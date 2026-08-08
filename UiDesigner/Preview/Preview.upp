@@ -1,0 +1,17 @@
+description "UiDesigner in-process preview and overlays";
+
+uses
+    Ui,
+    CtrlLib,
+    UiDesigner/Core,
+    UiDesigner/Catalog,
+    UiDesigner/Services;
+
+file
+    UiDesignerGeometrySnapshot.h,
+    UiDesignerGeometrySnapshot.cpp,
+    UiDesignerVisuals.h,
+    UiDesignerVisuals.cpp,
+    UiDesignerPreview.h,
+    UiDesignerPreview.cpp,
+    README.md;

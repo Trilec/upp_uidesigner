@@ -1,0 +1,25 @@
+uses
+    Core,
+    Draw,
+    CtrlCore,
+    CtrlLib,
+    Ui,
+    Utilities/PropertyEditor,
+    UiDesigner/Core,
+    UiDesigner/Commands,
+    UiDesigner/Catalog,
+    UiDesigner/Preview,
+    UiDesigner/CodeGen,
+    UiDesigner/Theme,
+    UiDesigner/Services;
+
+file
+    main.cpp,
+    ../../UiDesigner/UiDesigner/UiDesignerWidgets.cpp,
+    ../../UiDesigner/UiDesigner/UiDesignerSideWidgets.cpp,
+    ../../UiDesigner/UiDesigner/UiDesignerCatalogList.cpp,
+    ../../UiDesigner/UiDesigner/UiDesignerHierarchyView.cpp,
+    ../../UiDesigner/UiDesigner/UiDesignerCodeView.cpp;
+
+mainconfig
+    "" = "CONSOLE";

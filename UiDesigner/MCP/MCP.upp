@@ -1,0 +1,15 @@
+description "UiDesigner stdio MCP/JSON-RPC host";
+
+uses
+    Core,
+    UiDesigner/Services;
+
+mainconfig
+    "CONSOLE" = "1";
+
+file
+    UiDesignerMcpServer.h,
+    UiDesignerMcpServer.cpp,
+    main.cpp,
+    README.md,
+    Smoke.ps1;

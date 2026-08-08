@@ -1,0 +1,21 @@
+description "UiDesigner Spacer, drop, behavior and export regression tests";
+
+uses
+    Core,
+    Ui,
+    Utilities/PropertyEditorCore,
+    UiDesigner/Core,
+    UiDesigner/Commands,
+    UiDesigner/Catalog,
+    UiDesigner/CodeGen,
+    UiDesigner/Theme,
+    UiDesigner/ThemeCore,
+    UiDesigner/Services;
+
+mainconfig
+    "CONSOLE" = "1";
+
+file
+    main.cpp,
+    README.md,
+    BuildGeneratedFixture.ps1;

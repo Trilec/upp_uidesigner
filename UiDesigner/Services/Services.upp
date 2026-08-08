@@ -1,0 +1,32 @@
+description "UiDesigner session, edit, projection and automation services";
+
+uses
+    Ui,
+    Utilities/PropertyEditorCore,
+    UiDesigner/Core,
+    UiDesigner/Commands,
+    UiDesigner/Catalog,
+    UiDesigner/CodeGen,
+    UiDesigner/ThemeCore;
+
+file
+    UiDesignerServices.h,
+    UiDesignerHierarchyModel.h,
+    UiDesignerHierarchyModel.cpp,
+    UiDesignerProjection.h,
+    UiDesignerDrop.h,
+    UiDesignerDrop.cpp,
+    UiDesignerExport.h,
+    UiDesignerExport.cpp,
+    UiDesignerPresets.h,
+    UiDesignerPresets.cpp,
+    UiDesignerSession.h,
+    UiDesignerSession.cpp,
+    UiDesignerSessionExtensions.cpp,
+    UiDesignerAutomation.h,
+    UiDesignerAutomation.cpp,
+    UiDesignerTreeDataAdapter.h,
+    UiDesignerTreeDataAdapter.cpp,
+    UiDesignerListDataAdapter.h,
+    UiDesignerListDataAdapter.cpp,
+    README.md;

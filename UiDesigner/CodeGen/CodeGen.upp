@@ -1,0 +1,10 @@
+description "UiDesigner deterministic C++ and JSON generation";
+
+uses
+    UiDesigner/Core,
+    UiDesigner/Catalog;
+
+file
+    UiDesignerCodeGen.h,
+    UiDesignerCodeGen.cpp,
+    README.md;
