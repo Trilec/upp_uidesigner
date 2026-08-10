@@ -1,7 +1,6 @@
 #include <UiDesigner/Services/UiDesignerServices.h>
 #include <UiDesigner/UiDesigner/UiDesignerWidgets.h>
 #include <Utilities/PropertyEditor/PropertyEditor.h>
-#include <Ui/UiIcons.h>
 
 using namespace Upp;
 
@@ -505,17 +504,18 @@ CONSOLE_APP_MAIN
           "UiLabel exposes its icon content API");
     const UiDesignerPropertySpec *section_icon =
         section_spec ? section_spec->FindProperty("icon") : nullptr;
-    Check(section_icon && section_icon->choices.GetCount() ==
-              UiIconCatalog().GetCount() + 1,
-          "Icon properties enumerate the authoritative UiIcons catalogue");
+    Check(section_icon && section_icon->custom_editor == "property.icon" &&
+              section_icon->choices.IsEmpty(),
+          "Icon properties delegate visual catalogue enumeration to PropertyEditor");
 
     const UiDesignerControlSpec *accordion_owner_spec =
         semantic_session.Catalog().Find("UiAccordion");
     const UiDesignerPropertySpec *open_glyph = accordion_owner_spec
         ? accordion_owner_spec->FindProperty("chevron_open_icon") : nullptr;
     Check(open_glyph && open_glyph->default_value == "Default" &&
-              open_glyph->choices.GetCount() == UiIconCatalog().GetCount() + 2,
-          "Accordion glyph choices preserve the control default and expose every catalogue icon");
+              open_glyph->custom_editor == "property.icon" &&
+              open_glyph->choices.IsEmpty(),
+          "Accordion glyphs preserve control defaults through the shared icon editor");
 
     const UiDesignerControlSpec *tab_spec =
         semantic_session.Catalog().Find("UiTab");
@@ -579,14 +579,14 @@ CONSOLE_APP_MAIN
               migrated_button->properties.Find("v_sizing") < 0,
           "Legacy common-control sizing aliases are removed after migration");
 
-    UiDesignerDocument ordered_legacy;
-    Check(UiDesignerDeserialize(LegacySiblingOrderJson(), ordered_legacy, error),
+    UiDesignerDocument sibling_order_legacy;
+    Check(UiDesignerDeserialize(LegacySiblingOrderJson(), sibling_order_legacy, error),
           "Legacy sibling-order fixture loads: " + error);
-    const UiDesignerNode *ordered_column = ordered_legacy.Find(2);
+    const UiDesignerNode *ordered_column = sibling_order_legacy.Find(2);
     Check(ordered_column && ordered_column->children.GetCount() == 3 &&
-              ordered_legacy.Find(ordered_column->children[0])->name == "heading" &&
-              ordered_legacy.Find(ordered_column->children[1])->name == "content" &&
-              ordered_legacy.Find(ordered_column->children[2])->name == "footer",
+              sibling_order_legacy.Find(ordered_column->children[0])->name == "heading" &&
+              sibling_order_legacy.Find(ordered_column->children[1])->name == "content" &&
+              sibling_order_legacy.Find(ordered_column->children[2])->name == "footer",
           "Legacy import preserves source sibling order from heading to footer");
 
     UiDesignerCodeView code_view;

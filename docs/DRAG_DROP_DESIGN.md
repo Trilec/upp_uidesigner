@@ -69,7 +69,14 @@ UiDesigner uses one insertion and move service for mouse drag/drop, hierarchy re
 
 ## Catalog presentation
 
-The toolbox is a searchable flat catalog with category selection. Categories include All, Layouts, Containers, Ui Controls, Composites, Presets and U++ Controls. The authored left-hand pill icons select these categories; they do not create a second discovery tree.
+The toolbox is a searchable flat catalog with category selection. Categories include All, Layouts, Containers, Ui Controls, Presets and U++ Controls. PropertyEditor supplies compound authoring editors; obsolete UiComposite stopgap controls are not catalog controls. The authored left-hand pill icons select these categories; they do not create a second discovery tree.
+
+Inspector metadata stays semantic across the package boundary. Catalog and
+Services depend only on headless `PropertyEditorCore` and carry stable editor
+IDs or variants as strings. The GUI package resolves those IDs through the
+single PropertyEditor factory. Bounded numbers use numeric editors, icons and
+fonts use the shared cached catalog editors, colours and fill recipes use their
+native kinds, and fixed cubic curves use the four-value `bezier` Curve variant.
 
 A catalog row supports:
 

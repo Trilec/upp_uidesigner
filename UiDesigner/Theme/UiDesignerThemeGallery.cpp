@@ -221,9 +221,7 @@ void UiDesignerThemeGallery::RebuildInventory()
     for(const UiDesignerControlSpec& spec : catalog_->GetControls()) {
         if(spec.stock_upp)
             continue;
-        if(filter_ == "inputs" &&
-           spec.category != "Ui Controls" &&
-           spec.category != "Composites")
+        if(filter_ == "inputs" && spec.category != "Ui Controls")
             continue;
         if(filter_ == "containers" &&
            spec.category != "Containers" &&

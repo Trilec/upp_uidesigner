@@ -51,12 +51,6 @@ enum class UiDesignerRuntimeKind : word {
     UiDropdown,
     UiMenu,
     UiColorPicker,
-    UiCompositeSlider,
-    UiCompositeToggle,
-    UiCompositeColor,
-    UiCompositeDropdown,
-    UiCompositeLabel,
-    UiCompositeEdit,
 
     UppLabel,
     UppButton,
@@ -127,6 +121,9 @@ struct UiDesignerThemeOverrideSpec : Moveable<UiDesignerThemeOverrideSpec> {
     String label;
     String group;
     String help;
+    String custom_editor;
+    String editor_variant;
+    String picker_provider;
     PropertyEditorKind kind = PropertyEditorKind::Text;
     PropertyEditorDomain domain = PropertyEditorDomain::Theme;
     PropertyEditorImpact impact = PropertyImpactNone;
@@ -137,6 +134,8 @@ struct UiDesignerThemeOverrideSpec : Moveable<UiDesignerThemeOverrideSpec> {
     Value step;
     int decimals = 3;
     int color_count = 1;
+    int row_span = 0;
+    int expanded_row_span = 0;
     String adapter_field_id;
     String visible_when_id;
     Value visible_when_value;
@@ -150,10 +149,13 @@ struct UiDesignerThemeOverrideSpec : Moveable<UiDesignerThemeOverrideSpec> {
     UiDesignerThemeOverrideSpec() {}
     UiDesignerThemeOverrideSpec(const UiDesignerThemeOverrideSpec& other)
         : id(other.id), label(other.label), group(other.group), help(other.help),
+          custom_editor(other.custom_editor), editor_variant(other.editor_variant),
+          picker_provider(other.picker_provider),
           kind(other.kind), domain(other.domain), impact(other.impact),
           default_value(other.default_value), minimum(other.minimum),
           maximum(other.maximum), step(other.step), decimals(other.decimals),
-          color_count(other.color_count),
+          color_count(other.color_count), row_span(other.row_span),
+          expanded_row_span(other.expanded_row_span),
           adapter_field_id(other.adapter_field_id),
           visible_when_id(other.visible_when_id),
           visible_when_value(other.visible_when_value),
@@ -176,6 +178,8 @@ struct UiDesignerThemeOverrideSpec : Moveable<UiDesignerThemeOverrideSpec> {
     UiDesignerThemeOverrideSpec& VisibleWhen(const String& field_id,
                                              const Value& value);
     UiDesignerThemeOverrideSpec& ColorCount(int count);
+    UiDesignerThemeOverrideSpec& Editor(const String& id,
+                                        int expanded_rows = 0);
     UiDesignerThemeOverrideSpec& ReadOnly(bool on = true);
     UiDesignerThemeOverrideSpec& DesignerOnly(bool on = true);
 
@@ -188,6 +192,9 @@ struct UiDesignerPropertySpec : Moveable<UiDesignerPropertySpec> {
     String label;
     String group;
     String help;
+    String custom_editor;
+    String editor_variant;
+    String picker_provider;
     PropertyEditorKind kind = PropertyEditorKind::Text;
     PropertyEditorDomain domain = PropertyEditorDomain::General;
     PropertyEditorImpact impact = PropertyImpactNone;
@@ -197,6 +204,8 @@ struct UiDesignerPropertySpec : Moveable<UiDesignerPropertySpec> {
     Value maximum;
     Value step;
     int decimals = 3;
+    int row_span = 0;
+    int expanded_row_span = 0;
 
     Array<PropertyEditorChoice> choices;
 
@@ -207,9 +216,12 @@ struct UiDesignerPropertySpec : Moveable<UiDesignerPropertySpec> {
     UiDesignerPropertySpec() {}
     UiDesignerPropertySpec(const UiDesignerPropertySpec& other)
         : id(other.id), label(other.label), group(other.group), help(other.help),
+          custom_editor(other.custom_editor), editor_variant(other.editor_variant),
+          picker_provider(other.picker_provider),
           kind(other.kind), domain(other.domain), impact(other.impact),
           default_value(other.default_value), minimum(other.minimum),
           maximum(other.maximum), step(other.step), decimals(other.decimals),
+          row_span(other.row_span), expanded_row_span(other.expanded_row_span),
           resettable(other.resettable), read_only(other.read_only),
           designer_only(other.designer_only)
     {
@@ -223,6 +235,7 @@ struct UiDesignerPropertySpec : Moveable<UiDesignerPropertySpec> {
     UiDesignerPropertySpec& Help(const String& text);
     UiDesignerPropertySpec& Impact(PropertyEditorImpact value);
     UiDesignerPropertySpec& Domain(PropertyEditorDomain value);
+    UiDesignerPropertySpec& Editor(const String& id, int expanded_rows = 0);
     UiDesignerPropertySpec& Default(const Value& value, bool can_reset = true);
     UiDesignerPropertySpec& ReadOnly(bool on = true);
     UiDesignerPropertySpec& DesignerOnly(bool on = true);

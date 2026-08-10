@@ -1,7 +1,6 @@
 #include "UiDesignerCodeGen.h"
 #include <UiDesigner/UiDesigner/UiDesignerButtonStyle.h>
 #include <UiDesigner/Theme/UiDesignerThemeAdapter.h>
-#include <Ui/UiIcons.h>
 
 namespace Upp {
 
@@ -214,9 +213,12 @@ static String EmitCatalogIcon(const String& name)
 {
     if(name.IsEmpty() || name == "None")
         return "Image()";
-    for(const UiIconCatalogEntry& entry : UiIconCatalog())
-        if(entry.name == name)
-            return name + "()";
+    if(name.StartsWith("ICON_") && IsAlpha(name[0])) {
+        for(int i = 1; i < name.GetCount(); i++)
+            if(!IsAlNum(name[i]) && name[i] != '_')
+                return "Image()";
+        return name + "()";
+    }
     return "Image()";
 }
 
@@ -784,6 +786,25 @@ void UiDesignerCodeGenerator::EmitSetup(
         out << "\t" << member << ".SetData("
             << EmitValue(Effective("color", Color(58, 132, 255)))
             << ");\n";
+    if(spec.FindProperty("curve") &&
+       (spec.runtime_kind == UiDesignerRuntimeKind::UiBezierCurveEditor ||
+        spec.runtime_kind == UiDesignerRuntimeKind::UiBezierCurveField)) {
+        ValueArray curve = PropertyEditorNormalizeBezierCurve(
+            Effective("curve", PropertyEditorMakeBezierCurve(0.0, 0.0, 1.0, 1.0)));
+        out << "\t" << member << ".SetCurve(ShadowCurve { "
+            << EmitValue(curve[0]) << ", " << EmitValue(curve[1]) << ", "
+            << EmitValue(curve[2]) << ", " << EmitValue(curve[3]) << " });\n";
+    }
+    if(spec.FindProperty("editable") &&
+       (spec.runtime_kind == UiDesignerRuntimeKind::UiBezierCurveEditor ||
+        spec.runtime_kind == UiDesignerRuntimeKind::UiBezierCurveField))
+        out << "\t" << member << ".SetEditable("
+            << EmitValue(Effective("editable", true)) << ");\n";
+    if(spec.runtime_kind == UiDesignerRuntimeKind::UiBezierCurveField) {
+        out << "\t" << member << ".SetShowFormula("
+            << EmitValue(Effective("show_formula", true)) << ")"
+            << ".SetShowCopy(" << EmitValue(Effective("show_copy", true)) << ");\n";
+    }
     if(spec.FindProperty("visible"))
         out << "\t" << member << ".Show("
             << EmitValue(Effective("visible", true)) << ");\n";
@@ -1423,7 +1444,7 @@ UiDesignerGeneratedProject UiDesignerCodeGenerator::Generate(
     String gh;
     gh << "#ifndef " << guard << "\n#define " << guard << "\n\n"
        << "#include <CtrlLib/CtrlLib.h>\n#include <Ui/Ui.h>\n"
-       << "#include <Ui/UiColorPicker.h>\n\n"
+       << "#include <Ui/UiColorPicker/UiColorPicker.h>\n\n"
        << NamespaceOpen(options.namespace_name)
        << "class " << base << " : public TopWindow {\n"
        << "public:\n\ttypedef " << base << " CLASSNAME;\n"

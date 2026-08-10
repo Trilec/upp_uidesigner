@@ -1,5 +1,5 @@
-#ifndef _Utilities_UiDesigner_Services_UiDesignerHierarchyModel_h_
-#define _Utilities_UiDesigner_Services_UiDesignerHierarchyModel_h_
+#ifndef _UiDesigner_UiDesigner_UiDesignerHierarchyModel_h_
+#define _UiDesigner_UiDesigner_UiDesignerHierarchyModel_h_
 
 #include <Ui/UiTree.h>
 #include <UiDesigner/Catalog/UiDesignerCatalog.h>

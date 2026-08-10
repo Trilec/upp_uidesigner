@@ -1,6 +1,6 @@
 #ifndef _UiDesigner_UiDesignerColorPickerContract_h_
 #define _UiDesigner_UiDesignerColorPickerContract_h_
-#include <Ui/UiColorPicker.h>
+#include <Ui/UiColorPicker/UiColorPicker.h>
 namespace Upp {
 struct UiDesignerColorPickerEnumChoice { const char *id; const char *label; };
 inline const UiDesignerColorPickerEnumChoice *UiDesignerColorPickerPageModes(int& n) { static const UiDesignerColorPickerEnumChoice v[] = {{"color","Color"},{"palettes","Palettes"},{"generator","Generator"}}; n=3; return v; }

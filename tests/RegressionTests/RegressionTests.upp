@@ -15,6 +15,7 @@ uses
 
 file
     main.cpp,
+    ../../UiDesigner/UiDesigner/UiDesignerHierarchyModel.cpp,
     ../../UiDesigner/UiDesigner/UiDesignerWidgets.cpp,
     ../../UiDesigner/UiDesigner/UiDesignerSideWidgets.cpp,
     ../../UiDesigner/UiDesigner/UiDesignerCatalogList.cpp,

@@ -112,7 +112,7 @@ CONSOLE_APP_MAIN
     Check(catalog.FindCategory("Layouts").GetCount() >= 5, "layout catalog");
     Check(catalog.FindCategory("Containers").GetCount() >= 8, "container catalog");
     Check(catalog.FindCategory("Ui Controls").GetCount() >= 20, "Ui control catalog");
-    Check(catalog.FindCategory("Composites").GetCount() >= 6, "composite catalog");
+    Check(catalog.FindCategory("Composites").IsEmpty(), "obsolete composite catalog is absent");
     Check(catalog.FindCategory("U++ Controls").GetCount() >= 18, "stock U++ catalog");
     Check(catalog.GetPresets().GetCount() >= 3, "preset catalog");
 
@@ -306,13 +306,41 @@ CONSOLE_APP_MAIN
         "UiProgressBar", "UiSlider", "UiBreadcrumbs", "UiSliderEdit",
         "UiScrollBar", "UiSplitter", "UiQuadSplitter", "UiTable", "UiDoc",
         "UiTree", "UiList", "UiBezierCurveEditor", "UiBezierCurveField",
-        "UiDropdown", "UiMenu", "UiColorPicker", "UiCompositeSlider",
-        "UiCompositeToggle", "UiCompositeColor", "UiCompositeDropdown",
-        "UiCompositeLabel", "UiCompositeEdit"
+        "UiDropdown", "UiMenu", "UiColorPicker"
     };
     for(int i = 0; i < __countof(required_ui); i++)
         Check(catalog.Find(required_ui[i]) != nullptr,
               String("catalog includes ") + required_ui[i]);
+    static const char *obsolete_composites[] = {
+        "UiCompositeSlider", "UiCompositeToggle", "UiCompositeColor",
+        "UiCompositeDropdown", "UiCompositeLabel", "UiCompositeEdit"
+    };
+    for(int i = 0; i < __countof(obsolete_composites); i++)
+        Check(catalog.Find(obsolete_composites[i]) == nullptr,
+              String("catalog excludes obsolete ") + obsolete_composites[i]);
+    const UiDesignerControlSpec *curve_editor_spec = catalog.Find("UiBezierCurveEditor");
+    const UiDesignerControlSpec *curve_field_spec = catalog.Find("UiBezierCurveField");
+    const UiDesignerPropertySpec *curve_property = curve_editor_spec
+        ? curve_editor_spec->FindProperty("curve") : nullptr;
+    Check(curve_property && curve_property->kind == PropertyEditorKind::Curve &&
+              curve_property->editor_variant == "bezier" &&
+              curve_property->expanded_row_span == 4,
+          "Bezier controls use the shared PropertyEditor curve variant");
+    Check(curve_field_spec && curve_field_spec->FindProperty("show_formula") &&
+              curve_field_spec->FindProperty("show_copy"),
+          "Bezier field exposes its authored presentation properties");
+    const UiDesignerControlSpec *button_editor_spec = catalog.Find("UiButton");
+    const UiDesignerPropertySpec *button_icon = button_editor_spec
+        ? button_editor_spec->FindProperty("icon") : nullptr;
+    Check(button_icon && button_icon->kind == PropertyEditorKind::Custom &&
+              button_icon->custom_editor == "property.icon",
+          "control icon properties use the shared PropertyEditor icon adapter");
+    const UiDesignerControlSpec *title_editor_spec = catalog.Find("UiTitleCard");
+    const UiDesignerPropertySpec *title_icon = title_editor_spec
+        ? title_editor_spec->FindProperty("icon") : nullptr;
+    Check(title_icon && title_icon->kind == PropertyEditorKind::Custom &&
+              title_icon->custom_editor == "property.icon",
+          "Title Card icon uses the shared PropertyEditor icon adapter");
 
     static const char *edit_types[] = {
         "UiLineEdit", "UiIntEdit", "UiFloatEdit", "UiPasswordEdit",
@@ -1200,12 +1228,11 @@ CONSOLE_APP_MAIN
     const UiDesignerNodeId sample_doc = sample_add("UiDoc", "sample_doc");
     const UiDesignerNodeId sample_slider = sample_add("UiSlider", "sample_slider");
     const UiDesignerNodeId sample_slider_ctrl = sample_add("UppSliderCtrl", "sample_slider_ctrl");
-    const UiDesignerNodeId sample_dropdown = sample_add("UiCompositeDropdown", "sample_dropdown");
-    const UiDesignerNodeId sample_comp_slider = sample_add("UiCompositeSlider", "sample_comp_slider");
-    const UiDesignerNodeId sample_comp_toggle = sample_add("UiCompositeToggle", "sample_comp_toggle");
-    const UiDesignerNodeId sample_comp_color = sample_add("UiCompositeColor", "sample_comp_color");
-    const UiDesignerNodeId sample_comp_label = sample_add("UiCompositeLabel", "sample_comp_label");
-    const UiDesignerNodeId sample_comp_edit = sample_add("UiCompositeEdit", "sample_comp_edit");
+    const UiDesignerNodeId sample_curve = sample_add("UiBezierCurveEditor", "sample_curve");
+    Check(sample_commands.SetProperty(
+        sample_curve, "curve", PropertyEditorMakeBezierCurve(0.2, 0.3, 0.7, 0.9),
+        UiDesignerImpactPaint | UiDesignerImpactCode, "Set sample Bezier curve"),
+          "Bezier curve property command");
     const UiDesignerNodeId sample_button = sample_add("UiButton", "sample_button");
     const UiDesignerNodeId sample_title_card = sample_add("UiTitleCard", "sample_title_card");
     Check(sample_commands.SetProperty(
@@ -1327,21 +1354,13 @@ CONSOLE_APP_MAIN
         Check(slider->GetValue() == 50, "UiSlider representative value");
     if(auto *slider = dynamic_cast<SliderCtrl *>(CheckRuntime(sample_slider_ctrl, "SliderCtrl")))
         Check(slider->GetData() == 50, "SliderCtrl representative value");
-    if(auto *dropdown = dynamic_cast<UiCompositeDropdown *>(CheckRuntime(sample_dropdown, "UiCompositeDropdown")))
-        Check(dropdown->GetData() == 1, "UiCompositeDropdown representative selection");
-    if(auto *composite = dynamic_cast<UiCompositeSlider *>(CheckRuntime(sample_comp_slider, "UiCompositeSlider")))
-        Check(composite->GetData() == 50, "UiCompositeSlider representative value");
-    if(auto *composite = dynamic_cast<UiCompositeToggle *>(CheckRuntime(sample_comp_toggle, "UiCompositeToggle")))
-        Check(composite->GetData() == true, "UiCompositeToggle representative value");
-    if(auto *composite = dynamic_cast<UiCompositeColor *>(CheckRuntime(sample_comp_color, "UiCompositeColor")))
-        Check(composite->GetColors().GetCount() == 1 &&
-              composite->GetColors()[0] == Color(58, 132, 255),
-              "UiCompositeColor representative swatch");
-    if(auto *composite = dynamic_cast<UiCompositeLabel *>(CheckRuntime(sample_comp_label, "UiCompositeLabel")))
-        Check(composite->GetData().ToString() == "Value", "UiCompositeLabel representative text");
-    if(auto *composite = dynamic_cast<UiCompositeEdit *>(CheckRuntime(sample_comp_edit, "UiCompositeEdit")))
-        Check(composite->GetData().ToString() == "Editable value",
-              "UiCompositeEdit representative text");
+    if(auto *curve = dynamic_cast<UiBezierCurveEditor *>(
+           CheckRuntime(sample_curve, "UiBezierCurveEditor"))) {
+        const ShadowCurve& value = curve->GetCurve();
+        Check(value.x1 == 0.2 && value.y1 == 0.3 &&
+                  value.x2 == 0.7 && value.y2 == 0.9,
+              "Bezier curve property reaches the runtime control");
+    }
     if(auto *button = dynamic_cast<UiButton *>(CheckRuntime(sample_button, "UiButton"))) {
         Check(button->IsCheckable() && button->IsChecked(),
               "UiButton representative checked state");
@@ -2019,6 +2038,9 @@ CONSOLE_APP_MAIN
     Check(sample_generated.source.Find(".ShowTitleLine(false)") >= 0 &&
               sample_generated.source.Find(".ShowCardLine(true)") >= 0,
           "generated UiTitleCard line visibility");
+    Check(sample_generated.source.Find(
+              ".SetCurve(ShadowCurve { 0.2, 0.3, 0.7, 0.9 })") >= 0,
+          "generated Bezier control preserves compact cubic values");
 
     UiDesignerDocument standard_button_document;
     UiDesignerCommandService standard_button_commands(standard_button_document);

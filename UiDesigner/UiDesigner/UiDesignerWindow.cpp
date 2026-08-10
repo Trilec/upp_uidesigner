@@ -166,7 +166,6 @@ static UiScrollPanel::Style UiDesignerPreviewStyle()
 static PropertyEditorStyle UiDesignerInspectorStyle()
 {
     PropertyEditorStyle style = PropertyEditorStyle::System();
-    style.filter_height = DPI(72);
     style.row_odd = Color(250, 249, 247);
     style.row_even = Color(255, 247, 238);
     style.row_hover = Color(255, 238, 214);
@@ -380,13 +379,11 @@ void UiDesignerWindow::BuildDesigner()
     layouts_list_.SetCatalog(&catalog); layouts_list_.SetCategory("Layouts");
     containers_list_.SetCatalog(&catalog); containers_list_.SetCategory("Containers");
     controls_list_.SetCatalog(&catalog); controls_list_.SetCategory("Ui Controls");
-    composites_list_.SetCatalog(&catalog); composites_list_.SetCategory("Composites");
     upp_controls_list_.SetCatalog(&catalog); upp_controls_list_.SetCategory("U++ Controls");
 
     designer_left_.AddSection("Layouts", ICON_DESIGN_LAYOUTS_CATEGORY_48(), layouts_list_)
                   .AddSection("Containers", ICON_DESIGN_TAB_GROUP_48(), containers_list_)
                   .AddSection("Controls", ICON_DESIGN_WIDGETS_48(), controls_list_)
-                  .AddSection("Composites", ICON_DESIGN_DYNAMIC_FORM_48(), composites_list_)
                   .AddSection("Presets", ICON_DESIGN_DASHBOARD_EDIT_48(), presets_list_)
                   .AddSection("U++ Controls", ICON_EDITOR_CLARIFY_48(), upp_controls_list_);
 
@@ -588,7 +585,7 @@ void UiDesignerWindow::BuildDesigner()
     presets_list_.WhenToolCancel = [=] { CancelCatalogDrag(); };
     wire_list(layouts_list_);
     wire_list(containers_list_); wire_list(controls_list_);
-    wire_list(composites_list_); wire_list(upp_controls_list_);
+    wire_list(upp_controls_list_);
 }
 
 void UiDesignerWindow::BuildTheme()

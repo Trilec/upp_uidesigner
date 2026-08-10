@@ -6,7 +6,7 @@
 #include <Ui/UiTree.h>
 #include <Ui/UiList.h>
 #include <Ui/UiMenu.h>
-#include <Ui/UiColorPicker.h>
+#include <Ui/UiColorPicker/UiColorPicker.h>
 #include <Ui/UiTitleCard.h>
 #include <Ui/UiAccordion.h>
 #include <Ui/UiTab.h>
@@ -596,6 +596,7 @@ static void AddButtonThemeOverrides(UiDesignerControlSpec& spec, bool tool_butto
     add(UiDesignerButtonStyleField::FontFace, "Font face", "Typography",
         PropertyEditorKind::Text, base.font.GetFaceName(),
         PropertyImpactPaint | PropertyImpactCode);
+    spec.theme_overrides.Top().Editor("property.font");
     add_int(UiDesignerButtonStyleField::FontSize, "Font size", "Typography",
             base.font.GetHeight(), 1, 256, 1);
     add_bool(UiDesignerButtonStyleField::FontBold, "Font bold", "Typography",
@@ -2293,6 +2294,7 @@ static void AddEditThemeOverrides(UiDesignerControlSpec& spec)
         spec.theme_overrides.Add(pick(item));
     };
     add("font_face", "Font face", "Typography", PropertyEditorKind::Text, base.font.GetFaceName(), PropertyImpactPaint | PropertyImpactCode | PropertyImpactLocalLayout);
+    spec.theme_overrides.Top().Editor("property.font");
     add("font_size", "Font size", "Typography", PropertyEditorKind::Integer, base.font.GetHeight(), PropertyImpactPaint | PropertyImpactCode | PropertyImpactLocalLayout);
     add("font_bold", "Font bold", "Typography", PropertyEditorKind::Boolean, base.font.IsBold());
     add("font_italic", "Font italic", "Typography", PropertyEditorKind::Boolean, base.font.IsItalic());
@@ -2969,7 +2971,9 @@ public:
             if(p.adapter_field_id == "radius") v.radius = (int)x;
             else if(p.adapter_field_id == "transparent") v.transparent = (bool)x;
         }
-        if(id == "transparent") return v.transparent; return Value();
+        if(id == "radius") return v.radius;
+        if(id == "transparent") return v.transparent;
+        return Value();
     }
     void ApplyPreviewStyle(Ctrl& ctrl, const UiDesignerNode& node, const UiDesignerControlSpec& spec, const UiDesignerTransientOverlay* overlay) const override
     {
@@ -3199,12 +3203,12 @@ public:
         AddOverride(spec, "indicator_color", "Active indicator", "Tabs", PropertyEditorKind::Color, base.active_frame_color, PropertyImpactPaint | PropertyImpactCode, "indicator_color");
         AddOverride(spec, "indicator_thickness", "Indicator thickness", "Tabs", PropertyEditorKind::Integer, base.indicator_thickness, PropertyImpactPaint | PropertyImpactCode, "indicator_thickness");
         AddOverride(spec, "active_frame_width", "Active frame width", "Tabs", PropertyEditorKind::Integer, base.active_frame_width, PropertyImpactPaint | PropertyImpactCode, "active_frame_width");
-        AddOverride(spec, "tab_extent", "Tab extent", "Layout", PropertyEditorKind::Integer, base.tab_extent, PropertyImpactPaint | PropertyImpactCode, "tab_extent");
-        AddOverride(spec, "item_spacing", "Item spacing", "Layout", PropertyEditorKind::Integer, base.item_spacing, PropertyImpactPaint | PropertyImpactCode, "item_spacing");
-        AddOverride(spec, "body_gap", "Body gap", "Layout", PropertyEditorKind::Integer, base.body_gap, PropertyImpactPaint | PropertyImpactCode, "body_gap");
-        AddOverride(spec, "content_gap", "Content gap", "Layout", PropertyEditorKind::Integer, base.content_gap, PropertyImpactPaint | PropertyImpactCode, "content_gap");
-        AddOverride(spec, "expand_tabs", "Expand tabs", "Layout", PropertyEditorKind::Boolean, base.expand_tabs || base.fill_tabs, PropertyImpactPaint | PropertyImpactCode, "expand_tabs");
-        AddOverride(spec, "active_tab_uses_body_face", "Active tab uses body face", "Tabs", PropertyEditorKind::Boolean, base.active_tab_uses_body_face, PropertyImpactPaint | PropertyImpactCode, "active_tab_uses_body_face");
+        AddOverride(spec, "style_tab_extent", "Tab extent", "Layout", PropertyEditorKind::Integer, base.tab_extent, PropertyImpactPaint | PropertyImpactCode, "tab_extent");
+        AddOverride(spec, "style_item_spacing", "Item spacing", "Layout", PropertyEditorKind::Integer, base.item_spacing, PropertyImpactPaint | PropertyImpactCode, "item_spacing");
+        AddOverride(spec, "style_body_gap", "Body gap", "Layout", PropertyEditorKind::Integer, base.body_gap, PropertyImpactPaint | PropertyImpactCode, "body_gap");
+        AddOverride(spec, "style_content_gap", "Content gap", "Layout", PropertyEditorKind::Integer, base.content_gap, PropertyImpactPaint | PropertyImpactCode, "content_gap");
+        AddOverride(spec, "style_expand_tabs", "Expand tabs", "Layout", PropertyEditorKind::Boolean, base.expand_tabs || base.fill_tabs, PropertyImpactPaint | PropertyImpactCode, "expand_tabs");
+        AddOverride(spec, "style_active_tab_uses_body_face", "Active tab uses body face", "Tabs", PropertyEditorKind::Boolean, base.active_tab_uses_body_face, PropertyImpactPaint | PropertyImpactCode, "active_tab_uses_body_face");
     }
     bool HasField(const String& field_id) const override
     {
@@ -3375,25 +3379,27 @@ public:
         AddOverride(spec, "radius", "Radius", "Surface", PropertyEditorKind::Integer, base.metrics.radius, PropertyImpactPaint | PropertyImpactCode, "radius");
         AddOverride(spec, "ink_normal", "Ink normal", "Ink", PropertyEditorKind::Color, base.palette.ink[ST_NORMAL], PropertyImpactPaint | PropertyImpactCode, "ink_normal");
         AddOverride(spec, "ink_disabled", "Ink disabled", "Ink", PropertyEditorKind::Color, base.palette.ink[ST_DISABLED], PropertyImpactPaint | PropertyImpactCode, "ink_disabled");
-        AddOverride(spec, "header_height", "Header height", "Layout", PropertyEditorKind::Integer, base.header_height, PropertyImpactPaint | PropertyImpactCode, "header_height");
-        AddOverride(spec, "item_spacing", "Item spacing", "Layout", PropertyEditorKind::Integer, base.item_spacing, PropertyImpactPaint | PropertyImpactCode, "item_spacing");
-        AddOverride(spec, "header_body_gap", "Header/body gap", "Layout", PropertyEditorKind::Integer, base.header_body_gap, PropertyImpactPaint | PropertyImpactCode, "header_body_gap");
-        AddOverride(spec, "body_min_height", "Body min height", "Layout", PropertyEditorKind::Integer, base.body_min_height, PropertyImpactPaint | PropertyImpactCode, "body_min_height");
-        AddOverride(spec, "single_open", "Single open", "Behavior", PropertyEditorKind::Boolean, base.single_open, PropertyImpactPaint | PropertyImpactCode, "single_open");
-        AddOverride(spec, "enforce_one", "Enforce one open", "Behavior", PropertyEditorKind::Boolean, base.enforce_one, PropertyImpactPaint | PropertyImpactCode, "enforce_one");
-        AddOverride(spec, "show_chevron", "Show chevron", "Header", PropertyEditorKind::Boolean, base.show_chevron, PropertyImpactPaint | PropertyImpactCode, "show_chevron");
-        AddOverride(spec, "chevron_side", "Chevron side", "Header", PropertyEditorKind::Choice, String("Right"), PropertyImpactPaint | PropertyImpactCode, "chevron_side");
+        AddOverride(spec, "style_header_height", "Header height", "Layout",
+                    PropertyEditorKind::Integer, base.header_height,
+                    PropertyImpactPaint | PropertyImpactCode, "header_height");
+        AddOverride(spec, "style_item_spacing", "Item spacing", "Layout", PropertyEditorKind::Integer, base.item_spacing, PropertyImpactPaint | PropertyImpactCode, "item_spacing");
+        AddOverride(spec, "style_header_body_gap", "Header/body gap", "Layout", PropertyEditorKind::Integer, base.header_body_gap, PropertyImpactPaint | PropertyImpactCode, "header_body_gap");
+        AddOverride(spec, "style_body_min_height", "Body min height", "Layout", PropertyEditorKind::Integer, base.body_min_height, PropertyImpactPaint | PropertyImpactCode, "body_min_height");
+        AddOverride(spec, "style_single_open", "Single open", "Behavior", PropertyEditorKind::Boolean, base.single_open, PropertyImpactPaint | PropertyImpactCode, "single_open");
+        AddOverride(spec, "style_enforce_one", "Enforce one open", "Behavior", PropertyEditorKind::Boolean, base.enforce_one, PropertyImpactPaint | PropertyImpactCode, "enforce_one");
+        AddOverride(spec, "style_show_chevron", "Show chevron", "Header", PropertyEditorKind::Boolean, base.show_chevron, PropertyImpactPaint | PropertyImpactCode, "show_chevron");
+        AddOverride(spec, "style_chevron_side", "Chevron side", "Header", PropertyEditorKind::Choice, String("Right"), PropertyImpactPaint | PropertyImpactCode, "chevron_side");
         spec.theme_overrides.Top().choices.Add(PropertyEditorChoice("Left", "Left"));
         spec.theme_overrides.Top().choices.Add(PropertyEditorChoice("Right", "Right"));
         spec.theme_overrides.Top().choices.Add(PropertyEditorChoice("Top", "Top"));
         spec.theme_overrides.Top().choices.Add(PropertyEditorChoice("Bottom", "Bottom"));
-        AddOverride(spec, "show_drag_handle", "Show drag handle", "Header", PropertyEditorKind::Boolean, base.show_drag_handle, PropertyImpactPaint | PropertyImpactCode, "show_drag_handle");
-        AddOverride(spec, "drag_side", "Drag side", "Header", PropertyEditorKind::Choice, String("Right"), PropertyImpactPaint | PropertyImpactCode, "drag_side");
+        AddOverride(spec, "style_show_drag_handle", "Show drag handle", "Header", PropertyEditorKind::Boolean, base.show_drag_handle, PropertyImpactPaint | PropertyImpactCode, "show_drag_handle");
+        AddOverride(spec, "style_drag_side", "Drag side", "Header", PropertyEditorKind::Choice, String("Right"), PropertyImpactPaint | PropertyImpactCode, "drag_side");
         spec.theme_overrides.Top().choices.Add(PropertyEditorChoice("Left", "Left"));
         spec.theme_overrides.Top().choices.Add(PropertyEditorChoice("Right", "Right"));
-        AddOverride(spec, "unified_section_frame", "Unified section frame", "Body", PropertyEditorKind::Boolean, base.unified_section_frame, PropertyImpactPaint | PropertyImpactCode, "unified_section_frame");
-        AddOverride(spec, "unified_section_radius", "Unified section radius", "Body", PropertyEditorKind::Integer, base.unified_section_radius, PropertyImpactPaint | PropertyImpactCode, "unified_section_radius");
-        AddOverride(spec, "unified_section_frame_width", "Unified section frame width", "Body", PropertyEditorKind::Integer, base.unified_section_frame_width, PropertyImpactPaint | PropertyImpactCode, "unified_section_frame_width");
+        AddOverride(spec, "style_unified_section_frame", "Unified section frame", "Body", PropertyEditorKind::Boolean, base.unified_section_frame, PropertyImpactPaint | PropertyImpactCode, "unified_section_frame");
+        AddOverride(spec, "style_unified_section_radius", "Unified section radius", "Body", PropertyEditorKind::Integer, base.unified_section_radius, PropertyImpactPaint | PropertyImpactCode, "unified_section_radius");
+        AddOverride(spec, "style_unified_section_frame_width", "Unified section frame width", "Body", PropertyEditorKind::Integer, base.unified_section_frame_width, PropertyImpactPaint | PropertyImpactCode, "unified_section_frame_width");
         AddOverride(spec, "body_line_extent", "Body line extent", "Body", PropertyEditorKind::Choice, String("None"), PropertyImpactPaint | PropertyImpactCode, "body_line_extent");
         spec.theme_overrides.Top().choices.Add(PropertyEditorChoice("None", "None"));
         spec.theme_overrides.Top().choices.Add(PropertyEditorChoice("Small", "Small"));
@@ -3401,9 +3407,9 @@ public:
         spec.theme_overrides.Top().choices.Add(PropertyEditorChoice("Large", "Large"));
         AddOverride(spec, "body_line_thickness", "Body line thickness", "Body", PropertyEditorKind::Integer, base.body_line_thickness, PropertyImpactPaint | PropertyImpactCode, "body_line_thickness");
         AddOverride(spec, "transparent", "Transparent", "Surface", PropertyEditorKind::Boolean, base.transparent, PropertyImpactPaint | PropertyImpactCode, "transparent");
-        AddOverride(spec, "animation_enabled", "Animation enabled", "Behavior", PropertyEditorKind::Boolean, base.animation_enabled, PropertyImpactPaint | PropertyImpactCode, "animation_enabled");
-        AddOverride(spec, "anim_open_ms", "Open animation ms", "Behavior", PropertyEditorKind::Integer, base.anim_open_ms, PropertyImpactPaint | PropertyImpactCode, "anim_open_ms");
-        AddOverride(spec, "anim_close_ms", "Close animation ms", "Behavior", PropertyEditorKind::Integer, base.anim_close_ms, PropertyImpactPaint | PropertyImpactCode, "anim_close_ms");
+        AddOverride(spec, "style_animation_enabled", "Animation enabled", "Behavior", PropertyEditorKind::Boolean, base.animation_enabled, PropertyImpactPaint | PropertyImpactCode, "animation_enabled");
+        AddOverride(spec, "style_anim_open_ms", "Open animation ms", "Behavior", PropertyEditorKind::Integer, base.anim_open_ms, PropertyImpactPaint | PropertyImpactCode, "anim_open_ms");
+        AddOverride(spec, "style_anim_close_ms", "Close animation ms", "Behavior", PropertyEditorKind::Integer, base.anim_close_ms, PropertyImpactPaint | PropertyImpactCode, "anim_close_ms");
     }
     bool HasField(const String& field_id) const override
     {

@@ -72,13 +72,6 @@ static UiDesignerSizeProfile ResolveSizeProfile(const String& type,
         {"UiMenu", 180, 120, 100, 60},
         {"UiColorPicker", 480, 360, 320, 240},
 
-        {"UiCompositeSlider", 220, 56, 120, 44},
-        {"UiCompositeToggle", 180, 56, 100, 44},
-        {"UiCompositeColor", 220, 56, 120, 44},
-        {"UiCompositeDropdown", 220, 56, 120, 44},
-        {"UiCompositeLabel", 180, 50, 100, 40},
-        {"UiCompositeEdit", 220, 56, 120, 44},
-
         {"UppLabel", 100, 25, 40, 20},
         {"UppButton", 80, 25, 50, 25},
         {"UppOption", 110, 25, 60, 25},
@@ -215,7 +208,7 @@ static void AddButtonProperties(UiDesignerControlSpec& spec)
     icon.id = "icon";
     icon.label = "Icon";
     icon.group = "Content";
-    icon.kind = PropertyEditorKind::Choice;
+    icon.Editor("property.icon");
     icon.domain = PropertyEditorDomain::Content;
     icon.default_value = "None";
     icon.impact = PropertyImpactPaint | PropertyImpactCode;
@@ -421,6 +414,7 @@ static void AddButtonThemeOverrides(UiDesignerControlSpec& spec)
     add(UiDesignerButtonStyleField::FontFace, "Font face", "Typography",
         PropertyEditorKind::Text, base.font.GetFaceName(),
         PropertyImpactPaint | PropertyImpactCode);
+    spec.theme_overrides.Top().Editor("property.font");
     add_int(UiDesignerButtonStyleField::FontSize, "Font size", "Typography",
             base.font.GetHeight(), 1, 256, 1);
     add_bool(UiDesignerButtonStyleField::FontBold, "Font bold", "Typography",
@@ -952,7 +946,6 @@ static void RegisterNative(UiDesignerCatalog& catalog)
     const char *controls_icon = "controls";
     const char *containers_icon = "containers";
     const char *layouts_icon = "layouts";
-    const char *composites_icon = "composites";
 
     catalog.Register(MakeSpacer());
 
@@ -1186,6 +1179,7 @@ static void RegisterNative(UiDesignerCatalog& catalog)
                  {"ICON_DESIGN_DESCRIPTION_48", "Description"}},
                 PropertyImpactControlState | PropertyImpactLocalLayout |
                 PropertyImpactCode);
+            icon.Editor("property.icon");
             icon.domain = PropertyEditorDomain::Content;
             s.properties.Add(icon);
             s.defaults.Set("icon", "ICON_DESIGN_DESCRIPTION_48");
@@ -1322,6 +1316,45 @@ static void RegisterNative(UiDesignerCatalog& catalog)
                 AddEvent(s, "WhenAction", "Committed", "Runs after the slider gesture.");
             }
         }
+        if(String(c.type) == "UiBezierCurveEditor" ||
+           String(c.type) == "UiBezierCurveField") {
+            UiDesignerPropertySpec curve;
+            curve.id = "curve";
+            curve.label = "Curve";
+            curve.group = "Value";
+            curve.kind = PropertyEditorKind::Curve;
+            curve.editor_variant = "bezier";
+            curve.row_span = 1;
+            curve.expanded_row_span = 4;
+            curve.domain = PropertyEditorDomain::Content;
+            curve.default_value = PropertyEditorMakeBezierCurve(
+                0.011, 0.491, 0.925, 1.000);
+            curve.minimum = 0.0;
+            curve.maximum = 1.0;
+            curve.step = 0.001;
+            curve.impact = PropertyImpactPaint | PropertyImpactCode;
+            s.properties.Add(curve);
+            s.defaults.Set("curve", curve.default_value);
+
+            UiDesignerPropertySpec editable = UiDesignerBoolProperty(
+                "editable", "Editable", true);
+            s.properties.Add(editable);
+            s.defaults.Set("editable", true);
+            if(String(c.type) == "UiBezierCurveField") {
+                UiDesignerPropertySpec formula = UiDesignerBoolProperty(
+                    "show_formula", "Show formula", true);
+                UiDesignerPropertySpec copy = UiDesignerBoolProperty(
+                    "show_copy", "Show copy", true);
+                s.properties.Add(formula);
+                s.properties.Add(copy);
+                s.defaults.Set("show_formula", true);
+                s.defaults.Set("show_copy", true);
+            }
+            AddEvent(s, "WhenChanging", "Changing",
+                     "Runs while a Bezier handle is moving.");
+            AddEvent(s, "WhenAction", "Committed",
+                     "Runs when the Bezier edit is committed.");
+        }
         if(String(c.type) == "UiDropdown")
             AddEvent(s, "WhenAction", "Selection changed", "Runs after selection changes.");
         if(String(c.type) == "UiColorPicker") {
@@ -1398,27 +1431,6 @@ static void RegisterNative(UiDesignerCatalog& catalog)
         catalog.Register(pick(s));
     }
 
-    const struct CompositeControl {
-        const char *type;
-        const char *display;
-        const char *base;
-        UiDesignerRuntimeKind kind;
-    } composites[] = {
-        {"UiCompositeSlider", "Composite Slider", "composite_slider", UiDesignerRuntimeKind::UiCompositeSlider},
-        {"UiCompositeToggle", "Composite Toggle", "composite_toggle", UiDesignerRuntimeKind::UiCompositeToggle},
-        {"UiCompositeColor", "Composite Color", "composite_color", UiDesignerRuntimeKind::UiCompositeColor},
-        {"UiCompositeDropdown", "Composite Dropdown", "composite_dropdown", UiDesignerRuntimeKind::UiCompositeDropdown},
-        {"UiCompositeLabel", "Composite Label", "composite_label", UiDesignerRuntimeKind::UiCompositeLabel},
-        {"UiCompositeEdit", "Composite Edit", "composite_edit", UiDesignerRuntimeKind::UiCompositeEdit},
-    };
-    for(const auto& c : composites) {
-        auto s = MakeSpec(c.type, c.display, "Composites", c.type,
-                          c.base, c.kind, composites_icon,
-                          UiDesignerNodeContainer, Size(260, 72));
-        AddTitle(s, c.display);
-        AddEvent(s, "WhenAction", "Action", "Runs when the composite commits its value.");
-        catalog.Register(pick(s));
-    }
 }
 
 static void RegisterStock(UiDesignerCatalog& catalog)

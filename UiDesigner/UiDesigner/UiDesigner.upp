@@ -10,6 +10,8 @@ uses
 file
 	UiDesignerStyle.h,
 	UiDesignerVersion.h,
+	UiDesignerHierarchyModel.h,
+	UiDesignerHierarchyModel.cpp,
 	UiDesignerWidgets.h,
 	UiDesignerWidgets.cpp,
 	UiDesignerSideWidgets.cpp,
@@ -25,6 +27,9 @@ file
 	UiDesignerApplication.h,
 	UiDesignerApplication.cpp,
 	main.cpp,
+	UiDesigner.rc
+		depends() icon.ico,
+	icon.png,
 	README.md;
 
 mainconfig

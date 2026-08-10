@@ -3,7 +3,7 @@
 
 #include <CtrlLib/CtrlLib.h>
 #include <Ui/Ui.h>
-#include <Ui/UiColorPicker.h>
+#include <Ui/UiColorPicker/UiColorPicker.h>
 #include <UiDesigner/Catalog/UiDesignerCatalog.h>
 #include <UiDesigner/Preview/UiDesignerPreview.h>
 #include <UiDesigner/ThemeCore/UiDesignerTheme.h>

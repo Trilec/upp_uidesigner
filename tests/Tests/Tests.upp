@@ -16,6 +16,7 @@ uses
 file
     main.cpp,
     AuditContracts.cpp,
+    ../../UiDesigner/UiDesigner/UiDesignerHierarchyModel.cpp,
     ../../UiDesigner/UiDesigner/UiDesignerWidgets.cpp,
     ../../UiDesigner/UiDesigner/UiDesignerSideWidgets.cpp,
     ../../UiDesigner/UiDesigner/UiDesignerCatalogList.cpp,

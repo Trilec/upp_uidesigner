@@ -708,14 +708,12 @@ void UiDesignerSession::RebuildInspector()
     const UiDesignerNode* primary = document_.Find(state_.selection.primary);
     if(primary && primary->id == document_.GetRootId()) {
         const Size size = document_.GetVirtualSize();
-        inspector_model_.AddInteger("document_width", "Width", size.cx,
-                                    "Layout")
-            .SetRange(1, 8192, 1)
+        inspector_model_.AddNumericInt("document_width", "Width", size.cx,
+                                       1, 8192, 1, "Layout")
             .SetHelp("Document canvas width in pixels.")
             .SetImpact(PropertyImpactFullPreview | PropertyImpactCode);
-        inspector_model_.AddInteger("document_height", "Height", size.cy,
-                                    "Layout")
-            .SetRange(1, 8192, 1)
+        inspector_model_.AddNumericInt("document_height", "Height", size.cy,
+                                       1, 8192, 1, "Layout")
             .SetHelp("Document canvas height in pixels.")
             .SetImpact(PropertyImpactFullPreview | PropertyImpactCode);
         inspector_model_.StructureChanged();

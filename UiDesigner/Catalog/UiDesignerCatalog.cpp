@@ -37,6 +37,16 @@ UiDesignerPropertySpec& UiDesignerPropertySpec::Domain(PropertyEditorDomain valu
     return *this;
 }
 
+UiDesignerPropertySpec& UiDesignerPropertySpec::Editor(const String& id,
+                                                        int expanded_rows)
+{
+    kind = PropertyEditorKind::Custom;
+    custom_editor = id;
+    row_span = 1;
+    expanded_row_span = max(0, expanded_rows);
+    return *this;
+}
+
 UiDesignerThemeOverrideSpec& UiDesignerThemeOverrideSpec::Range(
     const Value& min_value, const Value& max_value, const Value& step_value)
 {
@@ -102,6 +112,16 @@ UiDesignerThemeOverrideSpec& UiDesignerThemeOverrideSpec::ColorCount(int count)
     return *this;
 }
 
+UiDesignerThemeOverrideSpec& UiDesignerThemeOverrideSpec::Editor(
+    const String& id, int expanded_rows)
+{
+    kind = PropertyEditorKind::Custom;
+    custom_editor = id;
+    row_span = 1;
+    expanded_row_span = max(0, expanded_rows);
+    return *this;
+}
+
 UiDesignerThemeOverrideSpec& UiDesignerThemeOverrideSpec::ReadOnly(bool on)
 {
     read_only = on;
@@ -119,7 +139,12 @@ UiDesignerThemeOverrideSpec& UiDesignerThemeOverrideSpec::DesignerOnly(bool on)
 void UiDesignerThemeOverrideSpec::AddTo(PropertyEditorModel& model,
                                         const Value& value, bool mixed) const
 {
-    PropertyEditorItem& item = model.Add(id, label, kind,
+    const bool bounded = !IsNull(minimum) && !IsNull(maximum);
+    const PropertyEditorKind projected_kind = bounded && kind == PropertyEditorKind::Integer
+        ? PropertyEditorKind::NumericInt
+        : bounded && kind == PropertyEditorKind::Double
+            ? PropertyEditorKind::NumericDouble : kind;
+    PropertyEditorItem& item = model.Add(id, label, projected_kind,
                                          IsNull(value) ? default_value : value,
                                          group);
     item.help = help;
@@ -131,6 +156,12 @@ void UiDesignerThemeOverrideSpec::AddTo(PropertyEditorModel& model,
     item.step = step;
     item.decimals = decimals;
     item.color_count = color_count;
+    item.custom_editor = custom_editor;
+    item.editor_variant = editor_variant;
+    item.picker_provider = picker_provider;
+    item.inline_editor = !custom_editor.IsEmpty();
+    item.row_span = row_span;
+    item.expanded_row_span = expanded_row_span;
     item.resettable = resettable;
     item.read_only = read_only;
     item.mixed = mixed;
@@ -162,7 +193,12 @@ UiDesignerPropertySpec& UiDesignerPropertySpec::DesignerOnly(bool on)
 void UiDesignerPropertySpec::AddTo(PropertyEditorModel& model,
                                    const Value& value, bool mixed) const
 {
-    PropertyEditorItem& item = model.Add(id, label, kind,
+    const bool bounded = !IsNull(minimum) && !IsNull(maximum);
+    const PropertyEditorKind projected_kind = bounded && kind == PropertyEditorKind::Integer
+        ? PropertyEditorKind::NumericInt
+        : bounded && kind == PropertyEditorKind::Double
+            ? PropertyEditorKind::NumericDouble : kind;
+    PropertyEditorItem& item = model.Add(id, label, projected_kind,
                                          IsNull(value) ? default_value : value,
                                          group);
     item.help = help;
@@ -173,6 +209,12 @@ void UiDesignerPropertySpec::AddTo(PropertyEditorModel& model,
     item.maximum = maximum;
     item.step = step;
     item.decimals = decimals;
+    item.custom_editor = custom_editor;
+    item.editor_variant = editor_variant;
+    item.picker_provider = picker_provider;
+    item.inline_editor = !custom_editor.IsEmpty();
+    item.row_span = row_span;
+    item.expanded_row_span = expanded_row_span;
     item.resettable = resettable;
     item.read_only = read_only;
     item.mixed = mixed;

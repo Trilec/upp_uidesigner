@@ -2,7 +2,6 @@ description "UiDesigner control and preset catalog";
 
 uses
     Draw,
-    Ui,
     Utilities/PropertyEditorCore,
     UiDesigner/Core;
 

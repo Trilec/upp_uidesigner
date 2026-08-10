@@ -3,7 +3,7 @@
 
 #include <CtrlLib/CtrlLib.h>
 #include <Ui/Ui.h>
-#include <Ui/UiColorPicker.h>
+#include <Ui/UiColorPicker/UiColorPicker.h>
 #include <Utilities/PropertyEditor/PropertyEditor.h>
 #include <UiDesigner/Preview/UiDesignerPreview.h>
 #include <UiDesigner/Services/UiDesignerServices.h>
@@ -101,7 +101,6 @@ private:
     UiDesignerCatalogList layouts_list_;
     UiDesignerCatalogList containers_list_;
     UiDesignerCatalogList controls_list_;
-    UiDesignerCatalogList composites_list_;
     UiDesignerCatalogList presets_list_;
     UiDesignerCatalogList upp_controls_list_;
 

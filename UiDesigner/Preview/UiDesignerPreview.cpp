@@ -4,7 +4,7 @@
 #include <UiDesigner/Core/UiDesignerSizing.h>
 #include <UiDesigner/Theme/UiDesignerThemeAdapter.h>
 #include <Ui/UiIcons.h>
-#include <Ui/UiColorPicker.h>
+#include <Ui/UiColorPicker/UiColorPicker.h>
 #include "UiDesignerColorPickerContract.h"
 
 namespace Upp {
@@ -586,12 +586,6 @@ static One<Ctrl> CreateRuntime(UiDesignerRuntimeKind kind)
     case UiDesignerRuntimeKind::UiDropdown: return MakeOne<UiDropdown>();
     case UiDesignerRuntimeKind::UiMenu: return MakeOne<UiMenu>();
     case UiDesignerRuntimeKind::UiColorPicker: return MakeOne<UiColorPicker>();
-    case UiDesignerRuntimeKind::UiCompositeSlider: return MakeOne<UiCompositeSlider>();
-    case UiDesignerRuntimeKind::UiCompositeToggle: return MakeOne<UiCompositeToggle>();
-    case UiDesignerRuntimeKind::UiCompositeColor: return MakeOne<UiCompositeColor>();
-    case UiDesignerRuntimeKind::UiCompositeDropdown: return MakeOne<UiCompositeDropdown>();
-    case UiDesignerRuntimeKind::UiCompositeLabel: return MakeOne<UiCompositeLabel>();
-    case UiDesignerRuntimeKind::UiCompositeEdit: return MakeOne<UiCompositeEdit>();
     case UiDesignerRuntimeKind::UppLabel: return MakeOne<Label>();
     case UiDesignerRuntimeKind::UppButton: return MakeOne<Button>();
     case UiDesignerRuntimeKind::UppOption: return MakeOne<Option>();
@@ -698,32 +692,6 @@ static void InitializeRuntime(Ctrl& ctrl, const UiDesignerControlSpec& spec)
     }
     if(auto *doc = dynamic_cast<UiDoc *>(&ctrl)) doc->SetText("UiDoc sample");
     if(auto *menu = dynamic_cast<UiMenu *>(&ctrl)) menu->SetMenuBarMode(true);
-    if(auto *composite = dynamic_cast<UiCompositeSlider *>(&ctrl)) {
-        composite->SetLabel(spec.display_name);
-        composite->SetData(50);
-    }
-    if(auto *composite = dynamic_cast<UiCompositeToggle *>(&ctrl)) {
-        composite->SetLabel(spec.display_name);
-        composite->SetData(true);
-    }
-    if(auto *composite = dynamic_cast<UiCompositeColor *>(&ctrl)) {
-        composite->SetLabel(spec.display_name);
-        Vector<Color> colors;
-        colors.Add(Color(58, 132, 255));
-        composite->SetColors(colors).SetValueText("Blue");
-    }
-    if(auto *composite = dynamic_cast<UiCompositeDropdown *>(&ctrl)) {
-        composite->SetLabel(spec.display_name);
-        composite->Clear().Add("First", 1).Add("Second", 2).Select(0);
-    }
-    if(auto *composite = dynamic_cast<UiCompositeLabel *>(&ctrl)) {
-        composite->SetLabel(spec.display_name);
-        composite->SetData("Value");
-    }
-    if(auto *composite = dynamic_cast<UiCompositeEdit *>(&ctrl)) {
-        composite->SetLabel(spec.display_name);
-        composite->SetData("Editable value");
-    }
     if(auto *label = dynamic_cast<Label *>(&ctrl)) label->SetLabel(spec.display_name);
     if(auto *button = dynamic_cast<Button *>(&ctrl)) button->SetLabel(spec.display_name);
     if(auto *option = dynamic_cast<Option *>(&ctrl)) option->SetLabel(spec.display_name);
@@ -733,6 +701,16 @@ static UiDesignerApplyResult ApplyRuntime(
     Ctrl& ctrl, const UiDesignerControlSpec& spec,
     const String& property, const Value& value)
 {
+    if(auto *curve = dynamic_cast<UiBezierCurveEditor *>(&ctrl)) {
+        if(property == "curve") { curve->SetData(value); return UiDesignerApplyResult::AppliedPaint; }
+        if(property == "editable") { curve->SetEditable((bool)value); return UiDesignerApplyResult::AppliedControlState; }
+    }
+    if(auto *curve = dynamic_cast<UiBezierCurveField *>(&ctrl)) {
+        if(property == "curve") { curve->SetData(value); return UiDesignerApplyResult::AppliedPaint; }
+        if(property == "editable") { curve->SetEditable((bool)value); return UiDesignerApplyResult::AppliedControlState; }
+        if(property == "show_formula") { curve->SetShowFormula((bool)value); return UiDesignerApplyResult::AppliedLocalLayout; }
+        if(property == "show_copy") { curve->SetShowCopy((bool)value); return UiDesignerApplyResult::AppliedLocalLayout; }
+    }
     if(auto *picker = dynamic_cast<UiColorPicker *>(&ctrl)) {
         if(property == "color") { picker->SetColor((Color)value, false); return UiDesignerApplyResult::AppliedPaint; }
         if(property == "alpha") { picker->SetAlpha(minmax((int)value, 0, 255), false); return UiDesignerApplyResult::AppliedPaint; }
