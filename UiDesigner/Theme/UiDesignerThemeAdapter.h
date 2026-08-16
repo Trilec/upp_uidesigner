@@ -89,6 +89,11 @@ public:
                            const UiDesignerControlSpec& spec) const = 0;
 };
 
+// Dedicated Label styling is kept outside the generic basic adapter so Label
+// can act as the reference consumer of the shared PropertyEditor override
+// layout convention without changing Checkbox/Radio/Toggle/etc. semantics.
+const UiDesignerThemeAdapter& UiDesignerLabelThemeAdapterInstance();
+
 const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(const String& id);
 const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(UiDesignerRuntimeKind kind);
 const UiDesignerThemeAdapter* UiDesignerGetThemeAdapter(const UiDesignerControlSpec& spec);
