@@ -10,6 +10,7 @@ uses
 file
     UiDesignerThemeAdapter.h,
     UiDesignerThemeAdapter.cpp,
+    UiDesignerLabelThemeAdapter.cpp,
     UiDesignerThemeGallery.h,
     UiDesignerThemeGallery.cpp,
     README.md;

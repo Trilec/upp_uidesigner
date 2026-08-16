@@ -7,6 +7,7 @@ Designer preview, validation, and code generation paths.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | UiButton | UiButton | `button` | `UiTheme::ResolveButton(role)` | typography, face, frame, text ink, icon ink, shadow, additional | Role-only path keeps standard inherited; non-standard role uses resolved style; authored overrides patch the selected role | `Use theme` inherits the active theme; an authored surface recipe is applied only when selected | none currently | automated + manual GUI validation |
 | UiToolButton | UiToolButton | `tool_button` | `UiTheme::ResolveToolButton(role)` | same as UiButton plus tool-button defaults | same as UiButton | `Use theme` inherits the active theme; explicit `None` removes the selected surface | none currently | automated + manual GUI validation |
+| UiLabel | UiLabel | `label` | `UiTheme::ResolveLabel(role)` | general, face, frame, ink, icon, typography, content margin, focus, shadow, highlight | Standard/no overrides remains inherited; non-standard role or authored fields use a resolved custom style | no overrides clears custom style and remains attached to the active theme | `Face/Skin` image resource editing is deferred until the theme-adapter preview contract can resolve document resources; do not fake an image row in the meantime | `LabelThemeAdapterTest` + GUI build/smoke |
 | UiTree | UiTree | `tree` | `UiTheme::ResolveTree()` | layout, visibility, glyph, icon render mode, ink, face, line | no role property owned here | no overrides clears custom style | future tree-specific theme fields | automated tests |
 | UiList | UiList | `list` | `UiTheme::ResolveList()` | layout, visibility, badges, row styling, ink, face | no role property owned here | no overrides clears custom style | future list-specific theme fields | automated tests |
 | UiMenu | UiMenu | `menu` | `UiTheme::ResolveMenu()` | layout, popup, visibility, palette, separators | no role property owned here | no overrides clears custom style | future menu-specific theme fields | automated tests |
@@ -43,3 +44,20 @@ Designer preview, validation, and code generation paths.
   field is a `UiFloatEdit` and its track is a `UiSlider`; a complete composite
   theme adapter must expose both child style families together and is not
   claimed by the shared `edit` adapter.
+
+## Label reference layout
+
+`UiLabel` is the first Designer consumer aligned to
+`upp_Ui/docs/11_UI_PROPERTY_OVERRIDE_LAYOUT.md`. Its override ids, labels,
+group names and ordering intentionally match the UiLabel demo for all fields the
+current Designer adapter can round-trip.
+
+The Designer does **not** currently expose a fake Skin image selector. The
+runtime `StyledSkin` is valid and the UiLabel demo can exercise it directly,
+but Designer images live in `UiDesignerDocument::resources` while
+`UiDesignerThemeAdapter::ApplyPreviewStyle(...)` currently receives no document
+or resource resolver. Skin should therefore remain nested under `Face` in the
+shared convention and in the demo, while the Designer records the resource-aware
+adapter extension as the one explicit Label gap. Once that contract is added,
+Skin should appear as `Face/Skin`, `Face/Skin/Slice`, and
+`Face/Skin/Content Inset` without changing the surrounding Label layout.

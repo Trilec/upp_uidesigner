@@ -1,0 +1,16 @@
+description "UiDesigner Label normalized theme override contract";
+
+uses
+    Core,
+    Ui,
+    Utilities/PropertyEditorCore,
+    UiDesigner/Core,
+    UiDesigner/Catalog,
+    UiDesigner/Theme,
+    UiDesigner/ThemeCore;
+
+mainconfig
+    "CONSOLE" = "1";
+
+file
+    main.cpp;
