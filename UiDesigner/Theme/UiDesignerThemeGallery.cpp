@@ -107,13 +107,13 @@ void UiDesignerThemeGallery::BuildAuthoredControls()
     tab_.Add(tab_page_a_, "First");
     tab_.Add(tab_page_b_, "Second");
     tab_.SetActiveTab(0);
-    tree_.GetInternalModel().AddChild(
-        tree_.GetInternalModel().Root(), UiModelItem("Workspace", "workspace"));
+    tree_.Model().AddChild(
+        tree_.Model().Root(), UiModelItem("Workspace", "workspace"));
     tree_.ShowConnectorLines(true);
     table_.UseInternalModel();
-    table_.GetInternalModel().SetSize(4, 2);
-    list_.GetInternalModel().Add(UiModelItem("First", 1));
-    list_.GetInternalModel().Add(UiModelItem("Second", 2));
+    table_.Model().SetSize(4, 2);
+    list_.Model().Add(UiModelItem("First", 1));
+    list_.Model().Add(UiModelItem("Second", 2));
     accordion_.SetSingleOpen(false).SetEnforceOne(false)
               .ShowChevron(true).SetAnimation(true, 120, 0);
     const int accordion_first = accordion_.AddSection("First", true);
