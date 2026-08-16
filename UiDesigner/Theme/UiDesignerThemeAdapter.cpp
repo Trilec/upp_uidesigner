@@ -2774,7 +2774,8 @@ static PanelThemeValues ResolvePanelThemeValues(UiDesignerRuntimeKind kind, UiRo
     }
     else {
         UiPanel::Style s = UiTheme::ResolvePanel(role);
-        for(int i = 0; i < 4; i++) { v.face[i] = UiDesignerFillColor(s.palette.face[i]); v.frame[i] = s.palette.frame[i]; }
+        for(int i = 0; i < 4; i++) { v.face[i] = UiDesignerFillColor(s.palette.face[i]); v.frame[i] = s.palette.frame[ST_NORMAL]; }
+        for(int i = 0; i < 4; i++) v.frame[i] = s.palette.frame[i];
         v.frame_enabled = s.metrics.frame_enabled; v.frame_dashed = s.metrics.dashed; v.frame_dash_pattern = s.metrics.dash_pattern; v.frame_width = s.metrics.frame_width; v.radius = s.metrics.radius; v.transparent = s.transparent;
     }
     return v;
@@ -3594,7 +3595,7 @@ private:
     PanelThemeAdapter panel_adapter_{"panel", UiDesignerRuntimeKind::UiPanel};
     PanelThemeAdapter group_panel_adapter_{"group_panel", UiDesignerRuntimeKind::UiGroupPanel};
     PanelThemeAdapter scroll_panel_adapter_{"scroll_panel", UiDesignerRuntimeKind::UiScrollPanel};
-    BasicThemeAdapter label_adapter_{"label", UiDesignerRuntimeKind::UiLabel};
+    const UiDesignerThemeAdapter& label_adapter_ = UiDesignerLabelThemeAdapterInstance();
     BasicThemeAdapter check_adapter_{"check", UiDesignerRuntimeKind::UiCheckBox};
     BasicThemeAdapter radio_adapter_{"radio", UiDesignerRuntimeKind::UiRadioButton};
     BasicThemeAdapter toggle_adapter_{"toggle", UiDesignerRuntimeKind::UiToggle};
