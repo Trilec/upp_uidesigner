@@ -52,6 +52,13 @@ Designer preview, validation, and code generation paths.
 group names and ordering intentionally match the UiLabel demo for all fields the
 current Designer adapter can round-trip.
 
+The four Face state rows use the shared `PropertyEditorKind::FillRecipe`
+contract, matching the UiLabel demo rather than degrading Face to a plain colour.
+Solid and QuadGradient recipes are applied to preview and emitted to generated
+C++. `ResolveFieldValue(...)` returns the authored recipe directly for Face rows
+so gradient colours, tile size and blur survive Inspector refresh without a
+lossy rendered-`UiFill` round-trip. `LabelThemeAdapterTest` covers this parity.
+
 The Designer does **not** currently expose a fake Skin image selector. The
 runtime `StyledSkin` is valid and the UiLabel demo can exercise it directly,
 but Designer images live in `UiDesignerDocument::resources` while
