@@ -14,9 +14,6 @@ struct UiDesignerNode;
 class UiDesignerTransientOverlay;
 enum class UiDesignerRuntimeKind : word;
 
-// User-facing surface choices are intentionally source choices, not Boolean
-// enable flags. UseTheme means inherit the active theme; None is an explicit
-// authored removal. The remaining values select authored surface recipes.
 enum class UiDesignerSurfaceKind : byte {
     UseTheme,
     None,
@@ -89,10 +86,11 @@ public:
                            const UiDesignerControlSpec& spec) const = 0;
 };
 
-// Dedicated Label styling is kept outside the generic basic adapter so Label
-// can act as the reference consumer of the shared PropertyEditor override
-// layout convention without changing Checkbox/Radio/Toggle/etc. semantics.
 const UiDesignerThemeAdapter& UiDesignerLabelThemeAdapterInstance();
+const UiDesignerThemeAdapter& UiDesignerListThemeAdapterInstance();
+const UiDesignerThemeAdapter& UiDesignerEditThemeAdapterInstance();
+const UiDesignerThemeAdapter& UiDesignerDropdownThemeAdapterInstance();
+const UiDesignerThemeAdapter& UiDesignerAccordionThemeAdapterInstance();
 
 const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(const String& id);
 const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(UiDesignerRuntimeKind kind);

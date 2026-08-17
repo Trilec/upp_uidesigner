@@ -9,7 +9,10 @@ uses
 
 file
     UiDesignerThemeAdapter.h,
-    UiDesignerThemeAdapter.cpp,
+    UiDesignerNormalizedThemeCommon.h,
+    UiDesignerThemeAdapterRegistry.cpp,
+    UiDesignerListThemeAdapter.cpp,
+    UiDesignerEditThemeAdapter.cpp,
     UiDesignerLabelThemeAdapter.cpp,
     UiDesignerThemeGallery.h,
     UiDesignerThemeGallery.cpp,

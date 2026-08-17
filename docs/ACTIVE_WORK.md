@@ -2,56 +2,62 @@
 
 Remote GitHub is authoritative. Never force-update `main`.
 
+## ACCEPTED LABEL REFERENCE
+
 BASE: `155e51eb696537f8ac6a8a3af1629d2278513f66` — Label FillRecipe reference checkpoint before the final model-access migration.
 
 TASK: `UIDESIGNER-LABEL-REFERENCE-ACCEPTANCE`.
 
-TOUCHED:
-
-- `UiDesigner/Theme/UiDesignerLabelThemeAdapter.cpp`
-- `UiDesigner/Theme/UiDesignerThemeAdapter.cpp`
-- `UiDesigner/Theme/UiDesignerThemeAdapter.h`
-- `UiDesigner/Theme/Theme.upp`
-- `tests/LabelThemeAdapterTest/LabelThemeAdapterTest.upp`
-- `tests/LabelThemeAdapterTest/main.cpp`
-- `UiDesigner/Preview/UiDesignerPreview.cpp`
-- `tests/Tests/main.cpp`
-- `docs/THEME_OVERRIDE_COVERAGE.md`
-- `docs/ACTIVE_WORK.md`
-- cross-repository reference: `Trilec/upp_Ui` `8a016656651fb929c08ac1c2f801a6b8c2f2ab77`.
-
 STATUS: **LABEL REFERENCE ACCEPTED — INTERACTIVE QUADGRADIENT RESELECTION SMOKE DEFERRED.**
 
 PUBLISHED:
-
 - `155e51eb696537f8ac6a8a3af1629d2278513f66` — dedicated Label adapter, FillRecipe parity, focused test and coverage note.
 - `59cb685219dc94bcad8d8cba82d1acc7528c6836` — migrated remaining Designer preview/test callers from retired `GetInternalModel()` to canonical `Model()`.
 
-SOURCE REVIEW:
+VALIDATION:
+- `tests/LabelThemeAdapterTest` Debug + Release: `checks=242 failed=0`.
+- UiDesigner Debug + Release: PASS, zero warnings/errors; Release launch responsive.
+- `git diff --check`: PASS.
+- no `Face/Skin` group in Designer by design; resource-aware Skin remains deferred.
+- full custom-control QuadGradient reselect smoke remains deferred because Windows UI Automation cannot reach U++ descendants.
 
-- `UiLabel` routes to the dedicated `label` theme adapter rather than the generic basic adapter.
-- Label groups match the shared reference convention for all non-resource fields: General, Face, Frame, Ink, Icon, Typography, Content Margin, Focus, Shadow, Highlight.
-- Face Normal/Hot/Pressed/Disabled use `PropertyEditorKind::FillRecipe`.
-- Solid and QuadGradient recipes share the production FillRecipe schema; preview rendering converts the recipe to `UiFill`, while field resolution and generated C++ retain the authored recipe so gradient colours, tile size and blur are not lost.
-- Standard role with no authored overrides clears custom style and remains attached to theme resolution.
-- Designer Skin remains intentionally deferred until the theme-adapter preview contract can resolve `UiDesignerDocument::resources`; do not add raw-path image editing.
-- The `59cb685...` diff is mechanical only: four production preview accesses and the corresponding Tree/List test assertions use `Model()`; no ownership or test expectations changed.
-- Gary's repository grep after that migration found no remaining `GetInternalModel()` calls.
+## FOUR-CONTROL OVERRIDE ROLLOUT
+
+BASE: `e47c71d4073c9e0bb0b77bd39a8410b21f54ebf8` — Designer Label acceptance documentation head before List/Edit work.
+
+TASK: `UIDESIGNER-LIST-EDIT-DROPDOWN-ACCORDION-OVERRIDE-NORMALIZATION`.
+
+STATUS: **LIST + EDIT IMPLEMENTATION STAGED FOR PUBLISH — WINDOWS VALIDATION PENDING.**
+
+CROSS-REPOSITORY BASE:
+- `Trilec/upp_Ui` List runtime authority checkpoint: `d0579b8753748ca765710f6c29805d2859ddf6aa`.
+
+TOUCHED IN LIST + EDIT SLICE:
+- `UiDesigner/Theme/UiDesignerThemeAdapter.h`
+- `UiDesigner/Theme/UiDesignerNormalizedThemeCommon.h`
+- `UiDesigner/Theme/UiDesignerThemeAdapterRegistry.cpp`
+- `UiDesigner/Theme/UiDesignerListThemeAdapter.cpp`
+- `UiDesigner/Theme/UiDesignerEditThemeAdapter.cpp`
+- `UiDesigner/Theme/Theme.upp`
+- `tests/ListEditThemeAdapterTest/`
+- `docs/ACTIVE_WORK.md`
+
+IMPLEMENTATION:
+- the 251 KB legacy adapter implementation remains byte-for-byte intact and is compiled through a small registry wrapper;
+- normalized List/Edit adapters replace only the `list` and `edit` registry decisions; every unaffected legacy adapter still resolves through the existing registry;
+- List distinguishes outer viewport Face/Frame/Ink from `Rows/Layout`, `Rows/State`, `Content`, `Badge` and `Drag` domains;
+- List outer Face states use shared `FillRecipe`; authored QuadGradient values are resolved and generated without lossy UiFill reverse-conversion;
+- Edit preserves existing authored ids (`face_normal`, `text_normal`, `underline_normal`, etc.) while normalizing visible groups to General, Face, Frame, Ink, Typography, Content Margin, Editing, Underline, Whitespace, Focus, Shadow and Highlight;
+- Edit Face states use shared `FillRecipe`; new common content-margin/focus/shadow/highlight and live whitespace fields are covered;
+- resource-backed Skin remains intentionally deferred for both controls until the adapter receives document-resource resolution.
 
 VALIDATION:
-
-- `tests/LabelThemeAdapterTest` Debug: `checks=242 failed=0`.
-- `tests/LabelThemeAdapterTest` Release: `checks=242 failed=0`.
-- UiDesigner Debug build: PASS, zero warnings/errors.
-- UiDesigner Release build: PASS, zero warnings/errors.
-- UiDesigner Release launch: PASS; remained responsive.
-- `git diff --check`: PASS.
-- No `Face/Skin` group in Designer: confirmed.
-- Full add/select UiLabel and QuadGradient refresh/reselection interaction remains manually unverified because the custom U++ controls expose no Windows UI Automation descendants. This is a deferred interactive smoke, not a source/build blocker.
+- source review and focused test construction complete; Windows U++ compile/runtime pending.
+- focused package: `tests/ListEditThemeAdapterTest` — require emitted `LIST_EDIT_THEME_ADAPTER_SUMMARY ... failed=0` in Debug + Release.
+- build UiDesigner Debug + Release after this checkpoint; no adapter-registry duplicate-definition errors are acceptable.
 
 NEXT:
-
-1. Continue the shared override-layout rollout with UiList and UiBaseEdit.
-2. Then normalize the composite UiDropdown and UiAccordion domains without flattening Popup/Header/Body semantics.
-3. When a convenient interactive Windows session is available, perform the deferred UiLabel QuadGradient reselection smoke; do not block the next implementation slice on UI Automation limitations.
-4. Keep `docs/ACTIVE_WORK.md` current with each coherent published checkpoint.
+1. publish and verify the List/Edit Designer checkpoint;
+2. normalize dedicated UiDropdown + UiAccordion adapters through the same registry seam;
+3. normalize the four control demos without replacing large files from snippets;
+4. run focused tests at each meaningful checkpoint, then give Gary one final accumulated Windows/manual validation task.

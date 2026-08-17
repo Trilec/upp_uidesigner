@@ -1,0 +1,15 @@
+description "UiDesigner normalized List and Edit theme adapter contract";
+
+uses
+    Core,
+    Ui,
+    UiDesigner/Core,
+    UiDesigner/Catalog,
+    UiDesigner/Theme,
+    UiDesigner/ThemeCore;
+
+mainconfig
+    "CONSOLE" = "1";
+
+file
+    main.cpp;
