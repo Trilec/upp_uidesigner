@@ -682,13 +682,13 @@ static void InitializeRuntime(Ctrl& ctrl, const UiDesignerControlSpec& spec)
     if(auto *parent = dynamic_cast<ParentCtrl *>(&ctrl))
         parent->SetMinSize(Size(DPI(80), DPI(48)));
     if(auto *tree = dynamic_cast<UiTree *>(&ctrl)) {
-        tree->GetInternalModel().AddChild(tree->GetInternalModel().Root(),
+        tree->Model().AddChild(tree->Model().Root(),
                                           UiModelItem("Workspace", "workspace"));
         tree->ShowConnectorLines(true);
     }
     if(auto *table = dynamic_cast<UiTable *>(&ctrl)) {
         table->UseInternalModel();
-        table->GetInternalModel().SetSize(3, 3);
+        table->Model().SetSize(3, 3);
     }
     if(auto *doc = dynamic_cast<UiDoc *>(&ctrl)) doc->SetText("UiDoc sample");
     if(auto *menu = dynamic_cast<UiMenu *>(&ctrl)) menu->SetMenuBarMode(true);
@@ -1411,7 +1411,7 @@ static void ApplyDesignerTreeData(UiTree& tree, const UiDesignerNode& node)
     if(!root_value.Is<ValueMap>())
         return;
 
-    UiTreeModel& model = tree.GetInternalModel();
+    UiTreeModel& model = tree.Model();
     model.Clear();
     const ValueMap root = root_value;
     UiModelItem root_item((String)UiDesignerMapValue(root, "text", "Root"),
@@ -1446,7 +1446,7 @@ static void ApplyDesignerListData(UiList& list, const UiDesignerNode& node)
     const ValueMap root = UiDesignerListDataAdapter::Root(node);
     if(root.IsEmpty())
         return;
-    UiListModel& model = list.GetInternalModel();
+    UiListModel& model = list.Model();
     model.Clear();
     for(const Value& value : UiDesignerListDataAdapter::Items(root)) {
         if(!value.Is<ValueMap>())

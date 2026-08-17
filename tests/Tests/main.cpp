@@ -1852,16 +1852,16 @@ CONSOLE_APP_MAIN
     build_preview(tree_document, tree_preview, tree_selection);
     if(auto *runtime_tree = dynamic_cast<UiTree *>(tree_preview.FindRuntime(tree_node))) {
         Check(!runtime_tree->HasCustomStyle(), "UiTree no overrides clears stale custom style");
-        Check(runtime_tree->GetInternalModel().GetChildCount(
-                  runtime_tree->GetInternalModel().Root()) == 2,
+        Check(runtime_tree->Model().GetChildCount(
+                  runtime_tree->Model().Root()) == 2,
               "UiTree preview projects authored root children");
-        UiTreeNodeRef nested = runtime_tree->GetInternalModel().GetChild(
-            runtime_tree->GetInternalModel().Root(), 1);
-        Check(runtime_tree->GetInternalModel().GetChildCount(nested) == 1,
+        UiTreeNodeRef nested = runtime_tree->Model().GetChild(
+            runtime_tree->Model().Root(), 1);
+        Check(runtime_tree->Model().GetChildCount(nested) == 1,
               "UiTree preview projects nested children");
-        UiTreeNodeRef disabled = runtime_tree->GetInternalModel().GetChild(
-            runtime_tree->GetInternalModel().Root(), 0);
-        Check(!runtime_tree->GetInternalModel().Get(disabled).enabled,
+        UiTreeNodeRef disabled = runtime_tree->Model().GetChild(
+            runtime_tree->Model().Root(), 0);
+        Check(!runtime_tree->Model().Get(disabled).enabled,
               "UiTree preview projects disabled item state");
     }
     tree_document.WhenChanged = [&](const UiDesignerChangeSet& changes) {
@@ -1882,9 +1882,9 @@ CONSOLE_APP_MAIN
                                 UiDesignerImpactStructure, "Update tree preview"),
           "UiTree data change commits through preview projection");
     if(auto *runtime_tree = dynamic_cast<UiTree *>(tree_preview.FindRuntime(tree_node))) {
-        UiTreeNodeRef updated = runtime_tree->GetInternalModel().GetChild(
-            runtime_tree->GetInternalModel().Root(), 0);
-        Check(runtime_tree->GetInternalModel().Get(updated).text == "Updated first",
+        UiTreeNodeRef updated = runtime_tree->Model().GetChild(
+            runtime_tree->Model().Root(), 0);
+        Check(runtime_tree->Model().Get(updated).text == "Updated first",
               "UiTree preview reflects committed data edit");
     }
 
@@ -1909,9 +1909,9 @@ CONSOLE_APP_MAIN
     build_preview(list_document, list_preview, list_selection);
     if(auto *runtime_list = dynamic_cast<UiList *>(list_preview.FindRuntime(list_node))) {
         Check(!runtime_list->HasCustomStyle(), "UiList no overrides clears stale custom style");
-        Check(runtime_list->GetInternalModel().GetCount() == 1 &&
-              runtime_list->GetInternalModel().Get(0).text == "Preview item" &&
-              runtime_list->GetInternalModel().Get(0).checked,
+        Check(runtime_list->Model().GetCount() == 1 &&
+              runtime_list->Model().Get(0).text == "Preview item" &&
+              runtime_list->Model().Get(0).checked,
               "UiList preview projects canonical item data");
     }
     list_document.WhenChanged = [&](const UiDesignerChangeSet& changes) {
@@ -1932,8 +1932,8 @@ CONSOLE_APP_MAIN
                                 UiDesignerImpactStructure, "Update list preview"),
           "UiList data change commits through preview projection");
     if(auto *runtime_list = dynamic_cast<UiList *>(list_preview.FindRuntime(list_node)))
-        Check(runtime_list->GetInternalModel().GetCount() == 1 &&
-              runtime_list->GetInternalModel().Get(0).text == "Updated preview item",
+        Check(runtime_list->Model().GetCount() == 1 &&
+              runtime_list->Model().Get(0).text == "Updated preview item",
               "UiList preview reflects committed data edit");
 
     UiDesignerDocument menu_document;
