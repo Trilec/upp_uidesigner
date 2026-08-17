@@ -5,7 +5,7 @@ namespace Upp {
 namespace {
 using namespace UiDesignerNormalizedTheme;
 
-static const char *const kStates[] = { "normal", "hot", "pressed", "disabled" };
+static const char *const kListStates[] = { "normal", "hot", "pressed", "disabled" };
 static const char *const kStateLabels[] = { "Normal", "Hot", "Pressed", "Disabled" };
 
 static UiList::Style ListBase()
@@ -225,10 +225,10 @@ static void AddListOverrides(UiDesignerControlSpec& spec)
     AddInt(spec, "radius", "Radius", "General", s.metrics.radius, 0, 96);
     Add(spec, "high_contrast", "High contrast", "General", PropertyEditorKind::Boolean, s.metrics.high_contrast);
     Add(spec, "face_enabled", "Enabled", "Face", PropertyEditorKind::Boolean, s.metrics.face_enabled);
-    for(int i = 0; i < 4; i++) Add(spec, "face." + String(kStates[i]), kStateLabels[i], "Face", PropertyEditorKind::FillRecipe, FillRecipe(s.palette.face[i]).ToValue());
+    for(int i = 0; i < 4; i++) Add(spec, "face." + String(kListStates[i]), kStateLabels[i], "Face", PropertyEditorKind::FillRecipe, FillRecipe(s.palette.face[i]).ToValue());
     Add(spec, "frame_enabled", "Enabled", "Frame", PropertyEditorKind::Boolean, s.metrics.frame_enabled, true);
     AddInt(spec, "frame_width", "Width", "Frame", s.metrics.frame_width, 0, 24, true);
-    for(int i = 0; i < 4; i++) Add(spec, "frame." + String(kStates[i]), kStateLabels[i], "Frame", PropertyEditorKind::Color, s.palette.frame[i]);
+    for(int i = 0; i < 4; i++) Add(spec, "frame." + String(kListStates[i]), kStateLabels[i], "Frame", PropertyEditorKind::Color, s.palette.frame[i]);
     Add(spec, "ink", "Normal", "Ink", PropertyEditorKind::Color, s.ink);
     Add(spec, "disabled_ink", "Disabled", "Ink", PropertyEditorKind::Color, s.disabled_ink);
     Add(spec, "muted_ink", "Muted", "Ink", PropertyEditorKind::Color, s.muted_ink);
