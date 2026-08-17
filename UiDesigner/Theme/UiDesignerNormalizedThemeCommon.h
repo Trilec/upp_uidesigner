@@ -66,16 +66,11 @@ inline String CppString(const String& text)
 
 inline String EmitValue(const Value& value)
 {
-    if(IsNull(value))
-        return "Null";
-    if(value.Is<String>())
-        return CppString(AsString(value));
-    if(value.Is<bool>())
-        return (bool)value ? "true" : "false";
-    if(value.Is<int>() || value.Is<int64_t>())
-        return AsString(value);
-    if(value.Is<double>())
-        return Format("%.12g", (double)value);
+    if(IsNull(value)) return "Null";
+    if(value.Is<String>()) return CppString(AsString(value));
+    if(value.Is<bool>()) return (bool)value ? "true" : "false";
+    if(value.Is<int>() || value.Is<int64_t>()) return AsString(value);
+    if(value.Is<double>()) return Format("%.12g", (double)value);
     if(value.Is<Color>()) {
         const Color c = value;
         return Format("Color(%d, %d, %d)", c.GetR(), c.GetG(), c.GetB());
@@ -99,9 +94,29 @@ inline UiDesignerFillRecipe FillRecipe(const UiFill& fill)
     return recipe;
 }
 
+inline UiDesignerFillRecipe FillRecipeValue(const Value& value)
+{
+    if(value.Is<Color>()) {
+        UiDesignerFillRecipe recipe;
+        recipe.mode = "Solid";
+        recipe.solid = (Color)value;
+        recipe.top_left = recipe.solid;
+        recipe.top_right = recipe.solid;
+        recipe.bottom_left = recipe.solid;
+        recipe.bottom_right = recipe.solid;
+        return recipe;
+    }
+    return UiDesignerFillRecipe::FromValue(value);
+}
+
+inline Value NormalizeFillValue(const Value& value)
+{
+    return FillRecipeValue(value).ToValue();
+}
+
 inline void ApplyFill(UiFill& target, const Value& value)
 {
-    const UiDesignerFillRecipe recipe = UiDesignerFillRecipe::FromValue(value);
+    const UiDesignerFillRecipe recipe = FillRecipeValue(value);
     if(recipe.mode == "Solid") {
         target = UiFill::Solid(recipe.solid);
         return;
@@ -117,7 +132,7 @@ inline void ApplyFill(UiFill& target, const Value& value)
 
 inline String FillCode(const Value& value)
 {
-    const UiDesignerFillRecipe recipe = UiDesignerFillRecipe::FromValue(value);
+    const UiDesignerFillRecipe recipe = FillRecipeValue(value);
     if(recipe.mode == "Solid")
         return "UiFill::Solid(" + EmitValue(recipe.solid) + ")";
     if(recipe.mode == "QuadGradient")
@@ -135,11 +150,10 @@ inline const char *StateCode(int state)
     return state >= 0 && state < 4 ? code[state] : "ST_NORMAL";
 }
 
-inline int DotState(const String& id, const char *prefix)
+inline int DotState(const String& id, const String& prefix)
 {
-    const String token = String(prefix) + ".";
-    if(!id.StartsWith(token))
-        return -1;
+    const String token = prefix + ".";
+    if(!id.StartsWith(token)) return -1;
     const String state = id.Mid(token.GetCount());
     if(state == "normal") return ST_NORMAL;
     if(state == "hot") return ST_HOT;
@@ -186,7 +200,10 @@ inline Value AuthoredOrDefault(const UiDesignerNode& node,
                                const UiDesignerThemeOverrideSpec& property)
 {
     const int q = node.theme_overrides.Find(property.id);
-    return q >= 0 ? node.theme_overrides.GetValue(q) : property.default_value;
+    Value value = q >= 0 ? node.theme_overrides.GetValue(q) : property.default_value;
+    if(property.kind == PropertyEditorKind::FillRecipe)
+        value = NormalizeFillValue(value);
+    return value;
 }
 
 } // namespace UiDesignerNormalizedTheme

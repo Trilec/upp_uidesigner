@@ -13,6 +13,8 @@ file
     UiDesignerThemeAdapterRegistry.cpp,
     UiDesignerListThemeAdapter.cpp,
     UiDesignerEditThemeAdapter.cpp,
+    UiDesignerDropdownThemeAdapter.cpp,
+    UiDesignerAccordionThemeAdapter.cpp,
     UiDesignerLabelThemeAdapter.cpp,
     UiDesignerThemeGallery.h,
     UiDesignerThemeGallery.cpp,

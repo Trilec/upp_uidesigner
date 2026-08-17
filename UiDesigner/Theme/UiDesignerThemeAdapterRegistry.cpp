@@ -29,6 +29,10 @@ const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(const String& id)
         return &UiDesignerListThemeAdapterInstance();
     if(id == "edit")
         return &UiDesignerEditThemeAdapterInstance();
+    if(id == "dropdown")
+        return &UiDesignerDropdownThemeAdapterInstance();
+    if(id == "accordion")
+        return &UiDesignerAccordionThemeAdapterInstance();
     return UiDesignerFindThemeAdapterLegacy(id);
 }
 
@@ -38,6 +42,10 @@ const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(UiDesignerRuntimeKind k
         return &UiDesignerListThemeAdapterInstance();
     if(IsEditRuntimeKind(kind))
         return &UiDesignerEditThemeAdapterInstance();
+    if(kind == UiDesignerRuntimeKind::UiDropdown)
+        return &UiDesignerDropdownThemeAdapterInstance();
+    if(kind == UiDesignerRuntimeKind::UiAccordion)
+        return &UiDesignerAccordionThemeAdapterInstance();
     return UiDesignerFindThemeAdapterLegacy(kind);
 }
 
