@@ -93,17 +93,17 @@ bool UiDesignerListDataAdapter::MoveItem(ValueMap& root, int index, int delta)
     if(index < 0 || target < 0 || index >= items.GetCount() ||
        target >= items.GetCount())
         return false;
+    if(target == index)
+        return true;
+
     ValueArray updated;
     for(int i = 0; i < items.GetCount(); i++) {
-        if(delta < 0) {
-            if(i == index - 1) updated.Add(items[index]);
-            if(i == index) continue;
-        }
-        else {
-            if(i == index) { updated.Add(items[index + 1]); continue; }
-            if(i == index + 1) continue;
-        }
-        updated.Add(items[i]);
+        if(target < index && i == target)
+            updated.Add(items[index]);
+        if(i != index)
+            updated.Add(items[i]);
+        if(target > index && i == target)
+            updated.Add(items[index]);
     }
     root.Set("items", updated);
     return true;
