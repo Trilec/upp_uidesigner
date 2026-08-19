@@ -1,0 +1,12 @@
+description "UiDesigner List data adapter mutation regression tests";
+
+uses
+    Core,
+    UiDesigner/Core,
+    UiDesigner/Services;
+
+mainconfig
+    "CONSOLE" = "1";
+
+file
+    main.cpp;
