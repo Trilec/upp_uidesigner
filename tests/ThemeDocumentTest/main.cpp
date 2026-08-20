@@ -61,6 +61,23 @@ CONSOLE_APP_MAIN
             theme.Get().roles.control_alert == 5,
             "Panel role assignment does not overwrite control role state");
 
+    UiDesignerThemeDocument palette_history;
+    const UiDesignerThemePalette original_light = palette_history.Get().light_palette;
+    UiDesignerThemePalette edited_light = original_light;
+    for(int i = 0; i < UI_DESIGNER_THEME_PALETTE_SIZE; i++)
+        edited_light.Set(i, Color(10 + i * 20, 20 + i * 15, 30 + i * 10));
+    t.Check(palette_history.CommitPalette(false, edited_light,
+                                          "Edit Light palette", error),
+            "Six-colour Light palette commits atomically: " + error);
+    t.Check(palette_history.Get().light_palette.ToValue() == edited_light.ToValue(),
+            "Atomic palette commit stores all six colours");
+    t.Check(palette_history.CanUndo() && palette_history.Undo() &&
+            palette_history.Get().light_palette.ToValue() == original_light.ToValue(),
+            "One undo restores the complete previous Light palette");
+    t.Check(palette_history.CanRedo() && palette_history.Redo() &&
+            palette_history.Get().light_palette.ToValue() == edited_light.ToValue(),
+            "One redo restores the complete edited Light palette");
+
     const String serialized = theme.Serialize(true);
     Value serialized_value = ParseJSON(serialized);
     ValueMap serialized_root = serialized_value;
