@@ -163,18 +163,29 @@ static UiScrollPanel::Style UiDesignerPreviewStyle()
     return style;
 }
 
-static PropertyEditorStyle UiDesignerInspectorStyle()
+static PropertyEditorStyle UiDesignerInspectorStyle(
+    const UiDesignerThemeSnapshot& theme = UiDesignerThemeSnapshot())
 {
     PropertyEditorStyle style = PropertyEditorStyle::System();
-    style.row_odd = Color(250, 249, 247);
-    style.row_even = Color(255, 247, 238);
-    style.row_hover = Color(255, 238, 214);
-    style.row_selected = Color(220, 235, 248);
-    style.group_background = Color(233, 226, 217);
-    style.group_ink = Color(70, 60, 52);
+    if(theme.mode != "Dark") {
+        style.row_odd = Color(250, 249, 247);
+        style.row_even = Color(255, 247, 238);
+        style.row_hover = Color(255, 238, 214);
+        style.row_selected = Color(220, 235, 248);
+        style.group_background = Color(233, 226, 217);
+        style.group_ink = Color(70, 60, 52);
+    }
     style.label_ratio = 38;
     style.show_group_summaries = true;
     return style;
+}
+
+static void ApplyUiDesignerPropertyEditorStyle(
+    PropertyEditor& editor,
+    const UiDesignerThemeSnapshot& theme = UiDesignerThemeSnapshot())
+{
+    editor.SetStyle(UiDesignerInspectorStyle(theme));
+    editor.SetLabelRatio(38);
 }
 
 static Size UiDesignerScaleVirtualSize(Size current, int width, int height)
@@ -399,9 +410,9 @@ void UiDesignerWindow::BuildDesigner()
                                "Inspect live preview performance and projection activity");
     designer_right_.SetPaneWidth(PANE_MEDIUM);
     designer_right_.SetActiveSection(0);
-    inspector_.SetStyle(UiDesignerInspectorStyle());
-    behaviors_.SetStyle(UiDesignerInspectorStyle());
-    overrides_.SetStyle(UiDesignerInspectorStyle());
+    ApplyUiDesignerPropertyEditorStyle(inspector_);
+    ApplyUiDesignerPropertyEditorStyle(behaviors_);
+    ApplyUiDesignerPropertyEditorStyle(overrides_);
     overrides_shell_.Add(overrides_layout_.SizePos());
     overrides_layout_.SetDirection(UiDirection::V)
                     .SetGap(DPI(4), DPI(4))
@@ -424,7 +435,7 @@ void UiDesignerWindow::BuildDesigner()
                                : "Theme overrides restored in Preview");
     };
     data_list_.SetModel(data_model_).SetSelectionMode(UILISTSEL_SINGLE);
-    data_editor_.SetStyle(UiDesignerInspectorStyle());
+    ApplyUiDesignerPropertyEditorStyle(data_editor_);
     data_editor_.SetModel(&data_editor_model_);
     data_panel_.Add(data_layout_.SizePos());
     data_layout_.SetDirection(UiDirection::V).SetGap(DPI(4), DPI(4)).SetInset(DPI(6));
@@ -617,7 +628,7 @@ void UiDesignerWindow::BuildTheme()
     theme_right_.RightColumn()
                 .AddSection("Inspector", ICON_DESIGN_TUNE_48(), theme_inspector_)
                 .AddSection("Code", ICON_DESIGN_CODE_BLOCKS_48(), theme_code_);
-    theme_inspector_.SetStyle(UiDesignerInspectorStyle());
+    ApplyUiDesignerPropertyEditorStyle(theme_inspector_);
     theme_gallery_.SetCatalog(&session_.Catalog());
     theme_gallery_.SetThemeDocument(&session_.Theme());
 }
@@ -1257,9 +1268,12 @@ void UiDesignerWindow::ConnectServices()
     session_.WhenCodeChanged = [=] { RefreshCode(); };
     session_.WhenStatus = [=](const String& text) { RefreshStatus(text); };
 
-    session_.Document().WhenChanged = [=](const UiDesignerChangeSet& changes) {
+    // UiDesignerSession owns document -> model/projection synchronization.
+    // The window is an additional presentation observer; append rather than
+    // replacing the session listener, and do not apply the same change set to
+    // the preview a second time here.
+    session_.Document().WhenChanged << [=](const UiDesignerChangeSet& changes) {
         interaction_overlay_.InvalidateCatalogDrag();
-        preview_canvas_.ApplyChangeSet(changes);
         if(changes.virtual_size_changed)
             RefreshLayout();
         interaction_overlay_.Refresh();
@@ -1268,11 +1282,11 @@ void UiDesignerWindow::ConnectServices()
         overrides_.Refresh();
         RequestDiagnosticsRefresh();
     };
-    session_.Theme().WhenChanged = [=] {
+    session_.Theme().WhenChanged << [=] {
         ApplyThemeToShell(); RefreshThemeInspector(); RefreshCode();
         RequestDiagnosticsRefresh();
     };
-    session_.Theme().WhenPreviewChanged = [=] { ApplyThemeToShell(); };
+    session_.Theme().WhenPreviewChanged << [=] { ApplyThemeToShell(); };
 
     designer_left_.WhenWidthChanged = [=] { Layout(); };
     designer_right_.WhenWidthChanged = [=] { Layout(); };
@@ -1295,6 +1309,15 @@ void UiDesignerWindow::ApplyThemeToShell()
     designer_center_.SetCustomStyle(UiDesignerSurfaceStyle(UiRole::Standard, theme));
     theme_gallery_column_.SetCustomStyle(UiDesignerSurfaceStyle(UiRole::Standard, theme));
     gallery_surface_.SetCustomStyle(UiDesignerSurfaceStyle(UiRole::Standard, theme));
+    // PropertyEditor::System resolves from the active Ui theme. Rebuild the
+    // Designer palettes after applying that theme so Light/Dark and preset
+    // changes cannot leave stale light-only rows behind. Keep one explicit
+    // label ratio across every property pane for fast visual comparison.
+    ApplyUiDesignerPropertyEditorStyle(inspector_, theme);
+    ApplyUiDesignerPropertyEditorStyle(overrides_, theme);
+    ApplyUiDesignerPropertyEditorStyle(data_editor_, theme);
+    ApplyUiDesignerPropertyEditorStyle(behaviors_, theme);
+    ApplyUiDesignerPropertyEditorStyle(theme_inspector_, theme);
     // This is an intentional instance override from DesignerExportGrid, not
     // a generic theme pill. Reapply it after global theme changes.
     aspect_pill_.SetCustomStyle(UiDesignerReferencePillStyle());
