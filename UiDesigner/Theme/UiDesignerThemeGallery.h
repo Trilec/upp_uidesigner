@@ -46,11 +46,29 @@ public:
     typedef UiDesignerThemeToolbar CLASSNAME;
 
     UiDesignerThemeToolbar();
+    UiDesignerThemeToolbar(UiDesignerThemeDocument& theme,
+                           UiDesignerThemeGallery& gallery)
+        : UiDesignerThemeToolbar()
+    {
+        SetThemeDocument(&theme);
+        SetGallery(&gallery);
+    }
 
     void SetThemeDocument(UiDesignerThemeDocument *theme);
     void SetGallery(UiDesignerThemeGallery *gallery);
     void ApplyTheme(const UiDesignerThemeSnapshot& theme);
     void SyncFromTheme();
+
+    // UiDesignerWindow used a UiDesignerPillBar here before the Theme Builder
+    // toolbar became a first-class control. Keep these two tiny compatibility
+    // shims while the window source is migrated: the toolbar owns its contents,
+    // so legacy AddControl calls deliberately do not re-parent those controls.
+    UiDesignerThemeToolbar& SetInset(int) { return *this; }
+    UiDesignerThemeToolbar& AddControl(Ctrl&, int) { return *this; }
+
+    String GetPreviewMode() const { return preview_mode_; }
+    UiRole GetPanelRole() const { return panel_role_; }
+    UiRole GetControlRole() const { return control_role_; }
 
     virtual Size GetMinSize() const override { return Size(DPI(760), DPI(50)); }
     virtual void Layout() override;
@@ -99,6 +117,9 @@ public:
     void SetControlRole(UiRole role);
     void RefreshTheme();
     int GetContentHeight() const { return content_height_; }
+    String GetPreviewMode() const { return preview_mode_; }
+    UiRole GetPanelRole() const { return panel_role_; }
+    UiRole GetControlRole() const { return control_role_; }
 
     // Compatibility with the previous gallery filter API. Theme Builder now
     // has only the two purposeful preview modes.
