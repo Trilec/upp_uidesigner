@@ -77,10 +77,10 @@ void UiDesignerThemeSwatch::Paint(Draw& w)
     Rect face = r.Deflated(DPI(2));
     if(!face.IsEmpty())
         w.DrawRect(face, color_);
-    DrawFrame(w, r, active_ ? SColorHighlight() : SColorShadow(),
-              active_ ? DPI(2) : DPI(1));
+    DrawFatFrame(w, r, active_ ? SColorHighlight() : SColorShadow(),
+                 active_ ? DPI(2) : DPI(1));
     if(HasFocus())
-        DrawFrame(w, r.Deflated(DPI(1)), SColorHighlight(), DPI(1));
+        DrawFatFrame(w, r.Deflated(DPI(1)), SColorHighlight(), DPI(1));
 }
 
 void UiDesignerThemeSwatch::LeftDown(Point, dword)
