@@ -7,7 +7,7 @@ uses
     UiDesigner/Theme;
 
 mainconfig
-    "" = "GUI";
+    "CONSOLE" = "1";
 
 file
     main.cpp;
