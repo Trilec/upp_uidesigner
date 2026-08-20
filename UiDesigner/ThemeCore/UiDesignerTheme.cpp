@@ -45,6 +45,64 @@ static bool ParseThemeColor(const Value& value, Color& color)
     return true;
 }
 
+// Theme Studio style recipes can contain typed U++ Values such as Color,
+// including Colors nested inside compound adapter recipes. Keep standalone
+// Theme JSON portable by using the same explicit recursive representation as
+// Designer document serialization instead of asking AsJSON to encode runtime
+// Value types directly.
+static Value EncodeThemeStyleValue(const Value& value)
+{
+    if(value.Is<Color>()) {
+        Color c = value;
+        ValueMap encoded;
+        encoded.Set("$type", "Color");
+        encoded.Set("r", c.GetR());
+        encoded.Set("g", c.GetG());
+        encoded.Set("b", c.GetB());
+        return encoded;
+    }
+    if(value.Is<ValueArray>()) {
+        ValueArray source = value;
+        ValueArray encoded;
+        for(const Value& item : source)
+            encoded.Add(EncodeThemeStyleValue(item));
+        return encoded;
+    }
+    if(value.Is<ValueMap>()) {
+        ValueMap source = value;
+        ValueMap encoded;
+        for(int i = 0; i < source.GetCount(); i++)
+            encoded.Set(source.GetKey(i),
+                        EncodeThemeStyleValue(source.GetValue(i)));
+        return encoded;
+    }
+    return value;
+}
+
+static Value DecodeThemeStyleValue(const Value& value)
+{
+    if(value.Is<ValueMap>()) {
+        ValueMap source = value;
+        if((String)UiDesignerMapValue(source, "$type", "") == "Color")
+            return Color((int)UiDesignerMapValue(source, "r", 0),
+                         (int)UiDesignerMapValue(source, "g", 0),
+                         (int)UiDesignerMapValue(source, "b", 0));
+        ValueMap decoded;
+        for(int i = 0; i < source.GetCount(); i++)
+            decoded.Set(source.GetKey(i),
+                        DecodeThemeStyleValue(source.GetValue(i)));
+        return decoded;
+    }
+    if(value.Is<ValueArray>()) {
+        ValueArray source = value;
+        ValueArray decoded;
+        for(const Value& item : source)
+            decoded.Add(DecodeThemeStyleValue(item));
+        return decoded;
+    }
+    return value;
+}
+
 static int ThemePaletteIndex(int value)
 {
     return minmax(value, 0, UI_DESIGNER_THEME_PALETTE_SIZE - 1);
@@ -206,14 +264,18 @@ bool UiDesignerThemeSnapshot::RemoveStyleOverride(const String& target,
 {
     if(target.IsEmpty() || field.IsEmpty())
         return false;
+    const int target_index = style_overrides.Find(target);
     ValueMap values = GetStyleOverrides(target);
-    if(values.Find(field) < 0)
+    if(target_index < 0 || values.Find(field) < 0)
         return false;
     ValueMap kept;
     for(int i = 0; i < values.GetCount(); i++)
         if(AsString(values.GetKey(i)) != field)
             kept.Set(values.GetKey(i), values.GetValue(i));
-    style_overrides.Set(target, kept);
+    if(kept.IsEmpty())
+        style_overrides.Remove(target_index);
+    else
+        style_overrides.Set(target, kept);
     return true;
 }
 
@@ -229,7 +291,7 @@ ValueMap UiDesignerThemeSnapshot::ToValue() const
     out.Set("accent", ThemeColorText(accent));
     out.Set("palettes", palettes);
     out.Set("roles", roles.ToValue());
-    out.Set("styles", style_overrides);
+    out.Set("styles", EncodeThemeStyleValue(style_overrides));
     out.Set("spacing", spacing);
     out.Set("radius", radius);
     out.Set("pill_radius", pill_radius);
@@ -288,7 +350,8 @@ bool UiDesignerThemeSnapshot::FromValue(const Value& value, String& error)
     }
 
     if(in.Find("styles") >= 0) {
-        Value styles = UiDesignerMapValue(in, "styles", ValueMap());
+        Value styles = DecodeThemeStyleValue(
+            UiDesignerMapValue(in, "styles", ValueMap()));
         if(!styles.Is<ValueMap>()) {
             error = "Theme styles must be an object";
             return false;
