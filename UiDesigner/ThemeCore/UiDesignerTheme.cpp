@@ -542,6 +542,40 @@ bool UiDesignerThemeDocument::Commit(
     position_ = history_.GetCount();
     WhenChanged();
     WhenHistoryChanged();
+    error.Clear();
+    return true;
+}
+
+bool UiDesignerThemeDocument::CommitPalette(
+    bool dark, const UiDesignerThemePalette& palette,
+    const String& label, String& error)
+{
+    UiDesignerThemeSnapshot after = value_;
+    after.GetPalette(dark) = palette;
+    after.SyncLegacyAccent();
+
+    if(after.ToValue() == value_.ToValue()) {
+        preview_ = value_;
+        preview_active_ = false;
+        error.Clear();
+        return true;
+    }
+
+    TruncateRedo();
+    UiDesignerThemeHistoryEntry& entry = history_.Add();
+    entry.label = label.IsEmpty()
+        ? String("Set ") + (dark ? "Dark" : "Light") + " palette"
+        : label;
+    entry.before = value_;
+    entry.after = after;
+
+    value_ = after;
+    preview_ = value_;
+    preview_active_ = false;
+    position_ = history_.GetCount();
+    WhenChanged();
+    WhenHistoryChanged();
+    error.Clear();
     return true;
 }
 
