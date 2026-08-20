@@ -153,10 +153,18 @@ private:
     UiMultiEdit diagnostics_shell_;
 
     UiPanel theme_gallery_column_;
-    UiDesignerThemeToolbar theme_toolbar_;
     UiScrollPanel gallery_scroll_;
     UiPanel gallery_surface_;
+    // Construct the preview before the toolbar so the toolbar can bind both
+    // authoritative theme state and the gallery without Window-owned mirrors.
     UiDesignerThemeGallery theme_gallery_;
+    UiDesignerThemeToolbar theme_gallery_pill_ { session_.Theme(), theme_gallery_ };
+    // Legacy Theme Studio buttons are retained only as inert construction
+    // targets until UiDesignerWindow.cpp's old AddControl calls are removed;
+    // UiDesignerThemeToolbar owns the actual visible Controls/Containers UI.
+    UiToolButton theme_all_;
+    UiToolButton theme_inputs_;
+    UiToolButton theme_containers_;
     UiDesignerInspectorColumn theme_right_;
     PropertyEditor theme_inspector_;
     UiDesignerCodeView theme_code_;
