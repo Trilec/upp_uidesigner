@@ -3,7 +3,6 @@
 
 #include <CtrlLib/CtrlLib.h>
 #include <Ui/Ui.h>
-#include <Ui/UiColorPicker/UiColorPicker.h>
 #include <Utilities/PropertyEditor/PropertyEditor.h>
 #include <UiDesigner/Preview/UiDesignerPreview.h>
 #include <UiDesigner/Services/UiDesignerServices.h>
@@ -154,10 +153,7 @@ private:
     UiMultiEdit diagnostics_shell_;
 
     UiPanel theme_gallery_column_;
-    UiDesignerPillBar theme_gallery_pill_;
-    UiToolButton theme_all_;
-    UiToolButton theme_inputs_;
-    UiToolButton theme_containers_;
+    UiDesignerThemeToolbar theme_toolbar_;
     UiScrollPanel gallery_scroll_;
     UiPanel gallery_surface_;
     UiDesignerThemeGallery theme_gallery_;
