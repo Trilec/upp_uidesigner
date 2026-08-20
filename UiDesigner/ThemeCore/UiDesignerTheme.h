@@ -96,6 +96,8 @@ public:
     bool Preview(const String& property, const Value& value, String& error);
     bool Commit(const String& property, const Value& value,
                 const String& label, String& error);
+    bool CommitPalette(bool dark, const UiDesignerThemePalette& palette,
+                       const String& label, String& error);
     void CancelPreview();
     bool Reset(const String& property, String& error);
 
