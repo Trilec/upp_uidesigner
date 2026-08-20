@@ -65,7 +65,10 @@ CONSOLE_APP_MAIN
 
     const String json = theme.Serialize(false);
     Value root_value = ParseJSON(json);
-    ValueMap root = root_value;
+    const bool valid_json = !IsError(root_value) && root_value.Is<ValueMap>();
+    Check(valid_json,
+          "Theme Builder serializes typed style values as valid JSON");
+    ValueMap root = valid_json ? (ValueMap)root_value : ValueMap();
     Check((int)UiDesignerMapValue(root, "schema", 0) == 3,
           "Theme Builder serializes schema 3 with style recipes");
 
@@ -76,13 +79,15 @@ CONSOLE_APP_MAIN
     Check(loaded.Get().dark_palette.Get(0) == dark_before.Get(0),
           "round-trip preserves independent Dark palette");
     Check(loaded.Get().GetStyleOverride(target, "face_normal") == Color(44, 55, 66),
-          "round-trip preserves selected-control style recipe");
+          "round-trip restores typed Color style recipe");
 
     loaded.SetActiveStyleTarget(target);
     Check(loaded.Reset("studio.face_normal", error),
           "Theme Studio reset removes an authored field");
     Check(!loaded.Get().HasStyleOverride(target, "face_normal"),
           "reset restores inherited adapter value");
+    Check(loaded.Get().GetStyleOverrides(target).IsEmpty(),
+          "reset removes an empty style target recipe");
     Check(loaded.Undo() &&
           loaded.Get().GetStyleOverride(target, "face_normal") == Color(44, 55, 66),
           "Theme Studio style reset participates in undo history");
