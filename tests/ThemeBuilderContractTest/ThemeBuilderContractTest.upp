@@ -1,0 +1,13 @@
+description "UiDesigner Theme Builder toolbar, matrix and colour-transfer contract test";
+
+uses
+    CtrlLib,
+    Ui,
+    Utilities/PropertyEditor,
+    UiDesigner/Theme;
+
+mainconfig
+    "" = "GUI";
+
+file
+    main.cpp;
