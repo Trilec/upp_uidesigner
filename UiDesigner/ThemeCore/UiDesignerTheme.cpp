@@ -272,7 +272,7 @@ static void AddPaletteRoleChoice(PropertyEditorModel& model, const String& id,
 {
     PropertyEditorItem& item = model.AddChoice(id, label, value, group);
     for(int i = 0; i < UI_DESIGNER_THEME_PALETTE_SIZE; i++)
-        item.AddChoice("Palette " + AsString(i + 1), i);
+        item.AddChoice(i, "Palette " + AsString(i + 1));
     item.SetDomain(PropertyEditorDomain::Theme)
         .SetImpact(PropertyImpactThemeGlobal |
                    PropertyImpactPaint |
