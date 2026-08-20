@@ -1,191 +1,162 @@
 # ACTIVE WORK
 
-Remote GitHub is authoritative. Never force-update `main`. Re-fetch current refs before implementation or publication and preserve unrelated concurrent advances.
+Remote GitHub is authoritative. Never force-update `main`. Refresh the current remote HEAD before implementation or publication and preserve unrelated concurrent advances.
 
 ## CURRENT SUPERVISORY STATE — 2026-08-20
 
-STATUS: **THEME BUILDER PALETTE FOUNDATION + FIRST WORKSPACE SLICE PUBLISHED; PREVIEW AND THEME WINDOWS VALIDATION PENDING.**
+STATUS: **THEME BUILDER INTERACTION / MATRIX SLICE PUBLISHED; WINDOWS COMPILE + VISUAL VALIDATION PENDING.**
 
 Authoritative branch: `main`.
 
-Current source checkpoints:
+Current source/test checkpoint immediately before this documentation update:
 
-- `af05395787ce105fc3a03d2b26d4aa74bced51c9` — first Theme Builder workspace: six-colour Light/Dark palette editing through production `UiColorPicker`, separate Control Role and Panel Role previews, and representative controls below;
-- `61a7ebf37f3d79ddac4113bbad75b00c10b0bdd3` — Theme Builder document foundation: schema-2 Light/Dark palettes, semantic role assignments, migration, undo/redo and focused ThemeDocument regression package;
-- `0757a06f640f5353944874390fd8e157b39f0a10` — preserve authored Grid structure through preview reconstruction and make nested transparent layouts directly selectable from their interaction space/perimeter.
+- `0caee55a1f1a9046cd1a523f4e02afd602ac2151` — focused Theme Builder compile/behavior gate added on top of the completed interaction/matrix slice.
 
-Concurrent/validation follow-up after the Preview source checkpoint:
+Important earlier checkpoints retained:
 
-- `c225eee336365a6ec69ebfa363747edab550c446` — test-only correction to probe the Box perimeter rail on the actual GroupPanel centreline; Preview implementation unchanged;
-- `0449ac0cabe265df051515356563256b10440fa0` — `.gitignore` update.
-
-Previously accepted Windows visual-readiness baseline:
-
-- `580ced97e66e5304d73929e05e52fb116ca686ff` — preceding Designer visual-readiness/test-linkage state. This does **not** automatically validate the later Preview or Theme Builder checkpoints.
+- `0757a06f640f5353944874390fd8e157b39f0a10` — Grid preview reconstruction and nested transparent-layout selection fix;
+- `580ced97e66e5304d73929e05e52fb116ca686ff` — preceding accepted Windows visual-readiness baseline. It does not validate later Preview or Theme Builder work.
 
 ## SUPERVISORY OWNERSHIP
 
-The supervisor owns architecture, source diagnosis, substantive implementation, reconciliation, diff review, publishing decisions and acceptance.
+The supervisor owns architecture, diagnosis, substantive source changes, review and publishing.
 
-Gary's role is **Windows validation and minor mechanical follow-up only**:
+Gary is the Windows validator/helper:
 
-- fetch and test the exact requested published SHA/ancestor;
-- report compiler/runtime failures with exact diagnostics and reproduction;
-- perform only genuinely mechanical build corrections if necessary;
-- do not redesign Preview reconstruction, geometry selection, PropertyEditor, session/model ownership, Theme Builder, theme adapters or Designer data contracts.
+- fetch the exact requested `main`;
+- build/run the focused gates;
+- report exact compiler/runtime diagnostics;
+- make only genuinely mechanical build corrections if explicitly appropriate;
+- do not redesign Theme Builder, PropertyEditor, Preview, session/model ownership or theme contracts.
 
 Substantive failures return to the supervisor.
 
-## PREVIEW RELIABILITY CHECKPOINT
+## THEME BUILDER — CURRENT DESIGN CONTRACT
 
-### Grid reconstruction defect
+The user corrected the earlier embedded-palette interpretation. Do **not** restore a full-time `UiColorPicker` inside Theme Studio.
 
-Human reproduction before `0757a06f...`:
+The intended Theme Builder top work area is compact:
 
-1. place a `UiGridLayout`;
-2. author `Rows = 1`, `Columns = 3`;
-3. Preview correctly becomes 1x3;
-4. add a child;
-5. structural preview rebuild visibly falls back to 2x2 while PropertyEditor/document still reports 1x3.
+1. **Controls / Containers** — the only two preview modes.
+2. **Panel Role** — independent role used by preview hosting surfaces.
+3. **Control Role** — independent role used by representative controls.
+4. **Light / Dark** — active preview appearance.
+5. **Six Light swatches** and **six Dark swatches** — persistent working palettes.
 
-Root cause was Preview reconstruction, not durable document state. Live Grid property edits called `UiGridLayout::SetGridSize(columns, rows)`, but freshly rebuilt Grids passed through generic scalar replay and retained the runtime 2x2 constructor defaults. The same asymmetry existed for coupled minimum-cell dimensions.
+The Panel Role and Control Role selectors are deliberately independent so controls can be judged against a different surface role.
 
-`0757a06f...` adds a Grid-specific preview adapter that reconstructs rows, columns, minimum cell dimensions and layout state from authored document values.
+### Six-colour palette editing
 
-The exact Grid failure was not found in `UiBoxLayout`'s main container fields: generic reconstruction already reapplies Box direction, wrapping, inset and gap. The regression fixture authors Box direction/wrap before another structural rebuild and verifies those values survive.
+The twelve top-bar swatches are the persistent palette work area. There is no permanent palette laboratory in the preview.
 
-### Nested transparent-layout selection
+Clicking any Light swatch:
 
-For `UiGridLayout -> UiBoxLayout -> UiGroupPanel`, zero Grid inset/gap previously made the transparent Box impractical to select directly from Preview.
+- opens a temporary production `UiColorPicker` dialog;
+- loads all six current Light colours into its primary slots;
+- selects the clicked slot;
+- keeps six generator slots and the existing analogous/complementary/triad, palette and User Stash workflows available;
+- accepting commits the complete six-colour Light palette as one undoable theme history step.
 
-`0757a06f...` keeps normal deepest-child selection but first reserves layout-owned interaction space:
+Dark behaves identically and remains independent.
 
-- inset regions select their layout;
-- gap regions select their layout;
-- a narrow 4-DPI perimeter rail keeps zero-inset/zero-gap layouts selectable;
-- deepest layout wins when layout rails coincide;
-- away from these regions the child remains the normal target.
+The authored theme document remains the authority. `UiDesignerThemeDocument::CommitPalette()` performs the six-colour atomic commit; project/theme serialization remains schema 2 and round-trippable.
 
-`c225eee...` changes only the focused test probe to intersect the natural-height GroupPanel correctly; it does not change production hit testing.
+### Palette drag / clipboard workflow
 
-### Focused Preview regression package
+The persistent Theme Builder swatches are colour drag sources. They publish standard colour text (`#RRGGBB`) rather than a Designer-private payload.
 
-- `tests/PreviewLayoutRegressionTest/PreviewLayoutRegressionTest.upp`
-- `tests/PreviewLayoutRegressionTest/main.cpp`
+`Utilities/PropertyEditor` in `Trilec/upp_Ui` now provides the reusable destination behavior:
 
-Required summary:
+- `PropertyEditorKind::Color` rows accept text colour drops;
+- the exact value cell is visibly highlighted while a valid colour drop is targeted;
+- a valid drop commits through the PropertyEditor model and normal `WhenCommit` pipeline;
+- inactive override rows are activated first and the colour commit is deferred until the rebuilt model is editable;
+- `Ctrl+C` on a selected colour row copies `#RRGGBB`;
+- `Ctrl+V` parses clipboard colour text through production `UiColorPicker::ParseColorText()` and commits normally.
 
-```text
-PREVIEW_LAYOUT_REGRESSION_SUMMARY checks=<n> failed=0
-```
+Direct drop onto a rendered control is deliberately **not** implemented because Face/Frame/Ink/etc. would be ambiguous. Drag from the temporary picker directly into the editor is also not required for this slice; accept the palette first, then drag from the persistent top swatches.
 
-The fixture covers live Grid 1x3, structural insertion, second reconstruction, Box direction/wrap replay, direct Box perimeter selection and ordinary child selection.
+Current `upp_Ui/main` containing this reusable PropertyEditor support:
 
-## THEME BUILDER — ACTIVE IMPLEMENTATION
+- `1088011f5b806ec7a21d58774b8a80ab1bace6b7`.
 
-The user explicitly authorized Theme Builder implementation to proceed while the earlier Preview Windows gate is still running. Do not revert to the old sequencing note that Theme work must wait.
+## THEME BUILDER PREVIEW MATRIX
 
-### Product goal
+The broad old control zoo has been replaced by two intentional views built from the production Ui layout controls.
 
-Theme Studio is becoming a practical **Theme Builder**, not an undifferentiated control gallery.
+### Controls view
 
-Required direction:
+- outer `UiGridLayout`: 3 columns × 1 row;
+- each column contains a vertical `UiBoxLayout` stack;
+- representative families are grouped into practical surfaces rather than one enormous flow;
+- examples include Buttons, Choices, Numeric & Sliders, Inputs, Data, Navigation and Feedback;
+- a plain `UiPanel` reference is included so panel treatment can be judged independently of `UiGroupPanel` chrome;
+- group panels use the selected Panel Role while representative controls use the selected Control Role.
 
-- a deliberately engineered palette is a first-class authored asset;
-- exactly six authored colours for Light and six for Dark in the current design;
-- use the production `UiColorPicker` palette/generator workflow, including complementary/triad/analogous generation and its existing drag transfer into primary slots;
-- keep **Control Roles** separate from **Panel Roles**;
-- use representative/category-filtered controls for visual testing;
-- save/reload themes for later tweaks and reuse;
-- a loaded/authored theme must be usable in the normal Designer preview, not only in Theme Builder;
-- project save/export, standalone theme JSON and runtime/code generation must converge on one authored theme contract rather than UI-only mirror state.
+### Containers view
 
-### Theme document foundation — `61a7ebf...`
+The same 3-column / vertical-stack structure shows container chrome both alone and with representative content. Current samples intentionally pair:
 
-`UiDesignerThemeSnapshot` now owns two six-colour palettes:
+- plain `UiPanel` without controls;
+- plain `UiPanel` with button/check content;
+- quiet `UiGroupPanel`;
+- form `UiGroupPanel` with edit/action;
+- numeric `UiPanel` with slider/int edit;
+- choice `UiGroupPanel` with dropdown/toggle.
 
-- `light_palette`;
-- `dark_palette`.
+This avoids another mode switch merely to see “with controls / without controls”; both are visible in the Containers view for direct comparison.
 
-It also owns semantic palette-slot assignments:
+## WINDOW INTEGRATION
 
-Control Roles:
+Theme Builder uses one `UiDesignerThemeToolbar` bound directly to:
 
-- Standard;
-- Subtle;
-- Accent;
-- Alert.
+- the session-owned `UiDesignerThemeDocument`;
+- the Theme Gallery preview.
 
-Panel Roles:
+The previous Theme Studio pill/button construction path is retained only through small compatibility shims while the large `UiDesignerWindow.cpp` source is mechanically migrated. Those old construction targets are inert and are not visible or authoritative. The visible toolbar owns Controls/Containers, role selectors, appearance and palette swatches.
 
-- Surface;
-- Subtle;
-- Strong.
+There is no duplicate theme state in the Window.
 
-The existing `accent` field remains temporarily as a compatibility projection derived from the active appearance palette and assigned Control Accent slot. It is not a second authority.
+## FOCUSED THEME TESTS
 
-Standalone theme serialization is schema 2 and round-trips palettes and role assignments. Schema-1 themes migrate by carrying their old single Accent colour into both Light and Dark Accent slots so appearance switching does not silently lose the authored colour.
+### `tests/ThemeDocumentTest`
 
-Theme preview/commit/undo/redo and the existing PropertyEditor model now support all palette slots and role assignments.
-
-Existing Designer project persistence already stores `theme_.Get().ToValue()`, and export already supports `theme.json`; therefore these new authored fields travel through the existing project/export path rather than a parallel file format.
-
-### Theme document regression package
-
-New package:
-
-- `tests/ThemeDocumentTest/ThemeDocumentTest.upp`
-- `tests/ThemeDocumentTest/main.cpp`
-
-Required summary:
+Existing schema/role/palette test. Required:
 
 ```text
 THEME_DOCUMENT_SUMMARY checks=<n> failed=0
 ```
 
-It covers:
+Covers schema-2 persistence, schema-1 migration, Light/Dark independence, role assignments, transient preview, undo/redo and atomic six-colour palette history.
 
-- independent Light/Dark palette editing;
-- separate Control and Panel role assignments;
-- active Accent compatibility projection;
-- schema-2 round-trip;
-- schema-1 migration;
-- transient preview/cancel;
-- undo/redo;
-- Theme Inspector exposure of both palette domains and both role domains.
+### `tests/ThemeBuilderContractTest`
 
-### First Theme Builder workspace — `af053957...`
+New compile/behavior gate. It deliberately depends on the complete `UiDesigner/Theme` package and `Utilities/PropertyEditor`, so building it compiles and links the toolbar, swatch drag source, palette popup, matrix preview and PropertyEditor colour-transfer implementation.
 
-The Theme Gallery now begins with a Theme Builder workspace containing:
+Required:
 
-1. **Theme Palette**
-   - Light/Dark palette selector;
-   - production `UiColorPicker`;
-   - exactly six primary theme slots;
-   - generator count six;
-   - palette generator/stash/internal drag workflow retained;
-   - a slot change commits directly to `UiDesignerThemeDocument`.
+```text
+THEME_BUILDER_CONTRACT_SUMMARY checks=<n> failed=0
+```
 
-2. **Control Roles**
-   - Standard, Subtle, Accent and Alert shown separately;
-   - each preview identifies the assigned palette slot.
+Its runtime assertions cover atomic six-colour commit/undo/redo, Light/Dark independence, schema round-trip, shared hex parsing and the PropertyEditor Color-domain contract.
 
-3. **Panel Roles**
-   - Surface, Subtle and Strong shown separately using real `UiPanelRole` semantics;
-   - each preview identifies the assigned palette slot.
+Building the actual `UiDesigner` package is still required because that is the compile gate for final Window integration.
 
-4. Existing representative controls remain below for the moment. They will be reduced/reorganized into intentional category views rather than retained as a large control zoo.
+## PREVIEW RELIABILITY RETAINED
 
-The role swatches directly visualize the authored palette now. Full arbitrary-palette propagation through every `upp_Ui` runtime resolver is **not yet implemented** and must not be claimed as complete.
+The earlier Preview fix remains part of the required regression line:
 
-### Next Theme Builder slices
+- authored Grid `Rows=1`, `Columns=3` must survive structural reconstruction;
+- coupled Grid minimum-cell dimensions are reconstructed from authored state;
+- Box direction/wrap/inset/gap survive structural rebuilds;
+- nested transparent layouts reserve inset/gap/perimeter interaction space so a zero-inset Box can be selected directly without making child selection unusable.
 
-1. add a clean standalone Theme Save/Load interaction around `UiDesignerThemeDocument::Serialize/Deserialize`, so authored themes can be reused independently of a project;
-2. synchronize loaded theme preset/mode state cleanly with the normal Designer shell;
-3. define the real `upp_Ui` custom semantic-palette runtime contract rather than maintaining hardcoded/Designer-only colour overrides;
-4. make Designer preview and generated/runtime output consume that same contract;
-5. replace the remaining broad gallery with bounded category-filtered representative control sets;
-6. if palette-to-role drag is still desirable after role assignment UX is evaluated, expose a proper public drag contract rather than reaching into `UiColorPicker` internals.
+Focused package:
+
+```text
+PREVIEW_LAYOUT_REGRESSION_SUMMARY checks=<n> failed=0
+```
 
 ## MODEL / PROPERTYEDITOR CONTRACT
 
@@ -200,50 +171,48 @@ Retained architecture:
 - `UiDesignerSession` remains the document -> projection/model synchronization authority;
 - Window observers append with `<<` and remain presentation-only.
 
-For model-backed controls, Data edits the same production model represented by the document/preview contract; do not introduce demo-only mirrors or duplicate synchronization layers.
+The Designer PropertyEditors retain the explicit 38% label/value divider and theme-aware Light/Dark styling.
 
-## PROPERTYEDITOR VISUAL LANGUAGE
+## KNOWN BOUNDARY AFTER THIS SLICE
 
-The Designer PropertyEditors use an explicit 38% label/value divider and theme-aware Light/Dark styling.
+The current six-colour palettes are authored/reusable working palettes and palette-slot role assignments. `upp_Ui` runtime theme resolvers still predominantly use their preset/mode colour recipes. Do not claim that arbitrary six-colour Theme Builder palettes already replace every runtime resolver colour automatically.
 
-Canonical common override grouping remains based on UiLabel: General, Face, Frame, Ink, Icon, Typography, Content Margin, Focus, Shadow, Highlight. Control-specific domains such as List Rows/*, Dropdown Popup/* and Accordion Header/* / Body/* remain nested and must not be flattened.
+The user explicitly wants palette colours to be conveniently **applied while authoring** through the PropertyEditor drag/clipboard workflow, which is implemented in this slice.
 
-## CROSS-REPOSITORY UI STATE
+Standalone project save already preserves the theme and Theme JSON export exists. A dedicated standalone Theme JSON **import/reuse** interaction remains a subsequent bounded feature; do not create a second theme authority to implement it.
 
-Last refreshed `Trilec/upp_Ui/main` during the Theme Builder audit:
+## CURRENT WINDOWS VALIDATION GATE
 
-- `1c239c68c504919e60859955db4faf9ea537d181`.
+Validate the current final `main`, not an older Theme Builder ancestor.
 
-Relevant runtime facts at that checkpoint:
+Minimum gate:
 
-- `UiThemeContext` currently contains only preset + mode;
-- `UiRole` provides Standard/Subtle/Accent/Alert;
-- `UiPanelRole` separately provides Surface/Subtle/Strong;
-- current resolver palettes are predominantly hard-coded by preset/mode, so a real custom authored-palette bridge still needs to be designed;
-- `UiColorPicker` already exposes six-slot editing primitives, 2-12 swatch generation, harmony modes including analogous/complementary/triad, User Stash and internal grouped drag transfer.
+1. `tests/ThemeBuilderContractTest` Debug + Release — summary `failed=0`;
+2. `tests/ThemeDocumentTest` Debug + Release — summary `failed=0`;
+3. `tests/PreviewLayoutRegressionTest` Debug + Release — summary `failed=0`;
+4. build `UiDesigner` Debug + Release;
+5. launch Debug UiDesigner and leave it open for Curt after a short Theme Builder smoke.
 
-Refresh `upp_Ui/main` again before cross-repository implementation.
+Visual smoke should confirm:
 
-## CURRENT WINDOWS VALIDATION
+- no embedded permanent `UiColorPicker` in Theme Studio;
+- only Controls / Containers preview mode buttons;
+- independent Panel Role and Control Role selectors;
+- Light/Dark appearance switch;
+- six Light + six Dark compact swatches;
+- clicking a swatch opens the temporary six-slot picker preloaded from that palette;
+- Controls view is a readable three-column stacked matrix;
+- Containers view switches to plain/populated container examples;
+- role selectors visibly change their respective preview domain;
+- ordinary Theme Inspector remains readable.
 
-The Preview validation requested from Gary was started before Theme Builder commits advanced `main`. Treat its result as validation of the requested Preview ancestor, not automatic validation of the new Theme Builder source.
+Colour drag/drop should be checked if convenient: drag a persistent palette swatch onto a Color row in a PropertyEditor and confirm the row highlights and commits the new colour.
 
-Preview gate still requires:
+On substantive failure, Gary stops and reports exact SHA, configuration, diagnostic and reproduction. Source fixes return to the supervisor.
 
-1. `tests/PreviewLayoutRegressionTest` Debug + Release — summary `failed=0`;
-2. `tests/ListDataAdapterTest` Debug + Release — `checks=8 failed=0`;
-3. `tests/ListEditThemeAdapterTest` Debug + Release — summary `failed=0`;
-4. `tests/DropdownAccordionThemeAdapterTest` Debug + Release — summary `failed=0`;
-5. UiDesigner Debug + Release;
-6. focused Grid 1x3 / nested Box direct-selection GUI smoke.
+## NEXT AFTER WINDOWS/VISUAL ACCEPTANCE
 
-Once the Theme Builder checkpoint is ready for Windows validation, add `tests/ThemeDocumentTest` Debug + Release plus focused Theme Builder UI smoke; do not conflate that with the older Preview gate.
-
-On substantive failures Gary stops and reports exact SHA, mode, diagnostic and reproduction. Architectural/source fixes return to the supervisor.
-
-## NEXT
-
-1. Continue the Theme Builder in bounded slices: standalone Theme Save/Load, Designer-shell synchronization, then runtime palette contract.
-2. Review and fix any Windows failure reported from the earlier Preview gate.
-3. Publish and validate Theme Builder increments frequently; do not wait for a monolithic redesign.
-4. Keep the runtime/editor/export theme contract single-source and round-trippable throughout.
+1. Correct any compile/runtime issue exposed by the focused gate.
+2. Refine matrix spacing/content from Curt's visual pass rather than redesigning the structure blindly.
+3. Add dedicated standalone Theme JSON import/reuse around the existing single theme document contract.
+4. Only then consider the broader custom semantic-palette bridge into every `upp_Ui` runtime resolver if the authored-theme workflow requires it.
