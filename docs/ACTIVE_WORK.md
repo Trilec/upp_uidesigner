@@ -1,127 +1,203 @@
 # ACTIVE WORK
 
-Remote GitHub is authoritative. Never force-update `main`. Preserve unrelated concurrent advances and re-fetch current refs before any implementation or publication.
+Remote GitHub is authoritative. Never force-update `main`. Re-fetch current refs before implementation or publication and preserve unrelated concurrent advances.
 
-## CURRENT SUPERVISORY STATE — 2026-08-19
+## CURRENT SUPERVISORY STATE — 2026-08-20
 
-STATUS: **NORMALIZED THEME ADAPTER SOURCE PUBLISHED; CURRENT-HEAD WINDOWS ACCEPTANCE + DEMO CONVERGENCE PENDING.**
+STATUS: **VISUAL-READINESS SOURCE CORRECTIONS PUBLISHED; WINDOWS BUILD/RUNTIME ACCEPTANCE PENDING.**
 
-Authoritative branch is `main`.
+Authoritative branch: `main`.
 
-Current published Designer checkpoint before this documentation refresh:
+Current source checkpoint:
 
-- `96bd99810aca9ae5d96afee3f7f059e588e3092c` — avoid BLITZ adapter state name collision.
+- `95c27952e23ca553bd1ac353477a6f898a596d15` — align the Designer PropertyEditor shell and preserve UiDesignerSession event/model synchronization.
 
-Current cross-repository Ui checkpoint inspected during recovery:
+Immediate preceding data-integrity checkpoint:
 
-- `Trilec/upp_Ui` `4a380c7071d8f0c641e01474544d648461fcb77d` — UiButton demo modernization checkpoint.
+- `3a0c1f415f5b2a985118de63cb70f6a77fc5bd06` — fix UiList Designer-data downward moves and add `tests/ListDataAdapterTest`.
 
-The newer Ui model/mutation work after the original four-control rollout base is a consumer-reconciliation concern, not permission to redesign Designer model architecture. Targeted recovery inspection found the Preview List/Tree/Table population paths using notifying public model operations rather than a proven stale in-place mutable-access path. No source correction is justified until a concrete incompatible mutation path is found.
+Earlier normalized-adapter production checkpoint:
+
+- `96bd99810aca9ae5d96afee3f7f059e588e3092c` — mechanical BLITZ List-adapter state-symbol correction after the List/Edit/Dropdown/Accordion normalization rollout.
+
+No Windows acceptance is claimed for the current source checkpoint yet.
+
+## SUPERVISORY OWNERSHIP
+
+The supervisor owns architecture, source diagnosis, substantive implementation, reconciliation, diff review, publishing decisions and acceptance.
+
+Gary's role for this checkpoint is **validation and minor mechanical follow-up only**:
+
+- fetch and test the exact published `main` SHA;
+- report compiler/runtime failures with exact diagnostics;
+- perform only genuinely mechanical build corrections if necessary;
+- do not redesign PropertyEditor, model ownership, event synchronization, theme adapters or Designer data contracts.
+
+Substantive failures return to the supervisor for diagnosis and source correction.
+
+## VISUAL-READINESS CORRECTIONS
+
+### PropertyEditor shell
+
+`UiDesigner/UiDesigner/UiDesignerWindow.cpp` now uses the production PropertyEditor consistently across:
+
+- Inspector;
+- Theme Overrides;
+- model/domain Data editor;
+- Events & Actions;
+- Theme Studio Inspector.
+
+The five panes now explicitly use `SetLabelRatio(38)` instead of leaving PropertyEditor in Auto label mode while merely storing a ratio in the style. This gives a stable label/value divider for visual comparison across controls and panes.
+
+The existing light Designer palette is retained in Light mode. Dark mode derives its PropertyEditor palette from `PropertyEditorStyle::System()` after `UiDesignerApplyGlobalTheme()`, and the styles are reapplied on theme/preset changes. A Light -> Dark -> Light smoke must confirm there is no stranded light-only PropertyEditor palette.
+
+### Event/model ownership
+
+`UiDesignerSession` remains the authority for document -> model/projection synchronization.
+
+The Designer window now appends presentation observers with `<<` instead of replacing session-owned `Document().WhenChanged`, `Theme().WhenChanged` and `Theme().WhenPreviewChanged` handlers.
+
+The window no longer sends the same document change set directly to `preview_canvas_`; the attached projection is updated once by the session. This preserves Inspector and Theme Override synchronization and avoids duplicate preview application.
+
+A remaining explicit window-side `RefreshCode()` after a document change is potentially redundant because the session also emits `WhenCodeChanged`; it is a minor efficiency observation, not a visual-readiness correctness blocker. Do not churn the large window source solely for that micro-optimization before Windows acceptance.
+
+### UiList Designer data integrity
+
+`UiDesignerListDataAdapter::MoveItem()` now reconstructs the authored `ValueArray` correctly for both upward and downward moves. The previous positive-delta branch could omit the moved item.
+
+Focused regression package:
+
+- `tests/ListDataAdapterTest/ListDataAdapterTest.upp`
+- `tests/ListDataAdapterTest/main.cpp`
+
+Required summary:
+
+```text
+LIST_DATA_ADAPTER_SUMMARY checks=8 failed=0
+```
+
+The test covers move up, move down, a multi-position downward move, preservation of all authored rows, and rejected/out-of-range moves.
+
+## MODEL / PROPERTYEDITOR CONTRACT
+
+The current Designer architecture is intentionally retained:
+
+- `UiDesignerDocument` is the durable authored state;
+- PropertyEditor models are projections of Designer/session state rather than parallel application state;
+- preview edits use the transient overlay;
+- durable property/theme/data edits go through command services;
+- generated code resolves from the same committed document/theme state;
+- List/Tree preview population uses notifying public model operations; do not add `Touch()` unless a concrete consumer actually mutates through mutable `Get(...)` access.
+
+For modern `upp_Ui` model-backed demos, the same principle applies: Data should edit the same active production model used by the preview, not a demo-only mirror.
+
+## CANONICAL PROPERTY GROUP LANGUAGE
+
+`UiLabel` remains the common override reference:
+
+1. General
+2. Face
+3. Frame
+4. Ink
+5. Icon
+6. Typography
+7. Content Margin
+8. Focus
+9. Shadow
+10. Highlight
+
+Composite controls extend that vocabulary only where runtime ownership requires it:
+
+- UiList: `Rows/Layout`, `Rows/State`, `Content`, `Badge`, `Drag`;
+- UiBaseEdit: `Editing`, `Underline`, `Whitespace` in addition to common groups;
+- UiDropdown: nested `Popup/*` domains remain separate from the collapsed control;
+- UiAccordion: outer Accordion groups plus nested `Header/*` and `Body/*` domains.
+
+Do not flatten these domains into generic appearance buckets and do not reintroduce demo-only/manual property-row frameworks.
 
 ## ACCEPTED LABEL REFERENCE
 
-BASE: `155e51eb696537f8ac6a8a3af1629d2278513f66`.
-TASK: `UIDESIGNER-LABEL-REFERENCE-ACCEPTANCE`.
-STATUS: **LABEL REFERENCE ACCEPTED — INTERACTIVE QUADGRADIENT RESELECTION SMOKE DEFERRED.**
+Historical accepted Label checkpoint:
 
-PUBLISHED:
-- `155e51eb696537f8ac6a8a3af1629d2278513f66` — dedicated Label adapter, FillRecipe parity, focused test and coverage note.
+- `155e51eb696537f8ac6a8a3af1629d2278513f66` — dedicated Label adapter / FillRecipe reference.
 - `59cb685219dc94bcad8d8cba82d1acc7528c6836` — final retired model-access migration.
 
-VALIDATION:
-- `LabelThemeAdapterTest` Debug + Release: 242/0.
-- UiDesigner Debug + Release: PASS at the accepted Label checkpoint, zero warnings/errors; Release launch responsive.
-- resource-aware Skin and manual QuadGradient reselect remain intentionally deferred.
+Historical validation at that checkpoint:
 
-Do not treat the accepted Label checkpoint as automatic Windows acceptance of later List/Edit/Dropdown/Accordion commits.
+- `LabelThemeAdapterTest` Debug + Release: 242/0;
+- UiDesigner Debug + Release: PASS at that checkpoint.
 
-## FOUR-CONTROL OVERRIDE ROLLOUT
+This historical result is not current-head acceptance.
 
-BASE: `e47c71d4073c9e0bb0b77bd39a8410b21f54ebf8` — Designer head before the rollout.
-TASK: `UIDESIGNER-LIST-EDIT-DROPDOWN-ACCORDION-OVERRIDE-NORMALIZATION`.
-STATUS: **FOUR ADAPTER IMPLEMENTATION PUBLISHED — CURRENT-HEAD WINDOWS VALIDATION + DEMO CONVERGENCE PENDING.**
+## FOUR-CONTROL NORMALIZED OVERRIDE ROLLOUT
 
-PUBLISHED:
-- `c27f499c8d51ad73037d9a60481bb73d870d38a7` — normalized dedicated UiList + UiBaseEdit adapters, registry seam and focused contract test.
-- `ec02f1cbcc040f70ad55e656b98ec64640142cec` — normalized UiDropdown + UiAccordion adapters and shared legacy-Color FillRecipe bridge.
-- `96bd99810aca9ae5d96afee3f7f059e588e3092c` — mechanical BLITZ translation-unit state-symbol correction in the List adapter; no contract redesign.
+Published production line:
 
-ORIGINAL CROSS-REPOSITORY UI BASE:
-- `Trilec/upp_Ui` `d0579b8753748ca765710f6c29805d2859ddf6aa` — List owning-style renderer authority + focused contract package.
+- `c27f499c8d51ad73037d9a60481bb73d870d38a7` — UiList + UiBaseEdit normalized adapters;
+- `ec02f1cbcc040f70ad55e656b98ec64640142cec` — UiDropdown + UiAccordion normalized adapters;
+- `96bd99810aca9ae5d96afee3f7f059e588e3092c` — BLITZ symbol correction.
 
-CURRENT UI RECOVERY BASE:
+Key retained rules:
+
+- absent overrides inherit the runtime theme;
+- authored overrides alone enter local custom state, except where semantic role resolution requires an explicit resolved style;
+- `None` is explicit authored no-surface, not absence;
+- FillRecipe bridges legacy Color values to Solid recipes;
+- preview and generated C++ start from the same inherited runtime style and apply the same authored values;
+- resource-backed Skin/custom glyph editing remains deferred until Designer has a document-resource resolver shared by preview and codegen.
+
+Do not substitute raw filesystem paths for that deferred resource contract.
+
+## CROSS-REPOSITORY UI STATE
+
+Last inspected `upp_Ui` recovery checkpoint was:
+
 - `Trilec/upp_Ui` `4a380c7071d8f0c641e01474544d648461fcb77d`.
-- Ui has advanced substantially in model notification, observer lifetime, sequential selection remapping and Tree update locality since `d0579b...`.
-- The recovery comparison from `d0579b...` to current Ui shows the relevant List/Dropdown/Tree/Table header changes are model/binding-facing; no proven normalized-adapter style-surface break was found in the inspected slice.
 
-TOUCHED BY THE PUBLISHED ROLLOUT:
-- `UiDesigner/Theme/UiDesignerThemeAdapter.h`
-- `UiDesigner/Theme/UiDesignerNormalizedThemeCommon.h`
-- `UiDesigner/Theme/UiDesignerThemeAdapterRegistry.cpp`
-- `UiDesigner/Theme/UiDesignerListThemeAdapter.cpp`
-- `UiDesigner/Theme/UiDesignerEditThemeAdapter.cpp`
-- `UiDesigner/Theme/UiDesignerDropdownThemeAdapter.cpp`
-- `UiDesigner/Theme/UiDesignerAccordionThemeAdapter.cpp`
-- `UiDesigner/Theme/Theme.upp`
-- `tests/ListEditThemeAdapterTest/`
-- `tests/DropdownAccordionThemeAdapterTest/`
-- `docs/THEME_OVERRIDE_COVERAGE.md`
-- `docs/ACTIVE_WORK.md`
+That repository must be refreshed again before any new cross-repository implementation claim because `upp_Ui/main` may have advanced since the recovery inspection.
 
-IMPLEMENTATION CONTRACT:
-- the legacy theme-adapter implementation remains compiled through the registry wrapper; unaffected adapters continue through the legacy registry;
-- UiList separates viewport chrome from Rows/Layout, Rows/State, Content, Badge and Drag; outer Face states use FillRecipe;
-- UiBaseEdit preserves existing serialized IDs while normalizing General, Face, Frame, Ink, Typography, Content Margin, Editing, Underline, Whitespace, Focus, Shadow and Highlight;
-- UiDropdown preserves the legacy generic IDs while adding the complete collapsed-control and nested Popup/Layout, Face, Frame, Items, Marker, Badge and Drag domains;
-- UiAccordion preserves existing `style_*` IDs while exposing real Header/Face, Header/Frame, Header/Ink, Header/Typography, Header/Content Margin, Header/Chevron, Header/Drag, Body/Face, Body/Frame, Body/Content Margin and Body/Line composition;
-- shared FillRecipe normalization accepts legacy plain Color values for fields promoted from Color to FillRecipe, so existing documents do not degrade to None;
-- generated C++ reconstructs theme-derived bases and applies the same authored values as preview resolution;
-- image-backed Skin and custom glyph/image resources remain deferred until the adapter receives document-resource resolution; no raw-path workaround is allowed.
+At the recovery checkpoint:
 
-CURRENT RECOVERY INSPECTION:
-- `upp_Ui` current demo guide still defines `UiLabelDemo` as the canonical full-demo reference and production `PropertyEditor` as mandatory for modernized full demos;
-- `UiButtonDemo` is now the first new-generation modernization pilot and uses production PropertyEditor models as authoritative authored state;
-- current remote `UiListDemo` remains the older transitional `BuilderDemoSupport + Config + manual rows` ownership-reference generation;
-- no List-specific Gary implementation or validation commit is published on remote `main`, and no List-named remote branch was found during recovery;
-- Gary's reported local List work therefore remains unpublished/unknown and must be reconciled before assigning overlapping List implementation;
-- targeted inspection of `UiDesignerPreview.cpp` found List population using `UiListModel::Clear/Add`, Tree population using `Clear/Set/AddChild`, and Table initialization using `SetSize`; these paths already notify through current public model APIs and do not require `Touch()` merely because the Ui models now expose explicit mutable-access notification.
+- UiButton was the new PropertyEditor demo-modernization pilot, with Windows validation pending;
+- current remote UiListDemo was still the transitional `BuilderDemoSupport + Config + manual rows` generation;
+- newer Ui List/Tree/Table model notification/remap changes did not reveal a proven Designer stale mutable-access path in the inspected preview slice.
 
-VALIDATION:
-- source/static review remains complete for the published normalized-adapter line;
-- no current-head Windows U++ compile/runtime PASS is claimed for `96bd998...` or this documentation-only successor;
-- `tests/ListEditThemeAdapterTest`: require `LIST_EDIT_THEME_ADAPTER_SUMMARY ... failed=0` Debug + Release;
-- `tests/DropdownAccordionThemeAdapterTest`: require `DROPDOWN_ACCORDION_THEME_ADAPTER_SUMMARY ... failed=0` Debug + Release;
-- build UiDesigner Debug + Release after focused suites; duplicate registry symbols, generated-code compile failures or warning regressions are stop conditions;
-- re-run Label only when shared adapter/FillRecipe infrastructure or dependency changes warrant it.
+Gary's previously reported local UiList demo work remains separate until exact published/local evidence is reconciled; do not overwrite or duplicate it blindly.
 
-## DEMO CONVERGENCE
+## CURRENT VALIDATION GATE
 
-Current `upp_Ui` direction supersedes the older instruction to normalize four demos mechanically in one sweep.
+Gary should validate the exact current `main` SHA, without redesigning source.
 
-Canonical full-demo language is:
+1. `tests/ListDataAdapterTest` — Debug + Release
+   - require `LIST_DATA_ADAPTER_SUMMARY checks=8 failed=0`.
+2. `tests/ListEditThemeAdapterTest` — Debug + Release
+   - require its summary with `failed=0`.
+3. `tests/DropdownAccordionThemeAdapterTest` — Debug + Release
+   - require its summary with `failed=0`.
+4. Build UiDesigner — Debug + Release.
+5. Focused GUI smoke:
+   - Light -> Dark -> Light keeps every PropertyEditor pane readable;
+   - Inspector / Theme Overrides / Data / Events & Actions / Theme Studio use a visibly consistent label/value divider;
+   - UiLabel common groups remain canonical;
+   - UiList shows Rows/Layout, Rows/State, Content, Badge and Drag ownership;
+   - UiLineEdit shows Editing / Underline / Whitespace extensions;
+   - UiDropdown preserves nested Popup groups;
+   - UiAccordion preserves Header/* and Body/* nesting;
+   - inherited/local override switching updates Preview;
+   - ordinary property commits update Preview;
+   - generated code follows committed values;
+   - UiList Data Add/Edit/Remove/Move Up/Move Down preserves every authored row.
 
-1. Header;
-2. generous real-control preview;
-3. right rail with Inspector;
-4. Theme Overrides;
-5. optional Data for model/domain-backed controls;
-6. Code.
-
-PropertyEditor models are authored state. A model-backed demo Data page edits the same active production model used by the preview. Do not retain a demo-only Config mirror as final authority and do not introduce a shared replacement demo framework.
-
-For UiList specifically, the published `NormalizedDemo.cpp` is transitional. Do not polish it indefinitely if Gary has already produced a canonical PropertyEditor/Data implementation locally. Recover Gary's exact diff/SHA/evidence first.
+Substantive runtime/model/preview failures stop validation and return to the supervisor. Do not patch around them in the validator pass.
 
 ## DEFERRED RESOURCE CONTRACT
 
-Resource-backed Skin and custom glyph/image fields remain intentionally deferred in normalized Designer adapters.
-
-Designer needs a real document-resource resolver shared by preview and generated code before these fields can be normalized. A standalone demo may own an application-specific provider, but Designer must not substitute raw filesystem-path rows.
+Resource-backed Skin and custom glyph/image fields remain intentionally deferred in normalized Designer adapters. Designer needs a real `UiDesignerDocument::resources` resolver shared by preview and generated code first.
 
 ## NEXT
 
-1. Recover Gary's current UiList demo work/evidence before any overlapping List implementation.
-2. Accept the published `upp_Ui` UiButton modernization on Windows before treating it as the rollout template for further demos.
-3. Run current-head Designer focused Windows acceptance: `ListEditThemeAdapterTest` Debug+Release, `DropdownAccordionThemeAdapterTest` Debug+Release, then UiDesigner Debug+Release and focused GUI Inspector/Theme Override/codegen smoke.
-4. If a current Ui model compatibility failure appears, diagnose the concrete consumer path first. Use notifying setters/mutation APIs, or `Touch()` only after actual mutable `Get(...)` access; do not add duplicate synchronization.
-5. After Button acceptance and Gary reconciliation, migrate model-backed demos incrementally to the canonical PropertyEditor shell with a same-model Data page where useful.
-6. Keep resource-aware Skin deferred until a proper Designer resource-resolution contract exists.
+1. Obtain current-head Windows evidence for the validation gate above.
+2. Supervisor reviews any failures and performs substantive source corrections if needed.
+3. Separately refresh `upp_Ui/main` and reconcile Gary's UiList demo work before overlapping demo implementation.
+4. Accept the UiButton modernization on Windows before using it as the rollout template for additional full demos.
+5. After those gates are green, continue model-backed demo convergence incrementally using production PropertyEditor and same-model Data pages.
