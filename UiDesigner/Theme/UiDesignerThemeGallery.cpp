@@ -26,355 +26,623 @@ void UiDesignerApplyGlobalTheme(const UiDesignerThemeSnapshot& theme)
     UiTheme::Set(UiDesignerResolveThemeContext(theme));
 }
 
-static Color ThemeBuilderReadableInk(Color face)
+static String ThemeRoleName(UiRole role)
 {
-    const int luminance = face.GetR() * 299 + face.GetG() * 587 +
-                          face.GetB() * 114;
-    return luminance >= 150000 ? Color(15, 23, 42) : White();
+    switch(role) {
+    case UiRole::Subtle: return "Subtle";
+    case UiRole::Accent: return "Accent";
+    case UiRole::Alert:  return "Alert";
+    case UiRole::Standard:
+    default:             return "Standard";
+    }
 }
 
-static UiButton::Style ThemeBuilderRoleButtonStyle(UiRole role, Color face)
+// -----------------------------------------------------------------------------
+// Compact working swatch
+
+UiDesignerThemeSwatch::UiDesignerThemeSwatch()
 {
-    UiButton::Style style = UiTheme::ResolveButton(role);
-    const Color ink = ThemeBuilderReadableInk(face);
-    style.metrics.face_enabled = true;
-    style.metrics.frame_enabled = true;
-    for(int state = 0; state < 4; state++) {
-        style.palette.face[state] = UiFill::Solid(face);
-        style.palette.frame[state] = face;
-        style.palette.ink[state] = ink;
-        style.palette.icon[state] = ink;
-    }
-    return style;
+    WantFocus();
+    Tip("Theme palette colour — click to edit the six-colour palette, drag to a colour property");
 }
 
-static UiPanel::Style ThemeBuilderPanelStyle(UiPanelRole role, Color face)
+UiDesignerThemeSwatch& UiDesignerThemeSwatch::SetColor(Color color)
 {
-    UiPanel::Style style = UiTheme::ResolvePanel(role);
-    style.metrics.face_enabled = true;
-    style.metrics.frame_enabled = true;
-    for(int state = 0; state < 4; state++) {
-        style.palette.face[state] = UiFill::Solid(face);
-        style.palette.frame[state] = face;
-    }
-    return style;
+    if(color_ == color)
+        return *this;
+    color_ = color;
+    Tip(HexText() + " — click to edit palette; drag to a colour property; Ctrl+C copies hex");
+    Refresh();
+    return *this;
 }
 
-static UiLabel::Style ThemeBuilderPanelLabelStyle(Color face)
+UiDesignerThemeSwatch& UiDesignerThemeSwatch::SetActive(bool active)
 {
-    UiLabel::Style style = UiTheme::ResolveLabel(UiRole::Standard);
-    const Color ink = ThemeBuilderReadableInk(face);
-    for(int state = 0; state < 4; state++) {
-        style.palette.ink[state] = ink;
-        style.palette.icon[state] = ink;
-    }
-    return style;
+    if(active_ == active)
+        return *this;
+    active_ = active;
+    Refresh();
+    return *this;
 }
+
+String UiDesignerThemeSwatch::HexText() const
+{
+    return Format("#%02X%02X%02X", color_.GetR(), color_.GetG(), color_.GetB());
+}
+
+void UiDesignerThemeSwatch::Paint(Draw& w)
+{
+    Rect r(Point(0, 0), GetSize());
+    w.DrawRect(r, SColorPaper());
+    Rect face = r.Deflated(DPI(2));
+    if(!face.IsEmpty())
+        w.DrawRect(face, color_);
+    DrawFrame(w, r, active_ ? SColorHighlight() : SColorShadow(),
+              active_ ? DPI(2) : DPI(1));
+    if(HasFocus())
+        DrawFrame(w, r.Deflated(DPI(1)), SColorHighlight(), DPI(1));
+}
+
+void UiDesignerThemeSwatch::LeftDown(Point, dword)
+{
+    dragging_ = false;
+    SetFocus();
+}
+
+void UiDesignerThemeSwatch::LeftUp(Point, dword)
+{
+    if(!dragging_)
+        WhenAction();
+    dragging_ = false;
+}
+
+void UiDesignerThemeSwatch::LeftDrag(Point, dword)
+{
+    dragging_ = true;
+    VectorMap<String, ClipData> payload;
+    Append(payload, HexText());
+    DoDragAndDrop(payload, Image(), DND_COPY);
+}
+
+bool UiDesignerThemeSwatch::Key(dword key, int count)
+{
+    if(key == K_CTRL_C) {
+        WriteClipboardText(HexText());
+        return true;
+    }
+    if(key == K_ENTER || key == K_SPACE) {
+        WhenAction();
+        return true;
+    }
+    return Ctrl::Key(key, count);
+}
+
+// -----------------------------------------------------------------------------
+// Palette popup. The full UiColorPicker belongs here temporarily, not in the
+// Theme Builder canvas. It edits one six-colour appearance palette atomically.
+
+class UiDesignerThemePaletteDialog : public TopWindow {
+public:
+    typedef UiDesignerThemePaletteDialog CLASSNAME;
+
+    UiDesignerThemePaletteDialog(bool dark, const UiDesignerThemePalette& palette,
+                                 int active_slot)
+    {
+        Title(dark ? "Dark theme palette" : "Light theme palette");
+        Sizeable().Zoomable();
+        SetRect(0, 0, DPI(760), DPI(600));
+        Add(picker_.SizePos());
+
+        picker_.EnableSessionPersistence(false)
+               .SetSlotCount(UI_DESIGNER_THEME_PALETTE_SIZE)
+               .SetGeneratorCount(UI_DESIGNER_THEME_PALETTE_SIZE)
+               .SetPageMode(UiColorPicker::PAGE_GENERATOR)
+               .SetMediumMode(UiColorPicker::MEDIUM_UI);
+        for(int i = 0; i < UI_DESIGNER_THEME_PALETTE_SIZE; i++) {
+            picker_.SetSlotLabel(i, AsString(i + 1));
+            picker_.SetSlotColor(i, palette.Get(i), false);
+        }
+        picker_.SetActiveSlot(minmax(active_slot, 0,
+                                     UI_DESIGNER_THEME_PALETTE_SIZE - 1));
+        picker_.WhenAccept = [=] { AcceptBreak(IDOK); };
+        picker_.WhenCancel = [=] { RejectBreak(IDCANCEL); };
+    }
+
+    UiDesignerThemePalette GetPalette() const
+    {
+        UiDesignerThemePalette out;
+        for(int i = 0; i < UI_DESIGNER_THEME_PALETTE_SIZE; i++)
+            out.Set(i, picker_.GetSlotColor(i));
+        return out;
+    }
+
+private:
+    UiColorPicker picker_;
+};
+
+// -----------------------------------------------------------------------------
+// Theme Builder toolbar
+
+UiDesignerThemeToolbar::UiDesignerThemeToolbar()
+{
+    BackPaint();
+
+    controls_mode_.SetIcon(ICON_DESIGN_WIDGETS_48())
+                  .SetIconSize(DPI(16), DPI(16))
+                  .SetCheckable().SetChecked(true)
+                  .Tip("Controls preview");
+    containers_mode_.SetIcon(ICON_DESIGN_TAB_GROUP_48())
+                    .SetIconSize(DPI(16), DPI(16))
+                    .SetCheckable()
+                    .Tip("Containers preview");
+
+    panel_role_label_.SetText("Panel Role")
+                     .SetAlign(UiAlign::RIGHT, UiAlign::CENTER);
+    control_role_label_.SetText("Ctrl Role")
+                       .SetAlign(UiAlign::RIGHT, UiAlign::CENTER);
+
+    panel_role_drop_.UseInternalModel().Clear()
+                    .Add("Standard", (int)UiRole::Standard)
+                    .Add("Subtle", (int)UiRole::Subtle)
+                    .Add("Accent", (int)UiRole::Accent)
+                    .Add("Alert", (int)UiRole::Alert);
+    control_role_drop_.UseInternalModel().Clear()
+                      .Add("Standard", (int)UiRole::Standard)
+                      .Add("Subtle", (int)UiRole::Subtle)
+                      .Add("Accent", (int)UiRole::Accent)
+                      .Add("Alert", (int)UiRole::Alert);
+    panel_role_drop_.Select((int)panel_role_);
+    control_role_drop_.Select((int)control_role_);
+
+    appearance_.SetIcon(ICON_ACTION_DARK_MODE_48())
+               .SetIconSize(DPI(16), DPI(16))
+               .SetCheckable()
+               .Tip("Switch Light / Dark preview");
+
+    light_label_.SetText("Light").SetAlign(UiAlign::LEFT, UiAlign::BOTTOM);
+    dark_label_.SetText("Dark").SetAlign(UiAlign::LEFT, UiAlign::BOTTOM);
+
+    Add(controls_mode_);
+    Add(containers_mode_);
+    Add(panel_role_label_);
+    Add(panel_role_drop_);
+    Add(control_role_label_);
+    Add(control_role_drop_);
+    Add(appearance_);
+    Add(light_label_);
+    Add(dark_label_);
+    for(int i = 0; i < UI_DESIGNER_THEME_PALETTE_SIZE; i++) {
+        Add(light_[i]);
+        Add(dark_[i]);
+        const int slot = i;
+        light_[i].WhenAction = [=] { EditPalette(false, slot); };
+        dark_[i].WhenAction = [=] { EditPalette(true, slot); };
+    }
+
+    controls_mode_.WhenAction = [=] { SetPreviewMode("controls"); };
+    containers_mode_.WhenAction = [=] { SetPreviewMode("containers"); };
+    panel_role_drop_.WhenAction = [=] {
+        if(!syncing_)
+            SetPanelRole((UiRole)(int)panel_role_drop_.GetData());
+    };
+    control_role_drop_.WhenAction = [=] {
+        if(!syncing_)
+            SetControlRole((UiRole)(int)control_role_drop_.GetData());
+    };
+    appearance_.WhenAction = [=] { ToggleAppearance(); };
+}
+
+void UiDesignerThemeToolbar::SetThemeDocument(UiDesignerThemeDocument *theme)
+{
+    theme_ = theme;
+    SyncFromTheme();
+}
+
+void UiDesignerThemeToolbar::SetGallery(UiDesignerThemeGallery *gallery)
+{
+    gallery_ = gallery;
+    if(gallery_) {
+        gallery_->SetPreviewMode(preview_mode_);
+        gallery_->SetPanelRole(panel_role_);
+        gallery_->SetControlRole(control_role_);
+    }
+}
+
+void UiDesignerThemeToolbar::SetPreviewMode(const String& mode)
+{
+    preview_mode_ = ToLower(mode) == "containers" ? "containers" : "controls";
+    UpdateModeButtons();
+    if(gallery_)
+        gallery_->SetPreviewMode(preview_mode_);
+    WhenStatus(preview_mode_ == "containers" ? "Theme Builder: Containers"
+                                               : "Theme Builder: Controls");
+}
+
+void UiDesignerThemeToolbar::SetPanelRole(UiRole role)
+{
+    if(!UiIsValid(role))
+        role = UiRole::Standard;
+    panel_role_ = role;
+    if(gallery_)
+        gallery_->SetPanelRole(role);
+    WhenStatus("Panel preview role: " + ThemeRoleName(role));
+}
+
+void UiDesignerThemeToolbar::SetControlRole(UiRole role)
+{
+    if(!UiIsValid(role))
+        role = UiRole::Standard;
+    control_role_ = role;
+    if(gallery_)
+        gallery_->SetControlRole(role);
+    WhenStatus("Control preview role: " + ThemeRoleName(role));
+}
+
+void UiDesignerThemeToolbar::ToggleAppearance()
+{
+    if(!theme_ || syncing_)
+        return;
+    const String next = theme_->GetEffective().mode == "Dark" ? "Light" : "Dark";
+    String error;
+    if(!theme_->Commit("mode", next, "Theme Builder " + next + " preview", error)) {
+        WhenStatus(error);
+        return;
+    }
+    SyncFromTheme();
+    WhenStatus(next + " theme preview");
+}
+
+void UiDesignerThemeToolbar::EditPalette(bool dark, int active_slot)
+{
+    if(!theme_)
+        return;
+
+    UiDesignerThemePaletteDialog dialog(
+        dark, theme_->GetEffective().GetPalette(dark), active_slot);
+    dialog.CenterOwner();
+    if(dialog.Run() != IDOK)
+        return;
+
+    String error;
+    if(!theme_->CommitPalette(dark, dialog.GetPalette(),
+                              String("Edit ") + (dark ? "Dark" : "Light") +
+                                  " six-colour palette",
+                              error)) {
+        WhenStatus(error);
+        return;
+    }
+    SyncFromTheme();
+    WhenStatus(String(dark ? "Dark" : "Light") + " palette updated");
+}
+
+void UiDesignerThemeToolbar::UpdateModeButtons()
+{
+    controls_mode_.SetChecked(preview_mode_ == "controls");
+    containers_mode_.SetChecked(preview_mode_ == "containers");
+    controls_mode_.SetCustomStyle(UiTheme::ResolveToolButton(
+        preview_mode_ == "controls" ? UiRole::Accent : UiRole::Subtle));
+    containers_mode_.SetCustomStyle(UiTheme::ResolveToolButton(
+        preview_mode_ == "containers" ? UiRole::Accent : UiRole::Subtle));
+}
+
+void UiDesignerThemeToolbar::SyncFromTheme()
+{
+    if(!theme_)
+        return;
+    syncing_ = true;
+    const UiDesignerThemeSnapshot& value = theme_->GetEffective();
+    appearance_.SetChecked(value.mode == "Dark");
+    appearance_.Tip(value.mode == "Dark" ? "Switch to Light preview"
+                                          : "Switch to Dark preview");
+    for(int i = 0; i < UI_DESIGNER_THEME_PALETTE_SIZE; i++) {
+        light_[i].SetColor(value.light_palette.Get(i));
+        dark_[i].SetColor(value.dark_palette.Get(i));
+        light_[i].SetActive(false);
+        dark_[i].SetActive(false);
+    }
+    syncing_ = false;
+    Refresh();
+}
+
+void UiDesignerThemeToolbar::ApplyTheme(const UiDesignerThemeSnapshot& theme)
+{
+    UiDesignerApplyGlobalTheme(theme);
+    UpdateModeButtons();
+    appearance_.SetCustomStyle(UiTheme::ResolveToolButton(UiRole::Accent));
+    panel_role_label_.SetCustomStyle(UiTheme::ResolveLabel(UiRole::Subtle));
+    control_role_label_.SetCustomStyle(UiTheme::ResolveLabel(UiRole::Subtle));
+    light_label_.SetCustomStyle(UiTheme::ResolveLabel(UiRole::Subtle));
+    dark_label_.SetCustomStyle(UiTheme::ResolveLabel(UiRole::Subtle));
+    panel_role_drop_.SetCustomStyle(UiTheme::ResolveDropdown(UiRole::Standard));
+    control_role_drop_.SetCustomStyle(UiTheme::ResolveDropdown(UiRole::Standard));
+    SyncFromTheme();
+    Refresh();
+}
+
+void UiDesignerThemeToolbar::Layout()
+{
+    const int h = GetSize().cy;
+    const int gap = DPI(6);
+    const int small_gap = DPI(3);
+    const int control_h = min(DPI(30), max(0, h - DPI(8)));
+    const int y = max(0, (h - control_h) / 2);
+    int x = DPI(4);
+
+    controls_mode_.SetRect(x, y, DPI(30), control_h); x += DPI(30) + small_gap;
+    containers_mode_.SetRect(x, y, DPI(30), control_h); x += DPI(30) + gap;
+
+    panel_role_label_.SetRect(x, y, DPI(62), control_h); x += DPI(62) + DPI(4);
+    panel_role_drop_.SetRect(x, y, DPI(118), control_h); x += DPI(118) + gap;
+
+    control_role_label_.SetRect(x, y, DPI(54), control_h); x += DPI(54) + DPI(4);
+    control_role_drop_.SetRect(x, y, DPI(118), control_h); x += DPI(118) + gap;
+
+    appearance_.SetRect(x, y, DPI(34), control_h); x += DPI(34) + DPI(10);
+
+    const int available = max(0, GetSize().cx - x - DPI(4));
+    const int palette_gap = DPI(10);
+    const int group_width = max(0, (available - palette_gap) / 2);
+    const int swatch = min(DPI(24), max(DPI(14),
+        (group_width - small_gap * (UI_DESIGNER_THEME_PALETTE_SIZE - 1)) /
+            UI_DESIGNER_THEME_PALETTE_SIZE));
+    const int swatch_y = max(DPI(17), h - swatch - DPI(3));
+    const int label_h = min(DPI(16), swatch_y);
+
+    light_label_.SetRect(x, 0, group_width, label_h);
+    for(int i = 0; i < UI_DESIGNER_THEME_PALETTE_SIZE; i++)
+        light_[i].SetRect(x + i * (swatch + small_gap), swatch_y, swatch, swatch);
+
+    x += group_width + palette_gap;
+    dark_label_.SetRect(x, 0, group_width, label_h);
+    for(int i = 0; i < UI_DESIGNER_THEME_PALETTE_SIZE; i++)
+        dark_[i].SetRect(x + i * (swatch + small_gap), swatch_y, swatch, swatch);
+}
+
+void UiDesignerThemeToolbar::Paint(Draw& w)
+{
+    w.DrawRect(GetSize(), SColorPaper());
+    w.DrawLine(0, GetSize().cy - 1, GetSize().cx, GetSize().cy - 1,
+               DPI(1), SColorShadow());
+}
+
+// -----------------------------------------------------------------------------
+// Matrix-driven preview
 
 UiDesignerThemeGallery::UiDesignerThemeGallery()
 {
     BackPaint();
-    BuildAuthoredControls();
+    BuildPreviewMatrices();
+    BuildControlSamples();
+    BuildContainerSamples();
+    ApplyThemeStyles();
 }
 
-void UiDesignerThemeGallery::Put(Ctrl& ctrl, int x, int y, int cx, int cy)
+void UiDesignerThemeGallery::BuildPreviewMatrices()
 {
-    ctrl.SetRect(x, y, max(0, cx), max(0, cy));
+    Add(preview_stack_);
+    preview_stack_.Add(controls_matrix_, "controls");
+    preview_stack_.Add(containers_matrix_, "containers");
+    preview_stack_.SetActiveKey("controls");
+
+    controls_matrix_.SetGridSize(3, 1).SetGap(DPI(10)).SetInset(DPI(0));
+    containers_matrix_.SetGridSize(3, 1).SetGap(DPI(10)).SetInset(DPI(0));
+
+    for(int i = 0; i < 3; i++) {
+        control_columns_[i].SetDirection(UiDirection::V)
+                           .SetGap(DPI(10))
+                           .SetInset(DPI(0))
+                           .SetAlignItems(UiCrossAlign::Stretch);
+        container_columns_[i].SetDirection(UiDirection::V)
+                             .SetGap(DPI(10))
+                             .SetInset(DPI(0))
+                             .SetAlignItems(UiCrossAlign::Stretch);
+        controls_matrix_.AddGrid(control_columns_[i], 0, i, true, true);
+        containers_matrix_.AddGrid(container_columns_[i], 0, i, true, true);
+    }
 }
 
-void UiDesignerThemeGallery::BuildAuthoredControls()
+void UiDesignerThemeGallery::BuildControlSamples()
 {
-    title_card_.SetTitle("Theme Builder")
-               .SetSubTitle("Engineer a Light/Dark palette, assign semantic roles, then inspect representative controls below.")
-               .SetContentInset(DPI(7))
-               .SetMediaGap(DPI(10))
-               .SetMediaReserve(DPI(24))
-               .SetMediaMin(DPI(16))
-               .ShowTitleLine(true)
-               .ShowCardLine(false);
-    title_card_.SetMedia(ICON_BRAND_NEWLOGO_V5_48(),
-                         Size(DPI(29), DPI(29)));
+    controls_reference_label_.SetText("Plain panel hosting the selected control role")
+                             .SetAlign(UiAlign::LEFT, UiAlign::CENTER);
+    controls_reference_button_.SetText("Reference button");
+    controls_reference_panel_.Add(controls_reference_label_);
+    controls_reference_panel_.Add(controls_reference_button_);
 
-    palette_group_.SetTitle("THEME PALETTE")
-                  .SetSubTitle("Six authored colours per appearance mode")
-                  .SetLine(false).SetHeaderBand(false);
-    palette_mode_.UseInternalModel().Clear()
-                 .Add("Light", "Light")
-                 .Add("Dark", "Dark");
-    palette_mode_.Select(0);
-    palette_help_.SetText(
-        "Use Generator, Palettes or the User Stash, then drag colours into the six primary theme slots. "
-        "The Light and Dark palettes are stored independently in the theme document.")
-        .SetAlign(UiAlign::LEFT, UiAlign::CENTER);
-    palette_editor_.SetSlotCount(UI_DESIGNER_THEME_PALETTE_SIZE)
-                   .SetGeneratorCount(UI_DESIGNER_THEME_PALETTE_SIZE)
-                   .SetPageMode(UiColorPicker::PAGE_GENERATOR)
-                   .SetMediumMode(UiColorPicker::MEDIUM_UI);
-    for(int i = 0; i < UI_DESIGNER_THEME_PALETTE_SIZE; i++)
-        palette_editor_.SetSlotLabel(i, AsString(i + 1));
-    palette_mode_.WhenAction = [=] {
-        edit_dark_palette_ = AsString(palette_mode_.GetData()) == "Dark";
-        SyncPaletteEditor();
-    };
-    palette_editor_.WhenSlotChanged = [=](int slot) {
-        CommitPaletteSlot(slot);
-    };
-
-    control_roles_group_.SetTitle("CONTROL ROLES")
-                        .SetSubTitle("Semantic control roles point to palette slots")
-                        .SetLine(false).SetHeaderBand(false);
-    role_standard_.SetText("Standard").Tip("Standard control role");
-    role_subtle_.SetText("Subtle").Tip("Subtle control role");
-    role_accent_.SetText("Accent").Tip("Accent control role");
-    role_alert_.SetText("Alert").Tip("Alert control role");
-
-    panel_roles_group_.SetTitle("PANEL ROLES")
-                      .SetSubTitle("Surface roles are independent from control roles")
-                      .SetLine(false).SetHeaderBand(false);
-    panel_surface_label_.SetAlign(UiAlign::CENTER, UiAlign::CENTER);
-    panel_subtle_label_.SetAlign(UiAlign::CENTER, UiAlign::CENTER);
-    panel_strong_label_.SetAlign(UiAlign::CENTER, UiAlign::CENTER);
-    panel_surface_.Add(panel_surface_label_);
-    panel_subtle_.Add(panel_subtle_label_);
-    panel_strong_.Add(panel_strong_label_);
-
-    toggle_group_.SetTitle("TOGGLE THEMES").SetLine(false).SetHeaderBand(false);
-    toggle_label_a_.SetText("First toggle theme")
-                   .SetIcon(ICON_DESIGN_CIRCLE_CIRCLE_48(),
-                            UiIconRenderMode::MonoTint)
-                   .SetIconSize(DPI(12), DPI(12));
-    toggle_label_b_.SetText("Second toggle theme")
-                   .SetIcon(ICON_DESIGN_CIRCLE_CIRCLE_48(),
-                            UiIconRenderMode::MonoTint)
-                   .SetIconSize(DPI(12), DPI(12));
-    toggle_a_.SetOn(true);
-    toggle_b_.SetOn(false);
-
-    buttons_group_.SetTitle("BUTTON THEMES").SetSubTitle("Representative button family")
-                  .SetLine(false).SetHeaderBand(false);
+    buttons_group_.SetTitle("BUTTONS")
+                  .SetSubTitle("Button family on the selected panel role");
     button_.SetText("Button");
-    tool_button_.SetIcon(ICON_DESIGN_SETTINGS_48()).SetIconSize(DPI(20), DPI(20));
-    split_button_.SetText("Save").SetSplitWidth(DPI(30))
-                 .Add("Recent A", "a").Add("Recent B", "b").Add("Recent C", "c");
+    tool_button_.SetIcon(ICON_DESIGN_SETTINGS_48()).SetIconSize(DPI(18), DPI(18));
+    split_button_.SetText("Save").SetSplitWidth(DPI(28))
+                 .Add("Save", "save").Add("Save As", "save_as");
     breadcrumbs_.AddCrumb("Home", "0");
-    breadcrumbs_.AddCrumb("Library", "1");
-    breadcrumbs_.AddCrumb("Current", "2");
+    breadcrumbs_.AddCrumb("Theme", "1");
+    breadcrumbs_.AddCrumb("Control", "2");
     breadcrumbs_.SetCurrentIndex(2);
-    breadcrumbs_.SetDivider("/");
-    breadcrumbs_.SetPathIcon(ICON_DESIGN_HOME_48(), UiAlign::LEFT,
-                             Size(DPI(16), DPI(16)));
-
-    numbers_group_.SetTitle("NUMERIC AND SLIDERS").SetLine(false).SetHeaderBand(false);
-    int_edit_.MinMax(0, 100).Step(1).ShowSpin(true);
-    int_edit_.SetValue(42);
-    float_edit_.MinMax(0, 100).Step(0.1).Precision(2).ShowSpin(true);
-    float_edit_.SetValue(3.14);
-    slider_.SetRange(0, 100).SetValue(50);
-    progress_.Percent(true).Set(60, 100);
-
-    security_group_.SetTitle("MASK AND PASSWORD").SetLine(false).SetHeaderBand(false);
-    mask_edit_.SetMask("##/##/####", '_');
-    mask_edit_.SetPlaceholder("Masked value");
-    password_edit_.SetTextUtf8("Password");
-    password_edit_.SetPlaceholder("Password");
-    password_edit_.SetPasswordChar(8226);
-    password_edit_.EnableVisibilityIcon(true);
-
-    document_group_.SetTitle("DOCUMENT").SetLine(false).SetHeaderBand(false);
-    document_.SetText("UiDoc sample");
-
-    data_group_.SetTitle("TAB, TREE, TABLE, LIST AND ACCORDION")
-               .SetLine(false).SetHeaderBand(false);
-    tab_.SetVisual(UITAB_UNDERLINE).SetPlacement(UiAlign::TOP)
-        .EnableCloseButtons(false).EnableDragHandles(false);
-    tab_.Add(tab_page_a_, "First");
-    tab_.Add(tab_page_b_, "Second");
-    tab_.SetActiveTab(0);
-    tree_.Model().AddChild(
-        tree_.Model().Root(), UiModelItem("Workspace", "workspace"));
-    tree_.ShowConnectorLines(true);
-    table_.UseInternalModel();
-    table_.Model().SetSize(4, 2);
-    list_.Model().Add(UiModelItem("First", 1));
-    list_.Model().Add(UiModelItem("Second", 2));
-    accordion_.SetSingleOpen(false).SetEnforceOne(false)
-              .ShowChevron(true).SetAnimation(true, 120, 0);
-    const int accordion_first = accordion_.AddSection("First", true);
-    const int accordion_second = accordion_.AddSection("Second", false);
-    accordion_.GetSectionContent(accordion_first).Add(accordion_a_.SizePos());
-    accordion_.GetSectionContent(accordion_second).Add(accordion_b_.SizePos());
-
-    input_group_.SetTitle("INPUTS AND ADVANCED EDITORS")
-                .SetLine(false).SetHeaderBand(false);
-    line_edit_.SetData("Line edit");
-    multi_edit_.SetData("Multiline\ncontent");
-    dropdown_.UseInternalModel().Clear()
-             .Add("First", 1).Add("Second", 2).Add("Third", 3);
-    dropdown_.Select(0);
-    check_.SetText("Check box").SetData(true);
-    radio_.SetText("Radio button").SetData(false);
-    slider_edit_.SetRange(0, 100).SetValue(50);
-
-    Add(title_card_);
-
-    Add(palette_group_);
-    palette_group_.Add(palette_mode_);
-    palette_group_.Add(palette_help_);
-    palette_group_.Add(palette_editor_);
-
-    Add(control_roles_group_);
-    control_roles_group_.Add(role_standard_);
-    control_roles_group_.Add(role_subtle_);
-    control_roles_group_.Add(role_accent_);
-    control_roles_group_.Add(role_alert_);
-
-    Add(panel_roles_group_);
-    panel_roles_group_.Add(panel_surface_);
-    panel_roles_group_.Add(panel_subtle_);
-    panel_roles_group_.Add(panel_strong_);
-
-    Add(toggle_group_);
-    toggle_group_.Add(toggle_label_a_);
-    toggle_group_.Add(toggle_label_b_);
-    toggle_group_.Add(toggle_a_);
-    toggle_group_.Add(toggle_b_);
-
-    Add(buttons_group_);
     buttons_group_.Add(button_);
     buttons_group_.Add(tool_button_);
     buttons_group_.Add(split_button_);
     buttons_group_.Add(breadcrumbs_);
 
-    Add(numbers_group_);
+    choices_group_.SetTitle("CHOICES")
+                  .SetSubTitle("Selection and toggle controls");
+    check_.SetText("Check box").SetData(true);
+    radio_.SetText("Radio button").SetData(true);
+    toggle_.SetOn(true);
+    dropdown_.UseInternalModel().Clear()
+             .Add("First choice", 1).Add("Second choice", 2).Add("Third choice", 3);
+    dropdown_.Select(0);
+    choices_group_.Add(check_);
+    choices_group_.Add(radio_);
+    choices_group_.Add(toggle_);
+    choices_group_.Add(dropdown_);
+
+    numbers_group_.SetTitle("NUMERIC & SLIDERS")
+                  .SetSubTitle("Dense numeric controls");
+    int_edit_.MinMax(0, 100).Step(1).ShowSpin(true).SetValue(42);
+    float_edit_.MinMax(0, 100).Step(0.1).Precision(2).ShowSpin(true).SetValue(3.14);
+    slider_.SetRange(0, 100).SetValue(56);
+    progress_.Percent(true).Set(68, 100);
     numbers_group_.Add(int_edit_);
     numbers_group_.Add(float_edit_);
     numbers_group_.Add(slider_);
     numbers_group_.Add(progress_);
 
-    Add(security_group_);
-    security_group_.Add(mask_edit_);
-    security_group_.Add(password_edit_);
+    inputs_group_.SetTitle("INPUTS")
+                 .SetSubTitle("Text and compound editors");
+    line_edit_.SetData("Line edit");
+    multi_edit_.SetData("Multiline\ncontent");
+    slider_edit_.SetRange(0, 100).SetValue(38);
+    inputs_group_.Add(line_edit_);
+    inputs_group_.Add(multi_edit_);
+    inputs_group_.Add(slider_edit_);
 
-    Add(document_group_);
-    document_group_.Add(document_);
-
-    Add(data_group_);
-    data_group_.Add(tab_);
+    data_group_.SetTitle("DATA")
+               .SetSubTitle("List, tree and table");
+    list_.Model().Add(UiModelItem("First", 1));
+    list_.Model().Add(UiModelItem("Second", 2));
+    tree_.Model().AddChild(tree_.Model().Root(), UiModelItem("Workspace", "workspace"));
+    tree_.Model().AddChild(tree_.Model().Root(), UiModelItem("Assets", "assets"));
+    table_.UseInternalModel();
+    table_.Model().SetSize(4, 2);
+    data_group_.Add(list_);
     data_group_.Add(tree_);
     data_group_.Add(table_);
-    data_group_.Add(list_);
-    data_group_.Add(accordion_);
 
-    Add(input_group_);
-    input_group_.Add(line_edit_);
-    input_group_.Add(multi_edit_);
-    input_group_.Add(dropdown_);
-    input_group_.Add(check_);
-    input_group_.Add(radio_);
-    input_group_.Add(color_);
-    input_group_.Add(slider_edit_);
-    input_group_.Add(curve_);
+    navigation_group_.SetTitle("NAVIGATION")
+                     .SetSubTitle("Tabs and accordion");
+    tab_.SetVisual(UITAB_UNDERLINE).SetPlacement(UiAlign::TOP)
+        .EnableCloseButtons(false).EnableDragHandles(false);
+    tab_.Add(tab_page_a_, "First");
+    tab_.Add(tab_page_b_, "Second");
+    tab_.SetActiveTab(0);
+    accordion_.SetSingleOpen(false).SetEnforceOne(false)
+              .ShowChevron(true).SetAnimation(true, 120, 0);
+    const int first = accordion_.AddSection("First", true);
+    const int second = accordion_.AddSection("Second", false);
+    accordion_.GetSectionContent(first).Add(accordion_a_.SizePos());
+    accordion_.GetSectionContent(second).Add(accordion_b_.SizePos());
+    navigation_group_.Add(tab_);
+    navigation_group_.Add(accordion_);
+
+    feedback_group_.SetTitle("FEEDBACK")
+                   .SetSubTitle("Status and progress");
+    feedback_label_.SetText("Ready to preview the selected role")
+                   .SetAlign(UiAlign::LEFT, UiAlign::CENTER);
+    feedback_progress_.Percent(true).Set(72, 100);
+    feedback_group_.Add(feedback_label_);
+    feedback_group_.Add(feedback_progress_);
+
+    control_columns_[0].Add(controls_reference_panel_).Fixed(DPI(108));
+    control_columns_[0].Add(buttons_group_).Fixed(DPI(164));
+    control_columns_[0].Add(choices_group_).Fixed(DPI(178));
+
+    control_columns_[1].Add(numbers_group_).Fixed(DPI(178));
+    control_columns_[1].Add(inputs_group_).Fixed(DPI(226));
+    control_columns_[1].Add(feedback_group_).Fixed(DPI(126));
+
+    control_columns_[2].Add(data_group_).Fixed(DPI(252));
+    control_columns_[2].Add(navigation_group_).Fixed(DPI(292));
+}
+
+void UiDesignerThemeGallery::BuildContainerSamples()
+{
+    container_plain_label_.SetText("Plain panel · no representative controls")
+                          .SetAlign(UiAlign::LEFT, UiAlign::CENTER);
+    container_plain_panel_.Add(container_plain_label_);
+
+    container_controls_label_.SetText("Plain panel · with controls")
+                             .SetAlign(UiAlign::LEFT, UiAlign::CENTER);
+    container_button_.SetText("Button");
+    container_check_.SetText("Check box").SetData(true);
+    container_controls_panel_.Add(container_controls_label_);
+    container_controls_panel_.Add(container_button_);
+    container_controls_panel_.Add(container_check_);
+
+    container_plain_group_.SetTitle("GROUP PANEL · QUIET")
+                          .SetSubTitle("Container chrome without working controls");
+    container_group_label_.SetText("The group title remains part of the container theme")
+                          .SetAlign(UiAlign::LEFT, UiAlign::CENTER);
+    container_plain_group_.Add(container_group_label_);
+
+    container_edit_group_.SetTitle("GROUP PANEL · FORM")
+                         .SetSubTitle("Edit + action on the selected panel role");
+    container_edit_.SetData("Editable value");
+    container_edit_button_.SetText("Apply");
+    container_edit_group_.Add(container_edit_);
+    container_edit_group_.Add(container_edit_button_);
+
+    container_numeric_label_.SetText("Plain panel · numeric content")
+                            .SetAlign(UiAlign::LEFT, UiAlign::CENTER);
+    container_slider_.SetRange(0, 100).SetValue(61);
+    container_int_.MinMax(0, 100).SetValue(61);
+    container_numeric_panel_.Add(container_numeric_label_);
+    container_numeric_panel_.Add(container_slider_);
+    container_numeric_panel_.Add(container_int_);
+
+    container_choice_group_.SetTitle("GROUP PANEL · CHOICES")
+                           .SetSubTitle("Dropdown + toggle for contrast checking");
+    container_dropdown_.UseInternalModel().Clear()
+                       .Add("Primary", 1).Add("Secondary", 2);
+    container_dropdown_.Select(0);
+    container_toggle_.SetOn(true);
+    container_choice_group_.Add(container_dropdown_);
+    container_choice_group_.Add(container_toggle_);
+
+    container_columns_[0].Add(container_plain_panel_).Fixed(DPI(154));
+    container_columns_[0].Add(container_controls_panel_).Fixed(DPI(196));
+    container_columns_[1].Add(container_plain_group_).Fixed(DPI(176));
+    container_columns_[1].Add(container_edit_group_).Fixed(DPI(196));
+    container_columns_[2].Add(container_numeric_panel_).Fixed(DPI(196));
+    container_columns_[2].Add(container_choice_group_).Fixed(DPI(196));
 }
 
 void UiDesignerThemeGallery::SetCatalog(const UiDesignerCatalog *catalog)
 {
     catalog_ = catalog;
-    RebuildInventory();
 }
 
-void UiDesignerThemeGallery::SetThemeDocument(
-    UiDesignerThemeDocument *theme)
+void UiDesignerThemeGallery::SetThemeDocument(UiDesignerThemeDocument *theme)
 {
-    const bool changed = theme_ != theme;
     theme_ = theme;
-    if(changed && theme_) {
-        edit_dark_palette_ = theme_->GetEffective().UsesDarkPalette();
-        palette_mode_.Select(edit_dark_palette_ ? 1 : 0);
-    }
-    SyncPaletteEditor();
     ApplyThemeStyles();
     Refresh();
 }
 
-void UiDesignerThemeGallery::SetFilter(const String& filter)
+void UiDesignerThemeGallery::SetPreviewMode(const String& mode)
 {
-    filter_ = ToLower(filter);
-    RebuildInventory();
-}
-
-void UiDesignerThemeGallery::SyncPaletteEditor()
-{
-    if(!theme_ || palette_syncing_)
+    const String next = ToLower(mode) == "containers" ? "containers" : "controls";
+    if(preview_mode_ == next)
         return;
-    palette_syncing_ = true;
-    const UiDesignerThemePalette& palette =
-        theme_->GetEffective().GetPalette(edit_dark_palette_);
-    for(int i = 0; i < UI_DESIGNER_THEME_PALETTE_SIZE; i++)
-        palette_editor_.SetSlotColor(i, palette.Get(i), false);
-    palette_syncing_ = false;
-}
-
-void UiDesignerThemeGallery::CommitPaletteSlot(int slot)
-{
-    if(!theme_ || palette_syncing_ || slot < 0 ||
-       slot >= UI_DESIGNER_THEME_PALETTE_SIZE)
-        return;
-    const String property = String("palette.") +
-        (edit_dark_palette_ ? "dark." : "light.") + AsString(slot);
-    String error;
-    if(!theme_->Commit(property, palette_editor_.GetSlotColor(slot),
-                       String(edit_dark_palette_ ? "Set Dark palette "
-                                                : "Set Light palette ") +
-                           AsString(slot + 1), error)) {
-        SyncPaletteEditor();
-        return;
-    }
-    ApplyThemeStyles();
-}
-
-void UiDesignerThemeGallery::RebuildInventory()
-{
-    for(Ctrl& ctrl : inventory_controls_)
-        ctrl.Remove();
-    for(UiLabel& label : inventory_titles_)
-        label.Remove();
-    for(UiGroupPanel& tile : inventory_tiles_)
-        tile.Remove();
-
-    inventory_controls_.Clear();
-    inventory_titles_.Clear();
-    inventory_tiles_.Clear();
-
-    if(!catalog_)
-        return;
-
-    for(const UiDesignerControlSpec& spec : catalog_->GetControls()) {
-        if(spec.stock_upp)
-            continue;
-        if(filter_ == "inputs" && spec.category != "Ui Controls")
-            continue;
-        if(filter_ == "containers" &&
-           spec.category != "Containers" &&
-           spec.category != "Layouts")
-            continue;
-
-        UiGroupPanel& tile = inventory_tiles_.Add();
-        tile.SetTitle(spec.display_name).SetLine(false).SetHeaderBand(false);
-        Add(tile);
-
-        UiLabel& title = inventory_titles_.Add();
-        title.SetText(spec.type_id);
-        tile.Add(title);
-
-        One<Ctrl> created = UiDesignerPreviewFactory::Create(spec);
-        if(created) {
-            UiDesignerPreviewFactory::Initialize(*created, spec);
-            Ctrl& control = inventory_controls_.Add(created.Detach());
-            tile.Add(control);
-        }
-    }
+    preview_mode_ = next;
+    preview_stack_.SetActiveKey(preview_mode_);
     Layout();
     Refresh();
+}
+
+void UiDesignerThemeGallery::SetPanelRole(UiRole role)
+{
+    if(!UiIsValid(role))
+        role = UiRole::Standard;
+    if(panel_role_ == role)
+        return;
+    panel_role_ = role;
+    ApplyThemeStyles();
+}
+
+void UiDesignerThemeGallery::SetControlRole(UiRole role)
+{
+    if(!UiIsValid(role))
+        role = UiRole::Standard;
+    if(control_role_ == role)
+        return;
+    control_role_ = role;
+    ApplyThemeStyles();
+}
+
+void UiDesignerThemeGallery::RefreshTheme()
+{
+    ApplyThemeStyles();
 }
 
 void UiDesignerThemeGallery::ApplyThemeStyles()
@@ -382,152 +650,150 @@ void UiDesignerThemeGallery::ApplyThemeStyles()
     const UiDesignerThemeSnapshot effective = theme_
         ? theme_->GetEffective() : UiDesignerThemeSnapshot();
     UiDesignerApplyGlobalTheme(effective);
-    SyncPaletteEditor();
 
-    const UiDesignerThemePalette& palette =
-        effective.GetPalette(effective.UsesDarkPalette());
+    const UiPanel::Style panel_style = UiTheme::ResolvePanel(panel_role_);
+    controls_reference_panel_.SetCustomStyle(panel_style);
+    container_plain_panel_.SetCustomStyle(panel_style);
+    container_controls_panel_.SetCustomStyle(panel_style);
+    container_numeric_panel_.SetCustomStyle(panel_style);
 
-    role_standard_.SetText("Standard · P" +
-                           AsString(effective.roles.control_standard + 1));
-    role_subtle_.SetText("Subtle · P" +
-                         AsString(effective.roles.control_subtle + 1));
-    role_accent_.SetText("Accent · P" +
-                         AsString(effective.roles.control_accent + 1));
-    role_alert_.SetText("Alert · P" +
-                        AsString(effective.roles.control_alert + 1));
+    const UiGroupPanel::Style group_style = UiTheme::ResolveGroupPanel(panel_role_);
+    buttons_group_.SetCustomStyle(group_style);
+    choices_group_.SetCustomStyle(group_style);
+    numbers_group_.SetCustomStyle(group_style);
+    inputs_group_.SetCustomStyle(group_style);
+    data_group_.SetCustomStyle(group_style);
+    navigation_group_.SetCustomStyle(group_style);
+    feedback_group_.SetCustomStyle(group_style);
+    container_plain_group_.SetCustomStyle(group_style);
+    container_edit_group_.SetCustomStyle(group_style);
+    container_choice_group_.SetCustomStyle(group_style);
 
-    role_standard_.SetCustomStyle(ThemeBuilderRoleButtonStyle(
-        UiRole::Standard, palette.Get(effective.roles.control_standard)));
-    role_subtle_.SetCustomStyle(ThemeBuilderRoleButtonStyle(
-        UiRole::Subtle, palette.Get(effective.roles.control_subtle)));
-    role_accent_.SetCustomStyle(ThemeBuilderRoleButtonStyle(
-        UiRole::Accent, palette.Get(effective.roles.control_accent)));
-    role_alert_.SetCustomStyle(ThemeBuilderRoleButtonStyle(
-        UiRole::Alert, palette.Get(effective.roles.control_alert)));
+    controls_reference_label_.SetCustomStyle(UiTheme::ResolveLabel(UiRole::Standard));
+    controls_reference_button_.SetCustomStyle(UiTheme::ResolveButton(control_role_));
+    button_.SetCustomStyle(UiTheme::ResolveButton(control_role_));
+    tool_button_.SetCustomStyle(UiTheme::ResolveToolButton(control_role_));
+    split_button_.SetCustomStyle(UiTheme::ResolveButton(control_role_));
+    check_.SetCustomStyle(UiTheme::ResolveCheckBox(control_role_));
+    radio_.SetCustomStyle(UiTheme::ResolveRadioButton(control_role_));
+    toggle_.SetCustomStyle(UiTheme::ResolveToggle(control_role_));
+    dropdown_.SetCustomStyle(UiTheme::ResolveDropdown(control_role_));
+    int_edit_.SetCustomStyle(UiTheme::ResolveEdit(control_role_));
+    float_edit_.SetCustomStyle(UiTheme::ResolveEdit(control_role_));
+    slider_.SetCustomStyle(UiTheme::ResolveSlider(control_role_));
+    progress_.SetCustomStyle(UiTheme::ResolveProgressBar(control_role_));
+    line_edit_.SetCustomStyle(UiTheme::ResolveEdit(control_role_));
+    multi_edit_.SetCustomStyle(UiTheme::ResolveEdit(control_role_));
+    tab_.SetCustomStyle(UiTheme::ResolveTab(control_role_, UITAB_UNDERLINE));
+    feedback_label_.SetCustomStyle(UiTheme::ResolveLabel(control_role_));
+    feedback_progress_.SetCustomStyle(UiTheme::ResolveProgressBar(control_role_));
 
-    const Color surface = palette.Get(effective.roles.panel_surface);
-    const Color subtle = palette.Get(effective.roles.panel_subtle);
-    const Color strong = palette.Get(effective.roles.panel_strong);
-    panel_surface_.SetCustomStyle(
-        ThemeBuilderPanelStyle(UiPanelRole::Surface, surface));
-    panel_subtle_.SetCustomStyle(
-        ThemeBuilderPanelStyle(UiPanelRole::Subtle, subtle));
-    panel_strong_.SetCustomStyle(
-        ThemeBuilderPanelStyle(UiPanelRole::Strong, strong));
-    panel_surface_label_.SetCustomStyle(ThemeBuilderPanelLabelStyle(surface));
-    panel_subtle_label_.SetCustomStyle(ThemeBuilderPanelLabelStyle(subtle));
-    panel_strong_label_.SetCustomStyle(ThemeBuilderPanelLabelStyle(strong));
-    panel_surface_label_.SetText("Surface · P" +
-                                 AsString(effective.roles.panel_surface + 1));
-    panel_subtle_label_.SetText("Subtle · P" +
-                                AsString(effective.roles.panel_subtle + 1));
-    panel_strong_label_.SetText("Strong · P" +
-                                AsString(effective.roles.panel_strong + 1));
+    container_plain_label_.SetCustomStyle(UiTheme::ResolveLabel(UiRole::Standard));
+    container_controls_label_.SetCustomStyle(UiTheme::ResolveLabel(UiRole::Standard));
+    container_numeric_label_.SetCustomStyle(UiTheme::ResolveLabel(UiRole::Standard));
+    container_group_label_.SetCustomStyle(UiTheme::ResolveLabel(UiRole::Standard));
+    container_button_.SetCustomStyle(UiTheme::ResolveButton(control_role_));
+    container_check_.SetCustomStyle(UiTheme::ResolveCheckBox(control_role_));
+    container_edit_.SetCustomStyle(UiTheme::ResolveEdit(control_role_));
+    container_edit_button_.SetCustomStyle(UiTheme::ResolveButton(control_role_));
+    container_slider_.SetCustomStyle(UiTheme::ResolveSlider(control_role_));
+    container_int_.SetCustomStyle(UiTheme::ResolveEdit(control_role_));
+    container_dropdown_.SetCustomStyle(UiTheme::ResolveDropdown(control_role_));
+    container_toggle_.SetCustomStyle(UiTheme::ResolveToggle(control_role_));
 
-    progress_.SetCustomStyle(UiTheme::ResolveProgressBar(UiRole::Accent));
+    Layout();
     Refresh();
+}
+
+void UiDesignerThemeGallery::LayoutControlSamples()
+{
+    const int inset = DPI(12);
+
+    int w = controls_reference_panel_.GetSize().cx;
+    controls_reference_label_.SetRect(inset, DPI(10), max(0, w - inset * 2), DPI(28));
+    controls_reference_button_.SetRect(inset, DPI(50), max(DPI(100), w - inset * 2), DPI(32));
+
+    w = buttons_group_.GetSize().cx;
+    button_.SetRect(inset, DPI(48), DPI(92), DPI(32));
+    tool_button_.SetRect(inset + DPI(100), DPI(48), DPI(42), DPI(32));
+    split_button_.SetRect(inset + DPI(150), DPI(48), max(DPI(94), w - DPI(162)), DPI(32));
+    breadcrumbs_.SetRect(inset, DPI(94), max(0, w - inset * 2), DPI(34));
+
+    w = choices_group_.GetSize().cx;
+    check_.SetRect(inset, DPI(48), max(0, w / 2 - inset), DPI(30));
+    radio_.SetRect(max(inset, w / 2), DPI(48), max(0, w / 2 - inset), DPI(30));
+    toggle_.SetRect(inset, DPI(88), DPI(58), DPI(30));
+    dropdown_.SetRect(inset + DPI(70), DPI(88), max(DPI(100), w - inset * 2 - DPI(70)), DPI(32));
+
+    w = numbers_group_.GetSize().cx;
+    int_edit_.SetRect(inset, DPI(48), max(DPI(72), (w - inset * 2 - DPI(8)) / 2), DPI(32));
+    float_edit_.SetRect(inset + (w - inset * 2 - DPI(8)) / 2 + DPI(8), DPI(48),
+                       max(DPI(72), (w - inset * 2 - DPI(8)) / 2), DPI(32));
+    slider_.SetRect(inset, DPI(92), max(0, w - inset * 2), DPI(28));
+    progress_.SetRect(inset, DPI(130), max(0, w - inset * 2), DPI(20));
+
+    w = inputs_group_.GetSize().cx;
+    line_edit_.SetRect(inset, DPI(48), max(0, w - inset * 2), DPI(32));
+    multi_edit_.SetRect(inset, DPI(90), max(0, w - inset * 2), DPI(70));
+    slider_edit_.SetRect(inset, DPI(174), max(0, w - inset * 2), DPI(30));
+
+    w = feedback_group_.GetSize().cx;
+    feedback_label_.SetRect(inset, DPI(46), max(0, w - inset * 2), DPI(26));
+    feedback_progress_.SetRect(inset, DPI(82), max(0, w - inset * 2), DPI(20));
+
+    w = data_group_.GetSize().cx;
+    const int data_gap = DPI(6);
+    const int data_w = max(DPI(60), (w - inset * 2 - data_gap * 2) / 3);
+    list_.SetRect(inset, DPI(48), data_w, DPI(178));
+    tree_.SetRect(inset + data_w + data_gap, DPI(48), data_w, DPI(178));
+    table_.SetRect(inset + (data_w + data_gap) * 2, DPI(48), data_w, DPI(178));
+
+    w = navigation_group_.GetSize().cx;
+    tab_.SetRect(inset, DPI(48), max(0, w - inset * 2), DPI(102));
+    accordion_.SetRect(inset, DPI(160), max(0, w - inset * 2), DPI(108));
+}
+
+void UiDesignerThemeGallery::LayoutContainerSamples()
+{
+    const int inset = DPI(12);
+    int w = container_plain_panel_.GetSize().cx;
+    container_plain_label_.SetRect(inset, DPI(14), max(0, w - inset * 2), DPI(30));
+
+    w = container_controls_panel_.GetSize().cx;
+    container_controls_label_.SetRect(inset, DPI(12), max(0, w - inset * 2), DPI(28));
+    container_button_.SetRect(inset, DPI(58), DPI(110), DPI(32));
+    container_check_.SetRect(inset, DPI(104), max(0, w - inset * 2), DPI(30));
+
+    w = container_plain_group_.GetSize().cx;
+    container_group_label_.SetRect(inset, DPI(58), max(0, w - inset * 2), DPI(44));
+
+    w = container_edit_group_.GetSize().cx;
+    container_edit_.SetRect(inset, DPI(58), max(0, w - inset * 2), DPI(32));
+    container_edit_button_.SetRect(inset, DPI(106), DPI(110), DPI(32));
+
+    w = container_numeric_panel_.GetSize().cx;
+    container_numeric_label_.SetRect(inset, DPI(12), max(0, w - inset * 2), DPI(28));
+    container_slider_.SetRect(inset, DPI(62), max(0, w - inset * 2), DPI(28));
+    container_int_.SetRect(inset, DPI(108), DPI(100), DPI(32));
+
+    w = container_choice_group_.GetSize().cx;
+    container_dropdown_.SetRect(inset, DPI(58), max(0, w - inset * 2), DPI(32));
+    container_toggle_.SetRect(inset, DPI(108), DPI(58), DPI(30));
 }
 
 void UiDesignerThemeGallery::Layout()
 {
-    const int gap = DPI(10);
-    const int inset = DPI(12);
-    const int w = max(DPI(760), GetSize().cx);
-    const int column = max(DPI(250), (w - inset * 2 - gap * 2) / 3);
-    int y = inset;
-
-    Put(title_card_, inset, y, w - inset * 2, DPI(72));
-    y += DPI(72) + gap;
-
-    const int palette_h = DPI(445);
-    Put(palette_group_, inset, y, w - inset * 2, palette_h);
-    Put(palette_mode_, DPI(12), DPI(42), DPI(130), DPI(30));
-    Put(palette_help_, DPI(154), DPI(40),
-        w - inset * 2 - DPI(178), DPI(34));
-    Put(palette_editor_, DPI(12), DPI(82),
-        w - inset * 2 - DPI(24), palette_h - DPI(94));
-    y += palette_h + gap;
-
-    Put(control_roles_group_, inset, y, w - inset * 2, DPI(84));
-    const int role_gap = DPI(8);
-    const int role_inner = w - inset * 2 - DPI(24);
-    const int role_w = max(DPI(110), (role_inner - role_gap * 3) / 4);
-    Put(role_standard_, DPI(12), DPI(42), role_w, DPI(32));
-    Put(role_subtle_, DPI(12) + role_w + role_gap, DPI(42), role_w, DPI(32));
-    Put(role_accent_, DPI(12) + (role_w + role_gap) * 2, DPI(42), role_w, DPI(32));
-    Put(role_alert_, DPI(12) + (role_w + role_gap) * 3, DPI(42), role_w, DPI(32));
-    y += DPI(84) + gap;
-
-    Put(panel_roles_group_, inset, y, w - inset * 2, DPI(118));
-    const int panel_w = max(DPI(180), (role_inner - role_gap * 2) / 3);
-    Put(panel_surface_, DPI(12), DPI(44), panel_w, DPI(60));
-    Put(panel_subtle_, DPI(12) + panel_w + role_gap, DPI(44), panel_w, DPI(60));
-    Put(panel_strong_, DPI(12) + (panel_w + role_gap) * 2, DPI(44), panel_w, DPI(60));
-    panel_surface_label_.SetRect(0, 0, panel_w, DPI(60));
-    panel_subtle_label_.SetRect(0, 0, panel_w, DPI(60));
-    panel_strong_label_.SetRect(0, 0, panel_w, DPI(60));
-    y += DPI(118) + gap;
-
-    Put(toggle_group_, inset, y, column, DPI(150));
-    Put(toggle_label_a_, DPI(12), DPI(42), DPI(160), DPI(30));
-    Put(toggle_a_, column - DPI(70), DPI(42), DPI(52), DPI(30));
-    Put(toggle_label_b_, DPI(12), DPI(84), DPI(160), DPI(30));
-    Put(toggle_b_, column - DPI(70), DPI(84), DPI(52), DPI(30));
-
-    Put(buttons_group_, inset + column + gap, y, column, DPI(150));
-    Put(button_, DPI(12), DPI(42), DPI(110), DPI(32));
-    Put(tool_button_, DPI(132), DPI(42), DPI(44), DPI(32));
-    Put(split_button_, DPI(186), DPI(42), column - DPI(198), DPI(32));
-    Put(breadcrumbs_, DPI(12), DPI(88), column - DPI(24), DPI(34));
-
-    Put(numbers_group_, inset + (column + gap) * 2, y, column, DPI(150));
-    Put(int_edit_, DPI(12), DPI(42), DPI(100), DPI(32));
-    Put(float_edit_, DPI(122), DPI(42), DPI(110), DPI(32));
-    Put(slider_, DPI(12), DPI(88), column - DPI(24), DPI(28));
-    Put(progress_, DPI(12), DPI(120), column - DPI(24), DPI(20));
-    y += DPI(150) + gap;
-
-    Put(security_group_, inset, y, column, DPI(126));
-    Put(mask_edit_, DPI(12), DPI(44), column - DPI(24), DPI(32));
-    Put(password_edit_, DPI(12), DPI(82), column - DPI(24), DPI(32));
-
-    Put(document_group_, inset + column + gap, y, column, DPI(126));
-    Put(document_, DPI(12), DPI(42), column - DPI(24), DPI(72));
-
-    Put(input_group_, inset + (column + gap) * 2, y, column, DPI(250));
-    Put(line_edit_, DPI(12), DPI(42), column - DPI(24), DPI(32));
-    Put(multi_edit_, DPI(12), DPI(80), column - DPI(24), DPI(58));
-    Put(dropdown_, DPI(12), DPI(144), column - DPI(24), DPI(32));
-    Put(check_, DPI(12), DPI(182), DPI(120), DPI(30));
-    Put(radio_, DPI(142), DPI(182), DPI(120), DPI(30));
-    Put(color_, DPI(12), DPI(216), DPI(120), DPI(28));
-    Put(slider_edit_, DPI(142), DPI(216), column - DPI(154), DPI(28));
-    y += DPI(260);
-
-    Put(data_group_, inset, y, w - inset * 2, DPI(280));
-    const int inner_w = w - inset * 2 - DPI(24);
-    const int data_col = (inner_w - gap * 4) / 5;
-    Put(tab_, DPI(12), DPI(42), data_col, DPI(220));
-    Put(tree_, DPI(12) + (data_col + gap), DPI(42), data_col, DPI(220));
-    Put(table_, DPI(12) + (data_col + gap) * 2, DPI(42), data_col, DPI(220));
-    Put(list_, DPI(12) + (data_col + gap) * 3, DPI(42), data_col, DPI(220));
-    Put(accordion_, DPI(12) + (data_col + gap) * 4, DPI(42), data_col, DPI(220));
-    y += DPI(290);
-
-    const int tile_w = max(DPI(220), (w - inset * 2 - gap * 2) / 3);
-    for(int i = 0; i < inventory_tiles_.GetCount(); i++) {
-        const int col = i % 3;
-        const int row = i / 3;
-        const int tx = inset + col * (tile_w + gap);
-        const int ty = y + row * DPI(126);
-        Put(inventory_tiles_[i], tx, ty, tile_w, DPI(116));
-        Put(inventory_titles_[i], DPI(10), DPI(38), tile_w - DPI(20), DPI(22));
-        if(i < inventory_controls_.GetCount())
-            Put(inventory_controls_[i], DPI(10), DPI(64),
-                tile_w - DPI(20), DPI(38));
+    preview_stack_.SetRect(0, 0, GetSize().cx, GetSize().cy);
+    controls_matrix_.SetRect(0, 0, GetSize().cx, GetSize().cy);
+    containers_matrix_.SetRect(0, 0, GetSize().cx, GetSize().cy);
+    controls_matrix_.Layout();
+    containers_matrix_.Layout();
+    for(int i = 0; i < 3; i++) {
+        control_columns_[i].Layout();
+        container_columns_[i].Layout();
     }
-    content_height_ = y +
-        ((inventory_tiles_.GetCount() + 2) / 3) * DPI(126) + inset;
+    LayoutControlSamples();
+    LayoutContainerSamples();
 }
 
 void UiDesignerThemeGallery::Paint(Draw& w)
