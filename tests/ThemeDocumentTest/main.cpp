@@ -81,12 +81,12 @@ CONSOLE_APP_MAIN
     const String serialized = theme.Serialize(true);
     Value serialized_value = ParseJSON(serialized);
     ValueMap serialized_root = serialized_value;
-    t.Check((int)UiDesignerMapValue(serialized_root, "schema", 0) == 2,
-            "Theme Builder serializes schema 2");
+    t.Check((int)UiDesignerMapValue(serialized_root, "schema", 0) == 3,
+            "Theme Builder serializes schema 3");
 
     UiDesignerThemeDocument roundtrip;
     t.Check(roundtrip.Deserialize(serialized, error),
-            "Schema-2 theme round-trips: " + error);
+            "Schema-3 theme round-trips: " + error);
     t.Check(roundtrip.Get().ToValue() == theme.Get().ToValue(),
             "Light/Dark palettes and role assignments survive round-trip");
 
