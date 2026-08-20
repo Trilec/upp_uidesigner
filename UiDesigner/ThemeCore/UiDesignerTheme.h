@@ -6,10 +6,49 @@
 
 namespace Upp {
 
+enum { UI_DESIGNER_THEME_PALETTE_SIZE = 6 };
+
+struct UiDesignerThemePalette {
+    Color colors[UI_DESIGNER_THEME_PALETTE_SIZE] = {
+        Color(248, 250, 252), Color(255, 255, 255), Color(226, 232, 240),
+        Color(15, 23, 42), Color(58, 132, 255), Color(220, 38, 38)
+    };
+
+    Color Get(int index) const;
+    void Set(int index, Color color);
+    ValueArray ToValue() const;
+    bool FromValue(const Value& value, String& error);
+};
+
+struct UiDesignerThemeRoleAssignments {
+    int control_standard = 1;
+    int control_subtle = 2;
+    int control_accent = 4;
+    int control_alert = 5;
+
+    int panel_surface = 1;
+    int panel_subtle = 0;
+    int panel_strong = 2;
+
+    ValueMap ToValue() const;
+    bool FromValue(const Value& value, String& error);
+};
+
 struct UiDesignerThemeSnapshot {
+    UiDesignerThemeSnapshot();
+
     String preset = "Minimal";
     String mode = "Light";
+
+    // Compatibility projection used by the existing Designer shell while the
+    // runtime semantic-palette bridge is introduced. The Light/Dark palette
+    // and role assignment remain authoritative.
     Color accent = Color(58, 132, 255);
+
+    UiDesignerThemePalette light_palette;
+    UiDesignerThemePalette dark_palette;
+    UiDesignerThemeRoleAssignments roles;
+
     int spacing = 8;
     int radius = 8;
     int pill_radius = 25;
@@ -18,6 +57,18 @@ struct UiDesignerThemeSnapshot {
     int shadow_distance = 6;
     int shadow_offset_y = 2;
     int shadow_alpha = 24;
+
+    const UiDesignerThemePalette& GetPalette(bool dark) const
+    {
+        return dark ? dark_palette : light_palette;
+    }
+    UiDesignerThemePalette& GetPalette(bool dark)
+    {
+        return dark ? dark_palette : light_palette;
+    }
+    bool UsesDarkPalette() const { return mode == "Dark"; }
+    Color GetActiveAccent() const;
+    void SyncLegacyAccent();
 
     ValueMap ToValue() const;
     bool FromValue(const Value& value, String& error);

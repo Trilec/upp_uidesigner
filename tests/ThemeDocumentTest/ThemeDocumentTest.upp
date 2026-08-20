@@ -1,0 +1,11 @@
+description "UiDesigner Theme Builder document and palette regression tests";
+
+uses
+    Core,
+    UiDesigner/ThemeCore;
+
+mainconfig
+    "CONSOLE" = "1";
+
+file
+    main.cpp;

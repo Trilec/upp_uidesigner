@@ -45,12 +45,139 @@ static bool ParseThemeColor(const Value& value, Color& color)
     return true;
 }
 
+static int ThemePaletteIndex(int value)
+{
+    return minmax(value, 0, UI_DESIGNER_THEME_PALETTE_SIZE - 1);
+}
+
+Color UiDesignerThemePalette::Get(int index) const
+{
+    return colors[ThemePaletteIndex(index)];
+}
+
+void UiDesignerThemePalette::Set(int index, Color color)
+{
+    colors[ThemePaletteIndex(index)] = color;
+}
+
+ValueArray UiDesignerThemePalette::ToValue() const
+{
+    ValueArray out;
+    for(int i = 0; i < UI_DESIGNER_THEME_PALETTE_SIZE; i++)
+        out.Add(ThemeColorText(colors[i]));
+    return out;
+}
+
+bool UiDesignerThemePalette::FromValue(const Value& value, String& error)
+{
+    if(!value.Is<ValueArray>()) {
+        error = "Theme palette must be an array";
+        return false;
+    }
+    ValueArray in = value;
+    if(in.GetCount() != UI_DESIGNER_THEME_PALETTE_SIZE) {
+        error = Format("Theme palette requires exactly %d colours",
+                       UI_DESIGNER_THEME_PALETTE_SIZE);
+        return false;
+    }
+    Color parsed[UI_DESIGNER_THEME_PALETTE_SIZE];
+    for(int i = 0; i < UI_DESIGNER_THEME_PALETTE_SIZE; i++) {
+        if(!ParseThemeColor(in[i], parsed[i])) {
+            error = Format("Invalid theme palette colour at slot %d", i + 1);
+            return false;
+        }
+    }
+    for(int i = 0; i < UI_DESIGNER_THEME_PALETTE_SIZE; i++)
+        colors[i] = parsed[i];
+    error.Clear();
+    return true;
+}
+
+ValueMap UiDesignerThemeRoleAssignments::ToValue() const
+{
+    ValueMap controls;
+    controls.Set("standard", control_standard);
+    controls.Set("subtle", control_subtle);
+    controls.Set("accent", control_accent);
+    controls.Set("alert", control_alert);
+
+    ValueMap panels;
+    panels.Set("surface", panel_surface);
+    panels.Set("subtle", panel_subtle);
+    panels.Set("strong", panel_strong);
+
+    ValueMap out;
+    out.Set("controls", controls);
+    out.Set("panels", panels);
+    return out;
+}
+
+bool UiDesignerThemeRoleAssignments::FromValue(const Value& value, String& error)
+{
+    if(!value.Is<ValueMap>()) {
+        error = "Theme roles must be an object";
+        return false;
+    }
+    ValueMap root = value;
+    Value controls_value = UiDesignerMapValue(root, "controls", ValueMap());
+    Value panels_value = UiDesignerMapValue(root, "panels", ValueMap());
+    if(!controls_value.Is<ValueMap>() || !panels_value.Is<ValueMap>()) {
+        error = "Theme roles require controls and panels objects";
+        return false;
+    }
+    ValueMap controls = controls_value;
+    ValueMap panels = panels_value;
+    control_standard = ThemePaletteIndex((int)UiDesignerMapValue(
+        controls, "standard", control_standard));
+    control_subtle = ThemePaletteIndex((int)UiDesignerMapValue(
+        controls, "subtle", control_subtle));
+    control_accent = ThemePaletteIndex((int)UiDesignerMapValue(
+        controls, "accent", control_accent));
+    control_alert = ThemePaletteIndex((int)UiDesignerMapValue(
+        controls, "alert", control_alert));
+    panel_surface = ThemePaletteIndex((int)UiDesignerMapValue(
+        panels, "surface", panel_surface));
+    panel_subtle = ThemePaletteIndex((int)UiDesignerMapValue(
+        panels, "subtle", panel_subtle));
+    panel_strong = ThemePaletteIndex((int)UiDesignerMapValue(
+        panels, "strong", panel_strong));
+    error.Clear();
+    return true;
+}
+
+UiDesignerThemeSnapshot::UiDesignerThemeSnapshot()
+{
+    dark_palette.Set(0, Color(15, 23, 42));
+    dark_palette.Set(1, Color(25, 25, 25));
+    dark_palette.Set(2, Color(51, 65, 85));
+    dark_palette.Set(3, Color(241, 245, 249));
+    dark_palette.Set(4, Color(96, 165, 250));
+    dark_palette.Set(5, Color(248, 113, 113));
+    SyncLegacyAccent();
+}
+
+Color UiDesignerThemeSnapshot::GetActiveAccent() const
+{
+    return GetPalette(UsesDarkPalette()).Get(roles.control_accent);
+}
+
+void UiDesignerThemeSnapshot::SyncLegacyAccent()
+{
+    accent = GetActiveAccent();
+}
+
 ValueMap UiDesignerThemeSnapshot::ToValue() const
 {
+    ValueMap palettes;
+    palettes.Set("light", light_palette.ToValue());
+    palettes.Set("dark", dark_palette.ToValue());
+
     ValueMap out;
     out.Set("preset", preset);
     out.Set("mode", mode);
     out.Set("accent", ThemeColorText(accent));
+    out.Set("palettes", palettes);
+    out.Set("roles", roles.ToValue());
     out.Set("spacing", spacing);
     out.Set("radius", radius);
     out.Set("pill_radius", pill_radius);
@@ -68,6 +195,8 @@ bool UiDesignerThemeSnapshot::FromValue(const Value& value, String& error)
         error = "Theme root must be an object";
         return false;
     }
+
+    *this = UiDesignerThemeSnapshot();
     ValueMap in = value;
     preset = UiDesignerMapValue(in, "preset", "Minimal");
     mode = UiDesignerMapValue(in, "mode", "Light");
@@ -75,11 +204,37 @@ bool UiDesignerThemeSnapshot::FromValue(const Value& value, String& error)
         preset = "Minimal";
     if(!IsThemeModeName(mode))
         mode = "Light";
-    Color parsed_accent;
-    if(ParseThemeColor(UiDesignerMapValue(in, "accent", "#3A84FF"), parsed_accent))
-        accent = parsed_accent;
-    else
-        accent = Color(58, 132, 255);
+
+    Color parsed_accent = Color(58, 132, 255);
+    ParseThemeColor(UiDesignerMapValue(in, "accent", "#3A84FF"), parsed_accent);
+
+    const int palettes_index = in.Find("palettes");
+    const bool has_palettes = palettes_index >= 0;
+    if(has_palettes) {
+        Value palettes_value = in.GetValue(palettes_index);
+        if(!palettes_value.Is<ValueMap>()) {
+            error = "Theme palettes must be an object";
+            return false;
+        }
+        ValueMap palettes = palettes_value;
+        if(!light_palette.FromValue(
+               UiDesignerMapValue(palettes, "light", ValueArray()), error))
+            return false;
+        if(!dark_palette.FromValue(
+               UiDesignerMapValue(palettes, "dark", ValueArray()), error))
+            return false;
+
+        if(in.Find("roles") >= 0 &&
+           !roles.FromValue(UiDesignerMapValue(in, "roles", ValueMap()), error))
+            return false;
+    }
+    else {
+        // Schema-1 themes had one accent. Preserve it in both appearance
+        // palettes so migration does not silently change colour on mode switch.
+        light_palette.Set(roles.control_accent, parsed_accent);
+        dark_palette.Set(roles.control_accent, parsed_accent);
+    }
+
     spacing = UiDesignerMapValue(in, "spacing", 8);
     radius = UiDesignerMapValue(in, "radius", 8);
     pill_radius = UiDesignerMapValue(in, "pill_radius", 25);
@@ -88,6 +243,7 @@ bool UiDesignerThemeSnapshot::FromValue(const Value& value, String& error)
     shadow_distance = UiDesignerMapValue(in, "shadow_distance", 6);
     shadow_offset_y = UiDesignerMapValue(in, "shadow_offset_y", 2);
     shadow_alpha = UiDesignerMapValue(in, "shadow_alpha", 24);
+    SyncLegacyAccent();
     error.Clear();
     return true;
 }
@@ -110,10 +266,24 @@ static void AddThemeChoice(PropertyEditorModel& model, const String& id,
                    PropertyImpactFullPreview);
 }
 
+static void AddPaletteRoleChoice(PropertyEditorModel& model, const String& id,
+                                 const String& label, int value,
+                                 const String& group)
+{
+    PropertyEditorItem& item = model.AddChoice(id, label, value, group);
+    for(int i = 0; i < UI_DESIGNER_THEME_PALETTE_SIZE; i++)
+        item.AddChoice("Palette " + AsString(i + 1), i);
+    item.SetDomain(PropertyEditorDomain::Theme)
+        .SetImpact(PropertyImpactThemeGlobal |
+                   PropertyImpactPaint |
+                   PropertyImpactFullPreview);
+}
+
 void UiDesignerThemeDocument::BuildPropertyModel(
     PropertyEditorModel& model) const
 {
     const UiDesignerThemeSnapshot& t = GetEffective();
+    const UiDesignerThemeSnapshot defaults;
     model.Clear(false);
 
     static const char *preset_choices[] = {
@@ -125,10 +295,38 @@ void UiDesignerThemeDocument::BuildPropertyModel(
     AddThemeChoice(model, "mode", "Mode", t.mode,
                    mode_choices, __countof(mode_choices));
 
-    model.AddColor("accent", "Accent", t.accent, "Palette")
-        .SetDefault(Color(58, 132, 255))
-        .SetDomain(PropertyEditorDomain::Theme)
-        .SetImpact(PropertyImpactThemeGlobal | PropertyImpactPaint);
+    for(int i = 0; i < UI_DESIGNER_THEME_PALETTE_SIZE; i++) {
+        const String id = "palette.light." + AsString(i);
+        model.AddColor(id, "Colour " + AsString(i + 1),
+                       t.light_palette.Get(i), "Palette / Light")
+            .SetDefault(defaults.light_palette.Get(i))
+            .SetDomain(PropertyEditorDomain::Theme)
+            .SetImpact(PropertyImpactThemeGlobal | PropertyImpactPaint);
+    }
+    for(int i = 0; i < UI_DESIGNER_THEME_PALETTE_SIZE; i++) {
+        const String id = "palette.dark." + AsString(i);
+        model.AddColor(id, "Colour " + AsString(i + 1),
+                       t.dark_palette.Get(i), "Palette / Dark")
+            .SetDefault(defaults.dark_palette.Get(i))
+            .SetDomain(PropertyEditorDomain::Theme)
+            .SetImpact(PropertyImpactThemeGlobal | PropertyImpactPaint);
+    }
+
+    AddPaletteRoleChoice(model, "roles.control.standard", "Standard",
+                         t.roles.control_standard, "Control Roles");
+    AddPaletteRoleChoice(model, "roles.control.subtle", "Subtle",
+                         t.roles.control_subtle, "Control Roles");
+    AddPaletteRoleChoice(model, "roles.control.accent", "Accent",
+                         t.roles.control_accent, "Control Roles");
+    AddPaletteRoleChoice(model, "roles.control.alert", "Alert",
+                         t.roles.control_alert, "Control Roles");
+
+    AddPaletteRoleChoice(model, "roles.panel.surface", "Surface",
+                         t.roles.panel_surface, "Panel Roles");
+    AddPaletteRoleChoice(model, "roles.panel.subtle", "Subtle",
+                         t.roles.panel_subtle, "Panel Roles");
+    AddPaletteRoleChoice(model, "roles.panel.strong", "Strong",
+                         t.roles.panel_strong, "Panel Roles");
 
     model.AddSliderInt("spacing", "Spacing", t.spacing, 0, 32, 1,
                        "Metrics")
@@ -188,6 +386,19 @@ Value UiDesignerThemeDocument::GetProperty(
     if(property == "preset") return source.preset;
     if(property == "mode") return source.mode;
     if(property == "accent") return source.accent;
+    for(int i = 0; i < UI_DESIGNER_THEME_PALETTE_SIZE; i++) {
+        if(property == "palette.light." + AsString(i))
+            return source.light_palette.Get(i);
+        if(property == "palette.dark." + AsString(i))
+            return source.dark_palette.Get(i);
+    }
+    if(property == "roles.control.standard") return source.roles.control_standard;
+    if(property == "roles.control.subtle") return source.roles.control_subtle;
+    if(property == "roles.control.accent") return source.roles.control_accent;
+    if(property == "roles.control.alert") return source.roles.control_alert;
+    if(property == "roles.panel.surface") return source.roles.panel_surface;
+    if(property == "roles.panel.subtle") return source.roles.panel_subtle;
+    if(property == "roles.panel.strong") return source.roles.panel_strong;
     if(property == "spacing") return source.spacing;
     if(property == "radius") return source.radius;
     if(property == "pill_radius") return source.pill_radius;
@@ -218,19 +429,68 @@ bool UiDesignerThemeDocument::SetProperty(
             return false;
         }
         target.mode = mode;
+        target.SyncLegacyAccent();
     }
-    else if(property == "accent") target.accent = (Color)value;
-    else if(property == "spacing") target.spacing = minmax((int)value, 0, 32);
-    else if(property == "radius") target.radius = minmax((int)value, 0, 32);
-    else if(property == "pill_radius") target.pill_radius = minmax((int)value, 0, 40);
-    else if(property == "border_width") target.border_width = minmax((int)value, 0, 6);
-    else if(property == "shadows") target.shadows = (bool)value;
-    else if(property == "shadow_distance") target.shadow_distance = minmax((int)value, 0, 24);
-    else if(property == "shadow_offset_y") target.shadow_offset_y = minmax((int)value, -12, 12);
-    else if(property == "shadow_alpha") target.shadow_alpha = minmax((int)value, 0, 255);
+    else if(property == "accent") {
+        Color color;
+        if(!ParseThemeColor(value, color)) {
+            error = "Invalid accent colour";
+            return false;
+        }
+        target.GetPalette(target.UsesDarkPalette())
+              .Set(target.roles.control_accent, color);
+        target.SyncLegacyAccent();
+    }
     else {
-        error = "Unknown theme property: " + property;
-        return false;
+        bool palette_property = false;
+        for(int i = 0; i < UI_DESIGNER_THEME_PALETTE_SIZE; i++) {
+            const String light_id = "palette.light." + AsString(i);
+            const String dark_id = "palette.dark." + AsString(i);
+            if(property == light_id || property == dark_id) {
+                Color color;
+                if(!ParseThemeColor(value, color)) {
+                    error = "Invalid palette colour";
+                    return false;
+                }
+                target.GetPalette(property == dark_id).Set(i, color);
+                target.SyncLegacyAccent();
+                palette_property = true;
+                break;
+            }
+        }
+        if(palette_property) {
+            error.Clear();
+            return true;
+        }
+
+        bool role_property = true;
+        const int index = ThemePaletteIndex((int)value);
+        if(property == "roles.control.standard") target.roles.control_standard = index;
+        else if(property == "roles.control.subtle") target.roles.control_subtle = index;
+        else if(property == "roles.control.accent") target.roles.control_accent = index;
+        else if(property == "roles.control.alert") target.roles.control_alert = index;
+        else if(property == "roles.panel.surface") target.roles.panel_surface = index;
+        else if(property == "roles.panel.subtle") target.roles.panel_subtle = index;
+        else if(property == "roles.panel.strong") target.roles.panel_strong = index;
+        else role_property = false;
+        if(role_property) {
+            target.SyncLegacyAccent();
+            error.Clear();
+            return true;
+        }
+
+        if(property == "spacing") target.spacing = minmax((int)value, 0, 32);
+        else if(property == "radius") target.radius = minmax((int)value, 0, 32);
+        else if(property == "pill_radius") target.pill_radius = minmax((int)value, 0, 40);
+        else if(property == "border_width") target.border_width = minmax((int)value, 0, 6);
+        else if(property == "shadows") target.shadows = (bool)value;
+        else if(property == "shadow_distance") target.shadow_distance = minmax((int)value, 0, 24);
+        else if(property == "shadow_offset_y") target.shadow_offset_y = minmax((int)value, -12, 12);
+        else if(property == "shadow_alpha") target.shadow_alpha = minmax((int)value, 0, 255);
+        else {
+            error = "Unknown theme property: " + property;
+            return false;
+        }
     }
     error.Clear();
     return true;
@@ -332,7 +592,8 @@ bool UiDesignerThemeDocument::Replace(
     const UiDesignerThemeSnapshot& value, bool mark_saved)
 {
     value_ = value;
-    preview_ = value;
+    value_.SyncLegacyAccent();
+    preview_ = value_;
     preview_active_ = false;
     history_.Clear();
     position_ = 0;
@@ -346,7 +607,7 @@ String UiDesignerThemeDocument::Serialize(bool pretty) const
 {
     ValueMap root;
     root.Set("format", "upp-ui-theme-designer");
-    root.Set("schema", 1);
+    root.Set("schema", 2);
     root.Set("theme", value_.ToValue());
     return AsJSON(root, pretty);
 }
@@ -366,6 +627,11 @@ bool UiDesignerThemeDocument::Deserialize(
     ValueMap root = parsed;
     if((String)UiDesignerMapValue(root, "format", "") != "upp-ui-theme-designer") {
         error = "Unsupported theme document";
+        return false;
+    }
+    const int schema = UiDesignerMapValue(root, "schema", 1);
+    if(schema < 1 || schema > 2) {
+        error = Format("Unsupported theme schema %d", schema);
         return false;
     }
     UiDesignerThemeSnapshot loaded;
