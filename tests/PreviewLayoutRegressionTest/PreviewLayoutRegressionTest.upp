@@ -1,0 +1,20 @@
+description "UiDesigner preview layout reconstruction and nested selection regressions";
+
+uses
+    Core,
+    Ui,
+    Utilities/PropertyEditorCore,
+    UiDesigner/Core,
+    UiDesigner/Commands,
+    UiDesigner/Catalog,
+    UiDesigner/CodeGen,
+    UiDesigner/Theme,
+    UiDesigner/ThemeCore,
+    UiDesigner/Services,
+    UiDesigner/Preview;
+
+mainconfig
+    "CONSOLE" = "1";
+
+file
+    main.cpp;

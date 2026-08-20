@@ -13,12 +13,52 @@ const UiDesignerDropRegion* UiDesignerGeometrySnapshot::FindDropRegion(int regio
     return nullptr;
 }
 
+static bool BetterSelectionRecord(const UiDesignerGeometryRecord& candidate,
+                                  const UiDesignerGeometryRecord *best)
+{
+    return !best || candidate.depth > best->depth ||
+           (candidate.depth == best->depth && candidate.order > best->order);
+}
+
+static bool HitLayoutSelectionRegion(const UiDesignerGeometryRecord& record,
+                                     Point p)
+{
+    if(!record.selectable || record.cue_kind != UiDesignerCueKind::LayoutBounds ||
+       record.rect.IsEmpty() || !record.rect.Contains(p))
+        return false;
+
+    // Inset and gap space belongs to the transparent layout, even if a nested
+    // child happens to publish overlapping geometry. This makes the visible
+    // spacing in Box/Grid layouts a reliable selection target.
+    for(const Rect& inset : record.inset_rects)
+        if(inset.Contains(p))
+            return true;
+    for(const Rect& gap : record.gap_rects)
+        if(gap.Contains(p))
+            return true;
+
+    // A transparent layout can legitimately have zero inset/gap and a child
+    // stretched over its entire body. Reserve a narrow perimeter rail so the
+    // layout is still directly selectable without forcing the user back to the
+    // hierarchy. The deepest layout rail wins when nested layout edges align.
+    const int rail = DPI(4);
+    const Rect inner = record.rect.Deflated(rail);
+    return inner.IsEmpty() || !inner.Contains(p);
+}
+
 UiDesignerNodeId UiDesignerGeometrySnapshot::Hit(Point p) const {
+    const UiDesignerGeometryRecord* best_layout = nullptr;
+    for(const auto& record : records_)
+        if(HitLayoutSelectionRegion(record, p) &&
+           BetterSelectionRecord(record, best_layout))
+            best_layout = &record;
+    if(best_layout)
+        return best_layout->node;
+
     const UiDesignerGeometryRecord* best = nullptr;
     for(const auto& record : records_)
         if(record.selectable && record.rect.Contains(p) &&
-           (!best || record.depth > best->depth ||
-            (record.depth == best->depth && record.order > best->order)))
+           BetterSelectionRecord(record, best))
             best = &record;
     return best ? best->node : 0;
 }
@@ -67,8 +107,7 @@ UiDesignerNodeId UiDesignerGeometrySnapshot::HitDropTarget(Point p) const {
     const UiDesignerGeometryRecord* best = nullptr;
     for(const auto& record : records_)
         if(record.drop_target && record.rect.Contains(p) &&
-           (!best || record.depth > best->depth ||
-            (record.depth == best->depth && record.order > best->order)))
+           BetterSelectionRecord(record, best))
             best = &record;
     return best ? best->node : 0;
 }

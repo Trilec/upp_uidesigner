@@ -17,11 +17,17 @@ outer and body rectangles, inset regions, and runtime item/cell and gap regions.
 Grid item rectangles are read from the runtime layout after it has assigned them; the
 overlay does not divide Grid space into guessed equal cells.
 
-Normal selection resolves the deepest selectable record in paint order. Drop planning
-uses the same geometric candidate, then climbs the model parents while the drop service
-checks semantic compatibility. Thus an occupied Panel wins at its centre, while exposed
-Box inset or gap space resolves to the Box.
+Normal selection resolves the deepest selectable record in paint order, except that
+transparent layout-owned interaction space is reserved first. Explicit Box/Grid inset or
+gap regions select their owning layout, and a narrow perimeter rail keeps a zero-inset,
+zero-gap layout directly selectable even when a stretched child covers its complete body.
+When nested layout rails coincide, the deepest layout wins. Away from those layout-owned
+regions, the normal deepest child remains the selection target.
 
-The current scope is Window, Box Layout, Grid Layout, and Panel. TitleCard cells, pages,
-splitter panes, and named semantic regions are future extension points. Debug guides are
-Designer-only outlines and region hints; they do not alter runtime painting or geometry.
+Drop planning uses the same geometric snapshot, then climbs the model parents while the
+drop service checks semantic compatibility. Thus an occupied Panel wins at its centre,
+while exposed Box inset or gap space resolves to the Box.
+
+The current scope is Window, Box Layout, Grid Layout, and Panel, with additional named
+regions for several composite containers. Debug guides are Designer-only outlines and
+region hints; they do not alter runtime painting or geometry.
