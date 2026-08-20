@@ -118,7 +118,10 @@ CONSOLE_APP_MAIN
             Format("nested Box and GroupPanel publish coherent geometry: %s / %s",
                    AsString(box_rect), AsString(group_rect)));
 
-    const Point box_rail(box_rect.left + DPI(1), box_rect.CenterPoint().y);
+    // Probe the Box rail on the GroupPanel's centerline.  Flow layout keeps
+    // this natural-height child shorter than the Box, so the Box center can
+    // fall outside the child rather than testing an overlapping rail.
+    const Point box_rail(box_rect.left + DPI(1), group_rect.CenterPoint().y);
     t.Check(group_rect.Contains(box_rail),
             "zero-inset GroupPanel overlaps the Box perimeter selection rail");
     t.Check(geometry.Hit(box_rail) == box,
