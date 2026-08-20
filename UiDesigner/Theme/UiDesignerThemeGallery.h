@@ -20,7 +20,7 @@ public:
     UiDesignerThemeGallery();
 
     void SetCatalog(const UiDesignerCatalog *catalog);
-    void SetThemeDocument(const UiDesignerThemeDocument *theme);
+    void SetThemeDocument(UiDesignerThemeDocument *theme);
     void SetFilter(const String& filter);
     void RebuildInventory();
     int GetContentHeight() const { return content_height_; }
@@ -31,19 +31,37 @@ public:
 private:
     void BuildAuthoredControls();
     void ApplyThemeStyles();
+    void SyncPaletteEditor();
+    void CommitPaletteSlot(int slot);
     void Put(Ctrl& ctrl, int x, int y, int cx, int cy);
 
     const UiDesignerCatalog *catalog_ = nullptr;
-    const UiDesignerThemeDocument *theme_ = nullptr;
+    UiDesignerThemeDocument *theme_ = nullptr;
     String filter_ = "all";
     int content_height_ = 1200;
+    bool palette_syncing_ = false;
+    bool edit_dark_palette_ = false;
 
     UiTitleCard title_card_;
-    UiPanel role_panel_;
+
+    UiGroupPanel palette_group_;
+    UiDropdown palette_mode_;
+    UiLabel palette_help_;
+    UiColorPicker palette_editor_;
+
+    UiGroupPanel control_roles_group_;
     UiButton role_standard_;
     UiButton role_subtle_;
     UiButton role_accent_;
     UiButton role_alert_;
+
+    UiGroupPanel panel_roles_group_;
+    UiPanel panel_surface_;
+    UiPanel panel_subtle_;
+    UiPanel panel_strong_;
+    UiLabel panel_surface_label_;
+    UiLabel panel_subtle_label_;
+    UiLabel panel_strong_label_;
 
     UiGroupPanel toggle_group_;
     UiLabel toggle_label_a_;

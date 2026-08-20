@@ -26,6 +26,51 @@ void UiDesignerApplyGlobalTheme(const UiDesignerThemeSnapshot& theme)
     UiTheme::Set(UiDesignerResolveThemeContext(theme));
 }
 
+static Color ThemeBuilderReadableInk(Color face)
+{
+    const int luminance = face.GetR() * 299 + face.GetG() * 587 +
+                          face.GetB() * 114;
+    return luminance >= 150000 ? Color(15, 23, 42) : White();
+}
+
+static UiButton::Style ThemeBuilderRoleButtonStyle(UiRole role, Color face)
+{
+    UiButton::Style style = UiTheme::ResolveButton(role);
+    const Color ink = ThemeBuilderReadableInk(face);
+    style.metrics.face_enabled = true;
+    style.metrics.frame_enabled = true;
+    for(int state = 0; state < 4; state++) {
+        style.palette.face[state] = UiFill::Solid(face);
+        style.palette.frame[state] = face;
+        style.palette.ink[state] = ink;
+        style.palette.icon[state] = ink;
+    }
+    return style;
+}
+
+static UiPanel::Style ThemeBuilderPanelStyle(UiPanelRole role, Color face)
+{
+    UiPanel::Style style = UiTheme::ResolvePanel(role);
+    style.metrics.face_enabled = true;
+    style.metrics.frame_enabled = true;
+    for(int state = 0; state < 4; state++) {
+        style.palette.face[state] = UiFill::Solid(face);
+        style.palette.frame[state] = face;
+    }
+    return style;
+}
+
+static UiLabel::Style ThemeBuilderPanelLabelStyle(Color face)
+{
+    UiLabel::Style style = UiTheme::ResolveLabel(UiRole::Standard);
+    const Color ink = ThemeBuilderReadableInk(face);
+    for(int state = 0; state < 4; state++) {
+        style.palette.ink[state] = ink;
+        style.palette.icon[state] = ink;
+    }
+    return style;
+}
+
 UiDesignerThemeGallery::UiDesignerThemeGallery()
 {
     BackPaint();
@@ -39,8 +84,8 @@ void UiDesignerThemeGallery::Put(Ctrl& ctrl, int x, int y, int cx, int cy)
 
 void UiDesignerThemeGallery::BuildAuthoredControls()
 {
-    title_card_.SetTitle("Main Title Card Theme")
-               .SetSubTitle("Subtitle theme represented here")
+    title_card_.SetTitle("Theme Builder")
+               .SetSubTitle("Engineer a Light/Dark palette, assign semantic roles, then inspect representative controls below.")
                .SetContentInset(DPI(7))
                .SetMediaGap(DPI(10))
                .SetMediaReserve(DPI(24))
@@ -50,10 +95,48 @@ void UiDesignerThemeGallery::BuildAuthoredControls()
     title_card_.SetMedia(ICON_BRAND_NEWLOGO_V5_48(),
                          Size(DPI(29), DPI(29)));
 
-    role_standard_.SetText("Normal").Tip("Normal role");
-    role_subtle_.SetText("Subtle").Tip("Subtle role");
-    role_accent_.SetText("Accent").Tip("Accent role");
-    role_alert_.SetText("Alert").Tip("Alert role");
+    palette_group_.SetTitle("THEME PALETTE")
+                  .SetSubTitle("Six authored colours per appearance mode")
+                  .SetLine(false).SetHeaderBand(false);
+    palette_mode_.UseInternalModel().Clear()
+                 .Add("Light", "Light")
+                 .Add("Dark", "Dark");
+    palette_mode_.Select(0);
+    palette_help_.SetText(
+        "Use Generator, Palettes or the User Stash, then drag colours into the six primary theme slots. "
+        "The Light and Dark palettes are stored independently in the theme document.")
+        .SetAlign(UiAlign::LEFT, UiAlign::CENTER);
+    palette_editor_.SetSlotCount(UI_DESIGNER_THEME_PALETTE_SIZE)
+                   .SetGeneratorCount(UI_DESIGNER_THEME_PALETTE_SIZE)
+                   .SetPageMode(UiColorPicker::PAGE_GENERATOR)
+                   .SetMediumMode(UiColorPicker::MEDIUM_UI);
+    for(int i = 0; i < UI_DESIGNER_THEME_PALETTE_SIZE; i++)
+        palette_editor_.SetSlotLabel(i, AsString(i + 1));
+    palette_mode_.WhenAction = [=] {
+        edit_dark_palette_ = AsString(palette_mode_.GetData()) == "Dark";
+        SyncPaletteEditor();
+    };
+    palette_editor_.WhenSlotChanged = [=](int slot) {
+        CommitPaletteSlot(slot);
+    };
+
+    control_roles_group_.SetTitle("CONTROL ROLES")
+                        .SetSubTitle("Semantic control roles point to palette slots")
+                        .SetLine(false).SetHeaderBand(false);
+    role_standard_.SetText("Standard").Tip("Standard control role");
+    role_subtle_.SetText("Subtle").Tip("Subtle control role");
+    role_accent_.SetText("Accent").Tip("Accent control role");
+    role_alert_.SetText("Alert").Tip("Alert control role");
+
+    panel_roles_group_.SetTitle("PANEL ROLES")
+                      .SetSubTitle("Surface roles are independent from control roles")
+                      .SetLine(false).SetHeaderBand(false);
+    panel_surface_label_.SetAlign(UiAlign::CENTER, UiAlign::CENTER);
+    panel_subtle_label_.SetAlign(UiAlign::CENTER, UiAlign::CENTER);
+    panel_strong_label_.SetAlign(UiAlign::CENTER, UiAlign::CENTER);
+    panel_surface_.Add(panel_surface_label_);
+    panel_subtle_.Add(panel_subtle_label_);
+    panel_strong_.Add(panel_strong_label_);
 
     toggle_group_.SetTitle("TOGGLE THEMES").SetLine(false).SetHeaderBand(false);
     toggle_label_a_.SetText("First toggle theme")
@@ -67,7 +150,7 @@ void UiDesignerThemeGallery::BuildAuthoredControls()
     toggle_a_.SetOn(true);
     toggle_b_.SetOn(false);
 
-    buttons_group_.SetTitle("BUTTON THEMES").SetSubTitle("Various buttons for theming.")
+    buttons_group_.SetTitle("BUTTON THEMES").SetSubTitle("Representative button family")
                   .SetLine(false).SetHeaderBand(false);
     button_.SetText("Button");
     tool_button_.SetIcon(ICON_DESIGN_SETTINGS_48()).SetIconSize(DPI(20), DPI(20));
@@ -133,11 +216,22 @@ void UiDesignerThemeGallery::BuildAuthoredControls()
     slider_edit_.SetRange(0, 100).SetValue(50);
 
     Add(title_card_);
-    Add(role_panel_);
-    role_panel_.Add(role_standard_);
-    role_panel_.Add(role_subtle_);
-    role_panel_.Add(role_accent_);
-    role_panel_.Add(role_alert_);
+
+    Add(palette_group_);
+    palette_group_.Add(palette_mode_);
+    palette_group_.Add(palette_help_);
+    palette_group_.Add(palette_editor_);
+
+    Add(control_roles_group_);
+    control_roles_group_.Add(role_standard_);
+    control_roles_group_.Add(role_subtle_);
+    control_roles_group_.Add(role_accent_);
+    control_roles_group_.Add(role_alert_);
+
+    Add(panel_roles_group_);
+    panel_roles_group_.Add(panel_surface_);
+    panel_roles_group_.Add(panel_subtle_);
+    panel_roles_group_.Add(panel_strong_);
 
     Add(toggle_group_);
     toggle_group_.Add(toggle_label_a_);
@@ -189,9 +283,15 @@ void UiDesignerThemeGallery::SetCatalog(const UiDesignerCatalog *catalog)
 }
 
 void UiDesignerThemeGallery::SetThemeDocument(
-    const UiDesignerThemeDocument *theme)
+    UiDesignerThemeDocument *theme)
 {
+    const bool changed = theme_ != theme;
     theme_ = theme;
+    if(changed && theme_) {
+        edit_dark_palette_ = theme_->GetEffective().UsesDarkPalette();
+        palette_mode_.Select(edit_dark_palette_ ? 1 : 0);
+    }
+    SyncPaletteEditor();
     ApplyThemeStyles();
     Refresh();
 }
@@ -200,6 +300,36 @@ void UiDesignerThemeGallery::SetFilter(const String& filter)
 {
     filter_ = ToLower(filter);
     RebuildInventory();
+}
+
+void UiDesignerThemeGallery::SyncPaletteEditor()
+{
+    if(!theme_ || palette_syncing_)
+        return;
+    palette_syncing_ = true;
+    const UiDesignerThemePalette& palette =
+        theme_->GetEffective().GetPalette(edit_dark_palette_);
+    for(int i = 0; i < UI_DESIGNER_THEME_PALETTE_SIZE; i++)
+        palette_editor_.SetSlotColor(i, palette.Get(i), false);
+    palette_syncing_ = false;
+}
+
+void UiDesignerThemeGallery::CommitPaletteSlot(int slot)
+{
+    if(!theme_ || palette_syncing_ || slot < 0 ||
+       slot >= UI_DESIGNER_THEME_PALETTE_SIZE)
+        return;
+    const String property = String("palette.") +
+        (edit_dark_palette_ ? "dark." : "light.") + AsString(slot);
+    String error;
+    if(!theme_->Commit(property, palette_editor_.GetSlotColor(slot),
+                       String(edit_dark_palette_ ? "Set Dark palette "
+                                                : "Set Light palette ") +
+                           AsString(slot + 1), error)) {
+        SyncPaletteEditor();
+        return;
+    }
+    ApplyThemeStyles();
 }
 
 void UiDesignerThemeGallery::RebuildInventory()
@@ -252,22 +382,48 @@ void UiDesignerThemeGallery::ApplyThemeStyles()
     const UiDesignerThemeSnapshot effective = theme_
         ? theme_->GetEffective() : UiDesignerThemeSnapshot();
     UiDesignerApplyGlobalTheme(effective);
+    SyncPaletteEditor();
 
-    UiRole roles[] = {UiRole::Standard, UiRole::Subtle,
-                      UiRole::Accent, UiRole::Alert};
-    UiButton *buttons[] = {&role_standard_, &role_subtle_,
-                           &role_accent_, &role_alert_};
-    for(int i = 0; i < 4; i++)
-        buttons[i]->SetCustomStyle(UiTheme::ResolveButton(roles[i]));
+    const UiDesignerThemePalette& palette =
+        effective.GetPalette(effective.UsesDarkPalette());
 
-    UiButton::Style accent = UiTheme::ResolveButton(UiRole::Accent);
-    for(int state = 0; state < 4; state++) {
-        accent.palette.face[state] = UiFill::Solid(effective.accent);
-        accent.palette.frame[state] = effective.accent;
-        accent.palette.ink[state] = White();
-        accent.palette.icon[state] = White();
-    }
-    role_accent_.SetCustomStyle(accent);
+    role_standard_.SetText("Standard · P" +
+                           AsString(effective.roles.control_standard + 1));
+    role_subtle_.SetText("Subtle · P" +
+                         AsString(effective.roles.control_subtle + 1));
+    role_accent_.SetText("Accent · P" +
+                         AsString(effective.roles.control_accent + 1));
+    role_alert_.SetText("Alert · P" +
+                        AsString(effective.roles.control_alert + 1));
+
+    role_standard_.SetCustomStyle(ThemeBuilderRoleButtonStyle(
+        UiRole::Standard, palette.Get(effective.roles.control_standard)));
+    role_subtle_.SetCustomStyle(ThemeBuilderRoleButtonStyle(
+        UiRole::Subtle, palette.Get(effective.roles.control_subtle)));
+    role_accent_.SetCustomStyle(ThemeBuilderRoleButtonStyle(
+        UiRole::Accent, palette.Get(effective.roles.control_accent)));
+    role_alert_.SetCustomStyle(ThemeBuilderRoleButtonStyle(
+        UiRole::Alert, palette.Get(effective.roles.control_alert)));
+
+    const Color surface = palette.Get(effective.roles.panel_surface);
+    const Color subtle = palette.Get(effective.roles.panel_subtle);
+    const Color strong = palette.Get(effective.roles.panel_strong);
+    panel_surface_.SetCustomStyle(
+        ThemeBuilderPanelStyle(UiPanelRole::Surface, surface));
+    panel_subtle_.SetCustomStyle(
+        ThemeBuilderPanelStyle(UiPanelRole::Subtle, subtle));
+    panel_strong_.SetCustomStyle(
+        ThemeBuilderPanelStyle(UiPanelRole::Strong, strong));
+    panel_surface_label_.SetCustomStyle(ThemeBuilderPanelLabelStyle(surface));
+    panel_subtle_label_.SetCustomStyle(ThemeBuilderPanelLabelStyle(subtle));
+    panel_strong_label_.SetCustomStyle(ThemeBuilderPanelLabelStyle(strong));
+    panel_surface_label_.SetText("Surface · P" +
+                                 AsString(effective.roles.panel_surface + 1));
+    panel_subtle_label_.SetText("Subtle · P" +
+                                AsString(effective.roles.panel_subtle + 1));
+    panel_strong_label_.SetText("Strong · P" +
+                                AsString(effective.roles.panel_strong + 1));
+
     progress_.SetCustomStyle(UiTheme::ResolveProgressBar(UiRole::Accent));
     Refresh();
 }
@@ -283,13 +439,34 @@ void UiDesignerThemeGallery::Layout()
     Put(title_card_, inset, y, w - inset * 2, DPI(72));
     y += DPI(72) + gap;
 
-    Put(role_panel_, inset, y, w - inset * 2, DPI(50));
-    const int role_w = DPI(92);
-    Put(role_standard_, DPI(10), DPI(8), role_w, DPI(34));
-    Put(role_subtle_, DPI(110), DPI(8), role_w, DPI(34));
-    Put(role_accent_, DPI(210), DPI(8), role_w, DPI(34));
-    Put(role_alert_, DPI(310), DPI(8), role_w, DPI(34));
-    y += DPI(50) + gap;
+    const int palette_h = DPI(445);
+    Put(palette_group_, inset, y, w - inset * 2, palette_h);
+    Put(palette_mode_, DPI(12), DPI(42), DPI(130), DPI(30));
+    Put(palette_help_, DPI(154), DPI(40),
+        w - inset * 2 - DPI(178), DPI(34));
+    Put(palette_editor_, DPI(12), DPI(82),
+        w - inset * 2 - DPI(24), palette_h - DPI(94));
+    y += palette_h + gap;
+
+    Put(control_roles_group_, inset, y, w - inset * 2, DPI(84));
+    const int role_gap = DPI(8);
+    const int role_inner = w - inset * 2 - DPI(24);
+    const int role_w = max(DPI(110), (role_inner - role_gap * 3) / 4);
+    Put(role_standard_, DPI(12), DPI(42), role_w, DPI(32));
+    Put(role_subtle_, DPI(12) + role_w + role_gap, DPI(42), role_w, DPI(32));
+    Put(role_accent_, DPI(12) + (role_w + role_gap) * 2, DPI(42), role_w, DPI(32));
+    Put(role_alert_, DPI(12) + (role_w + role_gap) * 3, DPI(42), role_w, DPI(32));
+    y += DPI(84) + gap;
+
+    Put(panel_roles_group_, inset, y, w - inset * 2, DPI(118));
+    const int panel_w = max(DPI(180), (role_inner - role_gap * 2) / 3);
+    Put(panel_surface_, DPI(12), DPI(44), panel_w, DPI(60));
+    Put(panel_subtle_, DPI(12) + panel_w + role_gap, DPI(44), panel_w, DPI(60));
+    Put(panel_strong_, DPI(12) + (panel_w + role_gap) * 2, DPI(44), panel_w, DPI(60));
+    panel_surface_label_.SetRect(0, 0, panel_w, DPI(60));
+    panel_subtle_label_.SetRect(0, 0, panel_w, DPI(60));
+    panel_strong_label_.SetRect(0, 0, panel_w, DPI(60));
+    y += DPI(118) + gap;
 
     Put(toggle_group_, inset, y, column, DPI(150));
     Put(toggle_label_a_, DPI(12), DPI(42), DPI(160), DPI(30));
