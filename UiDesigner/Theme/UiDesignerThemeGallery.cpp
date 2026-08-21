@@ -1,4 +1,5 @@
 #include "UiDesignerThemeGallery.h"
+#include "UiDesignerThemeAdapter.h"
 #include <Ui/UiIcons.h>
 
 namespace Upp {
@@ -35,6 +36,37 @@ static String ThemeRoleName(UiRole role)
     case UiRole::Standard:
     default:             return "Standard";
     }
+}
+
+static String PanelRoleName(UiPanelRole role)
+{
+    switch(role) {
+    case UiPanelRole::Subtle: return "Subtle";
+    case UiPanelRole::Strong: return "Strong";
+    case UiPanelRole::Surface:
+    default:                  return "Surface";
+    }
+}
+
+static UiRole PanelRoleAsControlRole(UiPanelRole role)
+{
+    switch(role) {
+    case UiPanelRole::Subtle: return UiRole::Subtle;
+    case UiPanelRole::Strong: return UiRole::Accent;
+    case UiPanelRole::Surface:
+    default:                  return UiRole::Standard;
+    }
+}
+
+static void PopulateSampleNode(UiDesignerNode& node,
+                               const UiDesignerControlSpec& spec,
+                               const String& role)
+{
+    node.type = spec.type_id;
+    for(int i = 0; i < spec.defaults.GetCount(); i++)
+        node.SetProperty(AsString(spec.defaults.GetKey(i)),
+                         spec.defaults.GetValue(i));
+    node.SetProperty("role", role);
 }
 
 // -----------------------------------------------------------------------------
@@ -182,10 +214,9 @@ UiDesignerThemeToolbar::UiDesignerThemeToolbar()
                        .SetAlign(UiAlign::RIGHT, UiAlign::CENTER);
 
     panel_role_drop_.UseInternalModel().Clear()
-                    .Add("Standard", (int)UiRole::Standard)
-                    .Add("Subtle", (int)UiRole::Subtle)
-                    .Add("Accent", (int)UiRole::Accent)
-                    .Add("Alert", (int)UiRole::Alert);
+                    .Add("Surface", (int)UiPanelRole::Surface)
+                    .Add("Subtle", (int)UiPanelRole::Subtle)
+                    .Add("Strong", (int)UiPanelRole::Strong);
     control_role_drop_.UseInternalModel().Clear()
                       .Add("Standard", (int)UiRole::Standard)
                       .Add("Subtle", (int)UiRole::Subtle)
@@ -199,8 +230,8 @@ UiDesignerThemeToolbar::UiDesignerThemeToolbar()
                .SetCheckable()
                .Tip("Switch Light / Dark preview");
 
-    light_label_.SetText("Light").SetAlign(UiAlign::LEFT, UiAlign::BOTTOM);
-    dark_label_.SetText("Dark").SetAlign(UiAlign::LEFT, UiAlign::BOTTOM);
+    light_label_.SetText("Light").SetAlign(UiAlign::RIGHT, UiAlign::CENTER);
+    dark_label_.SetText("Dark").SetAlign(UiAlign::RIGHT, UiAlign::CENTER);
 
     Add(controls_mode_);
     Add(containers_mode_);
@@ -223,7 +254,7 @@ UiDesignerThemeToolbar::UiDesignerThemeToolbar()
     containers_mode_.WhenAction = [=] { SetPreviewMode("containers"); };
     panel_role_drop_.WhenAction = [=] {
         if(!syncing_)
-            SetPanelRole((UiRole)(int)panel_role_drop_.GetData());
+            SetPanelRole((UiPanelRole)(int)panel_role_drop_.GetData());
     };
     control_role_drop_.WhenAction = [=] {
         if(!syncing_)
@@ -258,14 +289,14 @@ void UiDesignerThemeToolbar::SetPreviewMode(const String& mode)
                                                : "Theme Builder: Controls");
 }
 
-void UiDesignerThemeToolbar::SetPanelRole(UiRole role)
+void UiDesignerThemeToolbar::SetPanelRole(UiPanelRole role)
 {
     if(!UiIsValid(role))
-        role = UiRole::Standard;
+        role = UiPanelRole::Surface;
     panel_role_ = role;
     if(gallery_)
         gallery_->SetPanelRole(role);
-    WhenStatus("Panel preview role: " + ThemeRoleName(role));
+    WhenStatus("Panel preview role: " + PanelRoleName(role));
 }
 
 void UiDesignerThemeToolbar::SetControlRole(UiRole role)
@@ -372,30 +403,34 @@ void UiDesignerThemeToolbar::Layout()
     containers_mode_.SetRect(x, y, DPI(30), control_h); x += DPI(30) + gap;
 
     panel_role_label_.SetRect(x, y, DPI(62), control_h); x += DPI(62) + DPI(4);
-    panel_role_drop_.SetRect(x, y, DPI(118), control_h); x += DPI(118) + gap;
+    panel_role_drop_.SetRect(x, y, DPI(112), control_h); x += DPI(112) + gap;
 
     control_role_label_.SetRect(x, y, DPI(54), control_h); x += DPI(54) + DPI(4);
-    control_role_drop_.SetRect(x, y, DPI(118), control_h); x += DPI(118) + gap;
+    control_role_drop_.SetRect(x, y, DPI(112), control_h); x += DPI(112) + gap;
 
-    appearance_.SetRect(x, y, DPI(34), control_h); x += DPI(34) + DPI(10);
+    appearance_.SetRect(x, y, DPI(34), control_h); x += DPI(34) + DPI(8);
 
-    const int available = max(0, GetSize().cx - x - DPI(4));
+    const int label_w = DPI(32);
+    const int label_gap = DPI(4);
     const int palette_gap = DPI(10);
-    const int group_width = max(0, (available - palette_gap) / 2);
-    const int swatch = min(DPI(24), max(DPI(14),
-        (group_width - small_gap * (UI_DESIGNER_THEME_PALETTE_SIZE - 1)) /
+    const int available = max(0, GetSize().cx - x - DPI(4));
+    const int group_w = max(0, (available - palette_gap) / 2);
+    const int swatch_space = max(0, group_w - label_w - label_gap);
+    const int swatch = min(DPI(24), max(DPI(12),
+        (swatch_space - small_gap * (UI_DESIGNER_THEME_PALETTE_SIZE - 1)) /
             UI_DESIGNER_THEME_PALETTE_SIZE));
-    const int swatch_y = max(DPI(17), h - swatch - DPI(3));
-    const int label_h = min(DPI(16), swatch_y);
+    const int swatch_y = max(0, (h - swatch) / 2);
 
-    light_label_.SetRect(x, 0, group_width, label_h);
+    light_label_.SetRect(x, y, label_w, control_h);
+    int sx = x + label_w + label_gap;
     for(int i = 0; i < UI_DESIGNER_THEME_PALETTE_SIZE; i++)
-        light_[i].SetRect(x + i * (swatch + small_gap), swatch_y, swatch, swatch);
+        light_[i].SetRect(sx + i * (swatch + small_gap), swatch_y, swatch, swatch);
 
-    x += group_width + palette_gap;
-    dark_label_.SetRect(x, 0, group_width, label_h);
+    x += group_w + palette_gap;
+    dark_label_.SetRect(x, y, label_w, control_h);
+    sx = x + label_w + label_gap;
     for(int i = 0; i < UI_DESIGNER_THEME_PALETTE_SIZE; i++)
-        dark_[i].SetRect(x + i * (swatch + small_gap), swatch_y, swatch, swatch);
+        dark_[i].SetRect(sx + i * (swatch + small_gap), swatch_y, swatch, swatch);
 }
 
 void UiDesignerThemeToolbar::Paint(Draw& w)
@@ -406,7 +441,7 @@ void UiDesignerThemeToolbar::Paint(Draw& w)
 }
 
 // -----------------------------------------------------------------------------
-// Matrix-driven preview
+// Matrix-driven preview and selection-aware Theme Studio property projection
 
 UiDesignerThemeGallery::UiDesignerThemeGallery()
 {
@@ -414,7 +449,14 @@ UiDesignerThemeGallery::UiDesignerThemeGallery()
     BuildPreviewMatrices();
     BuildControlSamples();
     BuildContainerSamples();
+    BindSelectableSamples();
     ApplyThemeStyles();
+}
+
+UiDesignerThemeGallery::~UiDesignerThemeGallery()
+{
+    if(theme_)
+        theme_->ClearPropertyModelProvider();
 }
 
 void UiDesignerThemeGallery::BuildPreviewMatrices()
@@ -597,16 +639,87 @@ void UiDesignerThemeGallery::BuildContainerSamples()
     container_columns_[2].Add(container_choice_group_).Fixed(DPI(196));
 }
 
+void UiDesignerThemeGallery::BindSelectableSamples()
+{
+    const auto bind = [=](UiDesignerThemeSelectableBase& sample,
+                          const char *type, bool panel_sample) {
+        UiDesignerThemeSelectableBase *ptr = &sample;
+        const String type_id = type;
+        sample.WhenThemeSelect = [=] { SelectSample(type_id, ptr, panel_sample); };
+    };
+
+    bind(controls_reference_panel_, "UiPanel", true);
+    bind(controls_reference_label_, "UiLabel", false);
+    bind(controls_reference_button_, "UiButton", false);
+    bind(buttons_group_, "UiGroupPanel", true);
+    bind(button_, "UiButton", false);
+    bind(tool_button_, "UiToolButton", false);
+    bind(split_button_, "UiSplitButton", false);
+    bind(choices_group_, "UiGroupPanel", true);
+    bind(check_, "UiCheckBox", false);
+    bind(radio_, "UiRadioButton", false);
+    bind(toggle_, "UiToggle", false);
+    bind(dropdown_, "UiDropdown", false);
+    bind(numbers_group_, "UiGroupPanel", true);
+    bind(int_edit_, "UiIntEdit", false);
+    bind(float_edit_, "UiFloatEdit", false);
+    bind(slider_, "UiSlider", false);
+    bind(progress_, "UiProgressBar", false);
+    bind(inputs_group_, "UiGroupPanel", true);
+    bind(line_edit_, "UiLineEdit", false);
+    bind(multi_edit_, "UiMultiEdit", false);
+    bind(data_group_, "UiGroupPanel", true);
+    bind(list_, "UiList", false);
+    bind(tree_, "UiTree", false);
+    bind(navigation_group_, "UiGroupPanel", true);
+    bind(tab_, "UiTab", false);
+    bind(accordion_, "UiAccordion", false);
+    bind(feedback_group_, "UiGroupPanel", true);
+    bind(feedback_label_, "UiLabel", false);
+    bind(feedback_progress_, "UiProgressBar", false);
+
+    bind(container_plain_panel_, "UiPanel", true);
+    bind(container_plain_label_, "UiLabel", false);
+    bind(container_controls_panel_, "UiPanel", true);
+    bind(container_controls_label_, "UiLabel", false);
+    bind(container_button_, "UiButton", false);
+    bind(container_check_, "UiCheckBox", false);
+    bind(container_plain_group_, "UiGroupPanel", true);
+    bind(container_group_label_, "UiLabel", false);
+    bind(container_edit_group_, "UiGroupPanel", true);
+    bind(container_edit_, "UiLineEdit", false);
+    bind(container_edit_button_, "UiButton", false);
+    bind(container_numeric_panel_, "UiPanel", true);
+    bind(container_numeric_label_, "UiLabel", false);
+    bind(container_slider_, "UiSlider", false);
+    bind(container_int_, "UiIntEdit", false);
+    bind(container_choice_group_, "UiGroupPanel", true);
+    bind(container_dropdown_, "UiDropdown", false);
+    bind(container_toggle_, "UiToggle", false);
+}
+
 void UiDesignerThemeGallery::SetCatalog(const UiDesignerCatalog *catalog)
 {
     catalog_ = catalog;
+    ApplyThemeStyles();
 }
 
 void UiDesignerThemeGallery::SetThemeDocument(UiDesignerThemeDocument *theme)
 {
-    theme_ = theme;
+    if(theme_ != theme) {
+        if(theme_)
+            theme_->ClearPropertyModelProvider();
+        theme_ = theme;
+        if(theme_) {
+            theme_->SetPropertyModelProvider(
+                [=](PropertyEditorModel& model,
+                    const UiDesignerThemeSnapshot& value) {
+                    BuildSelectedPropertyModel(model, value);
+                });
+        }
+    }
+    SyncSelectedTarget();
     ApplyThemeStyles();
-    Refresh();
 }
 
 void UiDesignerThemeGallery::SetPreviewMode(const String& mode)
@@ -616,17 +729,24 @@ void UiDesignerThemeGallery::SetPreviewMode(const String& mode)
         return;
     preview_mode_ = next;
     preview_stack_.SetActiveKey(preview_mode_);
+    if(selected_sample_)
+        selected_sample_->SetThemeSelected(false);
+    selected_sample_ = nullptr;
+    selected_type_.Clear();
+    selected_panel_sample_ = false;
+    SyncSelectedTarget();
     Layout();
     Refresh();
 }
 
-void UiDesignerThemeGallery::SetPanelRole(UiRole role)
+void UiDesignerThemeGallery::SetPanelRole(UiPanelRole role)
 {
     if(!UiIsValid(role))
-        role = UiRole::Standard;
+        role = UiPanelRole::Surface;
     if(panel_role_ == role)
         return;
     panel_role_ = role;
+    SyncSelectedTarget();
     ApplyThemeStyles();
 }
 
@@ -637,12 +757,162 @@ void UiDesignerThemeGallery::SetControlRole(UiRole role)
     if(control_role_ == role)
         return;
     control_role_ = role;
+    SyncSelectedTarget();
     ApplyThemeStyles();
 }
 
 void UiDesignerThemeGallery::RefreshTheme()
 {
+    SyncSelectedTarget();
     ApplyThemeStyles();
+}
+
+void UiDesignerThemeGallery::SelectSample(
+    const String& type, UiDesignerThemeSelectableBase *sample, bool panel_sample)
+{
+    if(selected_sample_ && selected_sample_ != sample)
+        selected_sample_->SetThemeSelected(false);
+    selected_sample_ = sample;
+    selected_type_ = type;
+    selected_panel_sample_ = panel_sample;
+    if(selected_sample_)
+        selected_sample_->SetThemeSelected(true);
+    SyncSelectedTarget();
+    Refresh();
+}
+
+String UiDesignerThemeGallery::CurrentStyleTarget(
+    const UiDesignerThemeSnapshot& theme, const String& type,
+    bool panel_sample) const
+{
+    const String appearance = theme.mode == "Dark" ? "Dark" : "Light";
+    const String role = panel_sample ? PanelRoleName(panel_role_)
+                                     : ThemeRoleName(control_role_);
+    return appearance + "|" + (panel_sample ? "panel" : "control") +
+           "|" + type + "|" + role;
+}
+
+void UiDesignerThemeGallery::SyncSelectedTarget()
+{
+    if(!theme_)
+        return;
+    theme_->SetActiveStyleTarget(selected_type_.IsEmpty()
+        ? String()
+        : CurrentStyleTarget(theme_->GetEffective(), selected_type_,
+                             selected_panel_sample_));
+}
+
+void UiDesignerThemeGallery::BuildSelectedPropertyModel(
+    PropertyEditorModel& model, const UiDesignerThemeSnapshot& theme) const
+{
+    model.Clear(false);
+    if(selected_type_.IsEmpty()) {
+        model.AddReadOnly("theme.studio.status", "Status",
+                          "Select a Theme Studio sample to edit its theme.",
+                          "Theme Studio");
+        model.StructureChanged();
+        return;
+    }
+
+    const UiDesignerControlSpec *spec = catalog_ ? catalog_->Find(selected_type_)
+                                                 : nullptr;
+    const UiDesignerThemeAdapter *adapter = spec ? UiDesignerGetThemeAdapter(*spec)
+                                                 : nullptr;
+    if(!spec || !adapter || !adapter->Supports(spec->runtime_kind) ||
+       spec->theme_overrides.IsEmpty()) {
+        model.AddReadOnly("theme.studio.status", "Status",
+                          selected_type_ + " has no editable Theme adapter yet.",
+                          "Theme Studio");
+        model.StructureChanged();
+        return;
+    }
+
+    const String role = selected_panel_sample_
+        ? ThemeRoleName(PanelRoleAsControlRole(panel_role_))
+        : ThemeRoleName(control_role_);
+    UiDesignerNode base;
+    PopulateSampleNode(base, *spec, role);
+    const String target = CurrentStyleTarget(theme, selected_type_,
+                                             selected_panel_sample_);
+    const ValueMap authored = theme.GetStyleOverrides(target);
+
+    const auto add_field = [&](const UiDesignerThemeOverrideSpec& property) {
+        const Value inherited = adapter->ResolveFieldValue(
+            base, *spec, property.adapter_field_id, nullptr);
+        const int q = authored.Find(property.id);
+        const Value value = q >= 0 ? authored.GetValue(q) : inherited;
+        property.AddTo(model, value, false);
+        PropertyEditorItem *item = model.Find(property.id);
+        if(!item)
+            return;
+        item->id = "studio." + property.id;
+        item->default_value = inherited;
+        item->resettable = true;
+        item->overrideable = false;
+        item->override_active = q >= 0;
+        item->value_editable = !item->read_only;
+        item->SetInherited(q < 0);
+    };
+
+    for(const UiDesignerThemeOverrideSpec& property : spec->theme_overrides)
+        if(property.group == "General")
+            add_field(property);
+    for(const UiDesignerThemeOverrideSpec& property : spec->theme_overrides)
+        if(property.group != "General")
+            add_field(property);
+
+    for(const UiDesignerThemeOverrideSpec& property : spec->theme_overrides) {
+        if(property.visible_when_id.IsEmpty())
+            continue;
+        PropertyEditorItem *item = model.Find("studio." + property.id);
+        const PropertyEditorItem *condition =
+            model.Find("studio." + property.visible_when_id);
+        if(item)
+            item->visible = condition &&
+                            condition->value == property.visible_when_value;
+    }
+
+    const String subtitle = spec->display_name + " · " +
+        (selected_panel_sample_ ? PanelRoleName(panel_role_)
+                                : ThemeRoleName(control_role_));
+    model.SetGroupSubtitle("General", subtitle);
+    model.StructureChanged();
+}
+
+void UiDesignerThemeGallery::ApplySampleTheme(
+    Ctrl& ctrl, const String& type, bool panel_sample)
+{
+    if(!catalog_ || !theme_)
+        return;
+    const UiDesignerControlSpec *spec = catalog_->Find(type);
+    const UiDesignerThemeAdapter *adapter = spec ? UiDesignerGetThemeAdapter(*spec)
+                                                 : nullptr;
+    if(!spec || !adapter || !adapter->Supports(spec->runtime_kind) ||
+       spec->theme_overrides.IsEmpty())
+        return;
+
+    const UiDesignerThemeSnapshot& effective = theme_->GetEffective();
+    const String role = panel_sample
+        ? ThemeRoleName(PanelRoleAsControlRole(panel_role_))
+        : ThemeRoleName(control_role_);
+    UiDesignerNode base;
+    PopulateSampleNode(base, *spec, role);
+    UiDesignerNode styled = base;
+    const ValueMap authored = effective.GetStyleOverrides(
+        CurrentStyleTarget(effective, type, panel_sample));
+
+    // Give the adapter a complete concrete recipe. Inherited fields are
+    // resolved from the selected semantic role; authored fields then replace
+    // only the values the user changed in Theme Studio.
+    for(const UiDesignerThemeOverrideSpec& property : spec->theme_overrides) {
+        const int q = authored.Find(property.id);
+        const Value value = q >= 0
+            ? authored.GetValue(q)
+            : adapter->ResolveFieldValue(base, *spec,
+                                         property.adapter_field_id, nullptr);
+        styled.theme_overrides.Set(property.id, value);
+    }
+    adapter->ApplyPreviewStyle(ctrl, styled, *spec, nullptr);
 }
 
 void UiDesignerThemeGallery::ApplyThemeStyles()
@@ -651,55 +921,54 @@ void UiDesignerThemeGallery::ApplyThemeStyles()
         ? theme_->GetEffective() : UiDesignerThemeSnapshot();
     UiDesignerApplyGlobalTheme(effective);
 
-    const UiPanel::Style panel_style = UiTheme::ResolvePanel(panel_role_);
-    controls_reference_panel_.SetCustomStyle(panel_style);
-    container_plain_panel_.SetCustomStyle(panel_style);
-    container_controls_panel_.SetCustomStyle(panel_style);
-    container_numeric_panel_.SetCustomStyle(panel_style);
+    ApplySampleTheme(controls_reference_panel_, "UiPanel", true);
+    ApplySampleTheme(controls_reference_label_, "UiLabel", false);
+    ApplySampleTheme(controls_reference_button_, "UiButton", false);
+    ApplySampleTheme(buttons_group_, "UiGroupPanel", true);
+    ApplySampleTheme(button_, "UiButton", false);
+    ApplySampleTheme(tool_button_, "UiToolButton", false);
+    ApplySampleTheme(split_button_, "UiSplitButton", false);
+    ApplySampleTheme(choices_group_, "UiGroupPanel", true);
+    ApplySampleTheme(check_, "UiCheckBox", false);
+    ApplySampleTheme(radio_, "UiRadioButton", false);
+    ApplySampleTheme(toggle_, "UiToggle", false);
+    ApplySampleTheme(dropdown_, "UiDropdown", false);
+    ApplySampleTheme(numbers_group_, "UiGroupPanel", true);
+    ApplySampleTheme(int_edit_, "UiIntEdit", false);
+    ApplySampleTheme(float_edit_, "UiFloatEdit", false);
+    ApplySampleTheme(slider_, "UiSlider", false);
+    ApplySampleTheme(progress_, "UiProgressBar", false);
+    ApplySampleTheme(inputs_group_, "UiGroupPanel", true);
+    ApplySampleTheme(line_edit_, "UiLineEdit", false);
+    ApplySampleTheme(multi_edit_, "UiMultiEdit", false);
+    ApplySampleTheme(data_group_, "UiGroupPanel", true);
+    ApplySampleTheme(list_, "UiList", false);
+    ApplySampleTheme(tree_, "UiTree", false);
+    ApplySampleTheme(navigation_group_, "UiGroupPanel", true);
+    ApplySampleTheme(tab_, "UiTab", false);
+    ApplySampleTheme(accordion_, "UiAccordion", false);
+    ApplySampleTheme(feedback_group_, "UiGroupPanel", true);
+    ApplySampleTheme(feedback_label_, "UiLabel", false);
+    ApplySampleTheme(feedback_progress_, "UiProgressBar", false);
 
-    const UiGroupPanel::Style group_style = UiTheme::ResolveGroupPanel(panel_role_);
-    buttons_group_.SetCustomStyle(group_style);
-    choices_group_.SetCustomStyle(group_style);
-    numbers_group_.SetCustomStyle(group_style);
-    inputs_group_.SetCustomStyle(group_style);
-    data_group_.SetCustomStyle(group_style);
-    navigation_group_.SetCustomStyle(group_style);
-    feedback_group_.SetCustomStyle(group_style);
-    container_plain_group_.SetCustomStyle(group_style);
-    container_edit_group_.SetCustomStyle(group_style);
-    container_choice_group_.SetCustomStyle(group_style);
-
-    controls_reference_label_.SetCustomStyle(UiTheme::ResolveLabel(UiRole::Standard));
-    controls_reference_button_.SetCustomStyle(UiTheme::ResolveButton(control_role_));
-    button_.SetCustomStyle(UiTheme::ResolveButton(control_role_));
-    tool_button_.SetCustomStyle(UiTheme::ResolveToolButton(control_role_));
-    split_button_.SetCustomStyle(UiTheme::ResolveButton(control_role_));
-    check_.SetCustomStyle(UiTheme::ResolveCheckBox(control_role_));
-    radio_.SetCustomStyle(UiTheme::ResolveRadioButton(control_role_));
-    toggle_.SetCustomStyle(UiTheme::ResolveToggle(control_role_));
-    dropdown_.SetCustomStyle(UiTheme::ResolveDropdown(control_role_));
-    int_edit_.SetCustomStyle(UiTheme::ResolveEdit(control_role_));
-    float_edit_.SetCustomStyle(UiTheme::ResolveEdit(control_role_));
-    slider_.SetCustomStyle(UiTheme::ResolveSlider(control_role_));
-    progress_.SetCustomStyle(UiTheme::ResolveProgressBar(control_role_));
-    line_edit_.SetCustomStyle(UiTheme::ResolveEdit(control_role_));
-    multi_edit_.SetCustomStyle(UiTheme::ResolveEdit(control_role_));
-    tab_.SetCustomStyle(UiTheme::ResolveTab(control_role_, UITAB_UNDERLINE));
-    feedback_label_.SetCustomStyle(UiTheme::ResolveLabel(control_role_));
-    feedback_progress_.SetCustomStyle(UiTheme::ResolveProgressBar(control_role_));
-
-    container_plain_label_.SetCustomStyle(UiTheme::ResolveLabel(UiRole::Standard));
-    container_controls_label_.SetCustomStyle(UiTheme::ResolveLabel(UiRole::Standard));
-    container_numeric_label_.SetCustomStyle(UiTheme::ResolveLabel(UiRole::Standard));
-    container_group_label_.SetCustomStyle(UiTheme::ResolveLabel(UiRole::Standard));
-    container_button_.SetCustomStyle(UiTheme::ResolveButton(control_role_));
-    container_check_.SetCustomStyle(UiTheme::ResolveCheckBox(control_role_));
-    container_edit_.SetCustomStyle(UiTheme::ResolveEdit(control_role_));
-    container_edit_button_.SetCustomStyle(UiTheme::ResolveButton(control_role_));
-    container_slider_.SetCustomStyle(UiTheme::ResolveSlider(control_role_));
-    container_int_.SetCustomStyle(UiTheme::ResolveEdit(control_role_));
-    container_dropdown_.SetCustomStyle(UiTheme::ResolveDropdown(control_role_));
-    container_toggle_.SetCustomStyle(UiTheme::ResolveToggle(control_role_));
+    ApplySampleTheme(container_plain_panel_, "UiPanel", true);
+    ApplySampleTheme(container_plain_label_, "UiLabel", false);
+    ApplySampleTheme(container_controls_panel_, "UiPanel", true);
+    ApplySampleTheme(container_controls_label_, "UiLabel", false);
+    ApplySampleTheme(container_button_, "UiButton", false);
+    ApplySampleTheme(container_check_, "UiCheckBox", false);
+    ApplySampleTheme(container_plain_group_, "UiGroupPanel", true);
+    ApplySampleTheme(container_group_label_, "UiLabel", false);
+    ApplySampleTheme(container_edit_group_, "UiGroupPanel", true);
+    ApplySampleTheme(container_edit_, "UiLineEdit", false);
+    ApplySampleTheme(container_edit_button_, "UiButton", false);
+    ApplySampleTheme(container_numeric_panel_, "UiPanel", true);
+    ApplySampleTheme(container_numeric_label_, "UiLabel", false);
+    ApplySampleTheme(container_slider_, "UiSlider", false);
+    ApplySampleTheme(container_int_, "UiIntEdit", false);
+    ApplySampleTheme(container_choice_group_, "UiGroupPanel", true);
+    ApplySampleTheme(container_dropdown_, "UiDropdown", false);
+    ApplySampleTheme(container_toggle_, "UiToggle", false);
 
     Layout();
     Refresh();

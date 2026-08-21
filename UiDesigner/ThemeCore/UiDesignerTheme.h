@@ -49,6 +49,12 @@ struct UiDesignerThemeSnapshot {
     UiDesignerThemePalette dark_palette;
     UiDesignerThemeRoleAssignments roles;
 
+    // Durable Theme Studio style recipes. Each key identifies one appearance,
+    // semantic role and control type; each value is a map of adapter field ids
+    // to authored values. This keeps Theme Studio edits in the theme document
+    // rather than in demo controls or Designer document nodes.
+    ValueMap style_overrides;
+
     int spacing = 8;
     int radius = 8;
     int pill_radius = 25;
@@ -69,6 +75,14 @@ struct UiDesignerThemeSnapshot {
     bool UsesDarkPalette() const { return mode == "Dark"; }
     Color GetActiveAccent() const;
     void SyncLegacyAccent();
+
+    ValueMap GetStyleOverrides(const String& target) const;
+    bool HasStyleOverride(const String& target, const String& field) const;
+    Value GetStyleOverride(const String& target, const String& field,
+                           const Value& fallback = Value()) const;
+    void SetStyleOverride(const String& target, const String& field,
+                          const Value& value);
+    bool RemoveStyleOverride(const String& target, const String& field);
 
     ValueMap ToValue() const;
     bool FromValue(const Value& value, String& error);
@@ -91,6 +105,15 @@ public:
     {
         return preview_active_ ? preview_ : value_;
     }
+
+    // Theme Studio can replace the generic theme-property projection with a
+    // selection-aware projection while retaining this document as the single
+    // preview/commit/undo/persistence authority.
+    void SetPropertyModelProvider(
+        Function<void(PropertyEditorModel&, const UiDesignerThemeSnapshot&)> provider);
+    void ClearPropertyModelProvider();
+    void SetActiveStyleTarget(const String& target);
+    const String& GetActiveStyleTarget() const { return active_style_target_; }
 
     void BuildPropertyModel(PropertyEditorModel& model) const;
     bool Preview(const String& property, const Value& value, String& error);
@@ -123,11 +146,17 @@ private:
                      String& error) const;
     Value GetProperty(const UiDesignerThemeSnapshot& source,
                       const String& property) const;
+    bool CommitSnapshot(const UiDesignerThemeSnapshot& after,
+                        const String& label, String& error);
     void TruncateRedo();
 
     UiDesignerThemeSnapshot value_;
     UiDesignerThemeSnapshot preview_;
     bool preview_active_ = false;
+
+    String active_style_target_;
+    Function<void(PropertyEditorModel&, const UiDesignerThemeSnapshot&)>
+        property_model_provider_;
 
     Array<UiDesignerThemeHistoryEntry> history_;
     int position_ = 0;

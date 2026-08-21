@@ -45,6 +45,64 @@ static bool ParseThemeColor(const Value& value, Color& color)
     return true;
 }
 
+// Theme Studio style recipes can contain typed U++ Values such as Color,
+// including Colors nested inside compound adapter recipes. Keep standalone
+// Theme JSON portable by using the same explicit recursive representation as
+// Designer document serialization instead of asking AsJSON to encode runtime
+// Value types directly.
+static Value EncodeThemeStyleValue(const Value& value)
+{
+    if(value.Is<Color>()) {
+        Color c = value;
+        ValueMap encoded;
+        encoded.Set("$type", "Color");
+        encoded.Set("r", c.GetR());
+        encoded.Set("g", c.GetG());
+        encoded.Set("b", c.GetB());
+        return encoded;
+    }
+    if(value.Is<ValueArray>()) {
+        ValueArray source = value;
+        ValueArray encoded;
+        for(const Value& item : source)
+            encoded.Add(EncodeThemeStyleValue(item));
+        return encoded;
+    }
+    if(value.Is<ValueMap>()) {
+        ValueMap source = value;
+        ValueMap encoded;
+        for(int i = 0; i < source.GetCount(); i++)
+            encoded.Set(source.GetKey(i),
+                        EncodeThemeStyleValue(source.GetValue(i)));
+        return encoded;
+    }
+    return value;
+}
+
+static Value DecodeThemeStyleValue(const Value& value)
+{
+    if(value.Is<ValueMap>()) {
+        ValueMap source = value;
+        if((String)UiDesignerMapValue(source, "$type", "") == "Color")
+            return Color((int)UiDesignerMapValue(source, "r", 0),
+                         (int)UiDesignerMapValue(source, "g", 0),
+                         (int)UiDesignerMapValue(source, "b", 0));
+        ValueMap decoded;
+        for(int i = 0; i < source.GetCount(); i++)
+            decoded.Set(source.GetKey(i),
+                        DecodeThemeStyleValue(source.GetValue(i)));
+        return decoded;
+    }
+    if(value.Is<ValueArray>()) {
+        ValueArray source = value;
+        ValueArray decoded;
+        for(const Value& item : source)
+            decoded.Add(DecodeThemeStyleValue(item));
+        return decoded;
+    }
+    return value;
+}
+
 static int ThemePaletteIndex(int value)
 {
     return minmax(value, 0, UI_DESIGNER_THEME_PALETTE_SIZE - 1);
@@ -166,6 +224,61 @@ void UiDesignerThemeSnapshot::SyncLegacyAccent()
     accent = GetActiveAccent();
 }
 
+ValueMap UiDesignerThemeSnapshot::GetStyleOverrides(const String& target) const
+{
+    const int q = style_overrides.Find(target);
+    if(q < 0)
+        return ValueMap();
+    const Value value = style_overrides.GetValue(q);
+    return value.Is<ValueMap>() ? (ValueMap)value : ValueMap();
+}
+
+bool UiDesignerThemeSnapshot::HasStyleOverride(const String& target,
+                                               const String& field) const
+{
+    return GetStyleOverrides(target).Find(field) >= 0;
+}
+
+Value UiDesignerThemeSnapshot::GetStyleOverride(const String& target,
+                                                const String& field,
+                                                const Value& fallback) const
+{
+    ValueMap values = GetStyleOverrides(target);
+    const int q = values.Find(field);
+    return q >= 0 ? values.GetValue(q) : fallback;
+}
+
+void UiDesignerThemeSnapshot::SetStyleOverride(const String& target,
+                                               const String& field,
+                                               const Value& value)
+{
+    if(target.IsEmpty() || field.IsEmpty())
+        return;
+    ValueMap values = GetStyleOverrides(target);
+    values.Set(field, value);
+    style_overrides.Set(target, values);
+}
+
+bool UiDesignerThemeSnapshot::RemoveStyleOverride(const String& target,
+                                                  const String& field)
+{
+    if(target.IsEmpty() || field.IsEmpty())
+        return false;
+    const int target_index = style_overrides.Find(target);
+    ValueMap values = GetStyleOverrides(target);
+    if(target_index < 0 || values.Find(field) < 0)
+        return false;
+    ValueMap kept;
+    for(int i = 0; i < values.GetCount(); i++)
+        if(AsString(values.GetKey(i)) != field)
+            kept.Set(values.GetKey(i), values.GetValue(i));
+    if(kept.IsEmpty())
+        style_overrides.Remove(target_index);
+    else
+        style_overrides.Set(target, kept);
+    return true;
+}
+
 ValueMap UiDesignerThemeSnapshot::ToValue() const
 {
     ValueMap palettes;
@@ -178,6 +291,7 @@ ValueMap UiDesignerThemeSnapshot::ToValue() const
     out.Set("accent", ThemeColorText(accent));
     out.Set("palettes", palettes);
     out.Set("roles", roles.ToValue());
+    out.Set("styles", EncodeThemeStyleValue(style_overrides));
     out.Set("spacing", spacing);
     out.Set("radius", radius);
     out.Set("pill_radius", pill_radius);
@@ -235,6 +349,22 @@ bool UiDesignerThemeSnapshot::FromValue(const Value& value, String& error)
         dark_palette.Set(roles.control_accent, parsed_accent);
     }
 
+    if(in.Find("styles") >= 0) {
+        Value styles = DecodeThemeStyleValue(
+            UiDesignerMapValue(in, "styles", ValueMap()));
+        if(!styles.Is<ValueMap>()) {
+            error = "Theme styles must be an object";
+            return false;
+        }
+        ValueMap map = styles;
+        for(int i = 0; i < map.GetCount(); i++)
+            if(!map.GetValue(i).Is<ValueMap>()) {
+                error = "Theme style target must contain a field object";
+                return false;
+            }
+        style_overrides = map;
+    }
+
     spacing = UiDesignerMapValue(in, "spacing", 8);
     radius = UiDesignerMapValue(in, "radius", 8);
     pill_radius = UiDesignerMapValue(in, "pill_radius", 25);
@@ -251,6 +381,31 @@ bool UiDesignerThemeSnapshot::FromValue(const Value& value, String& error)
 UiDesignerThemeDocument::UiDesignerThemeDocument()
 {
     preview_ = value_;
+}
+
+void UiDesignerThemeDocument::SetPropertyModelProvider(
+    Function<void(PropertyEditorModel&, const UiDesignerThemeSnapshot&)> provider)
+{
+    property_model_provider_ = pick(provider);
+}
+
+void UiDesignerThemeDocument::ClearPropertyModelProvider()
+{
+    property_model_provider_.Clear();
+}
+
+void UiDesignerThemeDocument::SetActiveStyleTarget(const String& target)
+{
+    if(active_style_target_ == target)
+        return;
+    if(preview_active_) {
+        preview_ = value_;
+        preview_active_ = false;
+    }
+    active_style_target_ = target;
+    // Reuse the existing theme projection notification. Session rebuilds the
+    // ThemeModel in response, and the Window already observes this event.
+    WhenPreview();
 }
 
 static void AddThemeChoice(PropertyEditorModel& model, const String& id,
@@ -283,6 +438,11 @@ void UiDesignerThemeDocument::BuildPropertyModel(
     PropertyEditorModel& model) const
 {
     const UiDesignerThemeSnapshot& t = GetEffective();
+    if(property_model_provider_) {
+        property_model_provider_(model, t);
+        return;
+    }
+
     const UiDesignerThemeSnapshot defaults;
     model.Clear(false);
 
@@ -383,6 +543,8 @@ void UiDesignerThemeDocument::BuildPropertyModel(
 Value UiDesignerThemeDocument::GetProperty(
     const UiDesignerThemeSnapshot& source, const String& property) const
 {
+    if(property.StartsWith("studio."))
+        return source.GetStyleOverride(active_style_target_, property.Mid(7));
     if(property == "preset") return source.preset;
     if(property == "mode") return source.mode;
     if(property == "accent") return source.accent;
@@ -414,6 +576,21 @@ bool UiDesignerThemeDocument::SetProperty(
     UiDesignerThemeSnapshot& target, const String& property,
     const Value& value, String& error) const
 {
+    if(property.StartsWith("studio.")) {
+        if(active_style_target_.IsEmpty()) {
+            error = "Select a Theme Studio sample first";
+            return false;
+        }
+        const String field = property.Mid(7);
+        if(field.IsEmpty()) {
+            error = "Theme Studio style field is empty";
+            return false;
+        }
+        target.SetStyleOverride(active_style_target_, field, value);
+        error.Clear();
+        return true;
+    }
+
     if(property == "preset") {
         const String preset = value;
         if(!IsThemePresetName(preset)) {
@@ -515,14 +692,9 @@ void UiDesignerThemeDocument::TruncateRedo()
         saved_position_ = -1;
 }
 
-bool UiDesignerThemeDocument::Commit(
-    const String& property, const Value& value,
-    const String& label, String& error)
+bool UiDesignerThemeDocument::CommitSnapshot(
+    const UiDesignerThemeSnapshot& after, const String& label, String& error)
 {
-    UiDesignerThemeSnapshot after = value_;
-    if(!SetProperty(after, property, value, error))
-        return false;
-
     if(after.ToValue() == value_.ToValue()) {
         preview_ = value_;
         preview_active_ = false;
@@ -532,7 +704,7 @@ bool UiDesignerThemeDocument::Commit(
 
     TruncateRedo();
     UiDesignerThemeHistoryEntry& entry = history_.Add();
-    entry.label = label.IsEmpty() ? "Set " + property : label;
+    entry.label = label.IsEmpty() ? "Edit theme" : label;
     entry.before = value_;
     entry.after = after;
 
@@ -546,6 +718,18 @@ bool UiDesignerThemeDocument::Commit(
     return true;
 }
 
+bool UiDesignerThemeDocument::Commit(
+    const String& property, const Value& value,
+    const String& label, String& error)
+{
+    UiDesignerThemeSnapshot after = value_;
+    if(!SetProperty(after, property, value, error))
+        return false;
+    return CommitSnapshot(after,
+                          label.IsEmpty() ? "Set " + property : label,
+                          error);
+}
+
 bool UiDesignerThemeDocument::CommitPalette(
     bool dark, const UiDesignerThemePalette& palette,
     const String& label, String& error)
@@ -553,30 +737,11 @@ bool UiDesignerThemeDocument::CommitPalette(
     UiDesignerThemeSnapshot after = value_;
     after.GetPalette(dark) = palette;
     after.SyncLegacyAccent();
-
-    if(after.ToValue() == value_.ToValue()) {
-        preview_ = value_;
-        preview_active_ = false;
-        error.Clear();
-        return true;
-    }
-
-    TruncateRedo();
-    UiDesignerThemeHistoryEntry& entry = history_.Add();
-    entry.label = label.IsEmpty()
-        ? String("Set ") + (dark ? "Dark" : "Light") + " palette"
-        : label;
-    entry.before = value_;
-    entry.after = after;
-
-    value_ = after;
-    preview_ = value_;
-    preview_active_ = false;
-    position_ = history_.GetCount();
-    WhenChanged();
-    WhenHistoryChanged();
-    error.Clear();
-    return true;
+    return CommitSnapshot(after,
+        label.IsEmpty()
+            ? String("Set ") + (dark ? "Dark" : "Light") + " palette"
+            : label,
+        error);
 }
 
 void UiDesignerThemeDocument::CancelPreview()
@@ -591,6 +756,15 @@ void UiDesignerThemeDocument::CancelPreview()
 bool UiDesignerThemeDocument::Reset(
     const String& property, String& error)
 {
+    if(property.StartsWith("studio.")) {
+        if(active_style_target_.IsEmpty()) {
+            error = "Select a Theme Studio sample first";
+            return false;
+        }
+        UiDesignerThemeSnapshot after = value_;
+        after.RemoveStyleOverride(active_style_target_, property.Mid(7));
+        return CommitSnapshot(after, "Reset " + property.Mid(7), error);
+    }
     UiDesignerThemeSnapshot defaults;
     return Commit(property, GetProperty(defaults, property),
                   "Reset " + property, error);
@@ -641,7 +815,7 @@ String UiDesignerThemeDocument::Serialize(bool pretty) const
 {
     ValueMap root;
     root.Set("format", "upp-ui-theme-designer");
-    root.Set("schema", 2);
+    root.Set("schema", 3);
     root.Set("theme", value_.ToValue());
     return AsJSON(root, pretty);
 }
@@ -664,7 +838,7 @@ bool UiDesignerThemeDocument::Deserialize(
         return false;
     }
     const int schema = UiDesignerMapValue(root, "schema", 1);
-    if(schema < 1 || schema > 2) {
+    if(schema < 1 || schema > 3) {
         error = Format("Unsupported theme schema %d", schema);
         return false;
     }

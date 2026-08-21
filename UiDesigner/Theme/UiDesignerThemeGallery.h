@@ -39,6 +39,47 @@ private:
     bool dragging_ = false;
 };
 
+class UiDesignerThemeSelectableBase {
+public:
+    virtual ~UiDesignerThemeSelectableBase() {}
+    virtual void SetThemeSelected(bool selected) = 0;
+    Event<> WhenThemeSelect;
+};
+
+template <class T>
+class UiDesignerThemeSelectable : public T, public UiDesignerThemeSelectableBase {
+public:
+    UiDesignerThemeSelectable()
+    {
+        this->WantFocus();
+    }
+
+    void SetThemeSelected(bool selected) override
+    {
+        if(selected_ == selected)
+            return;
+        selected_ = selected;
+        this->Refresh();
+    }
+
+    virtual void LeftDown(Point p, dword keyflags) override
+    {
+        WhenThemeSelect();
+        T::LeftDown(p, keyflags);
+    }
+
+    virtual void Paint(Draw& w) override
+    {
+        T::Paint(w);
+        if(selected_)
+            DrawFatFrame(w, Rect(Point(0, 0), this->GetSize()),
+                         SColorHighlight(), DPI(2));
+    }
+
+private:
+    bool selected_ = false;
+};
+
 class UiDesignerThemeGallery;
 
 class UiDesignerThemeToolbar : public ParentCtrl {
@@ -59,15 +100,13 @@ public:
     void ApplyTheme(const UiDesignerThemeSnapshot& theme);
     void SyncFromTheme();
 
-    // UiDesignerWindow used a UiDesignerPillBar here before the Theme Builder
-    // toolbar became a first-class control. Keep these two tiny compatibility
-    // shims while the window source is migrated: the toolbar owns its contents,
-    // so legacy AddControl calls deliberately do not re-parent those controls.
+    // Compatibility while UiDesignerWindow still treats the old toolbar slot
+    // like a pill bar. The Theme Builder owns its toolbar children itself.
     UiDesignerThemeToolbar& SetInset(int) { return *this; }
     UiDesignerThemeToolbar& AddControl(Ctrl&, int) { return *this; }
 
     String GetPreviewMode() const { return preview_mode_; }
-    UiRole GetPanelRole() const { return panel_role_; }
+    UiPanelRole GetPanelRole() const { return panel_role_; }
     UiRole GetControlRole() const { return control_role_; }
 
     virtual Size GetMinSize() const override { return Size(DPI(760), DPI(50)); }
@@ -78,7 +117,7 @@ public:
 
 private:
     void SetPreviewMode(const String& mode);
-    void SetPanelRole(UiRole role);
+    void SetPanelRole(UiPanelRole role);
     void SetControlRole(UiRole role);
     void ToggleAppearance();
     void EditPalette(bool dark, int active_slot);
@@ -88,7 +127,7 @@ private:
     UiDesignerThemeGallery *gallery_ = nullptr;
     bool syncing_ = false;
     String preview_mode_ = "controls";
-    UiRole panel_role_ = UiRole::Accent;
+    UiPanelRole panel_role_ = UiPanelRole::Surface;
     UiRole control_role_ = UiRole::Accent;
 
     UiToolButton controls_mode_;
@@ -109,17 +148,19 @@ public:
     typedef UiDesignerThemeGallery CLASSNAME;
 
     UiDesignerThemeGallery();
+    virtual ~UiDesignerThemeGallery();
 
     void SetCatalog(const UiDesignerCatalog *catalog);
     void SetThemeDocument(UiDesignerThemeDocument *theme);
     void SetPreviewMode(const String& mode);
-    void SetPanelRole(UiRole role);
+    void SetPanelRole(UiPanelRole role);
     void SetControlRole(UiRole role);
     void RefreshTheme();
     int GetContentHeight() const { return content_height_; }
     String GetPreviewMode() const { return preview_mode_; }
-    UiRole GetPanelRole() const { return panel_role_; }
+    UiPanelRole GetPanelRole() const { return panel_role_; }
     UiRole GetControlRole() const { return control_role_; }
+    String GetSelectedType() const { return selected_type_; }
 
     // Compatibility with the previous gallery filter API. Theme Builder now
     // has only the two purposeful preview modes.
@@ -135,16 +176,29 @@ private:
     void BuildPreviewMatrices();
     void BuildControlSamples();
     void BuildContainerSamples();
+    void BindSelectableSamples();
     void ApplyThemeStyles();
+    void ApplySampleTheme(Ctrl& ctrl, const String& type, bool panel_sample);
     void LayoutControlSamples();
     void LayoutContainerSamples();
+    void SelectSample(const String& type, UiDesignerThemeSelectableBase *sample,
+                      bool panel_sample);
+    void SyncSelectedTarget();
+    String CurrentStyleTarget(const UiDesignerThemeSnapshot& theme,
+                              const String& type, bool panel_sample) const;
+    void BuildSelectedPropertyModel(PropertyEditorModel& model,
+                                    const UiDesignerThemeSnapshot& theme) const;
 
     const UiDesignerCatalog *catalog_ = nullptr;
     UiDesignerThemeDocument *theme_ = nullptr;
     String preview_mode_ = "controls";
-    UiRole panel_role_ = UiRole::Accent;
+    UiPanelRole panel_role_ = UiPanelRole::Surface;
     UiRole control_role_ = UiRole::Accent;
     int content_height_ = DPI(730);
+
+    String selected_type_;
+    bool selected_panel_sample_ = false;
+    UiDesignerThemeSelectableBase *selected_sample_ = nullptr;
 
     UiStack preview_stack_;
     UiGridLayout controls_matrix_;
@@ -153,76 +207,77 @@ private:
     UiBoxLayout container_columns_[3];
 
     // Controls view: representative families hosted on independently themed
-    // panels/group panels.
-    UiPanel controls_reference_panel_;
-    UiLabel controls_reference_label_;
-    UiButton controls_reference_button_;
+    // panels/group panels. Only controls backed by a real Theme adapter are
+    // selectable; passive reference controls remain visual context.
+    UiDesignerThemeSelectable<UiPanel> controls_reference_panel_;
+    UiDesignerThemeSelectable<UiLabel> controls_reference_label_;
+    UiDesignerThemeSelectable<UiButton> controls_reference_button_;
 
-    UiGroupPanel buttons_group_;
-    UiButton button_;
-    UiToolButton tool_button_;
-    UiSplitButton split_button_;
+    UiDesignerThemeSelectable<UiGroupPanel> buttons_group_;
+    UiDesignerThemeSelectable<UiButton> button_;
+    UiDesignerThemeSelectable<UiToolButton> tool_button_;
+    UiDesignerThemeSelectable<UiSplitButton> split_button_;
     UiBreadcrumbs breadcrumbs_;
 
-    UiGroupPanel choices_group_;
-    UiCheckBox check_;
-    UiRadioButton radio_;
-    UiToggle toggle_;
-    UiDropdown dropdown_;
+    UiDesignerThemeSelectable<UiGroupPanel> choices_group_;
+    UiDesignerThemeSelectable<UiCheckBox> check_;
+    UiDesignerThemeSelectable<UiRadioButton> radio_;
+    UiDesignerThemeSelectable<UiToggle> toggle_;
+    UiDesignerThemeSelectable<UiDropdown> dropdown_;
 
-    UiGroupPanel numbers_group_;
-    UiIntEdit int_edit_;
-    UiFloatEdit float_edit_;
-    UiSlider slider_;
-    UiProgressBar progress_;
+    UiDesignerThemeSelectable<UiGroupPanel> numbers_group_;
+    UiDesignerThemeSelectable<UiIntEdit> int_edit_;
+    UiDesignerThemeSelectable<UiFloatEdit> float_edit_;
+    UiDesignerThemeSelectable<UiSlider> slider_;
+    UiDesignerThemeSelectable<UiProgressBar> progress_;
 
-    UiGroupPanel inputs_group_;
-    UiLineEdit line_edit_;
-    UiMultiEdit multi_edit_;
+    UiDesignerThemeSelectable<UiGroupPanel> inputs_group_;
+    UiDesignerThemeSelectable<UiLineEdit> line_edit_;
+    UiDesignerThemeSelectable<UiMultiEdit> multi_edit_;
     UiSliderEdit slider_edit_;
 
-    UiGroupPanel data_group_;
-    UiList list_;
-    UiTree tree_;
+    UiDesignerThemeSelectable<UiGroupPanel> data_group_;
+    UiDesignerThemeSelectable<UiList> list_;
+    UiDesignerThemeSelectable<UiTree> tree_;
     UiTable table_;
 
-    UiGroupPanel navigation_group_;
-    UiTab tab_;
+    UiDesignerThemeSelectable<UiGroupPanel> navigation_group_;
+    UiDesignerThemeSelectable<UiTab> tab_;
     ParentCtrl tab_page_a_;
     ParentCtrl tab_page_b_;
-    UiAccordion accordion_;
+    UiDesignerThemeSelectable<UiAccordion> accordion_;
     ParentCtrl accordion_a_;
     ParentCtrl accordion_b_;
 
-    UiGroupPanel feedback_group_;
-    UiLabel feedback_label_;
-    UiProgressBar feedback_progress_;
+    UiDesignerThemeSelectable<UiGroupPanel> feedback_group_;
+    UiDesignerThemeSelectable<UiLabel> feedback_label_;
+    UiDesignerThemeSelectable<UiProgressBar> feedback_progress_;
 
     // Containers view: paired plain/populated surfaces make it possible to
     // judge container chrome both alone and with representative content.
-    UiPanel container_plain_panel_;
-    UiLabel container_plain_label_;
+    UiDesignerThemeSelectable<UiPanel> container_plain_panel_;
+    UiDesignerThemeSelectable<UiLabel> container_plain_label_;
 
-    UiPanel container_controls_panel_;
-    UiLabel container_controls_label_;
-    UiButton container_button_;
-    UiCheckBox container_check_;
+    UiDesignerThemeSelectable<UiPanel> container_controls_panel_;
+    UiDesignerThemeSelectable<UiLabel> container_controls_label_;
+    UiDesignerThemeSelectable<UiButton> container_button_;
+    UiDesignerThemeSelectable<UiCheckBox> container_check_;
 
-    UiGroupPanel container_plain_group_;
-    UiLabel container_group_label_;
+    UiDesignerThemeSelectable<UiGroupPanel> container_plain_group_;
+    UiDesignerThemeSelectable<UiLabel> container_group_label_;
 
-    UiGroupPanel container_edit_group_;
-    UiLineEdit container_edit_;
-    UiButton container_edit_button_;
+    UiDesignerThemeSelectable<UiGroupPanel> container_edit_group_;
+    UiDesignerThemeSelectable<UiLineEdit> container_edit_;
+    UiDesignerThemeSelectable<UiButton> container_edit_button_;
 
-    UiPanel container_numeric_panel_;
-    UiLabel container_numeric_label_;
-    UiSlider container_slider_;
-    UiIntEdit container_int_;
+    UiDesignerThemeSelectable<UiPanel> container_numeric_panel_;
+    UiDesignerThemeSelectable<UiLabel> container_numeric_label_;
+    UiDesignerThemeSelectable<UiSlider> container_slider_;
+    UiDesignerThemeSelectable<UiIntEdit> container_int_;
 
-    UiGroupPanel container_choice_group_;
-    UiDropdown container_dropdown_;
-    UiToggle container_toggle_;
+    UiDesignerThemeSelectable<UiGroupPanel> container_choice_group_;
+    UiDesignerThemeSelectable<UiDropdown> container_dropdown_;
+    UiDesignerThemeSelectable<UiToggle> container_toggle_;
 };
 
 }
