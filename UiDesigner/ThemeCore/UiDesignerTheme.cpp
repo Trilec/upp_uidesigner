@@ -45,11 +45,10 @@ static bool ParseThemeColor(const Value& value, Color& color)
     return true;
 }
 
-// Theme Studio style recipes can contain typed U++ Values such as Color,
-// including Colors nested inside compound adapter recipes. Keep standalone
-// Theme JSON portable by using the same explicit recursive representation as
-// Designer document serialization instead of asking AsJSON to encode runtime
-// Value types directly.
+// Theme Studio style recipes and presentation state can contain typed U++
+// Values such as Color, including Colors nested inside compound recipes. Keep
+// standalone Theme JSON portable by using the same explicit recursive
+// representation as Designer document serialization.
 static Value EncodeThemeStyleValue(const Value& value)
 {
     if(value.Is<Color>()) {
@@ -279,6 +278,53 @@ bool UiDesignerThemeSnapshot::RemoveStyleOverride(const String& target,
     return true;
 }
 
+ValueMap UiDesignerThemeSnapshot::GetStudioPreview(const String& target) const
+{
+    const int q = studio_preview.Find(target);
+    if(q < 0)
+        return ValueMap();
+    const Value value = studio_preview.GetValue(q);
+    return value.Is<ValueMap>() ? (ValueMap)value : ValueMap();
+}
+
+Value UiDesignerThemeSnapshot::GetStudioPreviewValue(
+    const String& target, const String& field, const Value& fallback) const
+{
+    ValueMap values = GetStudioPreview(target);
+    const int q = values.Find(field);
+    return q >= 0 ? values.GetValue(q) : fallback;
+}
+
+void UiDesignerThemeSnapshot::SetStudioPreviewValue(
+    const String& target, const String& field, const Value& value)
+{
+    if(target.IsEmpty() || field.IsEmpty())
+        return;
+    ValueMap values = GetStudioPreview(target);
+    values.Set(field, value);
+    studio_preview.Set(target, values);
+}
+
+bool UiDesignerThemeSnapshot::RemoveStudioPreviewValue(
+    const String& target, const String& field)
+{
+    if(target.IsEmpty() || field.IsEmpty())
+        return false;
+    const int target_index = studio_preview.Find(target);
+    ValueMap values = GetStudioPreview(target);
+    if(target_index < 0 || values.Find(field) < 0)
+        return false;
+    ValueMap kept;
+    for(int i = 0; i < values.GetCount(); i++)
+        if(AsString(values.GetKey(i)) != field)
+            kept.Set(values.GetKey(i), values.GetValue(i));
+    if(kept.IsEmpty())
+        studio_preview.Remove(target_index);
+    else
+        studio_preview.Set(target, kept);
+    return true;
+}
+
 ValueMap UiDesignerThemeSnapshot::ToValue() const
 {
     ValueMap palettes;
@@ -292,6 +338,7 @@ ValueMap UiDesignerThemeSnapshot::ToValue() const
     out.Set("palettes", palettes);
     out.Set("roles", roles.ToValue());
     out.Set("styles", EncodeThemeStyleValue(style_overrides));
+    out.Set("studio_preview", EncodeThemeStyleValue(studio_preview));
     out.Set("spacing", spacing);
     out.Set("radius", radius);
     out.Set("pill_radius", pill_radius);
@@ -363,6 +410,22 @@ bool UiDesignerThemeSnapshot::FromValue(const Value& value, String& error)
                 return false;
             }
         style_overrides = map;
+    }
+
+    if(in.Find("studio_preview") >= 0) {
+        Value preview = DecodeThemeStyleValue(
+            UiDesignerMapValue(in, "studio_preview", ValueMap()));
+        if(!preview.Is<ValueMap>()) {
+            error = "Theme Studio preview state must be an object";
+            return false;
+        }
+        ValueMap map = preview;
+        for(int i = 0; i < map.GetCount(); i++)
+            if(!map.GetValue(i).Is<ValueMap>()) {
+                error = "Theme Studio preview target must contain a field object";
+                return false;
+            }
+        studio_preview = map;
     }
 
     spacing = UiDesignerMapValue(in, "spacing", 8);
@@ -545,6 +608,8 @@ Value UiDesignerThemeDocument::GetProperty(
 {
     if(property.StartsWith("studio."))
         return source.GetStyleOverride(active_style_target_, property.Mid(7));
+    if(property.StartsWith("preview."))
+        return source.GetStudioPreviewValue(active_preview_target_, property.Mid(8));
     if(property == "preset") return source.preset;
     if(property == "mode") return source.mode;
     if(property == "accent") return source.accent;
@@ -587,6 +652,21 @@ bool UiDesignerThemeDocument::SetProperty(
             return false;
         }
         target.SetStyleOverride(active_style_target_, field, value);
+        error.Clear();
+        return true;
+    }
+
+    if(property.StartsWith("preview.")) {
+        if(active_preview_target_.IsEmpty()) {
+            error = "Select a Theme Studio sample first";
+            return false;
+        }
+        const String field = property.Mid(8);
+        if(field.IsEmpty()) {
+            error = "Theme Studio preview field is empty";
+            return false;
+        }
+        target.SetStudioPreviewValue(active_preview_target_, field, value);
         error.Clear();
         return true;
     }
@@ -764,6 +844,15 @@ bool UiDesignerThemeDocument::Reset(
         UiDesignerThemeSnapshot after = value_;
         after.RemoveStyleOverride(active_style_target_, property.Mid(7));
         return CommitSnapshot(after, "Reset " + property.Mid(7), error);
+    }
+    if(property.StartsWith("preview.")) {
+        if(active_preview_target_.IsEmpty()) {
+            error = "Select a Theme Studio sample first";
+            return false;
+        }
+        UiDesignerThemeSnapshot after = value_;
+        after.RemoveStudioPreviewValue(active_preview_target_, property.Mid(8));
+        return CommitSnapshot(after, "Reset preview " + property.Mid(8), error);
     }
     UiDesignerThemeSnapshot defaults;
     return Commit(property, GetProperty(defaults, property),
