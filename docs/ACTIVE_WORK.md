@@ -4,13 +4,13 @@ Remote GitHub is authoritative. Never force-update `main`. Refresh the current r
 
 ## CURRENT SUPERVISORY STATE — 2026-08-21
 
-STATUS: **PROPERTYEDITOR / DESIGNER / THEME STUDIO INTERACTION UNIFICATION SOURCE COMPLETE; CURRENT WINDOWS + VISUAL VALIDATION PENDING.**
+STATUS: **PROPERTYEDITOR / LABEL DEMO / DESIGNER / THEME STUDIO INTERACTION UNIFICATION SOURCE COMPLETE; CURRENT WINDOWS + VISUAL VALIDATION PENDING.**
 
 Authoritative branch: `main`.
 
 Current source/test checkpoint before this documentation update:
 
-- `a1f6b0b3832d700bf1259d90f2412daf8c4ab842` — Theme Builder contract coverage for shared Designer metadata and separate preview-presentation state;
+- `8ef7417b54b2309b89cb8d9d6d1cc6afa55994f2` — deterministic Theme Builder contract coverage for shared Designer metadata and separate preview-presentation state;
 - `b1a061319f60e36f7bdeb1e911ff791dc8a2a450` — Theme Studio preview properties reuse normal Designer catalog metadata and Preview adapters;
 - `9697d625f561dab3eb662f854fbdb36b526d0a0e` — Theme Studio preview-presentation persistence;
 - `0aefb699cbd7038aafbb54fae12dd325f3fdeb18` — normal Designer and Theme override projections preserve rich PropertyEditor metadata.
@@ -34,7 +34,7 @@ Gary is the Windows validator/helper: fetch the exact requested `main`, build/ru
 
 ## UNIFIED PROPERTYEDITOR CONTRACT
 
-The Label demo, normal Designer Inspector and Theme Studio must use the same PropertyEditor interaction vocabulary rather than separate approximations.
+The Label demo, normal Designer Inspector and Theme Studio use the same PropertyEditor interaction vocabulary rather than separate approximations.
 
 Current contract:
 
@@ -57,7 +57,7 @@ The normal Designer projection and Theme override projection both go through the
 
 ## LABEL DEMO / ICON PRESENTATION
 
-The current Label demo already uses the shared PropertyEditor APIs:
+The Label demo uses the shared PropertyEditor APIs:
 
 - bounded numeric rows are created through `AddNumericInt`, which enables the slider toggle;
 - Icon Side is a Cardinal4 matrix;
@@ -65,7 +65,7 @@ The current Label demo already uses the shared PropertyEditor APIs:
 - icon rendering supports `Auto`, `PreserveColor` and `MonoTint`;
 - explicit icon sizing is applied through `UiLabel::SetIconSize`, and `UiLabel` treats a positive explicit size as the rendered icon size when scale-to-content is off.
 
-No separate Label-demo-only editor mechanism should be introduced. The current unification fixes the shared behavior the demo and Designer consume.
+No separate Label-demo-only editor mechanism is introduced. The shared PropertyEditor changes are consumed by the demo and Designer.
 
 ## THEME STUDIO PRODUCT CONTRACT
 
@@ -85,7 +85,7 @@ Selectable samples use real catalog Theme adapters. The right PropertyEditor is 
 
 ## THEME STUDIO PREVIEW-PRESENTATION LAYER
 
-Theme Studio now has a deliberately separate sample-presentation layer for properties that help judge a style but are not themselves runtime theme recipe fields.
+Theme Studio has a deliberately separate sample-presentation layer for properties that help judge a style but are not themselves runtime theme recipe fields.
 
 `UiDesignerThemeSnapshot::studio_preview` is keyed independently of appearance/semantic role:
 
@@ -136,6 +136,16 @@ Standalone Theme JSON remains schema 3. Schemas 1 and 2 remain accepted for migr
 Project Save embeds `theme.Get().ToValue()`. Theme JSON export and generated-package theme metadata use the same authoritative ThemeDocument serialization. Dedicated standalone Theme JSON import/reuse UI remains a later bounded feature.
 
 ## FOCUSED TESTS
+
+### `Utilities/PropertyEditorV1RunTests`
+
+Must pass in Debug and Release:
+
+```text
+PropertyEditorV1RunTests: Checks: <n> Fails: 0
+```
+
+This is the focused shared-PropertyEditor regression gate for the numeric, rich-editor and scrolling lifecycle used by the Label demo, normal Designer and Theme Studio.
 
 ### `tests/ThemeBuilderContractTest`
 
@@ -195,12 +205,13 @@ Retained architecture:
 Validate current final `main`, not an earlier ancestor.
 
 1. Fetch exact `upp_Ui/main` and `upp_uidesigner/main`; report both SHAs.
-2. `ThemeBuilderContractTest` Debug + Release — `failed=0`.
-3. `ThemeDocumentTest` Debug + Release — `failed=0`.
-4. `PreviewLayoutRegressionTest` Debug + Release — `failed=0`.
-5. Build `UiLabelDemo` Debug.
-6. Build `UiDesigner` Debug + Release.
-7. Launch Debug UiDesigner, perform the smoke below, and leave it running for Curt.
+2. `PropertyEditorV1RunTests` Debug + Release — `Fails: 0`.
+3. `ThemeBuilderContractTest` Debug + Release — `failed=0`.
+4. `ThemeDocumentTest` Debug + Release — `failed=0`.
+5. `PreviewLayoutRegressionTest` Debug + Release — `failed=0`.
+6. Build `UiLabelDemo` Debug.
+7. Build `UiDesigner` Debug + Release.
+8. Launch Debug UiDesigner, perform the smoke below, and leave it running for Curt.
 
 Visual/interaction smoke:
 
