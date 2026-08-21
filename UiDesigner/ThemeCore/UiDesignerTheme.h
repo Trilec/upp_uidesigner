@@ -55,6 +55,12 @@ struct UiDesignerThemeSnapshot {
     // rather than in demo controls or Designer document nodes.
     ValueMap style_overrides;
 
+    // Theme Studio presentation state is deliberately separate from style
+    // recipes. It stores sample-only content/layout choices (for example icon,
+    // icon side/size and gap) used to judge a style. Runtime theme adapters do
+    // not consume these values.
+    ValueMap studio_preview;
+
     int spacing = 8;
     int radius = 8;
     int pill_radius = 25;
@@ -83,6 +89,13 @@ struct UiDesignerThemeSnapshot {
     void SetStyleOverride(const String& target, const String& field,
                           const Value& value);
     bool RemoveStyleOverride(const String& target, const String& field);
+
+    ValueMap GetStudioPreview(const String& target) const;
+    Value GetStudioPreviewValue(const String& target, const String& field,
+                                const Value& fallback = Value()) const;
+    void SetStudioPreviewValue(const String& target, const String& field,
+                               const Value& value);
+    bool RemoveStudioPreviewValue(const String& target, const String& field);
 
     ValueMap ToValue() const;
     bool FromValue(const Value& value, String& error);
@@ -114,6 +127,8 @@ public:
     void ClearPropertyModelProvider();
     void SetActiveStyleTarget(const String& target);
     const String& GetActiveStyleTarget() const { return active_style_target_; }
+    void SetActivePreviewTarget(const String& target) { active_preview_target_ = target; }
+    const String& GetActivePreviewTarget() const { return active_preview_target_; }
 
     void BuildPropertyModel(PropertyEditorModel& model) const;
     bool Preview(const String& property, const Value& value, String& error);
@@ -155,6 +170,7 @@ private:
     bool preview_active_ = false;
 
     String active_style_target_;
+    String active_preview_target_;
     Function<void(PropertyEditorModel&, const UiDesignerThemeSnapshot&)>
         property_model_provider_;
 
