@@ -138,56 +138,54 @@ CONSOLE_APP_MAIN
     Check(label != nullptr && button != nullptr,
           "Designer catalog exposes Label and Button metadata");
 
-    if(label) {
-        PropertyEditorModel projected;
-        const UiDesignerPropertySpec *width = label->FindProperty("icon_width");
-        const UiDesignerPropertySpec *side = label->FindProperty("icon_side");
-        const UiDesignerPropertySpec *icon = label->FindProperty("icon");
-        Check(width && side && icon,
-              "Label catalog exposes reusable preview icon metadata");
-        if(width) {
-            width->AddTo(projected, width->default_value, false);
-            const PropertyEditorItem *item = projected.Find("icon_width");
-            Check(item && item->kind == PropertyEditorKind::NumericInt &&
-                  item->show_slider_toggle,
-                  "bounded Designer numeric projection keeps value-to-slider affordance");
-        }
-        if(side) {
-            side->AddTo(projected, side->default_value, false);
-            const PropertyEditorItem *item = projected.Find("icon_side");
-            bool canonical = item && item->choices.GetCount() == 4;
-            if(canonical) {
-                static const char *expected[] = {"Left", "Right", "Top", "Bottom"};
-                for(int i = 0; i < 4; i++)
-                    canonical &= AsString(item->choices[i].value) == expected[i];
-            }
-            Check(item && item->kind == PropertyEditorKind::Custom &&
-                  item->custom_editor == PropertyEditorMatrixId() &&
-                  item->editor_variant == "Cardinal4" && canonical,
-                  "directional Designer choice projects to canonical Cardinal4 matrix");
-        }
-        if(icon) {
-            icon->AddTo(projected, icon->default_value, false);
-            const PropertyEditorItem *item = projected.Find("icon");
-            Check(item && item->kind == PropertyEditorKind::Custom &&
-                  item->custom_editor == PropertyEditorIconId(),
-                  "Designer icon projection keeps the shared icon chooser");
-        }
-    }
+    const UiDesignerPropertySpec *width = label ? label->FindProperty("icon_width") : nullptr;
+    const UiDesignerPropertySpec *side = label ? label->FindProperty("icon_side") : nullptr;
+    const UiDesignerPropertySpec *icon = label ? label->FindProperty("icon") : nullptr;
+    Check(width && side && icon,
+          "Label catalog exposes reusable preview icon metadata");
 
-    if(button) {
-        const UiDesignerThemeOverrideSpec *radius = button->FindThemeOverride("radius");
-        Check(radius != nullptr,
-              "Button Theme adapter exposes radius metadata");
-        if(radius) {
-            PropertyEditorModel projected;
-            radius->AddTo(projected, radius->default_value, false);
-            const PropertyEditorItem *item = projected.Find("radius");
-            Check(item && item->kind == PropertyEditorKind::NumericInt &&
-                  item->show_slider_toggle,
-                  "Theme override numeric projection keeps normal slider-toggle metadata");
-        }
+    PropertyEditorModel width_projection;
+    if(width)
+        width->AddTo(width_projection, width->default_value, false);
+    const PropertyEditorItem *width_item = width_projection.Find("icon_width");
+    Check(width_item && width_item->kind == PropertyEditorKind::NumericInt &&
+          width_item->show_slider_toggle,
+          "bounded Designer numeric projection keeps value-to-slider affordance");
+
+    PropertyEditorModel side_projection;
+    if(side)
+        side->AddTo(side_projection, side->default_value, false);
+    const PropertyEditorItem *side_item = side_projection.Find("icon_side");
+    bool canonical = side_item && side_item->choices.GetCount() == 4;
+    if(canonical) {
+        static const char *expected[] = {"Left", "Right", "Top", "Bottom"};
+        for(int i = 0; i < 4; i++)
+            canonical &= AsString(side_item->choices[i].value) == expected[i];
     }
+    Check(side_item && side_item->kind == PropertyEditorKind::Custom &&
+          side_item->custom_editor == PropertyEditorMatrixId() &&
+          side_item->editor_variant == "Cardinal4" && canonical,
+          "directional Designer choice projects to canonical Cardinal4 matrix");
+
+    PropertyEditorModel icon_projection;
+    if(icon)
+        icon->AddTo(icon_projection, icon->default_value, false);
+    const PropertyEditorItem *icon_item = icon_projection.Find("icon");
+    Check(icon_item && icon_item->kind == PropertyEditorKind::Custom &&
+          icon_item->custom_editor == PropertyEditorIconId(),
+          "Designer icon projection keeps the shared icon chooser");
+
+    const UiDesignerThemeOverrideSpec *radius =
+        button ? button->FindThemeOverride("radius") : nullptr;
+    Check(radius != nullptr,
+          "Button Theme adapter exposes radius metadata");
+    PropertyEditorModel radius_projection;
+    if(radius)
+        radius->AddTo(radius_projection, radius->default_value, false);
+    const PropertyEditorItem *radius_item = radius_projection.Find("radius");
+    Check(radius_item && radius_item->kind == PropertyEditorKind::NumericInt &&
+          radius_item->show_slider_toggle,
+          "Theme override numeric projection keeps normal slider-toggle metadata");
 
     // These calls exercise the public Theme Builder preview contract. The test
     // package also compiles and links the full Theme module, including the
