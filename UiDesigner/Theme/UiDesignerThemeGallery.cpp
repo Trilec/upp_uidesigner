@@ -1,5 +1,6 @@
 #include "UiDesignerThemeGallery.h"
 #include "UiDesignerThemeAdapter.h"
+#include <UiDesigner/Preview/UiDesignerPreview.h>
 #include <Ui/UiIcons.h>
 
 namespace Upp {
@@ -67,6 +68,49 @@ static void PopulateSampleNode(UiDesignerNode& node,
         node.SetProperty(AsString(spec.defaults.GetKey(i)),
                          spec.defaults.GetValue(i));
     node.SetProperty("role", role);
+}
+
+static bool IsThemeStudioPreviewProperty(const String& id)
+{
+    static const char *ids[] = {
+        "icon", "icon_render_mode", "icon_mode", "icon_side",
+        "icon_width", "icon_height", "icon_size", "scale_icon_to_content",
+        "content_gap", "align_h", "align_v"
+    };
+    for(const char *candidate : ids)
+        if(id == candidate)
+            return true;
+    return false;
+}
+
+static String ThemeStudioPreviewGroup(const String& id)
+{
+    return id == "icon" || id == "icon_render_mode" || id == "icon_mode"
+        ? "Preview / Content" : "Preview / Layout";
+}
+
+static String ThemeStudioPreviewTarget(const String& type, bool panel_sample)
+{
+    return String(panel_sample ? "panel|" : "control|") + type;
+}
+
+static Value ThemeStudioPreviewDefault(const UiDesignerPropertySpec& property)
+{
+    if(property.id == "icon" &&
+       (IsNull(property.default_value) ||
+        AsString(property.default_value).IsEmpty() ||
+        AsString(property.default_value) == "None" ||
+        AsString(property.default_value) == "Default"))
+        return String("ICON_DESIGN_WIDGETS_48");
+    if(property.id == "icon_render_mode" || property.id == "icon_mode")
+        return String("MonoTint");
+    if(property.id == "icon_width" || property.id == "icon_height" ||
+       property.id == "icon_size") {
+        const int authored = IsNumber(property.default_value)
+            ? (int)property.default_value : 0;
+        return max(24, authored);
+    }
+    return property.default_value;
 }
 
 // -----------------------------------------------------------------------------
@@ -796,6 +840,9 @@ void UiDesignerThemeGallery::SyncSelectedTarget()
 {
     if(!theme_)
         return;
+    const String preview_target = selected_type_.IsEmpty()
+        ? String() : ThemeStudioPreviewTarget(selected_type_, selected_panel_sample_);
+    theme_->SetActivePreviewTarget(preview_target);
     theme_->SetActiveStyleTarget(selected_type_.IsEmpty()
         ? String()
         : CurrentStyleTarget(theme_->GetEffective(), selected_type_,
@@ -872,10 +919,45 @@ void UiDesignerThemeGallery::BuildSelectedPropertyModel(
                             condition->value == property.visible_when_value;
     }
 
+    const String preview_target = ThemeStudioPreviewTarget(
+        selected_type_, selected_panel_sample_);
+    const ValueMap preview_values = theme.GetStudioPreview(preview_target);
+    for(const UiDesignerPropertySpec& source : spec->properties) {
+        if(!IsThemeStudioPreviewProperty(source.id))
+            continue;
+        UiDesignerPropertySpec property = source;
+        property.group = ThemeStudioPreviewGroup(property.id);
+        property.domain = PropertyEditorDomain::DesignerOnly;
+        const Value fallback = ThemeStudioPreviewDefault(property);
+        const int q = preview_values.Find(property.id);
+        const Value value = q >= 0 ? preview_values.GetValue(q) : fallback;
+        property.AddTo(model, value, false);
+        PropertyEditorItem *item = model.Find(property.id);
+        if(!item)
+            continue;
+        item->id = "preview." + property.id;
+        item->default_value = fallback;
+        item->resettable = true;
+        item->overrideable = false;
+        item->override_active = false;
+        item->value_editable = !item->read_only;
+        item->SetInherited(q < 0);
+        if(property.id == "icon_render_mode" || property.id == "icon_mode")
+            item->SetHelp("Preview-only icon rendering. Monochrome tint uses the selected control's themed Icon Ink.");
+    }
+
     const String subtitle = spec->display_name + " · " +
         (selected_panel_sample_ ? PanelRoleName(panel_role_)
                                 : ThemeRoleName(control_role_));
     model.SetGroupSubtitle("General", subtitle);
+    if(model.Find("preview.icon"))
+        model.SetGroupSubtitle("Preview / Content",
+                               "sample-only content for judging the authored theme");
+    if(model.Find("preview.icon_side") || model.Find("preview.icon_width") ||
+       model.Find("preview.icon_height") || model.Find("preview.icon_size") ||
+       model.Find("preview.content_gap"))
+        model.SetGroupSubtitle("Preview / Layout",
+                               "sample-only layout; not part of the runtime theme recipe");
     model.StructureChanged();
 }
 
@@ -913,6 +995,19 @@ void UiDesignerThemeGallery::ApplySampleTheme(
         styled.theme_overrides.Set(property.id, value);
     }
     adapter->ApplyPreviewStyle(ctrl, styled, *spec, nullptr);
+
+    // Presentation-only fields deliberately reuse the same catalog metadata
+    // and Preview adapter used by the normal Designer. This keeps icon chooser,
+    // render mode, Cardinal4 side selector and bounded numeric behavior unified
+    // without polluting the durable runtime theme recipe.
+    const String preview_target = ThemeStudioPreviewTarget(type, panel_sample);
+    for(const UiDesignerPropertySpec& property : spec->properties) {
+        if(!IsThemeStudioPreviewProperty(property.id))
+            continue;
+        const Value value = effective.GetStudioPreviewValue(
+            preview_target, property.id, ThemeStudioPreviewDefault(property));
+        UiDesignerPreviewFactory::Apply(ctrl, *spec, property.id, value);
+    }
 }
 
 void UiDesignerThemeGallery::ApplyThemeStyles()
