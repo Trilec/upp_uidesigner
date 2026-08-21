@@ -63,6 +63,22 @@ CONSOLE_APP_MAIN
           "Theme Studio preview remains transient");
     theme.CancelPreview();
 
+    const String preview_target = "control|UiLabel";
+    theme.SetActivePreviewTarget(preview_target);
+    Check(theme.Commit("preview.icon", "ICON_DESIGN_WIDGETS_48",
+                       "Set Theme Studio preview icon", error),
+          "Theme Studio sample presentation commits independently");
+    Check(theme.Commit("preview.icon_width", 32,
+                       "Set Theme Studio preview icon width", error),
+          "Theme Studio preview numeric value commits");
+    Check(AsString(theme.Get().GetStudioPreviewValue(preview_target, "icon")) ==
+              "ICON_DESIGN_WIDGETS_48" &&
+          (int)theme.Get().GetStudioPreviewValue(preview_target, "icon_width") == 32,
+          "Theme Studio presentation state is stored under its sample target");
+    Check(!theme.Get().HasStyleOverride(target, "icon") &&
+          !theme.Get().HasStyleOverride(target, "icon_width"),
+          "preview presentation does not pollute the runtime style recipe");
+
     const String json = theme.Serialize(false);
     Value root_value = ParseJSON(json);
     const bool valid_json = !IsError(root_value) && root_value.Is<ValueMap>();
@@ -80,6 +96,10 @@ CONSOLE_APP_MAIN
           "round-trip preserves independent Dark palette");
     Check(loaded.Get().GetStyleOverride(target, "face_normal") == Color(44, 55, 66),
           "round-trip restores typed Color style recipe");
+    Check(AsString(loaded.Get().GetStudioPreviewValue(preview_target, "icon")) ==
+              "ICON_DESIGN_WIDGETS_48" &&
+          (int)loaded.Get().GetStudioPreviewValue(preview_target, "icon_width") == 32,
+          "round-trip preserves Theme Studio presentation separately");
 
     loaded.SetActiveStyleTarget(target);
     Check(loaded.Reset("studio.face_normal", error),
@@ -91,6 +111,12 @@ CONSOLE_APP_MAIN
     Check(loaded.Undo() &&
           loaded.Get().GetStyleOverride(target, "face_normal") == Color(44, 55, 66),
           "Theme Studio style reset participates in undo history");
+
+    loaded.SetActivePreviewTarget(preview_target);
+    Check(loaded.Reset("preview.icon_width", error),
+          "Theme Studio preview reset succeeds");
+    Check(IsNull(loaded.Get().GetStudioPreviewValue(preview_target, "icon_width")),
+          "preview reset returns to the projection fallback without changing style");
 
     Color parsed;
     int alpha = 0;
@@ -104,6 +130,64 @@ CONSOLE_APP_MAIN
     Check(model.Find("frame") != nullptr &&
           model.Find("frame")->kind == PropertyEditorKind::Color,
           "PropertyEditor exposes a colour drop target kind");
+
+    UiDesignerCatalog catalog;
+    RegisterUiDesignerBuiltins(catalog);
+    const UiDesignerControlSpec *label = catalog.Find("UiLabel");
+    const UiDesignerControlSpec *button = catalog.Find("UiButton");
+    Check(label != nullptr && button != nullptr,
+          "Designer catalog exposes Label and Button metadata");
+
+    if(label) {
+        PropertyEditorModel projected;
+        const UiDesignerPropertySpec *width = label->FindProperty("icon_width");
+        const UiDesignerPropertySpec *side = label->FindProperty("icon_side");
+        const UiDesignerPropertySpec *icon = label->FindProperty("icon");
+        Check(width && side && icon,
+              "Label catalog exposes reusable preview icon metadata");
+        if(width) {
+            width->AddTo(projected, width->default_value, false);
+            const PropertyEditorItem *item = projected.Find("icon_width");
+            Check(item && item->kind == PropertyEditorKind::NumericInt &&
+                  item->show_slider_toggle,
+                  "bounded Designer numeric projection keeps value-to-slider affordance");
+        }
+        if(side) {
+            side->AddTo(projected, side->default_value, false);
+            const PropertyEditorItem *item = projected.Find("icon_side");
+            bool canonical = item && item->choices.GetCount() == 4;
+            if(canonical) {
+                static const char *expected[] = {"Left", "Right", "Top", "Bottom"};
+                for(int i = 0; i < 4; i++)
+                    canonical &= AsString(item->choices[i].value) == expected[i];
+            }
+            Check(item && item->kind == PropertyEditorKind::Custom &&
+                  item->custom_editor == PropertyEditorMatrixId() &&
+                  item->editor_variant == "Cardinal4" && canonical,
+                  "directional Designer choice projects to canonical Cardinal4 matrix");
+        }
+        if(icon) {
+            icon->AddTo(projected, icon->default_value, false);
+            const PropertyEditorItem *item = projected.Find("icon");
+            Check(item && item->kind == PropertyEditorKind::Custom &&
+                  item->custom_editor == PropertyEditorIconId(),
+                  "Designer icon projection keeps the shared icon chooser");
+        }
+    }
+
+    if(button) {
+        const UiDesignerThemeOverrideSpec *radius = button->FindThemeOverride("radius");
+        Check(radius != nullptr,
+              "Button Theme adapter exposes radius metadata");
+        if(radius) {
+            PropertyEditorModel projected;
+            radius->AddTo(projected, radius->default_value, false);
+            const PropertyEditorItem *item = projected.Find("radius");
+            Check(item && item->kind == PropertyEditorKind::NumericInt &&
+                  item->show_slider_toggle,
+                  "Theme override numeric projection keeps normal slider-toggle metadata");
+        }
+    }
 
     // These calls exercise the public Theme Builder preview contract. The test
     // package also compiles and links the full Theme module, including the
