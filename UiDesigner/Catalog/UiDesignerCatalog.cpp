@@ -136,6 +136,47 @@ UiDesignerThemeOverrideSpec& UiDesignerThemeOverrideSpec::DesignerOnly(bool on)
     return *this;
 }
 
+static bool UiDesignerIsCardinalChoiceSet(
+    const Vector<PropertyEditorChoice>& choices)
+{
+    if(choices.GetCount() != 4)
+        return false;
+    Index<String> values;
+    for(const PropertyEditorChoice& choice : choices) {
+        if(!choice.value.Is<String>())
+            return false;
+        values.FindAdd(ToLower(AsString(choice.value)));
+    }
+    return values.GetCount() == 4 &&
+           values.Find("left") >= 0 && values.Find("right") >= 0 &&
+           values.Find("top") >= 0 && values.Find("bottom") >= 0;
+}
+
+static void UiDesignerFinishProjectedItem(
+    PropertyEditorItem& item, bool bounded,
+    PropertyEditorKind projected_kind,
+    const Vector<PropertyEditorChoice>& choices)
+{
+    item.show_slider_toggle = bounded &&
+        (projected_kind == PropertyEditorKind::NumericInt ||
+         projected_kind == PropertyEditorKind::NumericDouble);
+
+    // Directional four-way choices use the same compact/expandable matrix
+    // interaction as the current PropertyEditor demos. Keep the authored
+    // canonical values in item.choices; the visual matrix editor maps its
+    // lowercase preset values back to those canonical values on commit.
+    if(item.custom_editor.IsEmpty() &&
+       projected_kind == PropertyEditorKind::Choice &&
+       UiDesignerIsCardinalChoiceSet(choices)) {
+        item.kind = PropertyEditorKind::Custom;
+        item.custom_editor = "property.matrix";
+        item.editor_variant = "Cardinal4";
+        item.inline_editor = true;
+        item.row_span = 1;
+        item.expanded_row_span = max(3, item.expanded_row_span);
+    }
+}
+
 void UiDesignerThemeOverrideSpec::AddTo(PropertyEditorModel& model,
                                         const Value& value, bool mixed) const
 {
@@ -166,6 +207,7 @@ void UiDesignerThemeOverrideSpec::AddTo(PropertyEditorModel& model,
     item.read_only = read_only;
     item.mixed = mixed;
     item.choices = clone(choices);
+    UiDesignerFinishProjectedItem(item, bounded, projected_kind, choices);
 }
 
 UiDesignerPropertySpec& UiDesignerPropertySpec::Default(const Value& value,
@@ -219,6 +261,7 @@ void UiDesignerPropertySpec::AddTo(PropertyEditorModel& model,
     item.read_only = read_only;
     item.mixed = mixed;
     item.choices = clone(choices);
+    UiDesignerFinishProjectedItem(item, bounded, projected_kind, choices);
 }
 
 const UiDesignerPropertySpec* UiDesignerControlSpec::FindProperty(
