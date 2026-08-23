@@ -33,6 +33,10 @@ const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(const String& id)
         return &UiDesignerDropdownThemeAdapterInstance();
     if(id == "accordion")
         return &UiDesignerAccordionThemeAdapterInstance();
+    if(id == "button")
+        return &UiDesignerButtonThemeAdapterV2Instance();
+    if(id == "tool_button")
+        return &UiDesignerToolButtonThemeAdapterV2Instance();
     if(id == "check")
         return &UiDesignerCheckThemeAdapterInstance();
     if(id == "radio")
@@ -58,6 +62,11 @@ const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(UiDesignerRuntimeKind k
         return &UiDesignerDropdownThemeAdapterInstance();
     if(kind == UiDesignerRuntimeKind::UiAccordion)
         return &UiDesignerAccordionThemeAdapterInstance();
+    if(kind == UiDesignerRuntimeKind::UiButton ||
+       kind == UiDesignerRuntimeKind::UiSplitButton)
+        return &UiDesignerButtonThemeAdapterV2Instance();
+    if(kind == UiDesignerRuntimeKind::UiToolButton)
+        return &UiDesignerToolButtonThemeAdapterV2Instance();
     if(kind == UiDesignerRuntimeKind::UiCheckBox)
         return &UiDesignerCheckThemeAdapterInstance();
     if(kind == UiDesignerRuntimeKind::UiRadioButton)
