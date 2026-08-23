@@ -33,6 +33,18 @@ const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(const String& id)
         return &UiDesignerDropdownThemeAdapterInstance();
     if(id == "accordion")
         return &UiDesignerAccordionThemeAdapterInstance();
+    if(id == "check")
+        return &UiDesignerCheckThemeAdapterInstance();
+    if(id == "radio")
+        return &UiDesignerRadioThemeAdapterInstance();
+    if(id == "toggle")
+        return &UiDesignerToggleThemeAdapterInstance();
+    if(id == "progress")
+        return &UiDesignerProgressThemeAdapterInstance();
+    if(id == "slider")
+        return &UiDesignerSliderThemeAdapterInstance();
+    if(id == "scroll_bar")
+        return &UiDesignerScrollBarThemeAdapterInstance();
     return UiDesignerFindThemeAdapterLegacy(id);
 }
 
@@ -46,6 +58,18 @@ const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(UiDesignerRuntimeKind k
         return &UiDesignerDropdownThemeAdapterInstance();
     if(kind == UiDesignerRuntimeKind::UiAccordion)
         return &UiDesignerAccordionThemeAdapterInstance();
+    if(kind == UiDesignerRuntimeKind::UiCheckBox)
+        return &UiDesignerCheckThemeAdapterInstance();
+    if(kind == UiDesignerRuntimeKind::UiRadioButton)
+        return &UiDesignerRadioThemeAdapterInstance();
+    if(kind == UiDesignerRuntimeKind::UiToggle)
+        return &UiDesignerToggleThemeAdapterInstance();
+    if(kind == UiDesignerRuntimeKind::UiProgressBar)
+        return &UiDesignerProgressThemeAdapterInstance();
+    if(kind == UiDesignerRuntimeKind::UiSlider)
+        return &UiDesignerSliderThemeAdapterInstance();
+    if(kind == UiDesignerRuntimeKind::UiScrollBar)
+        return &UiDesignerScrollBarThemeAdapterInstance();
     return UiDesignerFindThemeAdapterLegacy(kind);
 }
 
