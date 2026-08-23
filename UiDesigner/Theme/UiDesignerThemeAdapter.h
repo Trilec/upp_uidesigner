@@ -103,6 +103,7 @@ const UiDesignerThemeAdapter& UiDesignerPanelThemeAdapterInstance();
 const UiDesignerThemeAdapter& UiDesignerGroupPanelThemeAdapterInstance();
 const UiDesignerThemeAdapter& UiDesignerScrollPanelThemeAdapterInstance();
 const UiDesignerThemeAdapter& UiDesignerTabThemeAdapterInstance();
+const UiDesignerThemeAdapter& UiDesignerTabThemeRuntimeAdapterInstance();
 
 const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(const String& id);
 const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(UiDesignerRuntimeKind kind);
