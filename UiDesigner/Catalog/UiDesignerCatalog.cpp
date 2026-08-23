@@ -137,7 +137,7 @@ UiDesignerThemeOverrideSpec& UiDesignerThemeOverrideSpec::DesignerOnly(bool on)
 }
 
 static bool UiDesignerIsCardinalChoiceSet(
-    const Vector<PropertyEditorChoice>& choices)
+    const Array<PropertyEditorChoice>& choices)
 {
     if(choices.GetCount() != 4)
         return false;
@@ -155,7 +155,7 @@ static bool UiDesignerIsCardinalChoiceSet(
 static void UiDesignerFinishProjectedItem(
     PropertyEditorItem& item, bool bounded,
     PropertyEditorKind projected_kind,
-    const Vector<PropertyEditorChoice>& choices)
+    const Array<PropertyEditorChoice>& choices)
 {
     item.show_slider_toggle = bounded &&
         (projected_kind == PropertyEditorKind::NumericInt ||
