@@ -1,229 +1,193 @@
 # ACTIVE WORK
 
-Remote GitHub is authoritative. Never force-update `main`. Refresh the current remote HEAD before implementation or publication and preserve unrelated concurrent advances.
+Remote GitHub `main` is authoritative. Refresh exact remote HEAD before work and before publication; never force-update `main`; preserve unrelated concurrent changes.
 
-## CURRENT SUPERVISORY STATE — 2026-08-21
+## CURRENT SUPERVISORY STATE — 2026-08-23
 
-STATUS: **PROPERTYEDITOR / LABEL DEMO / DESIGNER / THEME STUDIO INTERACTION UNIFICATION SOURCE COMPLETE; CURRENT WINDOWS + VISUAL VALIDATION PENDING.**
+STATUS: **THEME STUDIO / DESIGNER / PROPERTYEDITOR API-PARITY SOURCE WORK COMPLETE; WINDOWS DEBUG/RELEASE + VISUAL ACCEPTANCE PENDING.**
 
-Authoritative branch: `main`.
+Source checkpoint before this bookkeeping commit:
 
-Current source/test checkpoint before this documentation update:
+- `upp_uidesigner/main`: `91a699bdab89f86ed48e494ccfa4c6ce8859c9ce` — complete Theme Studio adapter coverage documented.
+- `upp_Ui/main`: `527859915efefa2c0ab918a7f9f8bb6bf6e7a939` — PropertyEditor mouse-override regression now derives clicks from live PropertyEditor geometry.
+- Important `upp_Ui` ancestor: `ceb70739a97f5de25f23505114be24ff8607c359` — Boolean PropertyEditor callbacks are snapshotted before preview dispatch so a preview-triggered PropertyEditor rebuild cannot clear the subsequent commit callback.
 
-- `8ef7417b54b2309b89cb8d9d6d1cc6afa55994f2` — deterministic Theme Builder contract coverage for shared Designer metadata and separate preview-presentation state;
-- `b1a061319f60e36f7bdeb1e911ff791dc8a2a450` — Theme Studio preview properties reuse normal Designer catalog metadata and Preview adapters;
-- `9697d625f561dab3eb662f854fbdb36b526d0a0e` — Theme Studio preview-presentation persistence;
-- `0aefb699cbd7038aafbb54fae12dd325f3fdeb18` — normal Designer and Theme override projections preserve rich PropertyEditor metadata.
+Do not claim Windows acceptance until Gary validates the exact then-current `main` line.
 
-Current `upp_Ui/main` dependency checkpoint:
+## OWNERSHIP
 
-- `00502ca0b779187314d72d51fc11fbb16f5ebad2` — Cardinal4 PropertyEditor matrices preserve canonical caller values such as `Left / Right / Top / Bottom`;
-- parent `9d89914ef3068bd88b53697a3552051d174efe0d` — focused numeric PropertyEditor editing retains mouse-wheel numeric adjustment instead of scrolling the whole PropertyEditor.
+The supervisor owns architecture, diagnosis, substantive implementation, source review and publication. Gary performs Windows/U++ builds, tests and visual smoke, making only genuinely mechanical build/API corrections. Substantive failures return to the supervisor.
 
-Important retained Preview checkpoint:
+## THEME STUDIO CONTRACT
 
-- `0757a06f640f5353944874390fd8e157b39f0a10` — Grid preview reconstruction and nested transparent-layout selection fix.
+Theme Studio is a whole-application Theme Builder, not a second Designer document and not a static control gallery.
 
-Previous Windows validation was accepted for the older pair `upp_Ui bcd1278462bb...` / `upp_uidesigner b721c07e28...`, including ThemeBuilderContractTest, ThemeDocumentTest, PreviewLayoutRegressionTest and UiDesigner Debug/Release. That evidence does **not** validate the newer source above.
+Toolbar contract:
 
-## SUPERVISORY OWNERSHIP
+- Controls / Containers preview modes only;
+- Panel Role: Surface / Subtle / Strong;
+- Control Role: Standard / Subtle / Accent / Alert;
+- Light / Dark are independent;
+- six Light + six Dark palette swatches remain visible;
+- the production `UiColorPicker` opens transiently from a swatch and commits all six colours atomically.
 
-The supervisor owns architecture, diagnosis, substantive source changes, review and publication.
+Selected sample PropertyEditor now begins with read-only **Identity**:
 
-Gary is the Windows validator/helper: fetch the exact requested `main`, build/run focused gates, report exact diagnostics, and make only genuinely mechanical build corrections when appropriate. Substantive design/source failures return to the supervisor.
+- Control;
+- Type;
+- Appearance (Light/Dark);
+- Role;
+- Scope (Control-role or Panel-role recipe).
 
-## UNIFIED PROPERTYEDITOR CONTRACT
+Durable theme fields are presented under **Appearance** using the runtime ownership vocabulary. Common StyledPalette/StyledMetrics areas are:
 
-The Label demo, normal Designer Inspector and Theme Studio use the same PropertyEditor interaction vocabulary rather than separate approximations.
+- General;
+- Face;
+- Frame;
+- Text Ink;
+- Icon Ink;
+- Typography;
+- Content Margin;
+- Focus;
+- Shadow;
+- Highlight;
+- Additional.
 
-Current contract:
+Composite controls retain genuine domains such as Indicator, Track, Thumb, Fill, Arrow, Popup, Header, Body, Rows, Badge, Drag and Tab rather than being flattened into generic Surface/Ink buckets.
 
-- bounded `NumericInt` / `NumericDouble` values retain the compact numeric field and slider-toggle affordance;
-- clicking the slider action changes editing mode without changing the property itself;
-- a focused numeric editor owns mouse-wheel increments/decrements; the outer PropertyEditor scrolls only when a focused numeric editor is not handling the wheel;
-- four-way `Left / Right / Top / Bottom` choices project through the shared Cardinal4 `UiMatrixSelector` editor while preserving the caller's canonical values;
-- colour properties retain their normal colour editor/dropdown/alternate-editor behavior;
-- icon properties retain the shared icon chooser;
-- editor affordances and authored/inherited state are independent concepts.
+`UiFill` surfaces use the shared FillRecipe editor (Solid / None / gradient). Resource-backed `StyledSkin` / image fields remain deliberately deferred until Theme adapters have the real Designer document-resource resolver; do not fake raw filesystem paths. The eventual user-facing skin label is `Skin (Nine Slice)`.
 
-For Theme Studio style rows:
+## PROPERTYEDITOR ALIGNMENT
 
-- inherited/authored state remains the style-state layer;
-- Reset returns an authored field to its inherited adapter value;
-- slider/matrix/colour/icon editor actions remain available independently of that state;
-- Theme Studio must never replace editor affordances merely to show authored/inherited state.
+Normal Designer and Theme Studio continue to project the same metadata into the production PropertyEditor.
 
-The normal Designer projection and Theme override projection both go through the same `UiDesignerPropertySpec` / `UiDesignerThemeOverrideSpec` metadata finish path, so kind, bounds, step, slider toggle, custom editor, editor variant and choices stay aligned.
+Locked behavior:
 
-## LABEL DEMO / ICON PRESENTATION
+- bounded NumericInt/NumericDouble keep the numeric field + slider-toggle affordance;
+- a focused numeric editor owns mouse-wheel increments rather than scrolling the outer PropertyEditor;
+- colour rows retain picker/dropdown, palette DnD and clipboard hex support;
+- Left/Right/Top/Bottom choices retain the Cardinal4 matrix selector;
+- icon fields retain the shared icon chooser;
+- curve fields retain point-curve and Bézier editors;
+- authored/inherited state is independent from the editor affordance;
+- Reset returns to inherited; Undo restores authored state;
+- Light/Dark and semantic roles remain isolated.
 
-The Label demo uses the shared PropertyEditor APIs:
+The previous broad `PropertyEditorTests` 70/2 result was a stale test-coordinate problem, not a contract change: the mouse override tests used an absolute Y that no longer pointed at the property row after filter/group geometry evolved. `527859915...` computes the live row/override locations from PropertyEditor style geometry. The test still requires both override-circle and inherited-row-body activation semantics.
 
-- bounded numeric rows are created through `AddNumericInt`, which enables the slider toggle;
-- Icon Side is a Cardinal4 matrix;
-- Icon Width / Icon Height / Content Gap are bounded numeric edits;
-- icon rendering supports `Auto`, `PreserveColor` and `MonoTint`;
-- explicit icon sizing is applied through `UiLabel::SetIconSize`, and `UiLabel` treats a positive explicit size as the rendered icon size when scale-to-content is off.
+## COMPLETED API/CATALOG/ADAPTER COVERAGE
 
-No separate Label-demo-only editor mechanism is introduced. The shared PropertyEditor changes are consumed by the demo and Designer.
+### Button family
 
-## THEME STUDIO PRODUCT CONTRACT
+`UiButton`, `UiSplitButton` and `UiToolButton` use the fuller common Style vocabulary, real FillRecipe faces, typography, content margin, focus, shadow/highlight and their control-specific fields while preserving established serialized IDs.
 
-Theme Studio is a theme-focused editing workspace, not a static gallery and not a second Designer document.
+### Check / Radio / Toggle
 
-Top toolbar:
+- CheckBox: body + Indicator palettes/metrics, typography, alignment, indicator geometry, mark thickness and marker render mode.
+- RadioButton: body + Indicator palettes/metrics, typography and indicator geometry.
+- Toggle: Track / Thumb style domains and control-specific geometry/appearance.
 
-- Controls / Containers preview modes;
-- independent Panel Role (`Surface`, `Subtle`, `Strong`);
-- Control Role (`Standard`, `Subtle`, `Accent`, `Alert`);
-- Light and Dark each retain six persistent palette swatches;
-- clicking a swatch opens the temporary production `UiColorPicker`; accepting commits the six-colour palette atomically;
-- persistent swatches remain colour drag sources for PropertyEditor colour rows;
-- no permanently embedded full colour picker belongs in the Theme Studio preview.
+Resource-backed checked/tri-state/glyph images remain deferred to the real resource resolver.
 
-Selectable samples use real catalog Theme adapters. The right PropertyEditor is rebuilt from each selected type's real `UiDesignerThemeOverrideSpec`; inherited values resolve through the adapter for the selected semantic role, and committed edits remain in `UiDesignerThemeDocument` history.
+### Progress / Slider / ScrollBar
 
-## THEME STUDIO PREVIEW-PRESENTATION LAYER
+- ProgressBar: separate Track and Fill palette/metrics including the previously missing Track and Fill radii, plus content/focus/shadow/highlight/typography where owned.
+- Slider: separate Track and Thumb palette/metrics, ticks, geometry, thumb ring/additional fields.
+- ScrollBar: Track, Thumb and Arrow palettes/metrics, arrows, thumb length, expansion/fade, grip and insets.
 
-Theme Studio has a deliberately separate sample-presentation layer for properties that help judge a style but are not themselves runtime theme recipe fields.
+### Containers
 
-`UiDesignerThemeSnapshot::studio_preview` is keyed independently of appearance/semantic role:
+- Panel: full palette/metrics, transparent mode and stable existing frame recipe IDs.
+- ScrollPanel: full panel surface style.
+- GroupPanel: common panel style plus Header ink/typography/layout/insets/spacing, separator/header-band settings and Body inset.
 
-```text
-control|UiLabel
-control|UiButton
-panel|UiPanel
-```
+### Tab
 
-This prevents staging choices from becoming duplicated Light/Dark or role-specific style data.
+Tab now has complete Theme coverage for:
 
-For any selected control whose real catalog exposes them, Theme Studio can project shared Designer metadata for:
+- Body palette/metrics;
+- Tab-item palette/metrics;
+- tab typography;
+- tab extent, spacing and body/content gaps;
+- tab padding and strip inset;
+- icon size/side and affordance gap;
+- minimum tab length;
+- indicator colour/thickness/span;
+- active frame width;
+- open-corner radius;
+- active-tab-uses-body-face;
+- Classic / Underline / Segmented / Rail / Document visual families.
 
-- icon chooser;
-- icon render mode;
-- icon side;
-- icon width / height or scalar icon size;
-- scale icon to content;
-- content gap;
-- horizontal / vertical alignment.
+`UiTab` stores the visual family as runtime instance state as well as Style metadata. `UiDesignerTabThemeRuntimeAdapter` therefore applies `UiTab::SetVisual(...)` during preview and emits it during code generation; generated custom-style setup resolves from the same authored visual family rather than silently seeding from Classic.
 
-These appear under `Preview / Content` and `Preview / Layout` and are added by copying the real `UiDesignerPropertySpec`, so slider toggles, Cardinal4 matrices, choices and custom editors are exactly the normal Designer metadata rather than Theme Studio clones.
+### Existing rich adapters retained
 
-A Theme Studio preview icon defaults to a visible Widgets icon when the control's authored default is empty/None, with at least a 24px preview dimension where a bounded icon dimension exists. `MonoTint` is the preview default so the real themed Icon Ink fields can be judged visually. Reset returns preview staging to these projection fallbacks.
+Label, edit family, Dropdown, List, Tree and Accordion keep their richer existing adapters. Theme Studio selectable samples use the same catalog adapters as normal Designer; unsupported/passive references are not made falsely selectable.
 
-Applying preview-presentation values uses `UiDesignerPreviewFactory::Apply` with the selected control's real catalog spec. Theme Studio therefore shares the normal Designer runtime property application path.
+## THEME STUDIO PREVIEW PRESENTATION
 
-Preview-presentation state is serialized separately from `style_overrides`; it must never pollute generated/runtime theme recipes.
+Sample-only content/layout remains separate from durable theme recipes in `UiDesignerThemeSnapshot::studio_preview`.
 
-## DURABLE STYLE RECIPE CONTRACT
+Where the normal Designer catalog provides them, Theme Studio reuses the exact `UiDesignerPropertySpec` + `UiDesignerPreviewFactory` path for icon chooser/render mode, icon side, icon size/dimensions, scale-to-content, content gap and alignment.
 
-`UiDesignerThemeSnapshot::style_overrides` remains keyed by:
+Style-owned insets are represented by the real theme `Content Margin` / control-specific inset fields rather than creating a second competing Theme Studio value. Preview staging remains separate from `style_overrides` and is not emitted as runtime theme code.
 
-```text
-<Light|Dark>|<control|panel>|<type>|<role>
-```
+## DETERMINISTIC GATES
 
-Example:
+### upp_Ui
 
-```text
-Light|control|UiButton|Accent
-```
+- `Utilities/PropertyEditorV1RunTests` — `Fails: 0`.
+- `Utilities/PropertyEditorSemanticRunTests` — `failed=0`.
+- `Utilities/PropertyEditorTests` — `Fails: 0`; includes keyboard/mouse inherited-override behavior and the geometry-stable mouse regression.
 
-Each style target contains only authored adapter fields. Reset removes the authored field and restores the inherited adapter value; an empty target recipe is removed.
+### upp_uidesigner
 
-Standalone Theme JSON remains schema 3. Schemas 1 and 2 remain accepted for migration. Typed U++ Values such as `Color`, including nested values, are recursively encoded/decoded rather than passed raw to `AsJSON`.
+- `tests/ThemeAdapterCoverageTest` — `THEME_ADAPTER_COVERAGE_SUMMARY ... failed=0`.
+- `tests/ThemeBuilderContractTest` — `THEME_BUILDER_CONTRACT_SUMMARY ... failed=0`.
+- `tests/ThemeDocumentTest` — `THEME_DOCUMENT_SUMMARY ... failed=0`.
+- `tests/PreviewLayoutRegressionTest` — `PREVIEW_LAYOUT_REGRESSION_SUMMARY ... failed=0`.
+- Existing focused adapter suites remain complementary: Label, List/Edit, Dropdown/Accordion.
 
-Project Save embeds `theme.Get().ToValue()`. Theme JSON export and generated-package theme metadata use the same authoritative ThemeDocument serialization. Dedicated standalone Theme JSON import/reuse UI remains a later bounded feature.
+`ThemeAdapterCoverageTest` verifies every Theme Studio selectable type resolves a supporting adapter, every exposed adapter field is owned, FillRecipe survives projection, Progress/Slider/ScrollBar radii exist with numeric slider affordances, container and Tab coverage is present, Tab Cardinal4/codegen semantics hold, and unresolved fake Skin fields are absent.
 
-## FOCUSED TESTS
+## VISUAL ACCEPTANCE FOCUS
 
-### `Utilities/PropertyEditorV1RunTests`
+On Debug UiDesigner:
 
-Must pass in Debug and Release:
+1. Reproduce the old Button crash path: select Button, open Layout, toggle Scale icon to content repeatedly. It must not crash and the change must commit normally.
+2. Theme Studio Identity must show Control / Type / Appearance / Role / Scope.
+3. Select Label, Button, CheckBox, RadioButton, Toggle, ProgressBar, Slider, ScrollBar, Panel, GroupPanel, ScrollPanel and Tab; their Appearance groups must match their real API domains and visibly update the sample.
+4. ProgressBar Track/Fill radius, Slider Track/Thumb radius and ScrollBar Track/Thumb/Arrow radius must be independently editable.
+5. Tab Classic / Underline / Segmented / Rail / Document must visibly switch the runtime sample; Body, Tab and Indicator settings must update independently.
+6. Numeric slider toggle + focused wheel, colour picker, Cardinal4, icon chooser, Reset and Undo must behave like the normal Designer PropertyEditor.
+7. Verify Light/Dark and roles remain independent.
 
-```text
-PropertyEditorV1RunTests: Checks: <n> Fails: 0
-```
+## BRANCH HYGIENE
 
-This is the focused shared-PropertyEditor regression gate for the numeric, rich-editor and scrolling lifecycle used by the Label demo, normal Designer and Theme Studio.
+Do not create another work branch for this tranche.
 
-### `tests/ThemeBuilderContractTest`
+At the latest branch audit the following remote branches were fully behind `main` (`ahead_by=0`) and are cleanup candidates after successful validation:
 
-Must build/link the complete Theme module and pass in Debug and Release:
+`upp_uidesigner`:
+- `work/label-fillrecipe-parity`
+- `work/label-reference-audit-closure`
+- `work/label-registry-switch`
+- `work/model-api-preview-migration`
 
-```text
-THEME_BUILDER_CONTRACT_SUMMARY checks=<n> failed=0
-```
+`upp_Ui`:
+- `agent/uibutton-interaction-hardening`
+- `temp-demo-button-do-not-use`
 
-Current assertions include:
+**Do not delete `upp_Ui/agent/uigraph-interaction-reconcile`.** At the latest audit it is diverged from `main` and contains one unique UiNodeGraph interaction commit. It must be reconciled separately before branch removal.
 
-- atomic six-colour palette history and Light/Dark independence;
-- durable selected-control style edits and transient style preview;
-- valid schema-3 typed-value JSON round-trip;
-- reset/undo and empty style-target cleanup;
-- separate `studio_preview` commit, reset and JSON round-trip;
-- preview-presentation state does not enter `style_overrides`;
-- Label icon metadata is present in the real Designer catalog;
-- bounded Designer numeric projection retains `show_slider_toggle`;
-- `Icon Side` projects to the Cardinal4 custom editor while preserving `Left / Right / Top / Bottom` values;
-- icon projection retains the shared icon chooser;
-- Button Radius Theme override projection retains the same bounded numeric slider-toggle metadata;
-- shared colour parsing and Theme Gallery / toolbar link visibility.
+Gary should re-verify containment immediately before deleting any cleanup candidate.
 
-### `tests/ThemeDocumentTest`
+## BOUNDARIES AFTER ACCEPTANCE
 
-Must pass in Debug and Release:
+Still not complete and must not be claimed complete:
 
-```text
-THEME_DOCUMENT_SUMMARY checks=<n> failed=0
-```
+- standalone Theme JSON import/reuse UI;
+- a universal runtime bridge that makes arbitrary Theme Studio recipes replace every global `upp_Ui` resolver in all generated applications;
+- document-resource-backed Theme skin/glyph editing.
 
-### `tests/PreviewLayoutRegressionTest`
-
-Must pass in Debug and Release:
-
-```text
-PREVIEW_LAYOUT_REGRESSION_SUMMARY checks=<n> failed=0
-```
-
-## MODEL / PROPERTYEDITOR CONTRACT
-
-Retained architecture:
-
-- `UiDesignerDocument` is durable authored UI state;
-- `UiDesignerThemeDocument` is durable authored theme state;
-- PropertyEditor models are projections, never parallel application state;
-- transient previews remain transient;
-- durable edits go through their owning document/command service;
-- catalog Theme adapters remain authority for control-specific theme fields;
-- Preview adapters remain authority for normal control presentation properties;
-- Window remains presentation/wiring, not another state owner;
-- Designer PropertyEditors retain the explicit 38% label/value divider and theme-aware styling.
-
-## CURRENT WINDOWS VALIDATION GATE
-
-Validate current final `main`, not an earlier ancestor.
-
-1. Fetch exact `upp_Ui/main` and `upp_uidesigner/main`; report both SHAs.
-2. `PropertyEditorV1RunTests` Debug + Release — `Fails: 0`.
-3. `ThemeBuilderContractTest` Debug + Release — `failed=0`.
-4. `ThemeDocumentTest` Debug + Release — `failed=0`.
-5. `PreviewLayoutRegressionTest` Debug + Release — `failed=0`.
-6. Build `UiLabelDemo` Debug.
-7. Build `UiDesigner` Debug + Release.
-8. Launch Debug UiDesigner, perform the smoke below, and leave it running for Curt.
-
-Visual/interaction smoke:
-
-- Label demo: bounded numeric values show the value-to-slider action; Icon Side opens the Cardinal4 selector; icon size/gap and Auto/PreserveColor/MonoTint visibly work; a focused numeric value changes with the mouse wheel without scrolling the full PropertyEditor.
-- normal Designer: select a `UiLabel`; Icon Side uses Cardinal4, bounded icon dimensions have the same slider-toggle behavior, icon chooser/render mode remain available, and focused numeric mouse-wheel editing behaves the same way.
-- Theme Studio: select `UiLabel` and `UiButton`; Theme rows such as Radius/Focus Alpha retain their numeric slider toggle; colour rows retain the colour editor; preview-only icon/content/layout rows appear when supported and use the same shared editors; a MonoTint icon visibly reflects the themed Icon Ink; Reset/inherited state remains independent of editor mode.
-- Panel Role / Control Role and Light / Dark style targets remain independent.
-
-If a substantive failure occurs, stop and report exact SHA/configuration/diagnostic/reproduction. Do not redesign the architecture during validation.
-
-## KNOWN BOUNDARY / NEXT AFTER ACCEPTANCE
-
-Theme Studio authors and exports durable per-type/per-role style recipes, but arbitrary Theme Studio recipes are not yet a replacement for every global `upp_Ui` resolver in normal generated/runtime applications. Do not claim that broader runtime semantic-palette bridge is complete.
-
-After this slice is Windows/visual accepted, the next bounded work is dedicated Theme JSON import/reuse and then, if required, the shared `upp_Ui` runtime theme-consumption bridge.
+Those are separate bounded follow-ups after this API-parity tranche is accepted.
