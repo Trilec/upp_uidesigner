@@ -91,6 +91,12 @@ const UiDesignerThemeAdapter& UiDesignerListThemeAdapterInstance();
 const UiDesignerThemeAdapter& UiDesignerEditThemeAdapterInstance();
 const UiDesignerThemeAdapter& UiDesignerDropdownThemeAdapterInstance();
 const UiDesignerThemeAdapter& UiDesignerAccordionThemeAdapterInstance();
+const UiDesignerThemeAdapter& UiDesignerCheckThemeAdapterInstance();
+const UiDesignerThemeAdapter& UiDesignerRadioThemeAdapterInstance();
+const UiDesignerThemeAdapter& UiDesignerToggleThemeAdapterInstance();
+const UiDesignerThemeAdapter& UiDesignerProgressThemeAdapterInstance();
+const UiDesignerThemeAdapter& UiDesignerSliderThemeAdapterInstance();
+const UiDesignerThemeAdapter& UiDesignerScrollBarThemeAdapterInstance();
 
 const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(const String& id);
 const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(UiDesignerRuntimeKind kind);
