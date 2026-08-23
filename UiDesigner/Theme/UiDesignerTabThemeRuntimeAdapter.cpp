@@ -1,4 +1,5 @@
 #include "UiDesignerThemeAdapter.h"
+#include <UiDesigner/Catalog/UiDesignerCatalog.h>
 #include <Ui/UiTab.h>
 
 namespace Upp {
