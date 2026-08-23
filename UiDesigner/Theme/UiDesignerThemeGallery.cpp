@@ -124,9 +124,6 @@ static Value ThemeStudioPreviewDefault(const UiDesignerPropertySpec& property)
     return property.default_value;
 }
 
-// -----------------------------------------------------------------------------
-// Compact working swatch
-
 UiDesignerThemeSwatch::UiDesignerThemeSwatch()
 {
     WantFocus();
@@ -204,10 +201,6 @@ bool UiDesignerThemeSwatch::Key(dword key, int count)
     return Ctrl::Key(key, count);
 }
 
-// -----------------------------------------------------------------------------
-// Palette popup. The full UiColorPicker belongs here temporarily, not in the
-// Theme Builder canvas. It edits one six-colour appearance palette atomically.
-
 class UiDesignerThemePaletteDialog : public TopWindow {
 public:
     typedef UiDesignerThemePaletteDialog CLASSNAME;
@@ -246,9 +239,6 @@ public:
 private:
     UiColorPicker picker_;
 };
-
-// -----------------------------------------------------------------------------
-// Theme Builder toolbar
 
 UiDesignerThemeToolbar::UiDesignerThemeToolbar()
 {
@@ -495,9 +485,6 @@ void UiDesignerThemeToolbar::Paint(Draw& w)
                DPI(1), SColorShadow());
 }
 
-// -----------------------------------------------------------------------------
-// Matrix-driven preview and selection-aware Theme Studio property projection
-
 UiDesignerThemeGallery::UiDesignerThemeGallery()
 {
     BackPaint();
@@ -580,7 +567,7 @@ void UiDesignerThemeGallery::BuildControlSamples()
     float_edit_.MinMax(0, 100).Step(0.1).Precision(2).ShowSpin(true).SetValue(3.14);
     slider_.SetRange(0, 100).SetValue(56);
     progress_.Percent(true).Set(68, 100);
-    scroll_bar_.SetDirection(UiDirection::H).SetTotal(100).SetPage(24).SetPos(46);
+    scroll_bar_.SetDirection(UiDirection::H).SetRange(0, 100, 24).SetPos(46);
     numbers_group_.Add(int_edit_);
     numbers_group_.Add(float_edit_);
     numbers_group_.Add(slider_);
@@ -903,9 +890,6 @@ void UiDesignerThemeGallery::BuildSelectedPropertyModel(
         : control_role;
     const String appearance = theme.mode == "Dark" ? "Dark" : "Light";
 
-    // Identity is deliberately read-only. Theme Studio edits one reusable
-    // appearance recipe at a time; it does not duplicate normal Designer
-    // identity/state fields or turn the semantic role into a local override.
     model.AddReadOnly("theme.studio.identity.control", "Control",
                       spec->display_name, "Identity");
     model.AddReadOnly("theme.studio.identity.type", "Type",
@@ -1027,9 +1011,6 @@ void UiDesignerThemeGallery::ApplySampleTheme(
     const ValueMap authored = effective.GetStyleOverrides(
         CurrentStyleTarget(effective, type, panel_sample));
 
-    // Give the adapter a complete concrete recipe. Inherited fields are
-    // resolved from the selected semantic role; authored fields then replace
-    // only the values the user changed in Theme Studio.
     for(const UiDesignerThemeOverrideSpec& property : spec->theme_overrides) {
         const int q = authored.Find(property.id);
         const Value value = q >= 0
@@ -1040,10 +1021,6 @@ void UiDesignerThemeGallery::ApplySampleTheme(
     }
     adapter->ApplyPreviewStyle(ctrl, styled, *spec, nullptr);
 
-    // Presentation-only fields deliberately reuse the same catalog metadata
-    // and Preview adapter used by the normal Designer. This keeps icon chooser,
-    // render mode, Cardinal4 side selector and bounded numeric behavior unified
-    // without polluting the durable runtime theme recipe.
     const String preview_target = ThemeStudioPreviewTarget(type, panel_sample);
     for(const UiDesignerPropertySpec& property : spec->properties) {
         if(!IsThemeStudioPreviewProperty(property.id))
