@@ -6,11 +6,12 @@ Remote GitHub `main` is authoritative. Refresh exact remote HEAD before work and
 
 STATUS: **THEME STUDIO / DESIGNER / PROPERTYEDITOR API-PARITY SOURCE WORK COMPLETE; WINDOWS DEBUG/RELEASE + VISUAL ACCEPTANCE PENDING.**
 
-Source checkpoint before this bookkeeping commit:
+Source checkpoint before this final bookkeeping commit:
 
-- `upp_uidesigner/main`: `91a699bdab89f86ed48e494ccfa4c6ce8859c9ce` — complete Theme Studio adapter coverage documented.
-- `upp_Ui/main`: `527859915efefa2c0ab918a7f9f8bb6bf6e7a939` — PropertyEditor mouse-override regression now derives clicks from live PropertyEditor geometry.
-- Important `upp_Ui` ancestor: `ceb70739a97f5de25f23505114be24ff8607c359` — Boolean PropertyEditor callbacks are snapshotted before preview dispatch so a preview-triggered PropertyEditor rebuild cannot clear the subsequent commit callback.
+- `upp_uidesigner/main`: `2bafb74c987db75c58d63c8257d8e92469a66fd7` — Theme Studio API-parity state and branch hygiene recorded.
+- `upp_Ui/main`: `be3f2eb9a1180041675964749471aa369315dda4` — Theme Studio-style resettable rows now display inherited state separately from the value editor affordance.
+- `upp_Ui` parent `527859915efefa2c0ab918a7f9f8bb6bf6e7a939` — PropertyEditor mouse-override regression derives clicks from live PropertyEditor geometry.
+- Important `upp_Ui` ancestor `ceb70739a97f5de25f23505114be24ff8607c359` — Boolean PropertyEditor callbacks are snapshotted before preview dispatch so a preview-triggered PropertyEditor rebuild cannot clear the subsequent commit callback.
 
 Do not claim Windows acceptance until Gary validates the exact then-current `main` line.
 
@@ -31,7 +32,7 @@ Toolbar contract:
 - six Light + six Dark palette swatches remain visible;
 - the production `UiColorPicker` opens transiently from a swatch and commits all six colours atomically.
 
-Selected sample PropertyEditor now begins with read-only **Identity**:
+Selected sample PropertyEditor begins with read-only **Identity**:
 
 - Control;
 - Type;
@@ -59,7 +60,7 @@ Composite controls retain genuine domains such as Indicator, Track, Thumb, Fill,
 
 ## PROPERTYEDITOR ALIGNMENT
 
-Normal Designer and Theme Studio continue to project the same metadata into the production PropertyEditor.
+Normal Designer and Theme Studio project the same metadata into the production PropertyEditor.
 
 Locked behavior:
 
@@ -70,6 +71,7 @@ Locked behavior:
 - icon fields retain the shared icon chooser;
 - curve fields retain point-curve and Bézier editors;
 - authored/inherited state is independent from the editor affordance;
+- resettable Theme Studio/preview rows show a passive hollow marker while inherited and expose the Reset action once authored, leaving numeric/colour/matrix/icon actions in the value cell untouched;
 - Reset returns to inherited; Undo restores authored state;
 - Light/Dark and semantic roles remain isolated.
 
@@ -103,7 +105,7 @@ Resource-backed checked/tri-state/glyph images remain deferred to the real resou
 
 ### Tab
 
-Tab now has complete Theme coverage for:
+Tab has complete Theme coverage for:
 
 - Body palette/metrics;
 - Tab-item palette/metrics;
@@ -159,7 +161,7 @@ On Debug UiDesigner:
 3. Select Label, Button, CheckBox, RadioButton, Toggle, ProgressBar, Slider, ScrollBar, Panel, GroupPanel, ScrollPanel and Tab; their Appearance groups must match their real API domains and visibly update the sample.
 4. ProgressBar Track/Fill radius, Slider Track/Thumb radius and ScrollBar Track/Thumb/Arrow radius must be independently editable.
 5. Tab Classic / Underline / Segmented / Rail / Document must visibly switch the runtime sample; Body, Tab and Indicator settings must update independently.
-6. Numeric slider toggle + focused wheel, colour picker, Cardinal4, icon chooser, Reset and Undo must behave like the normal Designer PropertyEditor.
+6. Numeric slider toggle + focused wheel, colour picker, Cardinal4, icon chooser, inherited marker/Reset and Undo must behave like the normal Designer PropertyEditor.
 7. Verify Light/Dark and roles remain independent.
 
 ## BRANCH HYGIENE
