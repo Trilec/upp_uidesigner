@@ -12,6 +12,7 @@ file
     UiDesignerNormalizedThemeCommon.h,
     UiDesignerStyledThemeCommon.h,
     UiDesignerThemeAdapterRegistry.cpp,
+    UiDesignerButtonThemeAdapterV2.cpp,
     UiDesignerCoreControlThemeAdapters.cpp,
     UiDesignerListThemeAdapter.cpp,
     UiDesignerEditThemeAdapter.cpp,
