@@ -194,7 +194,7 @@ private:
     String preview_mode_ = "controls";
     UiPanelRole panel_role_ = UiPanelRole::Surface;
     UiRole control_role_ = UiRole::Accent;
-    int content_height_ = DPI(730);
+    int content_height_ = DPI(760);
 
     String selected_type_;
     bool selected_panel_sample_ = false;
@@ -230,6 +230,7 @@ private:
     UiDesignerThemeSelectable<UiFloatEdit> float_edit_;
     UiDesignerThemeSelectable<UiSlider> slider_;
     UiDesignerThemeSelectable<UiProgressBar> progress_;
+    UiDesignerThemeSelectable<UiScrollBar> scroll_bar_;
 
     UiDesignerThemeSelectable<UiGroupPanel> inputs_group_;
     UiDesignerThemeSelectable<UiLineEdit> line_edit_;
@@ -253,8 +254,8 @@ private:
     UiDesignerThemeSelectable<UiLabel> feedback_label_;
     UiDesignerThemeSelectable<UiProgressBar> feedback_progress_;
 
-    // Containers view: paired plain/populated surfaces make it possible to
-    // judge container chrome both alone and with representative content.
+    // Containers view: paired plain/populated surfaces plus a real scroll
+    // container make container chrome and inherited spacing directly comparable.
     UiDesignerThemeSelectable<UiPanel> container_plain_panel_;
     UiDesignerThemeSelectable<UiLabel> container_plain_label_;
 
@@ -278,6 +279,9 @@ private:
     UiDesignerThemeSelectable<UiGroupPanel> container_choice_group_;
     UiDesignerThemeSelectable<UiDropdown> container_dropdown_;
     UiDesignerThemeSelectable<UiToggle> container_toggle_;
+
+    UiDesignerThemeSelectable<UiScrollPanel> container_scroll_panel_;
+    UiDesignerThemeSelectable<UiLabel> container_scroll_label_;
 };
 
 }
