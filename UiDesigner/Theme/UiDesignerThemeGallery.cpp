@@ -89,6 +89,17 @@ static String ThemeStudioPreviewGroup(const String& id)
         ? "Preview / Content" : "Preview / Layout";
 }
 
+static String ThemeStudioAppearanceGroup(const String& group)
+{
+    if(group.IsEmpty() || group == "General")
+        return "Appearance";
+    if(group == "Appearance")
+        return "Appearance / Control";
+    if(group.StartsWith("Appearance / "))
+        return group;
+    return "Appearance / " + group;
+}
+
 static String ThemeStudioPreviewTarget(const String& type, bool panel_sample)
 {
     return String(panel_sample ? "panel|" : "control|") + type;
@@ -564,15 +575,17 @@ void UiDesignerThemeGallery::BuildControlSamples()
     choices_group_.Add(dropdown_);
 
     numbers_group_.SetTitle("NUMERIC & SLIDERS")
-                  .SetSubTitle("Dense numeric controls");
+                  .SetSubTitle("Numeric, range and scrolling surfaces");
     int_edit_.MinMax(0, 100).Step(1).ShowSpin(true).SetValue(42);
     float_edit_.MinMax(0, 100).Step(0.1).Precision(2).ShowSpin(true).SetValue(3.14);
     slider_.SetRange(0, 100).SetValue(56);
     progress_.Percent(true).Set(68, 100);
+    scroll_bar_.SetDirection(UiDirection::H).SetTotal(100).SetPage(24).SetPos(46);
     numbers_group_.Add(int_edit_);
     numbers_group_.Add(float_edit_);
     numbers_group_.Add(slider_);
     numbers_group_.Add(progress_);
+    numbers_group_.Add(scroll_bar_);
 
     inputs_group_.SetTitle("INPUTS")
                  .SetSubTitle("Text and compound editors");
@@ -597,7 +610,7 @@ void UiDesignerThemeGallery::BuildControlSamples()
 
     navigation_group_.SetTitle("NAVIGATION")
                      .SetSubTitle("Tabs and accordion");
-    tab_.SetVisual(UITAB_UNDERLINE).SetPlacement(UiAlign::TOP)
+    tab_.SetVisual(UITAB_CLASSIC).SetPlacement(UiAlign::TOP)
         .EnableCloseButtons(false).EnableDragHandles(false);
     tab_.Add(tab_page_a_, "First");
     tab_.Add(tab_page_b_, "Second");
@@ -623,7 +636,7 @@ void UiDesignerThemeGallery::BuildControlSamples()
     control_columns_[0].Add(buttons_group_).Fixed(DPI(164));
     control_columns_[0].Add(choices_group_).Fixed(DPI(178));
 
-    control_columns_[1].Add(numbers_group_).Fixed(DPI(178));
+    control_columns_[1].Add(numbers_group_).Fixed(DPI(212));
     control_columns_[1].Add(inputs_group_).Fixed(DPI(226));
     control_columns_[1].Add(feedback_group_).Fixed(DPI(126));
 
@@ -675,8 +688,14 @@ void UiDesignerThemeGallery::BuildContainerSamples()
     container_choice_group_.Add(container_dropdown_);
     container_choice_group_.Add(container_toggle_);
 
+    container_scroll_label_.SetText("Scroll Panel · viewport and content surface")
+                           .SetAlign(UiAlign::LEFT, UiAlign::TOP);
+    container_scroll_panel_.SetScrollMode(UIPANELSCROLL_AUTO);
+    container_scroll_panel_.Content().Add(container_scroll_label_);
+
     container_columns_[0].Add(container_plain_panel_).Fixed(DPI(154));
     container_columns_[0].Add(container_controls_panel_).Fixed(DPI(196));
+    container_columns_[0].Add(container_scroll_panel_).Fixed(DPI(160));
     container_columns_[1].Add(container_plain_group_).Fixed(DPI(176));
     container_columns_[1].Add(container_edit_group_).Fixed(DPI(196));
     container_columns_[2].Add(container_numeric_panel_).Fixed(DPI(196));
@@ -709,6 +728,7 @@ void UiDesignerThemeGallery::BindSelectableSamples()
     bind(float_edit_, "UiFloatEdit", false);
     bind(slider_, "UiSlider", false);
     bind(progress_, "UiProgressBar", false);
+    bind(scroll_bar_, "UiScrollBar", false);
     bind(inputs_group_, "UiGroupPanel", true);
     bind(line_edit_, "UiLineEdit", false);
     bind(multi_edit_, "UiMultiEdit", false);
@@ -740,6 +760,8 @@ void UiDesignerThemeGallery::BindSelectableSamples()
     bind(container_choice_group_, "UiGroupPanel", true);
     bind(container_dropdown_, "UiDropdown", false);
     bind(container_toggle_, "UiToggle", false);
+    bind(container_scroll_panel_, "UiScrollPanel", true);
+    bind(container_scroll_label_, "UiLabel", false);
 }
 
 void UiDesignerThemeGallery::SetCatalog(const UiDesignerCatalog *catalog)
@@ -874,9 +896,29 @@ void UiDesignerThemeGallery::BuildSelectedPropertyModel(
         return;
     }
 
+    const String control_role = ThemeRoleName(control_role_);
+    const String panel_role = PanelRoleName(panel_role_);
     const String role = selected_panel_sample_
         ? ThemeRoleName(PanelRoleAsControlRole(panel_role_))
-        : ThemeRoleName(control_role_);
+        : control_role;
+    const String appearance = theme.mode == "Dark" ? "Dark" : "Light";
+
+    // Identity is deliberately read-only. Theme Studio edits one reusable
+    // appearance recipe at a time; it does not duplicate normal Designer
+    // identity/state fields or turn the semantic role into a local override.
+    model.AddReadOnly("theme.studio.identity.control", "Control",
+                      spec->display_name, "Identity");
+    model.AddReadOnly("theme.studio.identity.type", "Type",
+                      selected_type_, "Identity");
+    model.AddReadOnly("theme.studio.identity.appearance", "Appearance",
+                      appearance, "Identity");
+    model.AddReadOnly("theme.studio.identity.role", "Role",
+                      selected_panel_sample_ ? panel_role : control_role,
+                      "Identity");
+    model.AddReadOnly("theme.studio.identity.scope", "Scope",
+                      selected_panel_sample_ ? "Panel role recipe" : "Control role recipe",
+                      "Identity");
+
     UiDesignerNode base;
     PopulateSampleNode(base, *spec, role);
     const String target = CurrentStyleTarget(theme, selected_type_,
@@ -888,7 +930,9 @@ void UiDesignerThemeGallery::BuildSelectedPropertyModel(
             base, *spec, property.adapter_field_id, nullptr);
         const int q = authored.Find(property.id);
         const Value value = q >= 0 ? authored.GetValue(q) : inherited;
-        property.AddTo(model, value, false);
+        UiDesignerThemeOverrideSpec projected = property;
+        projected.group = ThemeStudioAppearanceGroup(property.group);
+        projected.AddTo(model, value, false);
         PropertyEditorItem *item = model.Find(property.id);
         if(!item)
             return;
@@ -946,10 +990,10 @@ void UiDesignerThemeGallery::BuildSelectedPropertyModel(
             item->SetHelp("Preview-only icon rendering. Monochrome tint uses the selected control's themed Icon Ink.");
     }
 
-    const String subtitle = spec->display_name + " · " +
-        (selected_panel_sample_ ? PanelRoleName(panel_role_)
-                                : ThemeRoleName(control_role_));
-    model.SetGroupSubtitle("General", subtitle);
+    model.SetGroupSubtitle("Identity", spec->display_name + " · " +
+        (selected_panel_sample_ ? panel_role : control_role) + " · " + appearance);
+    model.SetGroupSubtitle("Appearance",
+                           "reusable Theme Studio recipe; reset returns this field to the selected role");
     if(model.Find("preview.icon"))
         model.SetGroupSubtitle("Preview / Content",
                                "sample-only content for judging the authored theme");
@@ -1033,6 +1077,7 @@ void UiDesignerThemeGallery::ApplyThemeStyles()
     ApplySampleTheme(float_edit_, "UiFloatEdit", false);
     ApplySampleTheme(slider_, "UiSlider", false);
     ApplySampleTheme(progress_, "UiProgressBar", false);
+    ApplySampleTheme(scroll_bar_, "UiScrollBar", false);
     ApplySampleTheme(inputs_group_, "UiGroupPanel", true);
     ApplySampleTheme(line_edit_, "UiLineEdit", false);
     ApplySampleTheme(multi_edit_, "UiMultiEdit", false);
@@ -1064,6 +1109,8 @@ void UiDesignerThemeGallery::ApplyThemeStyles()
     ApplySampleTheme(container_choice_group_, "UiGroupPanel", true);
     ApplySampleTheme(container_dropdown_, "UiDropdown", false);
     ApplySampleTheme(container_toggle_, "UiToggle", false);
+    ApplySampleTheme(container_scroll_panel_, "UiScrollPanel", true);
+    ApplySampleTheme(container_scroll_label_, "UiLabel", false);
 
     Layout();
     Refresh();
@@ -1095,6 +1142,7 @@ void UiDesignerThemeGallery::LayoutControlSamples()
                        max(DPI(72), (w - inset * 2 - DPI(8)) / 2), DPI(32));
     slider_.SetRect(inset, DPI(92), max(0, w - inset * 2), DPI(28));
     progress_.SetRect(inset, DPI(130), max(0, w - inset * 2), DPI(20));
+    scroll_bar_.SetRect(inset, DPI(166), max(0, w - inset * 2), DPI(18));
 
     w = inputs_group_.GetSize().cx;
     line_edit_.SetRect(inset, DPI(48), max(0, w - inset * 2), DPI(32));
@@ -1143,6 +1191,9 @@ void UiDesignerThemeGallery::LayoutContainerSamples()
     w = container_choice_group_.GetSize().cx;
     container_dropdown_.SetRect(inset, DPI(58), max(0, w - inset * 2), DPI(32));
     container_toggle_.SetRect(inset, DPI(108), DPI(58), DPI(30));
+
+    w = container_scroll_panel_.GetSize().cx;
+    container_scroll_label_.SetRect(inset, DPI(14), max(0, w - inset * 2), DPI(112));
 }
 
 void UiDesignerThemeGallery::Layout()
