@@ -14,6 +14,7 @@ file
     UiDesignerThemeAdapterRegistry.cpp,
     UiDesignerButtonThemeAdapterV2.cpp,
     UiDesignerCoreControlThemeAdapters.cpp,
+    UiDesignerContainerTabThemeAdapters.cpp,
     UiDesignerListThemeAdapter.cpp,
     UiDesignerEditThemeAdapter.cpp,
     UiDesignerDropdownThemeAdapter.cpp,
