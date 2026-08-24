@@ -86,7 +86,7 @@ CONSOLE_APP_MAIN
 
     // Fill surfaces must remain full UiFill recipes rather than being reduced
     // to a single colour field. This is the shared Solid / None / Gradient path.
-    CheckProjection(RequireOverride(catalog, "UiLabel", "face_normal"),
+    CheckProjection(RequireOverride(catalog, "UiLabel", "face.normal"),
                     PropertyEditorKind::FillRecipe, false,
                     "Label normal face");
     CheckProjection(RequireOverride(catalog, "UiButton", "face_normal"),
@@ -182,7 +182,8 @@ CONSOLE_APP_MAIN
               "Tab generated style resolves from the authored visual family");
     }
 
-    // Resource-backed skins are intentionally not faked as filesystem paths.
+    // Resource-backed skin images are intentionally not faked as filesystem
+    // paths. Policy flags such as popup_use_main_skin are ordinary API fields.
     // When the document resource resolver lands, the eventual public label is
     // required to be Skin (Nine Slice).
     for(const char *type : selectable_types) {
@@ -190,7 +191,7 @@ CONSOLE_APP_MAIN
         if(!spec)
             continue;
         for(const UiDesignerThemeOverrideSpec& property : spec->theme_overrides)
-            Check(property.id.Find("skin") < 0,
+            Check(property.id.Find("skin_image") < 0,
                   String(type) + " does not expose an unresolved fake skin field");
     }
 
