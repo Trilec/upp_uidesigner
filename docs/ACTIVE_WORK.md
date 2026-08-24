@@ -2,6 +2,45 @@
 
 Remote GitHub `main` is authoritative. Refresh exact remote HEAD before acting, never force-update `main`, and preserve unrelated concurrent changes.
 
+## THEME ACCEPTANCE REPAIR — 2026-08-24
+
+BASE:
+
+- `upp_uidesigner/main`: `dfde894feedf791e74a2753fb89334ad7f6de5d2`.
+- `upp_Ui/main`: `e1af79a92ed98186b6a16f43504566c492188a97` at supervisor refresh; its advance beyond `7309358f51af357d5676d376658996c3c13c5486` contains test/example image assets only.
+
+TASK: `THEME-ACCEPT-R1` — repair the three `ThemeAdapterCoverageTest` failures reported by Windows Debug validation without redesigning Theme Studio or changing established serialized schemas.
+
+TOUCHED:
+
+- `UiDesigner/Theme/UiDesignerCoreControlThemeAdapters.cpp`
+- `tests/ThemeAdapterCoverageTest/main.cpp`
+- `docs/ACTIVE_WORK.md`
+
+STATUS: **IMPLEMENTATION COMPLETE — PLATFORM VALIDATION PENDING.**
+
+PUBLISHED: `6fdd752b5514ee7c1fd41a26e0a216809a7bbf83` — reviewed source/test repair checkpoint; this bookkeeping commit records the recovery state on top of it.
+
+VALIDATION / DIAGNOSIS:
+
+- Windows `upp_Ui` Debug + Release on `7309358f51af357d5676d376658996c3c13c5486` passed `PropertyEditorV1RunTests` (`156 Fails: 0`), `PropertyEditorSemanticRunTests` (`checks=44 failed=0`) and `PropertyEditorTests` (`72 Fails: 0`).
+- Initial `upp_uidesigner` Debug validation on `b471a24531b3fd4ecd55e98341af5aca4edd3047` exposed stale `UiProgressBar::Style` references to removed `min_thickness` / `show_text` members. Current remote `dfde894...` already contains the narrow correction removing those invalid projections while preserving Track/Fill palette, metrics, radius and typography coverage.
+- After that mechanical Progress correction, `ThemeAdapterCoverageTest` reported `checks=3719 failed=3`: ScrollBar `grip_color` ownership, Label `face_normal`, and Dropdown fake-skin detection.
+- ScrollBar was the production defect: `grip_color` is a real authored field and is implemented by Add/Apply/Resolve/Emit, but its legal `Null` default made value-based `HasField()` incorrectly report no ownership. The adapter now explicitly owns `grip_color` without changing its runtime default.
+- Label was a coverage-test schema mismatch: the established Label adapter and dedicated regression suite use the stable serialized id `face.normal`. The broad coverage test now uses that canonical id rather than introducing a rename to `face_normal`.
+- Dropdown was a coverage-test classification error: `popup_use_main_skin` is a real boolean style policy, not a resource-backed skin editor. The resource guard now rejects unresolved `skin_image` fields instead of rejecting every legitimate property whose name merely contains `skin`.
+- Source/test diff was reviewed from `dfde894...` through `6fdd752...`; it contains only the one ScrollBar ownership correction and the two intended coverage-contract corrections.
+- Windows Debug/Release revalidation of `6fdd752...` or a descendant remains mandatory. No visual acceptance or branch deletion is authorized yet.
+
+NEXT ACTION:
+
+1. Fetch current `upp_uidesigner/main` and confirm `6fdd752b5514ee7c1fd41a26e0a216809a7bbf83` is an ancestor of the tested HEAD.
+2. Run `tests/ThemeAdapterCoverageTest` under CLANGx64 Debug first; require `failed=0` before resuming the remainder of the Theme Studio matrix.
+3. If green, run the remaining Debug/Release Theme suites and UiDesigner builds, then perform the existing visual smoke including Button rebuild safety, Tab visual families, PropertyEditor affordances and Light/Dark/role isolation.
+4. Stop on any substantive failure and return it to the supervisor. Do not delete cleanup branches until full Theme acceptance passes.
+
+---
+
 ## CURRENT STATE — 2026-08-23
 
 STATUS: **THEME STUDIO / DESIGNER / PROPERTYEDITOR API-PARITY SOURCE WORK COMPLETE; WINDOWS DEBUG/RELEASE + VISUAL ACCEPTANCE PENDING.**
