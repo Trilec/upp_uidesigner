@@ -2,6 +2,54 @@
 
 Remote GitHub `main` is authoritative. Refresh exact remote HEAD before acting, never force-update `main`, and preserve unrelated concurrent changes.
 
+## THEME ACCEPTANCE REPAIR R2 — 2026-08-25
+
+BASE:
+
+- `upp_uidesigner/main`: `b18e63ce65ef8bb562991fcf02a84e8d12bc7742` at supervisor refresh.
+- `upp_Ui/main`: `cccda9916e32fd9bd8d3a0d041cf10e3848546f7` at supervisor refresh. Comparison from `1284a7d72c8e1c83c6fb4f1c4f8ea56c194f67eb` to this HEAD is two commits ahead with no changed files; the repository tree is unchanged across that range.
+
+TASK: `THEME-ACCEPT-R2` — repair the deterministic `PreviewLayoutRegressionTest` Grid reconstruction failure without weakening the regression test or duplicating Grid structural state.
+
+TOUCHED:
+
+- `UiDesigner/Preview/UiDesignerPreview.h`
+- `UiDesigner/Preview/UiDesignerGridPreviewAdapter.cpp`
+- `docs/ACTIVE_WORK.md`
+
+STATUS: **IMPLEMENTATION COMPLETE — WINDOWS REVALIDATION PENDING.**
+
+SOURCE CHECKPOINT: `9962c1cdb683bc5712758d539fb17b0d301f8c54` on `work/theme-preview-grid-rebuild-r1`; this bookkeeping commit is a descendant of that source repair. Neither commit is acceptance evidence until Windows validation passes.
+
+REPORTED WINDOWS DEBUG VALIDATION:
+
+- `ThemeAdapterCoverageTest`: `checks=3721 failed=0`.
+- `ThemeBuilderContractTest`: `checks=42 failed=0`.
+- `ThemeDocumentTest`: `checks=31 failed=0`.
+- `PreviewLayoutRegressionTest`: `checks=23 failed=3`.
+- The exact tested `upp_uidesigner` HEAD was not restated in the result report; do not infer it. The prior mandatory adapter gate nevertheless passed, including the three R1 regressions.
+- Release tests, UiDesigner Debug/Release builds and manual smoke were correctly not run after the deterministic PreviewLayout stop condition.
+
+R2 DIAGNOSIS / REPAIR:
+
+- The document remains authoritative and preserves Grid `rows=1`, `columns=3` after child insertion. The failure occurs only after structural preview reconstruction: the fresh runtime Grid exposes four cells, i.e. its 2x2 catalog/runtime default.
+- Live `rows` / `columns` changes already use the document pair together through `SetGridSize(cols, rows)`, so the defect is not document mutation or `UiGridLayout` pair semantics.
+- `UiDesignerGridPreviewAdapter.cpp` already owns the correct reconstruction model: `UiDesignerGridPreviewCtrl` stores rows/columns and minimum-cell dimensions as coupled preview state and replays each field without losing its paired value.
+- That translation unit previously contained only a file-static adapter-registration object. Preview packages are linked through package archives; a registration-only object has no referenced external symbol and may be discarded by the linker. In that case `UiDesignerPreviewFactory::Adapter()` lazily installs the generic runtime adapter instead.
+- The generic `ApplyRuntime()` intentionally returns `RequiresSubtreeRebuild` for `rows` / `columns`. During `BuildNode()`, `ApplyAllProperties()` replays properties but does not consume those return values, so a fresh generic Grid remains at the 2x2 default. This exactly matches the observed four-cell failure.
+- R2 removes the fragile file-static registration. `UiDesignerPreviewAdapterRegistry` now has an explicit constructor defined in `UiDesignerGridPreviewAdapter.cpp`; construction registers the Grid adapter. `UiDesignerPreview.cpp` therefore has a concrete constructor-symbol dependency on the Grid adapter translation unit, forcing that object into the link and making registration deterministic.
+- No Grid geometry algorithm, document property, catalog default, runtime `UiGridLayout` API, Theme code or regression expectation was changed.
+- Reviewed R2 source diff contains exactly two source/header paths: one constructor declaration and the registration/linkage correction.
+
+NEXT ACTION:
+
+1. Fetch current `upp_uidesigner/main`; confirm the published R2 source checkpoint `9962c1cdb683bc5712758d539fb17b0d301f8c54` is an ancestor of the tested HEAD before validation.
+2. Run `tests/PreviewLayoutRegressionTest` under CLANGx64 Debug first. Require `PREVIEW_LAYOUT_REGRESSION_SUMMARY checks=23 failed=0`. Specifically confirm both structural rebuilds preserve Grid 1x3 state and the runtime Grid reports three cells.
+3. If the focused gate passes, rerun the four Debug acceptance suites as one set, then proceed to Release versions, UiDesigner Debug/Release builds and the existing manual smoke.
+4. Stop on any substantive failure. Do not weaken `PreviewLayoutRegressionTest`, reintroduce duplicate Grid state, or delete cleanup branches until full Theme acceptance passes.
+
+---
+
 ## THEME ACCEPTANCE REPAIR — 2026-08-24
 
 BASE:
