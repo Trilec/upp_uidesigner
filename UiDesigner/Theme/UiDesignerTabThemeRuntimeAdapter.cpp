@@ -26,6 +26,34 @@ static const char *RuntimeTabVisualCode(UiTabVisual visual)
     }
 }
 
+static bool IsTabThemeIdCollision(const String& id)
+{
+    static const char *ids[] = {
+        "tab_font_face", "tab_font_bold", "tab_font_italic",
+        "tab_padding_left", "tab_padding_top",
+        "tab_padding_right", "tab_padding_bottom",
+        "strip_inset_left", "strip_inset_top",
+        "strip_inset_right", "strip_inset_bottom",
+        "affordance_gap", "min_tab_main", "visual"
+    };
+    for(const char *candidate : ids)
+        if(id == candidate)
+            return true;
+    return false;
+}
+
+static void DisambiguateTabThemeIds(UiDesignerControlSpec& spec)
+{
+    // Normal Designer Tab properties predate the complete Theme adapter and
+    // intentionally keep their established ids. Theme overrides occupy a
+    // separate document namespace, so finish the existing style_* convention
+    // for every remaining overlap while preserving the canonical runtime field
+    // in adapter_field_id.
+    for(UiDesignerThemeOverrideSpec& property : spec.theme_overrides)
+        if(IsTabThemeIdCollision(property.id))
+            property.id = "style_" + property.id;
+}
+
 static bool FindAuthoredVisual(const UiDesignerNode& node,
                                const UiDesignerControlSpec& spec,
                                UiTabVisual& visual)
@@ -54,6 +82,7 @@ public:
     void AddThemeOverrides(UiDesignerControlSpec& spec) const override
     {
         Base().AddThemeOverrides(spec);
+        DisambiguateTabThemeIds(spec);
     }
 
     bool HasField(const String& field_id) const override
