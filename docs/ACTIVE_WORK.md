@@ -2,6 +2,55 @@
 
 Remote GitHub `main` is authoritative. Refresh exact remote HEAD before acting, never force-update `main`, and preserve unrelated concurrent changes.
 
+## THEME ACCEPTANCE REPAIR R3 — 2026-08-25
+
+BASE:
+
+- `upp_uidesigner/main`: `c0e0a16d8c70d349ac8ebe9ee4dc3ea73750158f` at supervisor refresh.
+- `upp_Ui/main`: `78c8bfb55f1b351ed7d63c66f467eaf308dd7b44` at supervisor refresh.
+
+TASK: `THEME-ACCEPT-R3` — close the retained adapter-suite catalog failure caused by duplicate normal/Theme `UiTab` property ids without renaming the older normal Designer schema or weakening catalog validation.
+
+TOUCHED:
+
+- `UiDesigner/Theme/UiDesignerTabThemeRuntimeAdapter.cpp`
+- `tests/ThemeAdapterCoverageTest/main.cpp`
+- `docs/ACTIVE_WORK.md`
+
+STATUS: **IMPLEMENTATION COMPLETE — WINDOWS REVALIDATION PENDING.**
+
+SOURCE CHECKPOINT: `ff492cadc3f8141e2b3a56f92abdae50bb874335` on `work/theme-tab-schema-r3`; this bookkeeping commit is a descendant of the reviewed source/test repair. It is not acceptance evidence until Windows validation passes.
+
+REPORTED R2 WINDOWS VALIDATION:
+
+- Exact tested heads: `upp_uidesigner c0e0a16d8c70d349ac8ebe9ee4dc3ea73750158f`; `upp_Ui 78c8bfb55f1b351ed7d63c66f467eaf308dd7b44`.
+- `git diff --check`: PASS; both worktrees clean.
+- Focused `PreviewLayoutRegressionTest`: `checks=23 failed=0`; both structural Grid rebuilds preserve 1x3 and runtime Grid reports three cells.
+- Principal Debug: ThemeAdapterCoverage `3721/0`, ThemeBuilderContract `42/0`, ThemeDocument `31/0`, PreviewLayout `23/0`.
+- Principal Release: same four summaries PASS.
+- UiDesigner Debug and Release builds: PASS with no compile/link errors.
+- Retained Debug adapter suites each failed only because `catalog.Validate()` reported `UiTab.tab_font_face duplicates a normal property id`: Label `242/1`, List/Edit `114/1`, Dropdown/Accordion `103/1`.
+- Manual smoke and branch cleanup were correctly skipped after the deterministic retained-suite stop condition.
+
+R3 DIAGNOSIS / REPAIR:
+
+- `NormalizeTab()` already exposed normal Designer ids such as `tab_font_face`, `tab_padding_*`, `strip_inset_*`, `affordance_gap`, `min_tab_main` and `visual` before the complete Tab Theme adapter was added. Preserve that older normal Designer document contract.
+- The later Tab Theme adapter already used distinct `style_*` public ids for overlapping fields including `style_tab_extent`, `style_item_spacing`, `style_body_gap`, `style_content_gap`, `style_expand_tabs` and `style_active_tab_uses_body_face`, but fourteen overlaps were left unprefixed.
+- R3 completes that existing Theme-side convention for the remaining overlaps: tab font face/bold/italic, tab padding four sides, strip inset four sides, affordance gap, minimum tab length and visual.
+- Only the Theme override `id` is prefixed. `adapter_field_id` remains the canonical runtime field (`tab_font_face`, `visual`, etc.), so base adapter apply/resolve/codegen and the runtime `SetVisual()` bridge keep their existing semantics.
+- `ThemeAdapterCoverageTest` now validates the whole catalog before adapter assertions and uses `style_tab_font_face` / `style_visual` as the public Tab Theme ids. This makes the principal coverage gate catch future normal/Theme namespace collisions directly.
+- No normal Designer property id, UiTab runtime API, base Tab theme field implementation, Theme document structure, or catalog validation rule was weakened.
+
+NEXT ACTION:
+
+1. Fetch current `upp_uidesigner/main`; confirm R3 source checkpoint `ff492cadc3f8141e2b3a56f92abdae50bb874335` is an ancestor of tested HEAD.
+2. First run `ThemeAdapterCoverageTest` CLANGx64 Debug. Expected summary after the added catalog assertion is `checks=3722 failed=0`.
+3. Then run the retained Debug Label, List/Edit and Dropdown/Accordion adapter suites; all must return `failed=0` and no catalog error.
+4. If green, rerun the four principal Debug + Release acceptance suites, UiDesigner Debug + Release builds, then perform the existing manual Theme Studio/PropertyEditor smoke.
+5. Stop on any substantive failure. Do not relax catalog uniqueness, rename normal Tab properties, or delete cleanup branches until full Theme acceptance passes.
+
+---
+
 ## THEME ACCEPTANCE REPAIR R2 — 2026-08-25
 
 BASE:
