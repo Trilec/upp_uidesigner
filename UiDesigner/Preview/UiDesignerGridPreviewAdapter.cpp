@@ -124,24 +124,31 @@ static UiDesignerApplyResult ApplyDesignerGridPreview(
     return UiDesignerApplyResult::Rejected;
 }
 
-struct UiDesignerGridPreviewAdapterRegistration {
-    UiDesignerGridPreviewAdapterRegistration()
-    {
-        UiDesignerPreviewAdapter adapter;
-        adapter.id = "runtime:UiGridLayout";
-        adapter.create = [] { return MakeOne<UiDesignerGridPreviewCtrl>(); };
-        adapter.initialize = [](Ctrl& ctrl, const UiDesignerControlSpec& spec) {
-            ctrl.Tip(spec.help.IsEmpty() ? spec.display_name : spec.help);
-            if(UiDesignerGridPreviewCtrl *grid =
-                   dynamic_cast<UiDesignerGridPreviewCtrl *>(&ctrl))
-                grid->InitializeDesignerState(spec);
-        };
-        adapter.apply = ApplyDesignerGridPreview;
-        UiDesignerPreviewAdapterRegistry::Global().Register(pick(adapter));
-    }
-};
-
-static UiDesignerGridPreviewAdapterRegistration s_grid_preview_adapter_registration;
-
+static void RegisterGridPreviewAdapter(UiDesignerPreviewAdapterRegistry& registry)
+{
+    UiDesignerPreviewAdapter adapter;
+    adapter.id = "runtime:UiGridLayout";
+    adapter.create = [] { return MakeOne<UiDesignerGridPreviewCtrl>(); };
+    adapter.initialize = [](Ctrl& ctrl, const UiDesignerControlSpec& spec) {
+        ctrl.Tip(spec.help.IsEmpty() ? spec.display_name : spec.help);
+        if(UiDesignerGridPreviewCtrl *grid =
+               dynamic_cast<UiDesignerGridPreviewCtrl *>(&ctrl))
+            grid->InitializeDesignerState(spec);
+    };
+    adapter.apply = ApplyDesignerGridPreview;
+    registry.Register(pick(adapter));
 }
+
+} // namespace
+
+// The Preview package is linked through package archives, so a translation
+// unit containing only a file-static registration object can be discarded by
+// the linker. Defining the registry constructor here gives UiDesignerPreview.cpp
+// a concrete symbol dependency on this unit and makes Grid adapter registration
+// deterministic for every preview/rebuild path.
+UiDesignerPreviewAdapterRegistry::UiDesignerPreviewAdapterRegistry()
+{
+    RegisterGridPreviewAdapter(*this);
 }
+
+} // namespace Upp

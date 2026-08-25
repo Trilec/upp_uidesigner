@@ -224,6 +224,7 @@ struct UiDesignerPreviewAdapter : Moveable<UiDesignerPreviewAdapter> {
 
 class UiDesignerPreviewAdapterRegistry {
 public:
+    UiDesignerPreviewAdapterRegistry();
     static UiDesignerPreviewAdapterRegistry& Global();
 
     void Register(UiDesignerPreviewAdapter adapter);
