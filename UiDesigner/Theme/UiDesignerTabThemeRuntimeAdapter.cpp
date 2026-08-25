@@ -51,7 +51,7 @@ static void DisambiguateTabThemeIds(UiDesignerControlSpec& spec)
     // in adapter_field_id.
     for(UiDesignerThemeOverrideSpec& property : spec.theme_overrides)
         if(IsTabThemeIdCollision(property.id))
-            property.id = "style_" + property.id;
+            property.id = String("style_") + property.id;
 }
 
 static bool FindAuthoredVisual(const UiDesignerNode& node,
