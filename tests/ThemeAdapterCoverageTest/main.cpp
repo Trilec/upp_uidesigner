@@ -55,6 +55,8 @@ CONSOLE_APP_MAIN
 {
     UiDesignerCatalog catalog;
     RegisterUiDesignerBuiltins(catalog);
+    String catalog_error;
+    Check(catalog.Validate(catalog_error), "catalog validates: " + catalog_error);
 
     static const char *selectable_types[] = {
         "UiPanel", "UiGroupPanel", "UiScrollPanel", "UiTab",
@@ -149,7 +151,7 @@ CONSOLE_APP_MAIN
     CheckProjection(RequireOverride(catalog, "UiTab", "indicator_thickness"),
                     PropertyEditorKind::NumericInt, true,
                     "Tab indicator thickness");
-    RequireOverride(catalog, "UiTab", "tab_font_face");
+    RequireOverride(catalog, "UiTab", "style_tab_font_face");
     const UiDesignerThemeOverrideSpec *tab_side =
         RequireOverride(catalog, "UiTab", "icon_side");
     if(tab_side) {
@@ -166,7 +168,7 @@ CONSOLE_APP_MAIN
     const UiDesignerThemeAdapter *tab_adapter =
         tab ? UiDesignerGetThemeAdapter(*tab) : nullptr;
     const UiDesignerThemeOverrideSpec *visual =
-        tab ? tab->FindThemeOverride("visual") : nullptr;
+        tab ? tab->FindThemeOverride("style_visual") : nullptr;
     Check(tab_adapter != nullptr && visual != nullptr,
           "Tab visual has a runtime-aware Theme adapter");
     if(tab_adapter && visual) {
