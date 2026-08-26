@@ -49,6 +49,17 @@ void CheckProjection(const UiDesignerThemeOverrideSpec *property,
               what + " keeps the shared numeric slider-toggle affordance");
 }
 
+void CheckThemeAlias(const UiDesignerCatalog& catalog, const char *type,
+                     const char *public_id, const char *adapter_field_id)
+{
+    const UiDesignerThemeOverrideSpec *property =
+        RequireOverride(catalog, type, public_id);
+    if(property)
+        Check(property->adapter_field_id == adapter_field_id,
+              String(type) + "." + public_id +
+              " keeps canonical adapter field " + adapter_field_id);
+}
+
 }
 
 CONSOLE_APP_MAIN
@@ -100,6 +111,16 @@ CONSOLE_APP_MAIN
     CheckProjection(RequireOverride(catalog, "UiProgressBar", "fill_face_normal"),
                     PropertyEditorKind::FillRecipe, false,
                     "Progress fill normal face");
+
+    // Button layout/content fields also exist as normal Designer properties.
+    // Their Theme document ids stay distinct while adapter_field_id continues
+    // to address the canonical UiButton::Style member.
+    CheckThemeAlias(catalog, "UiButton", "style_align_h", "align_h");
+    CheckThemeAlias(catalog, "UiButton", "style_align_v", "align_v");
+    CheckThemeAlias(catalog, "UiButton", "style_icon_side", "icon_side");
+    CheckThemeAlias(catalog, "UiButton", "style_content_gap", "content_gap");
+    CheckThemeAlias(catalog, "UiButton", "style_icon_render_mode",
+                    "icon_render_mode");
 
     // Previously-missing StyledMetrics radius coverage.
     CheckProjection(RequireOverride(catalog, "UiProgressBar", "radius"),
