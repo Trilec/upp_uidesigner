@@ -2,6 +2,58 @@
 
 Remote GitHub `main` is authoritative. Refresh exact remote HEAD before acting, never force-update `main`, and preserve unrelated concurrent changes.
 
+## THEME ACCEPTANCE REPAIR R5 — 2026-08-26
+
+BASE:
+
+- `upp_uidesigner/main`: `d57874f98aa0b15321641affefdb5768fa1d97e2` at supervisor refresh and exact R4 validation HEAD.
+- R4 validation `upp_Ui` HEAD: `6e77738f544fb83e0be58d2e3e92e7fceba57138`; its advance beyond the prior Theme-compatible checkpoint remained UiGraph/UiNodeGraph-only and did not touch UiTab, Theme or PropertyEditor dependencies.
+
+TASK: `THEME-ACCEPT-R5` — close the deterministic `UiSlider` duplicate Theme override failure and the identical latent `UiScrollBar` defect without changing the underlying Ui control style contracts or weakening catalog validation.
+
+TOUCHED:
+
+- `UiDesigner/Theme/UiDesignerSliderScrollBarThemeAdapterV2.cpp`
+- `UiDesigner/Theme/UiDesignerThemeAdapter.h`
+- `UiDesigner/Theme/UiDesignerThemeAdapterRegistry.cpp`
+- `UiDesigner/Theme/Theme.upp`
+- `tests/ThemeAdapterCoverageTest/main.cpp`
+- `docs/ACTIVE_WORK.md`
+
+STATUS: **IMPLEMENTATION COMPLETE — WINDOWS REVALIDATION PENDING.**
+
+SOURCE CHECKPOINT: `dba96a306e17981a16aafda003693c0df4b71a04` on `work/theme-slider-scrollbar-schema-r5`; this bookkeeping commit is a descendant of the reviewed source/test repair and is not acceptance evidence until Windows validation passes.
+
+REPORTED R4 WINDOWS VALIDATION:
+
+- Exact tested heads: `upp_uidesigner d57874f98aa0b15321641affefdb5768fa1d97e2`; `upp_Ui 6e77738f544fb83e0be58d2e3e92e7fceba57138`.
+- Required R4, R3 and Grid source checkpoints were confirmed ancestors; `78c8bfb55f1b351ed7d63c66f467eaf308dd7b44` remained an ancestor of tested `upp_Ui`.
+- R4 `git diff --check`: PASS; both worktrees clean; no validator edits, commits or pushes.
+- Focused Debug `ThemeAdapterCoverageTest` built and linked but stopped at `UiSlider has duplicate theme override thumb_face_hot`; summary `checks=3737 failed=1`.
+- Retained suites, principal Debug/Release, UiDesigner builds, manual smoke and cleanup were correctly skipped.
+
+R5 DIAGNOSIS / REPAIR:
+
+- `UiSlider::Style` and `UiScrollBar::Style` each have one valid `thumb_palette` containing the normal/hot/pressed/disabled faces. Inspection of the exact tested `upp_Ui` headers found no duplicated control state or broken control API; no `upp_Ui` change is warranted.
+- In the Designer core adapters, `AddPaletteMetrics(..., "thumb", ...)` already creates `thumb_face_normal`, `thumb_face_hot`, `thumb_face_pressed` and `thumb_face_disabled`.
+- Slider and ScrollBar then deliberately remove `thumb_face_normal` and replace it with the older public `ink_normal` alias, but they also redundantly append hot/pressed/disabled again. The shared and later entries are both FillRecipe rows with the same canonical `adapter_field_id`, so the extra three rows are pure duplicates.
+- R5 routes Slider and ScrollBar through small V2 adapters that delegate all runtime ownership, resolve/apply/layout/codegen behavior to the existing core adapters and only keep the first occurrence of `thumb_face_hot`, `thumb_face_pressed` and `thumb_face_disabled` after Theme override construction.
+- The established `ink_normal` alias remains exactly once and `thumb_face_normal` remains absent. Runtime field ids and `UiSlider` / `UiScrollBar` APIs are unchanged.
+- Base adapter resolution is lazy rather than stored during cross-translation-unit static initialization, so package initialization order cannot affect the wrapper.
+- `ThemeAdapterCoverageTest` now explicitly checks the Slider/ScrollBar normal alias and all four Thumb-face ID counts. It also checks Theme override ID uniqueness once for every selectable control, so any remaining duplicate surfaces will be reported together rather than one catalog failure per validation round.
+- Because six duplicate per-field ownership checks disappear, ten explicit face-contract checks are added, and 22 control-wide uniqueness checks are added, the expected focused summary is `THEME_ADAPTER_COVERAGE_SUMMARY checks=3763 failed=0`.
+- No normal Designer schema, catalog validation rule, Theme document structure, Ui control implementation, concurrent UiGraph work or other Theme adapter behavior was changed.
+
+NEXT ACTION:
+
+1. Fetch current `upp_uidesigner/main`; confirm R5 source checkpoint `dba96a306e17981a16aafda003693c0df4b71a04` is an ancestor of tested HEAD.
+2. Run `ThemeAdapterCoverageTest` CLANGx64 Debug first. Require `checks=3763 failed=0`. If any duplicate Theme surface remains, the per-control uniqueness checks should report all affected selectable controls in the same run.
+3. If green, run retained Debug Label, List/Edit and Dropdown/Accordion adapter suites; all must return zero failures.
+4. If green, run the four principal Debug + Release suites, UiDesigner Debug + Release builds, then the existing Theme Studio/PropertyEditor manual smoke.
+5. Stop on substantive failure. Do not weaken catalog uniqueness, change `upp_Ui` merely to accommodate Designer metadata, rename established normal Button/Tab properties, remove `style_*` separation, delete cleanup branches or touch concurrent UiGraph work.
+
+---
+
 ## THEME ACCEPTANCE REPAIR R4 — 2026-08-26
 
 BASE:
