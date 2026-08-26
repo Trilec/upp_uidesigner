@@ -21,19 +21,18 @@ static void KeepFirstOverride(UiDesignerControlSpec& spec, const String& id)
 
 class DeduplicatedThumbFaceThemeAdapter final : public UiDesignerThemeAdapter {
 public:
-    DeduplicatedThumbFaceThemeAdapter(const char *id,
-                                      const UiDesignerThemeAdapter& base)
-        : id_(id), base_(base) {}
+    DeduplicatedThumbFaceThemeAdapter(const char *id, bool slider)
+        : id_(id), slider_(slider) {}
 
     const char *Id() const override { return id_; }
     bool Supports(UiDesignerRuntimeKind kind) const override
     {
-        return base_.Supports(kind);
+        return Base().Supports(kind);
     }
 
     void AddThemeOverrides(UiDesignerControlSpec& spec) const override
     {
-        base_.AddThemeOverrides(spec);
+        Base().AddThemeOverrides(spec);
 
         // The legacy core adapters replace thumb_face_normal with ink_normal,
         // but also re-add hot/pressed/disabled after AddPaletteMetrics already
@@ -46,12 +45,12 @@ public:
 
     bool HasField(const String& field_id) const override
     {
-        return base_.HasField(field_id);
+        return Base().HasField(field_id);
     }
 
     bool FieldAffectsLayout(const String& field_id) const override
     {
-        return base_.FieldAffectsLayout(field_id);
+        return Base().FieldAffectsLayout(field_id);
     }
 
     Value ResolveFieldValue(const UiDesignerNode& node,
@@ -59,32 +58,36 @@ public:
                             const String& field_id,
                             const UiDesignerTransientOverlay* overlay) const override
     {
-        return base_.ResolveFieldValue(node, spec, field_id, overlay);
+        return Base().ResolveFieldValue(node, spec, field_id, overlay);
     }
 
     void ApplyPreviewStyle(Ctrl& ctrl, const UiDesignerNode& node,
                            const UiDesignerControlSpec& spec,
                            const UiDesignerTransientOverlay* overlay) const override
     {
-        base_.ApplyPreviewStyle(ctrl, node, spec, overlay);
+        Base().ApplyPreviewStyle(ctrl, node, spec, overlay);
     }
 
     void EmitSetup(String& out, const String& member,
                    const UiDesignerNode& node,
                    const UiDesignerControlSpec& spec) const override
     {
-        base_.EmitSetup(out, member, node, spec);
+        Base().EmitSetup(out, member, node, spec);
     }
 
 private:
+    const UiDesignerThemeAdapter& Base() const
+    {
+        return slider_ ? UiDesignerSliderThemeAdapterInstance()
+                       : UiDesignerScrollBarThemeAdapterInstance();
+    }
+
     const char *id_;
-    const UiDesignerThemeAdapter& base_;
+    bool slider_;
 };
 
-DeduplicatedThumbFaceThemeAdapter slider_adapter_v2(
-    "slider", UiDesignerSliderThemeAdapterInstance());
-DeduplicatedThumbFaceThemeAdapter scroll_bar_adapter_v2(
-    "scroll_bar", UiDesignerScrollBarThemeAdapterInstance());
+DeduplicatedThumbFaceThemeAdapter slider_adapter_v2("slider", true);
+DeduplicatedThumbFaceThemeAdapter scroll_bar_adapter_v2("scroll_bar", false);
 
 } // namespace
 
