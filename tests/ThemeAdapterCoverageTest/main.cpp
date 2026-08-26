@@ -73,6 +73,28 @@ void CheckThemeOverrideCount(const UiDesignerCatalog& catalog, const char *type,
           Format("%s.%s theme override count is %d", type, id, expected));
 }
 
+void CheckThemeOverrideIdsUnique(const UiDesignerControlSpec& spec)
+{
+    String duplicates;
+    for(int i = 0; i < spec.theme_overrides.GetCount(); ++i) {
+        const String& id = spec.theme_overrides[i].id;
+        bool repeated = false;
+        for(int j = 0; j < i; ++j)
+            if(spec.theme_overrides[j].id == id) {
+                repeated = true;
+                break;
+            }
+        if(repeated) {
+            if(!duplicates.IsEmpty())
+                duplicates << ", ";
+            duplicates << id;
+        }
+    }
+    Check(duplicates.IsEmpty(),
+          spec.type_id + " has unique Theme override ids" +
+          (duplicates.IsEmpty() ? String() : ": " + duplicates));
+}
+
 }
 
 CONSOLE_APP_MAIN
@@ -105,6 +127,7 @@ CONSOLE_APP_MAIN
               String(type) + " adapter supports its runtime kind");
         Check(!spec->theme_overrides.IsEmpty(),
               String(type) + " exposes an editable Theme surface");
+        CheckThemeOverrideIdsUnique(*spec);
         for(const UiDesignerThemeOverrideSpec& property : spec->theme_overrides)
             Check(adapter->HasField(property.adapter_field_id),
                   String(type) + " adapter owns field " + property.adapter_field_id);
