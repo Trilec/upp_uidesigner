@@ -46,9 +46,9 @@ const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(const String& id)
     if(id == "progress")
         return &UiDesignerProgressThemeAdapterInstance();
     if(id == "slider")
-        return &UiDesignerSliderThemeAdapterInstance();
+        return &UiDesignerSliderThemeAdapterV2Instance();
     if(id == "scroll_bar")
-        return &UiDesignerScrollBarThemeAdapterInstance();
+        return &UiDesignerScrollBarThemeAdapterV2Instance();
     if(id == "panel")
         return &UiDesignerPanelThemeAdapterInstance();
     if(id == "group_panel")
@@ -84,9 +84,9 @@ const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(UiDesignerRuntimeKind k
     if(kind == UiDesignerRuntimeKind::UiProgressBar)
         return &UiDesignerProgressThemeAdapterInstance();
     if(kind == UiDesignerRuntimeKind::UiSlider)
-        return &UiDesignerSliderThemeAdapterInstance();
+        return &UiDesignerSliderThemeAdapterV2Instance();
     if(kind == UiDesignerRuntimeKind::UiScrollBar)
-        return &UiDesignerScrollBarThemeAdapterInstance();
+        return &UiDesignerScrollBarThemeAdapterV2Instance();
     if(kind == UiDesignerRuntimeKind::UiPanel)
         return &UiDesignerPanelThemeAdapterInstance();
     if(kind == UiDesignerRuntimeKind::UiGroupPanel)
