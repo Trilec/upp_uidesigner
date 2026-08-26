@@ -2,6 +2,56 @@
 
 Remote GitHub `main` is authoritative. Refresh exact remote HEAD before acting, never force-update `main`, and preserve unrelated concurrent changes.
 
+## THEME ACCEPTANCE REPAIR R4 — 2026-08-26
+
+BASE:
+
+- `upp_uidesigner/main`: `2e0b9025327749b7d570c76cb09888b7f4db49d7` at supervisor refresh and exact R3 validation HEAD.
+- R3 validation `upp_Ui` HEAD: `91f2926f57a86dfc6df08d9b0ae10173085dcbf5`; the tested advance beyond `78c8bfb55f1b351ed7d63c66f467eaf308dd7b44` was UiNodeGraph-only and did not touch UiTab, Theme or PropertyEditor dependencies.
+
+TASK: `THEME-ACCEPT-R4` — close the next deterministic catalog collision exposed after the Tab Theme namespace repair, without renaming established normal Button properties, weakening catalog validation, or changing UiButton runtime semantics.
+
+TOUCHED:
+
+- `UiDesigner/Theme/UiDesignerButtonThemeAdapterV2.cpp`
+- `tests/ThemeAdapterCoverageTest/main.cpp`
+- `docs/ACTIVE_WORK.md`
+
+STATUS: **IMPLEMENTATION COMPLETE — WINDOWS REVALIDATION PENDING.**
+
+SOURCE CHECKPOINTS on `work/theme-button-schema-r4`:
+
+- `241d27204d23ea9fdd30378355df976a2567d66c` — Button Theme schema repair.
+- `7a96b8c10c70c58ed6c37d0f86cd2f2480678feb` — coverage regression for public Theme ids and canonical adapter fields.
+
+REPORTED R3 WINDOWS VALIDATION:
+
+- Exact tested heads: `upp_uidesigner 2e0b9025327749b7d570c76cb09888b7f4db49d7`; `upp_Ui 91f2926f57a86dfc6df08d9b0ae10173085dcbf5`.
+- R3 source `ff492cadc3f8141e2b3a56f92abdae50bb874335`, Grid repair `9962c1cdb683bc5712758d539fb17b0d301f8c54`, and Ui checkpoint `78c8bfb55f1b351ed7d63c66f467eaf308dd7b44` were confirmed ancestors.
+- `git diff --check`: PASS; both worktrees clean; no validator edits or commits.
+- Focused Debug `ThemeAdapterCoverageTest` built and linked but stopped at `UiButton.align_h duplicates a normal property id`; summary `checks=3722 failed=1`.
+- The prior Tab `style_*` repair therefore passed its catalog position and the next independent duplicate became visible. Retained suites, full Debug/Release, UiDesigner builds, manual smoke and cleanup were correctly skipped.
+
+R4 DIAGNOSIS / REPAIR:
+
+- `AddButtonProperties()` exposes normal Designer properties `align_h`, `align_v`, `icon_side`, `content_gap` and `icon_render_mode` for Button, ToolButton and SplitButton.
+- `UiDesignerButtonThemeAdapterV2` independently exposed those same five public ids as durable `UiButton::Style` Theme fields. The catalog uniqueness rule correctly rejects the overlap.
+- R4 namespaces the complete five-field Button overlap in one bounded repair: `style_align_h`, `style_align_v`, `style_icon_side`, `style_content_gap`, and `style_icon_render_mode`.
+- Only `UiDesignerThemeOverrideSpec::id` changes. `adapter_field_id` remains `align_h`, `align_v`, `icon_side`, `content_gap`, and `icon_render_mode`, so `HasField`, layout-impact ownership, preview application, resolution and generated `UiButton::Style` setup continue to use the existing canonical runtime fields.
+- The normal Designer schema, Button content properties, `UiButton` / `UiToolButton` / `UiSplitButton` runtime APIs, catalog validator, and other Theme adapters are untouched.
+- `ThemeAdapterCoverageTest` now checks each of the five public Button `style_*` ids and its canonical adapter-field mapping in addition to whole-catalog validation. This adds 15 checks; expected focused summary is now `checks=3737 failed=0`.
+- Reviewed R4 source/test diff from `2e0b902...` contains exactly two paths and 42 added lines: 21 in the Button adapter and 21 in the coverage test.
+
+NEXT ACTION:
+
+1. Fetch current `upp_uidesigner/main`; confirm the eventual R4 source/test checkpoint is an ancestor of the tested HEAD before Windows validation.
+2. Run `ThemeAdapterCoverageTest` CLANGx64 Debug first. Require `THEME_ADAPTER_COVERAGE_SUMMARY checks=3737 failed=0` and no catalog duplicate-property error.
+3. If green, run retained Debug Label, List/Edit and Dropdown/Accordion adapter suites; all must return zero failures.
+4. If green, run the four principal Debug + Release suites, UiDesigner Debug + Release builds, then the existing Theme Studio/PropertyEditor manual smoke.
+5. Stop on any substantive failure. Do not weaken catalog uniqueness, rename normal Button/Tab properties, change UiButton/UiTab runtime merely for Designer, remove `style_*` separation, delete cleanup branches, or touch concurrent UiGraph work.
+
+---
+
 ## THEME ACCEPTANCE REPAIR R3 — 2026-08-25
 
 BASE:
@@ -246,7 +296,7 @@ Manual Debug smoke:
 
 ## BRANCH HYGIENE
 
-Do not create another branch for this tranche.
+Do not create unnecessary additional branches for this acceptance tranche.
 
 Latest verified cleanup candidates (`ahead_by=0` versus `main` when audited):
 
