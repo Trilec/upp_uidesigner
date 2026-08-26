@@ -60,6 +60,19 @@ void CheckThemeAlias(const UiDesignerCatalog& catalog, const char *type,
               " keeps canonical adapter field " + adapter_field_id);
 }
 
+void CheckThemeOverrideCount(const UiDesignerCatalog& catalog, const char *type,
+                             const char *id, int expected)
+{
+    const UiDesignerControlSpec *spec = catalog.Find(type);
+    int count = 0;
+    if(spec)
+        for(const UiDesignerThemeOverrideSpec& property : spec->theme_overrides)
+            if(property.id == id)
+                count++;
+    Check(spec && count == expected,
+          Format("%s.%s theme override count is %d", type, id, expected));
+}
+
 }
 
 CONSOLE_APP_MAIN
@@ -121,6 +134,20 @@ CONSOLE_APP_MAIN
     CheckThemeAlias(catalog, "UiButton", "style_content_gap", "content_gap");
     CheckThemeAlias(catalog, "UiButton", "style_icon_render_mode",
                     "icon_render_mode");
+
+    // Slider and ScrollBar keep the established ink_normal alias for the
+    // normal Thumb face. The shared Thumb palette owns the remaining three
+    // state faces and each public Theme id must occur exactly once.
+    CheckThemeOverrideCount(catalog, "UiSlider", "ink_normal", 1);
+    CheckThemeOverrideCount(catalog, "UiSlider", "thumb_face_normal", 0);
+    CheckThemeOverrideCount(catalog, "UiSlider", "thumb_face_hot", 1);
+    CheckThemeOverrideCount(catalog, "UiSlider", "thumb_face_pressed", 1);
+    CheckThemeOverrideCount(catalog, "UiSlider", "thumb_face_disabled", 1);
+    CheckThemeOverrideCount(catalog, "UiScrollBar", "ink_normal", 1);
+    CheckThemeOverrideCount(catalog, "UiScrollBar", "thumb_face_normal", 0);
+    CheckThemeOverrideCount(catalog, "UiScrollBar", "thumb_face_hot", 1);
+    CheckThemeOverrideCount(catalog, "UiScrollBar", "thumb_face_pressed", 1);
+    CheckThemeOverrideCount(catalog, "UiScrollBar", "thumb_face_disabled", 1);
 
     // Previously-missing StyledMetrics radius coverage.
     CheckProjection(RequireOverride(catalog, "UiProgressBar", "radius"),
