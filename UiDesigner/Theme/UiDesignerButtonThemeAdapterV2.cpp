@@ -45,6 +45,19 @@ static void RenameOverride(UiDesignerControlSpec& spec, const String& from,
         }
 }
 
+static void DisambiguateButtonThemeIds(UiDesignerControlSpec& spec)
+{
+    static const char *ids[] = {
+        "align_h", "align_v", "icon_side", "content_gap", "icon_render_mode"
+    };
+    for(UiDesignerThemeOverrideSpec& property : spec.theme_overrides)
+        for(const char *id : ids)
+            if(property.id == id) {
+                property.id = String("style_") + property.id;
+                break;
+            }
+}
+
 static void AddButtonOverrides(UiDesignerControlSpec& spec)
 {
     const UiButton::Style s = ResolveButtonStyle(spec.runtime_kind, UiRole::Standard);
@@ -93,6 +106,14 @@ static void AddButtonOverrides(UiDesignerControlSpec& spec)
                s.underline_width, 0, 32, true);
     AddNumeric(spec, "underline_offset", "Underline offset", "Additional",
                s.underline_offset, -32, 64, true);
+
+    // Button, ToolButton and SplitButton expose these layout/content controls
+    // as normal Designer properties as well as durable Style fields. Keep the
+    // established normal property ids and place the Theme document keys in the
+    // same style_* namespace used for other normal/Theme overlaps. The adapter
+    // field remains canonical so preview, resolution and code generation keep
+    // applying UiButton::Style members by their original names.
+    DisambiguateButtonThemeIds(spec);
 
     // UiButton::Style::skin is a real nine-slice skin. It remains deliberately
     // unexposed until ThemeDocument preview/codegen can resolve Designer
