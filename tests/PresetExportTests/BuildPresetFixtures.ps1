@@ -29,16 +29,21 @@ try {
     Invoke-Checked 'Build PresetExportTests' {
         & $UmkPath $Assembly 'PresetExportTests' $Config '-br' $fixtureExe
     }
-    Invoke-Checked 'Export blank, three-pane and dialog fixtures' {
+    Invoke-Checked 'Export all creation and catalog preset fixtures' {
         & $fixtureExe '--export-all' $generatedRoot
     }
 
-    $packages = @(
-        'BlankFormGenerated',
-        'ThreePaneGenerated',
-        'DialogGenerated'
-    )
-    foreach($package in $packages) {
+    $packages = @(Get-ChildItem -LiteralPath $generatedRoot -Directory | Sort-Object Name)
+    if($packages.Count -lt 4) {
+        throw "Expected creation plus catalog preset packages, found $($packages.Count)"
+    }
+
+    foreach($packageDir in $packages) {
+        $package = $packageDir.Name
+        $uppFile = Join-Path $packageDir.FullName ($package + '.upp')
+        if(-not (Test-Path -LiteralPath $uppFile -PathType Leaf)) {
+            throw "Generated package is missing its .upp file: $uppFile"
+        }
         $relative = "PresetExportTests/.generated-presets/$package"
         $output = Join-Path $OutputRoot ($package + '.exe')
         Invoke-Checked "Build generated preset $package" {
@@ -49,7 +54,7 @@ try {
         }
     }
 
-    Write-Host 'Blank Form, Three Pane and Dialog generated-package builds passed.'
+    Write-Host "All $($packages.Count) generated creation/catalog preset packages built successfully."
     Remove-Item -LiteralPath $generatedRoot -Recurse -Force
 }
 catch {

@@ -1,4 +1,4 @@
-description "UiDesigner blank, three-pane and dialog generated package tests";
+description "UiDesigner creation and catalog preset generated-package tests";
 
 uses
     Core,
