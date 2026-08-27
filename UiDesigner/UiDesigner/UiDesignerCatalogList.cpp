@@ -1,4 +1,5 @@
 #include "UiDesignerWidgets.h"
+#include <UiDesigner/Theme/UiDesignerThemeBuilderV2.h>
 
 namespace Upp {
 
@@ -8,7 +9,6 @@ UiDesignerCatalogList::UiDesignerCatalogList()
     Add(filter_edit_);
     Add(scope_label_);
     filter_edit_.SetPlaceholder("Filter controls...");
-    scope_label_.SetCustomStyle(UiTheme::ResolveLabel(UiRole::Subtle));
     UpdateScopeLabel();
     filter_edit_.WhenChange = [=] {
         filter_ = AsString(filter_edit_.GetData());
@@ -148,30 +148,35 @@ void UiDesignerCatalogList::Layout()
 
 void UiDesignerCatalogList::Paint(Draw& w)
 {
-    w.DrawRect(GetSize(), SColorPaper());
+    const UiDesignerThemeSurfacePalette palette =
+        UiDesignerResolveThemeSurfacePalette();
+    w.DrawRect(GetSize(), palette.paper);
     for(int i = 0; i < Count(); i++) {
         Rect r = ItemRect(i);
         if(r.bottom < DPI(40) || r.top > GetSize().cy)
             continue;
         const bool current = i == selected_;
         Color face = current
-            ? Blend(SColorHighlight(), SColorPaper(), 75)
-            : i == hover_ ? Blend(SColorHighlight(), SColorPaper(), 35)
-            : (i & 1 ? Blend(SColorFace(), SColorPaper(), 70) : SColorPaper());
+            ? Blend(palette.accent, palette.paper, 72)
+            : i == hover_ ? Blend(palette.accent, palette.paper, 32)
+            : (i & 1 ? Blend(palette.alternate, palette.paper, 96)
+                     : palette.paper);
         w.DrawRect(r, face);
         Image icon = ItemIcon(i);
         if(!icon.IsEmpty())
             w.DrawImage(r.left + DPI(10), r.top + DPI(11), DPI(18), DPI(18), icon);
         w.DrawText(r.left + DPI(38), r.top + DPI(7), ItemLabel(i),
-                   SansSerifZ(11).Bold(current), SColorText());
+                   SansSerifZ(11).Bold(current), palette.ink);
         const String help = ItemHelp(i);
         if(!help.IsEmpty())
             w.DrawText(r.left + DPI(38), r.top + DPI(23),
-                       help.Left(54), SansSerifZ(8), SColorDisabled());
-        w.DrawLine(r.left, r.bottom - 1, r.right, r.bottom - 1, 1, SColorShadow());
+                       help.Left(54), SansSerifZ(8), palette.disabled);
+        w.DrawLine(r.left, r.bottom - 1, r.right, r.bottom - 1, 1,
+                   palette.divider);
     }
     if(Count() == 0)
-        w.DrawText(DPI(12), DPI(54), "No matching controls", SansSerifZ(10), SColorDisabled());
+        w.DrawText(DPI(12), DPI(54), "No matching controls", SansSerifZ(10),
+                   palette.disabled);
 }
 
 void UiDesignerCatalogList::Activate(int index)

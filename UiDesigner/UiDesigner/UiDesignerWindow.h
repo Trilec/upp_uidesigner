@@ -6,10 +6,11 @@
 #include <Utilities/PropertyEditor/PropertyEditor.h>
 #include <UiDesigner/Preview/UiDesignerPreview.h>
 #include <UiDesigner/Services/UiDesignerServices.h>
-#include <UiDesigner/Theme/UiDesignerThemeGallery.h>
+#include <UiDesigner/Theme/UiDesignerThemeBuilderV2.h>
 #include "UiDesignerInteractionOverlayV2.h"
 #include "UiDesignerWidgets.h"
 #include "UiDesignerExportDialog.h"
+#include "UiDesignerWindowClosure.h"
 
 namespace Upp {
 
@@ -36,6 +37,7 @@ public:
 private:
     friend class UiDesignerInteractionOverlay;
     friend class UiDesignerInteractionOverlayV2;
+    friend class UiDesignerWindowClosureHook;
     void BuildHeader();
     void RefreshLoadMenu();
     void BuildDesigner();
@@ -158,8 +160,8 @@ private:
     UiPanel gallery_surface_;
     // Construct the preview before the toolbar so the toolbar can bind both
     // authoritative theme state and the gallery without Window-owned mirrors.
-    UiDesignerThemeGallery theme_gallery_;
-    UiDesignerThemeToolbar theme_gallery_pill_ { session_.Theme(), theme_gallery_ };
+    UiDesignerThemeGalleryV2 theme_gallery_;
+    UiDesignerThemeToolbarV2 theme_gallery_pill_ { session_.Theme(), theme_gallery_ };
     // Legacy Theme Studio buttons are retained only as inert construction
     // targets until UiDesignerWindow.cpp's old AddControl calls are removed;
     // UiDesignerThemeToolbar owns the actual visible Controls/Containers UI.
@@ -190,6 +192,10 @@ private:
     bool preview_resize_pending_ = false;
     Size pending_preview_virtual_size_;
     Function<void()> pending_preview_resize_callback_;
+
+    // Declared last so all controls/services exist before the hook schedules
+    // its post-construction extension of the established event pipeline.
+    UiDesignerWindowClosureHook closure_hook_ {*this};
 };
 
 }

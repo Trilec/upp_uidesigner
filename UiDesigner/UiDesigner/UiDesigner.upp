@@ -26,6 +26,8 @@ file
 	UiDesignerInteractionOverlayV2.h,
 	UiDesignerInteractionOverlayV2.cpp,
 	UiDesignerPresetDropV2.cpp,
+	UiDesignerWindowClosure.h,
+	UiDesignerWindowClosure.cpp,
 	UiDesignerWindow.h,
 	UiDesignerWindow.cpp,
 	UiDesignerApplication.h,

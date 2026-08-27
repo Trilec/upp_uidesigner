@@ -3,7 +3,7 @@
 
 namespace Upp {
 
-inline constexpr const char* UI_DESIGNER_VERSION = "v1.0.1-RC1";
+inline constexpr const char* UI_DESIGNER_VERSION = "v1.0.1-RC2";
 
 }
 

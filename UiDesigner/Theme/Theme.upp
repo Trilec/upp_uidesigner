@@ -16,6 +16,7 @@ file
     UiDesignerCoreControlThemeAdapters.cpp,
     UiDesignerSliderScrollBarThemeAdapterV2.cpp,
     UiDesignerContainerTabThemeAdapters.cpp,
+    UiDesignerGroupPanelThemeAdapterV3.cpp,
     UiDesignerTabThemeRuntimeAdapter.cpp,
     UiDesignerListThemeAdapter.cpp,
     UiDesignerEditThemeAdapter.cpp,
@@ -24,4 +25,7 @@ file
     UiDesignerLabelThemeAdapter.cpp,
     UiDesignerThemeGallery.h,
     UiDesignerThemeGallery.cpp,
+    UiDesignerThemeBuilderV2.h,
+    UiDesignerThemeBuilderV2.cpp,
+    UiDesignerThemeBuilderV2Contract.cpp,
     README.md;

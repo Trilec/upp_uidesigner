@@ -12,6 +12,9 @@ namespace Upp {
 UiThemeContext UiDesignerResolveThemeContext(const UiDesignerThemeSnapshot& theme);
 void UiDesignerApplyGlobalTheme(const UiDesignerThemeSnapshot& theme);
 
+class UiDesignerThemeToolbarV2;
+class UiDesignerThemeGalleryV2;
+
 class UiDesignerThemeSwatch : public Ctrl {
 public:
     typedef UiDesignerThemeSwatch CLASSNAME;
@@ -100,8 +103,6 @@ public:
     void ApplyTheme(const UiDesignerThemeSnapshot& theme);
     void SyncFromTheme();
 
-    // Compatibility while UiDesignerWindow still treats the old toolbar slot
-    // like a pill bar. The Theme Builder owns its toolbar children itself.
     UiDesignerThemeToolbar& SetInset(int) { return *this; }
     UiDesignerThemeToolbar& AddControl(Ctrl&, int) { return *this; }
 
@@ -116,6 +117,8 @@ public:
     Event<String> WhenStatus;
 
 private:
+    friend class UiDesignerThemeToolbarV2;
+
     void SetPreviewMode(const String& mode);
     void SetPanelRole(UiPanelRole role);
     void SetControlRole(UiRole role);
@@ -162,8 +165,6 @@ public:
     UiRole GetControlRole() const { return control_role_; }
     String GetSelectedType() const { return selected_type_; }
 
-    // Compatibility with the previous gallery filter API. Theme Builder now
-    // has only the two purposeful preview modes.
     void SetFilter(const String& filter)
     {
         SetPreviewMode(ToLower(filter) == "containers" ? "containers" : "controls");
@@ -173,6 +174,8 @@ public:
     virtual void Paint(Draw& w) override;
 
 private:
+    friend class UiDesignerThemeGalleryV2;
+
     void BuildPreviewMatrices();
     void BuildControlSamples();
     void BuildContainerSamples();
@@ -206,9 +209,6 @@ private:
     UiBoxLayout control_columns_[3];
     UiBoxLayout container_columns_[3];
 
-    // Controls view: representative families hosted on independently themed
-    // panels/group panels. Only controls backed by a real Theme adapter are
-    // selectable; passive reference controls remain visual context.
     UiDesignerThemeSelectable<UiPanel> controls_reference_panel_;
     UiDesignerThemeSelectable<UiLabel> controls_reference_label_;
     UiDesignerThemeSelectable<UiButton> controls_reference_button_;
@@ -254,8 +254,6 @@ private:
     UiDesignerThemeSelectable<UiLabel> feedback_label_;
     UiDesignerThemeSelectable<UiProgressBar> feedback_progress_;
 
-    // Containers view: paired plain/populated surfaces plus a real scroll
-    // container make container chrome and inherited spacing directly comparable.
     UiDesignerThemeSelectable<UiPanel> container_plain_panel_;
     UiDesignerThemeSelectable<UiLabel> container_plain_label_;
 

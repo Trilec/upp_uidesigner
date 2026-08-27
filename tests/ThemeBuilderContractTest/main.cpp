@@ -1,7 +1,7 @@
 #include <Core/Core.h>
 #include <Ui/UiColorPicker/UiColorPicker.h>
 #include <Utilities/PropertyEditor/PropertyEditor.h>
-#include <UiDesigner/Theme/UiDesignerThemeGallery.h>
+#include <UiDesigner/Theme/UiDesignerThemeBuilderV2.h>
 
 using namespace Upp;
 
@@ -186,6 +186,65 @@ CONSOLE_APP_MAIN
     Check(radius_item && radius_item->kind == PropertyEditorKind::NumericInt &&
           radius_item->show_slider_toggle,
           "Theme override numeric projection keeps normal slider-toggle metadata");
+
+    // Closure: the Theme Studio exposes two independent universal role axes.
+    UiDesignerThemeGalleryV2 gallery;
+    gallery.SetCatalog(&catalog);
+    gallery.SetThemeDocument(&loaded);
+    UiDesignerThemeToolbarV2 toolbar(loaded, gallery);
+    const UiRole roles[] = {
+        UiRole::Standard, UiRole::Subtle, UiRole::Accent, UiRole::Alert
+    };
+    for(UiRole role : roles) {
+        const UiRole control_before = toolbar.GetUniversalControlRole();
+        toolbar.SetPanelRole(role);
+        Check(toolbar.GetUniversalPanelRole() == role &&
+              toolbar.GetUniversalControlRole() == control_before,
+              "Panel Role changes independently across all four universal roles");
+        const UiRole panel_before = toolbar.GetUniversalPanelRole();
+        toolbar.SetControlRole(role);
+        Check(toolbar.GetUniversalControlRole() == role &&
+              toolbar.GetUniversalPanelRole() == panel_before,
+              "Control Role changes independently across all four universal roles");
+    }
+
+    // The target key itself carries panel/control scope; writing one namespace
+    // must not mutate the other even for the same type, appearance and role.
+    const String panel_target = "Light|panel|UiGroupPanel|Accent";
+    const String control_target = "Light|control|UiGroupPanel|Accent";
+    loaded.SetActiveStyleTarget(panel_target);
+    Check(loaded.Commit("studio.radius", 13, "Panel radius", error),
+          "panel role target accepts an authored recipe");
+    loaded.SetActiveStyleTarget(control_target);
+    Check(loaded.Commit("studio.radius", 7, "Control radius", error),
+          "control role target accepts an authored recipe");
+    Check((int)loaded.Get().GetStyleOverride(panel_target, "radius") == 13 &&
+          (int)loaded.Get().GetStyleOverride(control_target, "radius") == 7,
+          "panel| and control| style-target namespaces remain isolated");
+
+    gallery.SetRect(0, 0, DPI(960), DPI(760));
+    gallery.Layout();
+    Check(gallery.GetDataSampleColumn() == 0 &&
+          gallery.GetChoicesSampleColumn() == 2,
+          "Theme gallery places DATA in column 1 and CHOICES in column 3");
+    Check(gallery.IsSaveSampleContained(),
+          "Theme gallery Save split-button stays inside its Buttons group");
+
+    UiDesignerThemeSnapshot light_snapshot = loaded.GetEffective();
+    light_snapshot.mode = "Light";
+    UiDesignerApplyGlobalTheme(light_snapshot);
+    const UiDesignerThemeSurfacePalette light_surface =
+        UiDesignerResolveThemeSurfacePalette();
+    UiDesignerThemeSnapshot dark_snapshot = light_snapshot;
+    dark_snapshot.mode = "Dark";
+    UiDesignerApplyGlobalTheme(dark_snapshot);
+    const UiDesignerThemeSurfacePalette dark_surface =
+        UiDesignerResolveThemeSurfacePalette();
+    Check(light_surface.paper != dark_surface.paper ||
+          light_surface.ink != dark_surface.ink ||
+          light_surface.alternate != dark_surface.alternate,
+          "Designer-owned catalog/surface painting resolves different Dark Theme colours");
+    UiDesignerApplyGlobalTheme(loaded.GetEffective());
 
     // These calls exercise the public Theme Builder preview contract. The test
     // package also compiles and links the full Theme module, including the

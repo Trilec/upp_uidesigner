@@ -59,6 +59,62 @@ static void AddGroupPanelMetadata(UiDesignerControlSpec& spec)
         spec.properties.Add(subtitle);
         spec.defaults.Set("subtitle", subtitle.default_value);
     }
+    if(!spec.FindProperty("icon")) {
+        UiDesignerPropertySpec icon;
+        icon.id = "icon";
+        icon.label = "Icon";
+        icon.group = "Content";
+        icon.help = "Optional GroupPanel header icon. Choose None for a text-only panel.";
+        icon.kind = PropertyEditorKind::Custom;
+        icon.custom_editor = "property.icon";
+        icon.row_span = 1;
+        icon.expanded_row_span = 6;
+        icon.domain = PropertyEditorDomain::Content;
+        icon.default_value = "None";
+        icon.impact = PropertyImpactPaint |
+                      PropertyImpactLocalLayout | PropertyImpactCode;
+        spec.properties.Add(icon);
+        spec.defaults.Set("icon", icon.default_value);
+    }
+}
+
+static void AddUiDocScalarData(UiDesignerControlSpec& spec)
+{
+    spec.data_capability = UiDesignerDataCapability::Scalar;
+    spec.data_adapter_id = "scalar";
+    if(spec.FindProperty("value"))
+        return;
+
+    UiDesignerPropertySpec value = UiDesignerTextProperty("value", "Value");
+    value.group = "Data";
+    value.help = "Scalar UiDoc value. The Data pane, live Preview and generated SetData call share this authored value.";
+    value.domain = PropertyEditorDomain::Content;
+    value.default_value = "UiDoc sample";
+    value.impact = PropertyImpactControlState |
+                   PropertyImpactPaint | PropertyImpactCode;
+    spec.properties.Add(value);
+    spec.defaults.Set("value", value.default_value);
+}
+
+bool UiDesignerBuildScalarDataPropertyModel(
+    const UiDesignerControlSpec& spec, const UiDesignerNode& node,
+    PropertyEditorModel& model)
+{
+    if(spec.data_capability != UiDesignerDataCapability::Scalar)
+        return false;
+    const UiDesignerPropertySpec *value = spec.FindProperty("value");
+    if(!value)
+        return false;
+
+    model.Clear();
+    UiDesignerPropertySpec projected = *value;
+    projected.group = "Scalar";
+    projected.AddTo(model, node.GetProperty("value", value->default_value), false);
+    model.SetGroupSubtitle(
+        "Scalar", spec.display_name +
+            " · one authored value shared by Data, Preview and code generation");
+    model.StructureChanged();
+    return model.Find("value") != nullptr;
 }
 
 static void FinalizeAdvancedLeaf(UiDesignerControlSpec& spec)
@@ -155,6 +211,9 @@ void RegisterUiDesignerAdvancedCatalog(UiDesignerCatalog& catalog)
 
     if(UiDesignerControlSpec *group = MutableSpec(catalog, "UiGroupPanel"))
         AddGroupPanelMetadata(*group);
+
+    if(UiDesignerControlSpec *doc = MutableSpec(catalog, "UiDoc"))
+        AddUiDocScalarData(*doc);
 
     for(int i = 0; i < catalog.GetCount(); i++)
         ApplyWorkingSizingEditors(

@@ -52,7 +52,7 @@ const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(const String& id)
     if(id == "panel")
         return &UiDesignerPanelThemeAdapterInstance();
     if(id == "group_panel")
-        return &UiDesignerGroupPanelThemeAdapterInstance();
+        return &UiDesignerGroupPanelThemeAdapterV3Instance();
     if(id == "scroll_panel")
         return &UiDesignerScrollPanelThemeAdapterInstance();
     if(id == "tab")
@@ -90,7 +90,7 @@ const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(UiDesignerRuntimeKind k
     if(kind == UiDesignerRuntimeKind::UiPanel)
         return &UiDesignerPanelThemeAdapterInstance();
     if(kind == UiDesignerRuntimeKind::UiGroupPanel)
-        return &UiDesignerGroupPanelThemeAdapterInstance();
+        return &UiDesignerGroupPanelThemeAdapterV3Instance();
     if(kind == UiDesignerRuntimeKind::UiScrollPanel)
         return &UiDesignerScrollPanelThemeAdapterInstance();
     if(kind == UiDesignerRuntimeKind::UiTab)

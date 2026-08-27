@@ -2,6 +2,7 @@
 #include <Ui/Ui.h>
 #include <UiDesigner/Services/UiDesignerSession.h>
 #include <UiDesigner/Preview/UiDesignerPreview.h>
+#include "../../UiDesigner/UiDesigner/UiDesignerVersion.h"
 
 using namespace Upp;
 
@@ -31,6 +32,11 @@ CONSOLE_APP_MAIN
     const UiDesignerControlSpec *group = catalog.Find("UiGroupPanel");
     Check(group && group->FindProperty("subtitle"),
           "GroupPanel exposes subtitle metadata");
+    const UiDesignerPropertySpec *group_icon = group
+        ? group->FindProperty("icon") : nullptr;
+    Check(group_icon && group_icon->custom_editor == "property.icon" &&
+          AsString(group_icon->default_value) == "None",
+          "GroupPanel exposes canonical icon chooser metadata");
 
     static const char *sizes[] = {
         "fixed_width", "fixed_height", "min_width", "min_height",
@@ -51,6 +57,30 @@ CONSOLE_APP_MAIN
     Check(group && (int)group->FindProperty("max_width")->minimum == 0 &&
                   (int)UiDesignerMapValue(group->defaults, "max_width", -1) == 0,
           "maximum size zero remains the unbounded sentinel");
+
+    const UiDesignerControlSpec *doc = catalog.Find("UiDoc");
+    const UiDesignerPropertySpec *doc_value = doc
+        ? doc->FindProperty("value") : nullptr;
+    Check(doc && doc->runtime_kind == UiDesignerRuntimeKind::UiDoc &&
+          doc->data_capability == UiDesignerDataCapability::Scalar &&
+          doc->data_adapter_id == "scalar" && doc_value,
+          "UiDoc exposes one scalar Designer data contract");
+    Check(doc && doc->data_defaults.Find("value") < 0 &&
+          doc->defaults.Find("value") >= 0,
+          "UiDoc scalar value is normal authored state, not duplicate data state");
+    if(doc) {
+        UiDesignerNode scalar_node;
+        scalar_node.type = "UiDoc";
+        scalar_node.SetProperty("value", "Projected scalar value");
+        PropertyEditorModel scalar_projection;
+        const bool projected = UiDesignerBuildScalarDataPropertyModel(
+            *doc, scalar_node, scalar_projection);
+        const PropertyEditorItem *value_item = scalar_projection.Find("value");
+        Check(projected && value_item &&
+              AsString(value_item->value) == "Projected scalar value" &&
+              value_item->group == "Scalar",
+              "UiDoc Data pane projection uses the canonical authored value property");
+    }
 
     const UiDesignerControlSpec *range = catalog.Find("UiRangeSlider");
     Check(range && range->runtime_cpp_type == "UiRangeSlider" &&
@@ -89,6 +119,21 @@ CONSOLE_APP_MAIN
               "NodeGraph preview uses a genuine three-node model sample");
     }
 
+    if(doc) {
+        One<Ctrl> preview = UiDesignerPreviewFactory::Create(*doc);
+        UiDoc *runtime = preview ? dynamic_cast<UiDoc *>(preview.Get()) : nullptr;
+        Check(runtime != nullptr,
+              "UiDoc preview creates the reusable runtime control");
+        if(runtime) {
+            const UiDesignerApplyResult applied =
+                UiDesignerPreviewFactory::Apply(*runtime, *doc, "value",
+                                                "Scalar preview contract");
+            Check(applied != UiDesignerApplyResult::Rejected &&
+                  AsString(runtime->GetData()) == "Scalar preview contract",
+                  "UiDoc scalar value applies through the runtime SetData contract");
+        }
+    }
+
     if(group) {
         One<Ctrl> preview = UiDesignerPreviewFactory::Create(*group);
         Check(preview &&
@@ -96,12 +141,23 @@ CONSOLE_APP_MAIN
                                                "Metadata") !=
                   UiDesignerApplyResult::Rejected,
               "GroupPanel subtitle is live-previewable");
+        if(preview) {
+            Check(UiDesignerPreviewFactory::Apply(
+                      *preview, *group, "icon", "ICON_DESIGN_WIDGETS_48") !=
+                      UiDesignerApplyResult::Rejected,
+                  "GroupPanel icon is live-previewable");
+            Check(UiDesignerPreviewFactory::Apply(
+                      *preview, *group, "icon", "None") !=
+                      UiDesignerApplyResult::Rejected,
+                  "GroupPanel icon can be cleared through Preview");
+        }
     }
+
+    UiDesignerCodeGenerator generator(catalog);
 
     session.NewDocument("blank");
     const UiDesignerNodeId range_id = session.AddControl("UiRangeSlider");
     Check(range_id != 0, "RangeSlider can be authored in a Designer document");
-    UiDesignerCodeGenerator generator(catalog);
     UiDesignerGeneratedProject project = generator.Generate(
         session.Document(), "GeneratedRangeWindow");
     Check(project.IsValid(), "RangeSlider document generates a project");
@@ -111,6 +167,37 @@ CONSOLE_APP_MAIN
           "generated RangeSlider setup uses its normal ValueArray data contract");
     Check(project.package.Find("\tUi;") >= 0,
           "generated package needs only the existing Ui dependency");
+
+    session.NewDocument("blank");
+    const UiDesignerNodeId doc_id = session.AddControl("UiDoc");
+    Check(doc_id != 0, "UiDoc can be authored in a Designer document");
+    session.Select(doc_id);
+    error.Clear();
+    Check(session.CommitProperty("value", "Scalar codegen contract", error),
+          "UiDoc scalar value commits through the normal property command");
+    UiDesignerGeneratedProject doc_project = generator.Generate(
+        session.Document(), "GeneratedDocWindow");
+    Check(doc_project.IsValid(), "UiDoc scalar document generates a project");
+    Check(doc_project.generated_source.Find(
+              ".SetData(\"Scalar codegen contract\")") >= 0,
+          "generated UiDoc code uses the same scalar SetData value");
+
+    session.NewDocument("blank");
+    const UiDesignerNodeId group_id = session.AddControl("UiGroupPanel");
+    Check(group_id != 0, "GroupPanel can be authored in a Designer document");
+    session.Select(group_id);
+    error.Clear();
+    Check(session.CommitProperty("icon", "ICON_DESIGN_WIDGETS_48", error),
+          "GroupPanel icon commits through normal Designer property state");
+    UiDesignerGeneratedProject group_project = generator.Generate(
+        session.Document(), "GeneratedGroupWindow");
+    Check(group_project.IsValid(), "GroupPanel icon document generates a project");
+    Check(group_project.generated_source.Find(
+              ".SetIcon(ICON_DESIGN_WIDGETS_48())") >= 0,
+          "generated GroupPanel code preserves the authored header icon");
+
+    Check(String(UI_DESIGNER_VERSION) == "v1.0.1-RC2",
+          "Designer closure bumps the visible release candidate version");
 
     Cout() << "DESIGNER_CLOSURE_CATALOG_SUMMARY checks=" << checks
            << " failed=" << failed << '\n';
