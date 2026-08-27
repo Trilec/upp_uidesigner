@@ -1,6 +1,7 @@
 #include <Core/Core.h>
 #include <UiDesigner/Services/UiDesignerServices.h>
 #include <UiDesigner/Preview/UiDesignerPreview.h>
+#include <UiDesigner/Preview/UiDesignerSelectionHit.h>
 
 using namespace Upp;
 
@@ -118,7 +119,7 @@ CONSOLE_APP_MAIN
             Format("nested Box and GroupPanel publish coherent geometry: %s / %s",
                    AsString(box_rect), AsString(group_rect)));
 
-    // Probe the Box rail on the GroupPanel's centerline.  Flow layout keeps
+    // Probe the Box rail on the GroupPanel's centerline. Flow layout keeps
     // this natural-height child shorter than the Box, so the Box center can
     // fall outside the child rather than testing an overlapping rail.
     const Point box_rail(box_rect.left + DPI(1), group_rect.CenterPoint().y);
@@ -132,6 +133,50 @@ CONSOLE_APP_MAIN
     t.Check(geometry.Hit(group_center) == group,
             Format("GroupPanel remains the normal deepest selection away from the Box rail (%d)",
                    (int)geometry.Hit(group_center)));
+
+    const Vector<UiDesignerNodeId> stack = UiDesignerPreviewSelectionStack(
+        geometry, session.Document(), group_center);
+    t.Check(stack.GetCount() >= 3,
+            Format("overlapping preview point exposes nested selection stack (%d)",
+                   stack.GetCount()));
+    const int box_in_stack = FindIndex(stack, box);
+    const int grid_in_stack = FindIndex(stack, grid);
+    t.Check(!stack.IsEmpty() && stack[0] == group && box_in_stack > 0 &&
+                grid_in_stack > box_in_stack,
+            "selection stack orders GroupPanel -> Box -> Grid ancestors");
+
+    UiDesignerDropPlan button_plan = session.PlanAddControl("UiButton", box);
+    UiDesignerNodeId button = 0;
+    error.Clear();
+    t.Check(button_plan.valid && session.ExecuteDrop(button_plan, &button, error) && button != 0,
+            "creates Button beside GroupPanel for preview reparent fixture: " + error);
+
+    session.Select(button);
+    UiDesignerDropPlan button_to_group = session.PlanMoveSelection(group);
+    t.Check(button_to_group.valid,
+            "Button -> GroupPanel move plan is valid: " + button_to_group.reason);
+    error.Clear();
+    t.Check(button_to_group.valid && session.ExecuteDrop(button_to_group, nullptr, error),
+            "executes Button -> GroupPanel reparent: " + error);
+    const UiDesignerNode *moved_button = session.Document().Find(button);
+    t.Check(moved_button && moved_button->parent == group,
+            "Button parent becomes GroupPanel after move");
+
+    session.Select(group);
+    UiDesignerDropPlan group_to_grid = session.PlanMoveSelection(
+        grid, Point(), true, -1, 0, 1);
+    t.Check(group_to_grid.valid,
+            "GroupPanel -> free Grid cell move plan is valid: " + group_to_grid.reason);
+    error.Clear();
+    t.Check(group_to_grid.valid && session.ExecuteDrop(group_to_grid, nullptr, error),
+            "executes GroupPanel -> Grid cell reparent: " + error);
+    const UiDesignerNode *moved_group = session.Document().Find(group);
+    t.Check(moved_group && moved_group->parent == grid &&
+                (int)moved_group->GetProperty("grid_row", -1) == 0 &&
+                (int)moved_group->GetProperty("grid_column", -1) == 1,
+            "GroupPanel lands in authored Grid row 0 column 1");
+    t.Check(GridCellCount(preview, grid) == 3,
+            "preview move rebuild preserves Grid 1x3 state");
 
     Cout() << "PREVIEW_LAYOUT_REGRESSION_SUMMARY checks=" << t.checks
            << " failed=" << t.failures << '\n';

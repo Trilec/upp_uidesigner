@@ -22,6 +22,8 @@ file
 	UiDesignerExportDialog.cpp,
 	UiDesignerInteractionOverlay.h,
 	UiDesignerInteractionOverlay.cpp,
+	UiDesignerInteractionOverlayV2.h,
+	UiDesignerInteractionOverlayV2.cpp,
 	UiDesignerWindow.h,
 	UiDesignerWindow.cpp,
 	UiDesignerApplication.h,

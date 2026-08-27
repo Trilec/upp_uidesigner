@@ -10,6 +10,8 @@ uses
 file
     UiDesignerGeometrySnapshot.h,
     UiDesignerGeometrySnapshot.cpp,
+    UiDesignerSelectionHit.h,
+    UiDesignerSelectionHit.cpp,
     UiDesignerVisuals.h,
     UiDesignerVisuals.cpp,
     UiDesignerPreview.h,

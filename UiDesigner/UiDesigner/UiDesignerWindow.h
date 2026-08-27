@@ -7,7 +7,7 @@
 #include <UiDesigner/Preview/UiDesignerPreview.h>
 #include <UiDesigner/Services/UiDesignerServices.h>
 #include <UiDesigner/Theme/UiDesignerThemeGallery.h>
-#include "UiDesignerInteractionOverlay.h"
+#include "UiDesignerInteractionOverlayV2.h"
 #include "UiDesignerWidgets.h"
 #include "UiDesignerExportDialog.h"
 
@@ -35,6 +35,7 @@ public:
 
 private:
     friend class UiDesignerInteractionOverlay;
+    friend class UiDesignerInteractionOverlayV2;
     void BuildHeader();
     void RefreshLoadMenu();
     void BuildDesigner();
@@ -115,7 +116,7 @@ private:
     // document surface in the center scroll viewport.
     ParentCtrl preview_workspace_;
     UiDesignerPreviewCanvas preview_canvas_;
-    UiDesignerInteractionOverlay interaction_overlay_;
+    UiDesignerInteractionOverlayV2 interaction_overlay_;
 
     UiDesignerHierarchyView hierarchy_;
     PropertyEditor inspector_;
