@@ -26,8 +26,14 @@ CONSOLE_APP_MAIN
         Cout() << "CATALOG: " << error << '\n';
 
     const UiDesignerControlSpec *tool = catalog.Find("UiToolButton");
-    Check(tool && tool->FindProperty("text"),
+    const UiDesignerPropertySpec *tool_text = tool
+        ? tool->FindProperty("text") : nullptr;
+    Check(tool_text != nullptr,
           "ToolButton exposes text metadata");
+    Check(tool_text && AsString(tool_text->default_value).IsEmpty() &&
+          tool->defaults.Find("text") >= 0 &&
+          AsString(tool->defaults.GetValue(tool->defaults.Find("text"))).IsEmpty(),
+          "ToolButton defaults to icon-only empty text");
 
     const UiDesignerControlSpec *group = catalog.Find("UiGroupPanel");
     Check(group && group->FindProperty("subtitle"),

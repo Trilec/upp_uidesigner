@@ -207,7 +207,7 @@ static UiDesignerControlSpec MakeNodeGraphSpec()
 void RegisterUiDesignerAdvancedCatalog(UiDesignerCatalog& catalog)
 {
     if(UiDesignerControlSpec *tool = MutableSpec(catalog, "UiToolButton"))
-        AddTextProperty(*tool, "Tool");
+        AddTextProperty(*tool, String());
 
     if(UiDesignerControlSpec *group = MutableSpec(catalog, "UiGroupPanel"))
         AddGroupPanelMetadata(*group);
