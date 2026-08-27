@@ -16,5 +16,6 @@ file
     UiDesignerVisuals.cpp,
     UiDesignerPreview.h,
     UiDesignerGridPreviewAdapter.cpp,
+    UiDesignerAdvancedPreview.cpp,
     UiDesignerPreview.cpp,
     README.md;

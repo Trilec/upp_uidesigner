@@ -8,6 +8,7 @@
 #include "UiDesignerProjection.h"
 #include "UiDesignerDrop.h"
 #include "UiDesignerPresets.h"
+#include "UiDesignerAdvancedCatalog.h"
 
 namespace Upp {
 
@@ -161,7 +162,7 @@ private:
 
     UiDesignerDocument document_;
     UiDesignerCommandService commands_;
-    UiDesignerCatalog catalog_;
+    UiDesignerApplicationCatalog catalog_;
     UiDesignerDropService drops_;
     UiDesignerSessionState state_;
     UiDesignerTransientOverlay overlay_;

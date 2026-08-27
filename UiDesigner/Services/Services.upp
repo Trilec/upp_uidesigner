@@ -17,6 +17,8 @@ file
     UiDesignerExport.cpp,
     UiDesignerPresets.h,
     UiDesignerPresets.cpp,
+    UiDesignerAdvancedCatalog.h,
+    UiDesignerAdvancedCatalog.cpp,
     UiDesignerSession.h,
     UiDesignerSession.cpp,
     UiDesignerSessionExtensions.cpp,

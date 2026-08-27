@@ -5,24 +5,14 @@
 
 namespace Upp {
 
+// Application-level catalog additions. The reusable Catalog package remains
+// independent of newer Ui controls; the Designer application opts into them
+// here once the corresponding Ui runtime is available.
 void RegisterUiDesignerAdvancedCatalog(UiDesignerCatalog& catalog);
 
-class UiDesignerAdvancedCatalogBinder {
+class UiDesignerApplicationCatalog : public UiDesignerCatalog {
 public:
-    explicit UiDesignerAdvancedCatalogBinder(UiDesignerCatalog& catalog)
-        : catalog_(&catalog)
-    {
-        Ensure();
-    }
-
-    void Ensure()
-    {
-        if(catalog_)
-            RegisterUiDesignerAdvancedCatalog(*catalog_);
-    }
-
-private:
-    UiDesignerCatalog *catalog_ = nullptr;
+    UiDesignerApplicationCatalog();
 };
 
 }
