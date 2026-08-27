@@ -261,6 +261,46 @@ static UiDesignerNodeId BuildWorkbench(UiDesignerPresetBuilder& b,
     return root;
 }
 
+static UiDesignerNodeId BuildDemo(UiDesignerPresetBuilder& b,
+                                  UiDesignerNodeId parent)
+{
+    UiDesignerNodeId root = b.Add("UiGridLayout", "demo_grid", parent);
+    b.Size(root, "Expand", "Expand")
+     .P(root, "rows", 2).P(root, "columns", 2)
+     .P(root, "gap", 10).P(root, "inset", 10);
+
+    const char *titles[] = {"Range", "Document", "Graph", "Tool action"};
+    const char *subtitles[] = {
+        "Two-handle reusable range control",
+        "Scalar document data",
+        "Model-driven advanced control",
+        "ToolButton with authored text"
+    };
+    UiDesignerNodeId panels[4];
+    for(int i = 0; i < 4; i++) {
+        panels[i] = b.Add("UiGroupPanel", Format("demo_panel_%d", i + 1), root);
+        b.Text(panels[i], titles[i]).Size(panels[i], "Expand", "Expand")
+         .P(panels[i], "subtitle", subtitles[i])
+         .P(panels[i], "grid_row", i / 2)
+         .P(panels[i], "grid_column", i % 2);
+    }
+
+    UiDesignerNodeId range = b.Add("UiRangeSlider", "demo_range", panels[0]);
+    ValueArray range_value; range_value.Add(22.0); range_value.Add(78.0);
+    b.Size(range, "Expand", "Fit").P(range, "value", range_value);
+
+    UiDesignerNodeId doc = b.Add("UiDoc", "demo_doc", panels[1]);
+    b.Size(doc, "Expand", "Expand");
+
+    UiDesignerNodeId graph = b.Add("UiNodeGraph", "demo_graph", panels[2]);
+    b.Size(graph, "Expand", "Expand");
+
+    UiDesignerNodeId tool = b.Add("UiToolButton", "demo_tool", panels[3]);
+    b.Text(tool, "Run demo").Size(tool, "Fit", "Fit")
+     .P(tool, "icon", "ICON_DESIGN_WIDGETS_48");
+    return root;
+}
+
 bool UiDesignerPresetLibrary::Build(const String& id,
                                     const UiDesignerCatalog& catalog,
                                     UiDesignerDocument& fragment,
@@ -278,6 +318,7 @@ bool UiDesignerPresetLibrary::Build(const String& id,
     else if(id == "FPattern") fragment_root = BuildFPattern(b, parent);
     else if(id == "HeaderWithActions") fragment_root = BuildHeaderWithActions(b, parent);
     else if(id == "DesignerWorkbench") fragment_root = BuildWorkbench(b, parent);
+    else if(id == "Demo") fragment_root = BuildDemo(b, parent);
     else {
         error = "Unknown preset " + id;
         return false;

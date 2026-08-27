@@ -14,6 +14,8 @@ public:
 
     explicit UiDesignerInteractionOverlayV2(UiDesignerWindow& owner);
 
+    bool FinishCatalogDrag(const String& type_id, Point screen);
+
     virtual void Paint(Draw& w) override;
     virtual void LeftDown(Point p, dword keyflags) override;
     virtual void LeftDrag(Point p, dword keyflags) override;

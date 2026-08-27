@@ -85,6 +85,10 @@ public:
                      UiDesignerNodeId *created, String& error);
     bool InsertPreset(const String& preset_id, UiDesignerNodeId target,
                       int index, UiDesignerNodeId *created, String& error);
+    bool InsertPresetAt(const String& preset_id, UiDesignerNodeId target,
+                        Point canvas_position, bool has_canvas_position,
+                        int index, int grid_row, int grid_column,
+                        UiDesignerNodeId *created, String& error);
     const Vector<String>& GetRecentPaths() const { return recent_paths_; }
 
     UiDesignerNodeId AddControl(const String& type_id,

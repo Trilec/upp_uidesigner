@@ -19,6 +19,7 @@ file
     UiDesignerPresets.cpp,
     UiDesignerAdvancedCatalog.h,
     UiDesignerAdvancedCatalog.cpp,
+    UiDesignerPresetPlacement.cpp,
     UiDesignerSession.h,
     UiDesignerSession.cpp,
     UiDesignerSessionExtensions.cpp,

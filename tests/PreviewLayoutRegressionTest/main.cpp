@@ -8,7 +8,6 @@ using namespace Upp;
 struct PreviewLayoutRegressionTester {
     int checks = 0;
     int failures = 0;
-
     void Check(bool condition, const String& label)
     {
         checks++;
@@ -51,7 +50,6 @@ CONSOLE_APP_MAIN
     t.Check(GridCellCount(preview, grid) == 3,
             Format("live Grid is 1x3 before structural rebuild (%d cells)",
                    GridCellCount(preview, grid)));
-
     error.Clear();
     t.Check(session.CommitProperty("inset", 0, error),
             "authors Grid inset=0: " + error);
@@ -73,8 +71,7 @@ CONSOLE_APP_MAIN
             Format("rebuilt Grid remains 1x3 after Box insertion (%d cells)",
                    GridCellCount(preview, grid)));
 
-    UiGridLayout *runtime_grid =
-        dynamic_cast<UiGridLayout *>(preview.FindRuntime(grid));
+    UiGridLayout *runtime_grid = dynamic_cast<UiGridLayout *>(preview.FindRuntime(grid));
     Vector<Rect> runtime_cells;
     if(runtime_grid)
         runtime_grid->GetCellRects(runtime_cells);
@@ -105,8 +102,7 @@ CONSOLE_APP_MAIN
     t.Check(GridCellCount(preview, grid) == 3,
             "second structural rebuild still preserves Grid 1x3 state");
 
-    UiBoxLayout *runtime_box =
-        dynamic_cast<UiBoxLayout *>(preview.FindRuntime(box));
+    UiBoxLayout *runtime_box = dynamic_cast<UiBoxLayout *>(preview.FindRuntime(box));
     t.Check(runtime_box && runtime_box->GetDirection() == UiDirection::H &&
                 runtime_box->GetWrapMode() == UiBoxWrap::Flow,
             "Box rebuild preserves authored direction and wrap state");
@@ -114,26 +110,19 @@ CONSOLE_APP_MAIN
     const UiDesignerGeometrySnapshot& geometry = preview.GetGeometrySnapshot();
     const Rect box_rect = preview.GetNodeRect(box);
     const Rect group_rect = preview.GetNodeRect(group);
-    t.Check(!box_rect.IsEmpty() && !group_rect.IsEmpty() &&
-                box_rect.Contains(group_rect),
+    t.Check(!box_rect.IsEmpty() && !group_rect.IsEmpty() && box_rect.Contains(group_rect),
             Format("nested Box and GroupPanel publish coherent geometry: %s / %s",
                    AsString(box_rect), AsString(group_rect)));
-
-    // Probe the Box rail on the GroupPanel's centerline. Flow layout keeps
-    // this natural-height child shorter than the Box, so the Box center can
-    // fall outside the child rather than testing an overlapping rail.
     const Point box_rail(box_rect.left + DPI(1), group_rect.CenterPoint().y);
     t.Check(group_rect.Contains(box_rail),
             "zero-inset GroupPanel overlaps the Box perimeter selection rail");
     t.Check(geometry.Hit(box_rail) == box,
             Format("Box perimeter remains directly selectable over its stretched child (%d)",
                    (int)geometry.Hit(box_rail)));
-
     const Point group_center = group_rect.CenterPoint();
     t.Check(geometry.Hit(group_center) == group,
             Format("GroupPanel remains the normal deepest selection away from the Box rail (%d)",
                    (int)geometry.Hit(group_center)));
-
     const Vector<UiDesignerNodeId> stack = UiDesignerPreviewSelectionStack(
         geometry, session.Document(), group_center);
     t.Check(stack.GetCount() >= 3,
@@ -150,7 +139,6 @@ CONSOLE_APP_MAIN
     error.Clear();
     t.Check(button_plan.valid && session.ExecuteDrop(button_plan, &button, error) && button != 0,
             "creates Button beside GroupPanel for preview reparent fixture: " + error);
-
     session.Select(button);
     UiDesignerDropPlan button_to_group = session.PlanMoveSelection(group);
     t.Check(button_to_group.valid,
@@ -177,6 +165,62 @@ CONSOLE_APP_MAIN
             "GroupPanel lands in authored Grid row 0 column 1");
     t.Check(GridCellCount(preview, grid) == 3,
             "preview move rebuild preserves Grid 1x3 state");
+
+    UiDesignerSession demo;
+    demo.NewDocument("blank");
+    UiDesignerNodeId demo_root = 0;
+    error.Clear();
+    t.Check(demo.InsertPreset("Demo", demo.Document().GetRootId(), -1,
+                              &demo_root, error),
+            "inserts Demo preset: " + error);
+    const UiDesignerNode *demo_grid = demo.Document().Find(demo_root);
+    t.Check(demo_grid && demo_grid->type == "UiGridLayout" &&
+                demo_grid->children.GetCount() == 4,
+            "Demo root is a four-panel Grid");
+    bool cells[2][2] = {{false, false}, {false, false}};
+    if(demo_grid)
+        for(UiDesignerNodeId child_id : demo_grid->children) {
+            const UiDesignerNode *panel = demo.Document().Find(child_id);
+            const int row = panel ? (int)panel->GetProperty("grid_row", -1) : -1;
+            const int column = panel ? (int)panel->GetProperty("grid_column", -1) : -1;
+            if(panel && panel->type == "UiGroupPanel" &&
+               row >= 0 && row < 2 && column >= 0 && column < 2)
+                cells[row][column] = true;
+        }
+    t.Check(cells[0][0] && cells[0][1] && cells[1][0] && cells[1][1],
+            "Demo authors one GroupPanel in every 2x2 Grid cell");
+
+    UiDesignerPreviewCanvas demo_preview;
+    demo_preview.SetRect(0, 0, 640, 420);
+    demo.AttachProjection(&demo_preview);
+    Vector<Rect> panel_rects;
+    if(demo_grid)
+        for(UiDesignerNodeId child_id : demo_grid->children)
+            panel_rects.Add(demo_preview.GetNodeRect(child_id));
+    bool distinct = panel_rects.GetCount() == 4;
+    for(int i = 0; distinct && i < panel_rects.GetCount(); i++) {
+        distinct &= !panel_rects[i].IsEmpty();
+        for(int j = i + 1; distinct && j < panel_rects.GetCount(); j++)
+            distinct &= panel_rects[i] != panel_rects[j] &&
+                        !panel_rects[i].Intersects(panel_rects[j]);
+    }
+    t.Check(distinct,
+            "four Demo GroupPanels resolve to distinct non-overlapping preview cells");
+
+    UiDesignerSession positioned;
+    positioned.NewDocument("blank");
+    const UiDesignerNodeId absolute = positioned.AddControl("UiAbsoluteLayout");
+    UiDesignerNodeId positioned_demo = 0;
+    error.Clear();
+    t.Check(absolute && positioned.InsertPresetAt(
+                "Demo", absolute, Point(163, 117), true, -1, -1, -1,
+                &positioned_demo, error),
+            "location-aware preset inserts into Absolute Layout: " + error);
+    const UiDesignerNode *positioned_node = positioned.Document().Find(positioned_demo);
+    t.Check(positioned_node &&
+                (int)positioned_node->GetProperty("x", -1) == 160 &&
+                (int)positioned_node->GetProperty("y", -1) == 120,
+            "location-aware preset preserves snapped canvas drop coordinates");
 
     Cout() << "PREVIEW_LAYOUT_REGRESSION_SUMMARY checks=" << t.checks
            << " failed=" << t.failures << '\n';

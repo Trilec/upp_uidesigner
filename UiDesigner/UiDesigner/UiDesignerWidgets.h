@@ -95,17 +95,11 @@ private:
     bool right_ = false;
 };
 
-// Right-side columns display dense Inspector, data and code editors. They use
-// the former middle width as their minimum and preserve the same three-state
-// button cycle without changing the compact left catalog column.
 class UiDesignerInspectorColumn : public UiDesignerSideColumn {
 public:
     typedef UiDesignerInspectorColumn CLASSNAME;
 
-    UiDesignerInspectorColumn()
-    {
-        RightColumn();
-    }
+    UiDesignerInspectorColumn() { RightColumn(); }
 
     int GetDesiredWidth() const override
     {
@@ -122,22 +116,18 @@ public:
 class UiDesignerCatalogList : public ParentCtrl {
 public:
     typedef UiDesignerCatalogList CLASSNAME;
-
     UiDesignerCatalogList();
-
     void SetCatalog(const UiDesignerCatalog *catalog);
     void SetCategory(const String& category);
     void SetPresets(bool on = true);
     void SetFilter(const String& filter);
     String GetFilter() const { return filter_; }
     int GetContentHeight() const;
-
     Event<String> WhenActivate;
     Event<String> WhenFilter;
     Event<String, Point> WhenToolDrag;
     Event<String, Point> WhenToolDrop;
     Event<> WhenToolCancel;
-
     virtual void Layout() override;
     virtual void Paint(Draw& w) override;
     virtual void LeftDown(Point p, dword flags) override;
@@ -150,7 +140,6 @@ public:
     virtual Image CursorImage(Point p, dword flags) override;
     virtual void CancelMode() override;
     virtual bool Key(dword key, int count) override;
-
 private:
     void RebuildMatches();
     int Count() const;
@@ -162,7 +151,6 @@ private:
     Rect ItemRect(int index) const;
     void Activate(int index);
     void UpdateScopeLabel();
-
     const UiDesignerCatalog *catalog_ = nullptr;
     String category_;
     String filter_;
@@ -183,10 +171,8 @@ private:
 class UiDesignerHierarchyView : public ParentCtrl {
 public:
     typedef UiDesignerHierarchyView CLASSNAME;
-
     UiDesignerHierarchyView();
     ~UiDesignerHierarchyView();
-
     void SetCatalog(const UiDesignerCatalog *catalog);
     void SetDocument(const UiDesignerDocument *document);
     void SetSelection(const UiDesignerSelection *selection);
@@ -195,17 +181,14 @@ public:
     bool FinishCatalogDrop(const String& type_id, Point screen);
     void CancelCatalogDrop();
     virtual void CancelMode() override;
-
     bool IsNodeDragPollArmed() const { return tree_.IsManualDragPollArmed(); }
     int GetNodeDragPollArmCount() const { return tree_.GetManualDragPollArmCount(); }
     bool HasDropTarget() const { return header_drop_ || tree_.GetDropInfo().valid; }
-
     Rect GetHeaderRect() const;
     Rect GetNameRect(int index) const;
     Rect GetTypeRect(int index) const;
     Rect GetWidthModeRect(int index) const;
     Rect GetHeightModeRect(int index) const;
-
     Function<UiDesignerDropPlan(const Vector<UiDesignerNodeId>&,
                                 UiDesignerNodeId, int)> PlanDrop;
     Function<UiDesignerDropPlan(const String&, UiDesignerNodeId, int)> PlanCatalogDrop;
@@ -214,42 +197,35 @@ public:
     Function<bool(const String&, UiDesignerNodeId, int, String&)> ExecutePresetDrop;
     Function<bool(UiDesignerNodeId, bool)> CycleSizingMode;
     Function<bool(UiDesignerNodeId, const String&)> RenameNode;
-
     Event<UiDesignerNodeId, bool> WhenSelectNode;
     Event<String> WhenDropStatus;
     Event<> WhenDelete;
-
     virtual void Layout() override;
     virtual void Paint(Draw& w) override;
-
 private:
     class HierarchyTree : public UiTree {
     public:
         ~HierarchyTree();
-
         Event<> WhenDelete;
         Event<const Vector<UiTreeNodeRef>&, UiTree::DropInfo> WhenManualDrag;
         Event<const Vector<UiTreeNodeRef>&, UiTree::DropInfo> WhenManualDrop;
         Event<> WhenManualCancel;
-
         bool IsManualDragPollArmed() const { return drag_poll_armed_; }
         int GetManualDragPollArmCount() const { return drag_poll_arm_count_; }
-
         virtual void LeftDown(Point p, dword flags) override;
         virtual void LeftUp(Point p, dword flags) override;
+        virtual void LeftDouble(Point p, dword flags) override;
         virtual void LeftDrag(Point p, dword flags) override;
         virtual void MouseMove(Point p, dword flags) override;
         virtual Image CursorImage(Point p, dword flags) override;
         virtual void CancelMode() override;
         virtual bool Key(dword key, int count) override;
-
     private:
         void UpdateManualDrag();
         void PollManualDrag();
         void ResetManualDrag(bool notify_cancel);
         void ReleaseManualCapture();
         void ArmManualDragPoll();
-
         Vector<UiTreeNodeRef> drag_nodes_;
         Point drag_start_screen_;
         bool dragging_ = false;
@@ -260,11 +236,9 @@ private:
         bool cancelling_manual_drag_ = false;
         bool releasing_manual_capture_ = false;
     };
-
     void SyncSelectionFromDesigner();
     void ForwardTreeSelection();
     void UpdateCatalogDrop(const String& type_id, Point screen);
-
     const UiDesignerDocument *document_ = nullptr;
     const UiDesignerCatalog *catalog_ = nullptr;
     const UiDesignerSelection *selection_ = nullptr;
@@ -280,17 +254,13 @@ private:
 class UiDesignerCodeView : public ParentCtrl {
 public:
     typedef UiDesignerCodeView CLASSNAME;
-
     UiDesignerCodeView();
     void SetCode(const String& code);
     String GetCode() const;
-
     virtual void Layout() override;
-
 private:
     void CopyAll();
     void ShowFullscreen();
-
     UiToolButton copy_;
     UiToolButton fullscreen_;
     UiMultiEdit edit_;
