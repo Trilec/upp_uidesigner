@@ -6,7 +6,8 @@ uses
     Ui,
     Utilities/PropertyEditor,
     UiDesigner/Services,
-    UiDesigner/Preview;
+    UiDesigner/Preview,
+    UiDesigner/Theme;
 
 file
     main.cpp;
