@@ -1,0 +1,15 @@
+description "Generated UiDesigner application";
+
+uses
+	CtrlLib,
+	Ui;
+
+mainconfig
+	"GUI" = "1";
+
+file
+	BlankFormGeneratedWindow.generated.h,
+	BlankFormGeneratedWindow.generated.cpp,
+	BlankFormGeneratedWindow.h,
+	BlankFormGeneratedWindow.cpp,
+	main.cpp;

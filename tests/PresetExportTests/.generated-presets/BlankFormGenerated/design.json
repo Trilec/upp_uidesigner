@@ -1,0 +1,32 @@
+{
+	"format": "upp-ui-designer-next",
+	"schema": 4,
+	"ordering": "explicit-children",
+	"document_id": "580139B3F8A000C4927F3D45D7D493A5",
+	"revision": 0,
+	"virtual_size": {
+		"cx": 512,
+		"cy": 250
+	},
+	"nodes": [
+		{
+			"id": 1,
+			"parent": 0,
+			"type": "Window",
+			"name": "Window",
+			"flags": 9,
+			"children": [
+
+			],
+			"properties": {
+
+			},
+			"actions": [
+
+			]
+		}
+	],
+	"resources": [
+
+	]
+}
