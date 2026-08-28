@@ -21,6 +21,37 @@ UiDesignerWindowClosureHook::UiDesignerWindowClosureHook(UiDesignerWindow& owner
         window.version_.SetIcon(brand, UiIconRenderMode::PreserveColor)
                        .SetIconSize(DPI(10), DPI(10));
 
+        // Preset activation and preview dragging use the same location-aware
+        // pipeline. Catalog rows deliberately carry the `preset:` envelope for
+        // drag identity; click activation strips it before entering the preset
+        // library. A blank document therefore accepts a preset at the Window
+        // root without pretending that Window is a normal catalog control.
+        window.presets_list_.WhenActivate = [safe](const String& id) {
+            if(!safe)
+                return;
+            const String preset_id = id.StartsWith("preset:") ? id.Mid(7) : id;
+            String error;
+            UiDesignerNodeId created = 0;
+            if(!safe->session_.InsertPresetAt(
+                   preset_id, 0, Point(), false, -1, -1, -1,
+                   &created, error))
+                safe->RefreshStatus(error);
+            else
+                safe->RefreshStatus("Preset inserted");
+        };
+        window.presets_list_.WhenToolDrag = [safe](const String& id, Point screen) {
+            if(safe)
+                safe->TrackCatalogDrag(id, screen);
+        };
+        window.presets_list_.WhenToolDrop = [safe](const String& id, Point screen) {
+            if(safe)
+                safe->FinishCatalogDrag(id, screen);
+        };
+        window.presets_list_.WhenToolCancel = [safe] {
+            if(safe)
+                safe->CancelCatalogDrag();
+        };
+
         const auto RefreshScalarData = [safe] {
             if(!safe)
                 return;

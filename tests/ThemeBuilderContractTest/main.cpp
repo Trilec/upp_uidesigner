@@ -207,6 +207,9 @@ CONSOLE_APP_MAIN
               toolbar.GetUniversalPanelRole() == panel_before,
               "Control Role changes independently across all four universal roles");
     }
+    Check(gallery.GetUniversalPanelRole() == toolbar.GetUniversalPanelRole() &&
+          gallery.GetUniversalControlRole() == toolbar.GetUniversalControlRole(),
+          "Theme toolbar and gallery remain synchronized across both role axes");
 
     // The target key itself carries panel/control scope; writing one namespace
     // must not mutate the other even for the same type, appearance and role.

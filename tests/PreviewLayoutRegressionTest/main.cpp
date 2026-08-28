@@ -170,9 +170,9 @@ CONSOLE_APP_MAIN
     demo.NewDocument("blank");
     UiDesignerNodeId demo_root = 0;
     error.Clear();
-    t.Check(demo.InsertPreset("Demo", demo.Document().GetRootId(), -1,
-                              &demo_root, error),
-            "inserts Demo preset: " + error);
+    t.Check(demo.InsertPresetAt("Demo", 0, Point(), false,
+                                -1, -1, -1, &demo_root, error),
+            "inserts Demo preset through the location-aware activation path: " + error);
     const UiDesignerNode *demo_grid = demo.Document().Find(demo_root);
     t.Check(demo_grid && demo_grid->type == "UiGridLayout" &&
                 demo_grid->children.GetCount() == 4,
