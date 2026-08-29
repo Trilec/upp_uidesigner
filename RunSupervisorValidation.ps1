@@ -2,7 +2,7 @@ param(
     [string]$UmkPath = 'E:\upp-18468\umk.exe',
     [string]$Assembly = 'github',
     [string]$Config = 'CLANGx64',
-    [string]$OutputRoot = 'E:\apps\github\upp_uidesigner\out'
+    [string]$OutputRoot = 'E:\apps\github\upp_uidesigner\build'
 )
 
 $ErrorActionPreference = 'Stop'

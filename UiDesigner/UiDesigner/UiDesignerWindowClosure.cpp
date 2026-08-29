@@ -4,6 +4,17 @@
 
 namespace Upp {
 
+void UiDesignerWindow::Paint(Draw& w)
+{
+    const UiPanel::Style surface = UiTheme::ResolvePanel(UiPanelRole::Surface);
+    const Rect outer = GetSize();
+    if(outer.IsEmpty())
+        return;
+    const UiFill& fill = surface.palette.face[ST_NORMAL];
+    w.DrawRect(outer, fill.IsSolid() && !IsNull(fill.color)
+                      ? fill.color : SColorFace());
+}
+
 UiDesignerWindowClosureHook::UiDesignerWindowClosureHook(UiDesignerWindow& owner)
 {
     Ptr<UiDesignerWindow> safe = &owner;
@@ -20,6 +31,17 @@ UiDesignerWindowClosureHook::UiDesignerWindowClosureHook(UiDesignerWindow& owner
                      .SetMediaAlign(UiAlign::CENTER, UiAlign::CENTER);
         window.version_.SetIcon(brand, UiIconRenderMode::PreserveColor)
                        .SetIconSize(DPI(10), DPI(10));
+
+        const auto RefreshHeaderThemeChrome = [safe] {
+            if(!safe)
+                return;
+            // Header controls are application chrome, not Theme Studio samples.
+            // Re-resolve the dropdown after every theme revision so neither the
+            // collapsed field nor its popup can retain a stale Light custom style.
+            safe->theme_select_.SetCustomStyle(
+                UiTheme::ResolveDropdown(UiRole::Standard));
+            safe->Refresh();
+        };
 
         // Preset activation and preview dragging use the same location-aware
         // pipeline. Catalog rows deliberately carry the `preset:` envelope for
@@ -157,9 +179,12 @@ UiDesignerWindowClosureHook::UiDesignerWindowClosureHook(UiDesignerWindow& owner
         };
         window.session_.Theme().WhenChanged << RefreshCatalogPainting;
         window.session_.Theme().WhenPreviewChanged << RefreshCatalogPainting;
+        window.session_.Theme().WhenChanged << RefreshHeaderThemeChrome;
+        window.session_.Theme().WhenPreviewChanged << RefreshHeaderThemeChrome;
 
         RefreshScalarData();
         RefreshCatalogPainting();
+        RefreshHeaderThemeChrome();
     });
 }
 

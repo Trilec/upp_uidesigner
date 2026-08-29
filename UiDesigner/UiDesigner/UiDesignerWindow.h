@@ -24,6 +24,7 @@ public:
     const UiDesignerSession& Session() const { return session_; }
     void WriteLaunchDiagnostic();
 
+    virtual void Paint(Draw& w) override;
     virtual void Layout() override;
     virtual void Close() override;
     virtual bool Key(dword key, int count) override;

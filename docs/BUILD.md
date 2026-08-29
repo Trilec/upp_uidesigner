@@ -9,6 +9,7 @@ powershell -ExecutionPolicy Bypass -File RunSupervisorValidation.ps1
 ```
 
 Optional parameters select the `umk` path, assembly, configuration and output folder.
+The canonical default output folder is `E:\apps\github\upp_uidesigner\build`; executables are written directly into that folder, without Debug/Release or `out` subdirectories.
 
 The runner performs:
 
@@ -42,11 +43,11 @@ The dependent library packages build automatically.
 Representative commands:
 
 ```powershell
-E:\upp-18468\umk.exe github "Tests" CLANGx64 -br +GUI "E:\apps\github\upp_uidesigner\out\UiDesignerTests.exe"
-E:\upp-18468\umk.exe github "FoundationTests" CLANGx64 -br "E:\apps\github\upp_uidesigner\out\UiDesignerFoundationTests.exe"
-E:\upp-18468\umk.exe github "UiDesigner/CLI" CLANGx64 -br "E:\apps\github\upp_uidesigner\out\uidesigner_cli.exe"
-E:\upp-18468\umk.exe github "UiDesigner/MCP" CLANGx64 -br "E:\apps\github\upp_uidesigner\out\uidesigner_mcp.exe"
-E:\upp-18468\umk.exe github "UiDesigner/UiDesigner" CLANGx64 -br +GUI "E:\apps\github\upp_uidesigner\out\UiDesigner.exe"
+E:\upp-18468\umk.exe github "Tests" CLANGx64 -br +GUI "E:\apps\github\upp_uidesigner\build\UiDesignerTests.exe"
+E:\upp-18468\umk.exe github "FoundationTests" CLANGx64 -br "E:\apps\github\upp_uidesigner\build\UiDesignerFoundationTests.exe"
+E:\upp-18468\umk.exe github "UiDesigner/CLI" CLANGx64 -br "E:\apps\github\upp_uidesigner\build\uidesigner_cli.exe"
+E:\upp-18468\umk.exe github "UiDesigner/MCP" CLANGx64 -br "E:\apps\github\upp_uidesigner\build\uidesigner_mcp.exe"
+E:\upp-18468\umk.exe github "UiDesigner/UiDesigner" CLANGx64 -br +GUI "E:\apps\github\upp_uidesigner\build\UiDesigner.exe"
 ```
 
 ## Generated package proof
@@ -56,3 +57,11 @@ powershell -ExecutionPolicy Bypass -File tests/FoundationTests/BuildGeneratedFix
 ```
 
 The fixture is deleted after success and retained under `.generated-smoke` after failure.
+
+Creation/catalog preset package proof uses:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tests/PresetExportTests/BuildPresetFixtures.ps1
+```
+
+Generated source fixtures stay under their temporary test directories; generated executables go directly to `build/`.
