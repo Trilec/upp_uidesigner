@@ -22,7 +22,7 @@ bool UiDesignerInteractionOverlayV2::IsRootResizePoint(Point p) const
 
 Point UiDesignerInteractionOverlayV2::CanvasPoint(Point p) const
 {
-    return owner_v2_ ? p - owner_v2_->preview_canvas_.GetRect().TopLeft() : p;
+    return owner_v2_ ? Point(p - owner_v2_->preview_canvas_.GetRect().TopLeft()) : p;
 }
 
 UiDesignerNodeId UiDesignerInteractionOverlayV2::ResolveClickSelection(
