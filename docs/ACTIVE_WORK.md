@@ -4,6 +4,68 @@ Remote GitHub `main` is authoritative. Refresh exact remote HEAD before acting, 
 
 Historical Theme acceptance and earlier Designer recovery checkpoints remain in Git history. This file is the current recovery checkpoint.
 
+## R7 DARK THEME INTEGRATION — 2026-08-29
+
+BASE:
+
+- Tested `upp_uidesigner/main`: `2f9838fdc7bbda7c3773acdfb9d7807e84d31ef9`.
+- Tested `upp_Ui/main`: `9ca0c26ad1e46aacd2bcd67578bf9e2c9c5b1c4c`.
+
+TASK:
+
+- Repair the Light/Dark transition path for Designer-owned chrome,
+  PropertyEditor surfaces, and Theme Studio sample controls.
+
+ROOT CAUSE / REPAIR:
+
+- `PropertyEditorStyle::System()` used the platform paper colour when the
+  active UiTheme's Subtle panel was intentionally transparent. It now falls
+  back to the semantic Surface panel, so the PropertyEditor gets an opaque
+  dark surface in Dark mode while retaining the existing Light behaviour.
+- The reusable `UiTheme::ResolveTable()` resolver returned its default white
+  table surface in Dark mode. It now resolves table/header/row/selection
+  chrome from the same semantic Surface, Subtle, List and role palettes used
+  by the live table control.
+- Basic Theme Studio samples now rebuild their style from the active theme
+  resolver instead of copying stale custom state from the previous mode. This
+  closes the dropdown/slider mixed-palette path, including non-normal states.
+- Designer shell page surfaces, side-column tool chrome, reference pills and
+  gallery scrolling are reapplied from the active theme after every mode or
+  theme edit. The Theme Studio toolbar no longer shows a duplicate mode icon;
+  mode ownership remains with the single header toggle.
+
+TOUCHED:
+
+- `upp_Ui/Utilities/PropertyEditor/PropertyEditorBase.cpp`
+- `upp_Ui/Ui/UiTheme.h`
+- `UiDesigner/Theme/UiDesignerThemeAdapter.cpp`
+- `UiDesigner/Theme/UiDesignerThemeBuilderV2.cpp`
+- `UiDesigner/UiDesigner/UiDesignerSideWidgets.cpp`
+- `UiDesigner/UiDesigner/UiDesignerWindow.cpp`
+- `tests/ThemeDarkIntegrationTest/`
+- `docs/ACTIVE_WORK.md`
+
+VALIDATION:
+
+- `ThemeDarkIntegrationTest` Debug and Release: `checks=18 failed=0`.
+- `ThemeBuilderContractTest` Debug and Release: `checks=57 failed=0`.
+- `UiThemeSurfaceRegressionTest` Debug and Release: `Checks: 13, Fails: 0`.
+- UiDesigner Debug and Release both linked successfully.
+- Automated coverage confirms Light/Dark PropertyEditor, dropdown, slider and
+  table surfaces are materially different and return correctly after a
+  repeated mode switch.
+- A final interactive visual pass was not repeated after the last rebuild
+  because the desktop Computer Use session was stopped with the physical
+  Escape key. The built Debug executable is available for the supervisor's
+  visual check.
+
+STATUS: **DARK THEME INTEGRATION REPAIR COMPLETE — SUPERVISOR VISUAL REVIEW PENDING.**
+
+PUBLISHED:
+
+- Local commits are prepared only after review; nothing from this repair has
+  been pushed by this task.
+
 ## DESIGNER R7 SPLITTER PRESET REPAIR — 2026-08-29
 
 BASE:

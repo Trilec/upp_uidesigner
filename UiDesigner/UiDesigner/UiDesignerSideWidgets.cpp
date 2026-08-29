@@ -250,6 +250,14 @@ UiDesignerSideColumn& UiDesignerSideColumn::AddSection(
 UiDesignerSideColumn& UiDesignerSideColumn::ApplyTheme(
     const UiDesignerThemeSnapshot& theme)
 {
+    UiPanel::Style tool_style = UiDesignerSurfaceStyle(UiRole::Subtle, theme);
+    tool_style.metrics.radius = DPI(15);
+    tool_style.metrics.frame_enabled = true;
+    tool_style.metrics.frame_width = DPI(1);
+    tool_panel_.SetCustomStyle(tool_style);
+    close_.SetCustomStyle(UiTheme::ResolveToolButton(UiRole::Subtle));
+    expand_.SetCustomStyle(UiTheme::ResolveToolButton(UiRole::Subtle));
+    UpdateToolSelection();
     content_surface_.SetCustomStyle(
         UiDesignerSurfaceStyle(UiRole::Subtle, theme));
     Refresh();

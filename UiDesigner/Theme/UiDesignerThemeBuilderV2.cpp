@@ -449,6 +449,11 @@ void UiDesignerThemeGalleryV2::ApplyThemeStylesV2()
     ApplySampleThemeV2(container_scroll_panel_, "UiScrollPanel", true);
     ApplySampleThemeV2(container_scroll_label_, "UiLabel", false);
 
+    // The table has no Theme Studio catalog recipe of its own yet, so it must
+    // remain on the reusable UiTheme path rather than retaining a stale
+    // custom/default palette across Light/Dark switches.
+    table_.ClearCustomStyle();
+
     Layout();
     Refresh();
 }
@@ -470,6 +475,10 @@ void UiDesignerThemeGalleryV2::Paint(Draw& w)
 
 UiDesignerThemeToolbarV2::UiDesignerThemeToolbarV2()
 {
+    // Theme mode is owned by the single application-level toggle in the
+    // window header. Keep the palette row focused on role selection and
+    // swatches instead of exposing a second, duplicate mode control.
+    appearance_.Hide();
     panel_role_v2_ = UiRole::Standard;
     control_role_v2_ = UiRole::Accent;
     control_role_ = control_role_v2_;
@@ -561,8 +570,6 @@ void UiDesignerThemeToolbarV2::Layout()
 
     control_role_label_.SetRect(x, y, DPI(76), control_h); x += DPI(76) + DPI(4);
     control_role_drop_.SetRect(x, y, DPI(108), control_h); x += DPI(108) + gap;
-
-    appearance_.SetRect(x, y, DPI(34), control_h); x += DPI(34) + DPI(8);
 
     const int label_w = DPI(32);
     const int label_gap = DPI(4);

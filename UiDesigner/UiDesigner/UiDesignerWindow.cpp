@@ -15,14 +15,11 @@ static void Put(Ctrl& c, int x, int y, int cx, int cy)
     c.SetRect(x, y, max(0, cx), max(0, cy));
 }
 
-static UiPanel::Style UiDesignerReferencePillStyle()
+static UiPanel::Style UiDesignerReferencePillStyle(
+    const UiDesignerThemeSnapshot& theme = UiDesignerThemeSnapshot())
 {
-    UiPanel::Style style = UiTheme::ResolvePanel(UiRole::Subtle);
-    style.metrics.face_enabled = true;
-    style.palette.face[ST_NORMAL] = UiFill::Solid(Color(243, 243, 243));
+    UiPanel::Style style = UiDesignerSurfaceStyle(UiRole::Subtle, theme);
     style.metrics.frame_enabled = true;
-    for(int i = 0; i < 4; i++)
-        style.palette.frame[i] = Color(216, 216, 216);
     style.metrics.frame_width = DPI(1);
     style.metrics.radius = DPI(15);
     style.metrics.shadow.enabled = true;
@@ -1297,6 +1294,14 @@ void UiDesignerWindow::ApplyThemeToShell()
 {
     const UiDesignerThemeSnapshot& theme = session_.Theme().GetEffective();
     UiDesignerApplyGlobalTheme(theme);
+    brand_.SetCustomStyle(UiTheme::ResolveTitleCard(UiRole::Accent));
+    save_.SetCustomStyle(UiTheme::ResolveButton(UiRole::Accent));
+    load_.SetCustomStyle(UiTheme::ResolveButton(UiRole::Accent));
+    export_.SetCustomStyle(UiTheme::ResolveButton(UiRole::Accent));
+    version_.SetCustomStyle(UiTheme::ResolveLabel(UiRole::Accent));
+    dark_.SetCustomStyle(UiTheme::ResolveToolButton(UiRole::Accent));
+    help_.SetCustomStyle(UiTheme::ResolveToolButton(UiRole::Accent));
+    exit_.SetCustomStyle(UiTheme::ResolveToolButton(UiRole::Alert));
     header_surface_.SetCustomStyle(UiDesignerSurfaceStyle(UiRole::Standard, theme));
     designer_mode_.SetCustomStyle(UiTheme::ResolveButton(
         session_.State().active_workspace == "designer" ? UiRole::Accent : UiRole::Subtle));
@@ -1306,6 +1311,8 @@ void UiDesignerWindow::ApplyThemeToShell()
     designer_left_.ApplyTheme(theme);
     designer_right_.ApplyTheme(theme);
     theme_right_.ApplyTheme(theme);
+    designer_page_.SetCustomStyle(UiDesignerSurfaceStyle(UiRole::Standard, theme));
+    theme_page_.SetCustomStyle(UiDesignerSurfaceStyle(UiRole::Standard, theme));
     designer_center_.SetCustomStyle(UiDesignerSurfaceStyle(UiRole::Standard, theme));
     theme_gallery_column_.SetCustomStyle(UiDesignerSurfaceStyle(UiRole::Standard, theme));
     gallery_surface_.SetCustomStyle(UiDesignerSurfaceStyle(UiRole::Standard, theme));
@@ -1320,8 +1327,9 @@ void UiDesignerWindow::ApplyThemeToShell()
     ApplyUiDesignerPropertyEditorStyle(theme_inspector_, theme);
     // This is an intentional instance override from DesignerExportGrid, not
     // a generic theme pill. Reapply it after global theme changes.
-    aspect_pill_.SetCustomStyle(UiDesignerReferencePillStyle());
+    aspect_pill_.SetCustomStyle(UiDesignerReferencePillStyle(theme));
     preview_scroll_.SetCustomStyle(UiDesignerPreviewStyle());
+    gallery_scroll_.SetCustomStyle(UiTheme::ResolveScrollPanel(UiRole::Subtle));
     theme_gallery_pill_.ApplyTheme(theme);
     preview_canvas_.SetAccent(theme.accent);
     theme_gallery_.SetThemeDocument(&session_.Theme());

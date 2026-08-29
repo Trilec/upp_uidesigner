@@ -1,0 +1,13 @@
+description "UiDesigner Dark theme bridge and PropertyEditor integration contract";
+
+uses
+    CtrlLib,
+    Ui,
+    Utilities/PropertyEditor,
+    UiDesigner/Theme;
+
+mainconfig
+    "CONSOLE" = "1";
+
+file
+    main.cpp;
