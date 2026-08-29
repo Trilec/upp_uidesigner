@@ -69,4 +69,3 @@ vcpkg_installed/
 Testing/
 .cache/
 tests/PresetExportTests/.generated-presets/
-/out

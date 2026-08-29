@@ -9,7 +9,7 @@ powershell -ExecutionPolicy Bypass -File RunSupervisorValidation.ps1
 ```
 
 Optional parameters select the `umk` path, assembly, configuration and output folder.
-The canonical default output folder is `E:\apps\github\upp_uidesigner\build`; executables are written directly into that folder, without Debug/Release or `out` subdirectories.
+The canonical default output folder is `E:\apps\github\upp_uidesigner\build`; every executable is written directly at the root of that folder, without Debug or Release subdirectories.
 
 The runner performs:
 
@@ -64,4 +64,4 @@ Creation/catalog preset package proof uses:
 powershell -ExecutionPolicy Bypass -File tests/PresetExportTests/BuildPresetFixtures.ps1
 ```
 
-Generated source fixtures stay under their temporary test directories; generated executables go directly to `build/`.
+Generated source fixtures stay under their temporary test directories; generated executables go directly to the root of `build/`.

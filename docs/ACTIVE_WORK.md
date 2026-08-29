@@ -28,7 +28,7 @@ Do not restore a second Theme Studio mode toggle.
 - `UiTable` uses theme-driven `UiScrollBar` internally; no native light scrollbar state.
 - UiSplitter supports multiple direct panes; UiQuadSplitter remains capped at four.
 - Generated preset packages are temporary and never tracked.
-- Build/test executables go directly under `build/`; do not create `out/`, `build/out/`, Debug, or Release subdirectories.
+- Build/test executables go directly under `build/`; do not create Debug or Release subdirectories.
 
 ## LATEST AUTOMATED EVIDENCE
 - ThemeDarkIntegrationTest Debug/Release: `18/0`.
@@ -71,7 +71,7 @@ Do not rerun the complete R7 matrix before the visual check.
 
 ## NEXT ACTION
 1. Pull current `main` in both repositories.
-2. Remove obsolete local `upp_uidesigner\out` only after confirming it contains build products only.
+2. Keep generated artifacts in the repository `build` directory only.
 3. Build Debug UiDesigner to `E:\apps\github\upp_uidesigner\build\UiDesigner.exe`.
 4. Launch that exact executable and leave it running for Curt.
 5. Curt checks Light -> Dark -> Light: root background, header dropdown and popup, Theme Studio dropdown/editor surfaces, table and table scrollbar, and absence of light islands.
