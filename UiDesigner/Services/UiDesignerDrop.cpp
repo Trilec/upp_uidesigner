@@ -321,10 +321,6 @@ UiDesignerDropPlan UiDesignerDropService::PlanMove(
             retained_children--;
     }
     const int resulting_count = retained_children + nodes.GetCount();
-    if(parent->type == "UiSplitter" && resulting_count > 2) {
-        plan.reason = "Splitter accepts at most two panes";
-        return plan;
-    }
     if(parent->type == "UiQuadSplitter" && resulting_count > 4) {
         plan.reason = "Quad Splitter accepts at most four panes";
         return plan;

@@ -1,0 +1,16 @@
+uses
+    Core,
+    Draw,
+    CtrlCore,
+    CtrlLib,
+    Ui,
+    Utilities/PropertyEditor,
+    UiDesigner/Services,
+    UiDesigner/Preview,
+    UiDesigner/Theme;
+
+mainconfig
+    "" = "CONSOLE";
+
+file
+    main.cpp;

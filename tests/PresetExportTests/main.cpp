@@ -69,8 +69,8 @@ static bool ExportCatalogPreset(const UiDesignerPreset& preset,
     UiDesignerSession session;
     session.NewDocument("blank");
     UiDesignerNodeId created = 0;
-    if(!session.InsertPreset(preset.id, session.Document().GetRootId(), -1,
-                             &created, error)) {
+    if(!session.InsertPresetAt(preset.id, 0, Point(0, 0), false, -1, -1, -1,
+                               &created, error)) {
         error = "catalog:" + preset.id + ": " + error;
         return false;
     }

@@ -442,10 +442,6 @@ bool UiDesignerCatalog::CanInsert(const UiDesignerDocument& document,
     if(!CanParent(child_type, parent->type, reason))
         return false;
 
-    if(parent->type == "UiSplitter" && parent->children.GetCount() >= 2) {
-        reason = "Splitter already has two panes";
-        return false;
-    }
     if(parent->type == "UiQuadSplitter" && parent->children.GetCount() >= 4) {
         reason = "Quad Splitter already has four panes";
         return false;
@@ -605,10 +601,6 @@ bool UiDesignerCatalog::ValidateDocument(const UiDesignerDocument& document,
                 error = parent.name + " has an inconsistent child reference";
                 return false;
             }
-        }
-        if(parent.type == "UiSplitter" && parent.children.GetCount() > 2) {
-            error = parent.name + " has more than two splitter panes";
-            return false;
         }
         if(parent.type == "UiQuadSplitter" && parent.children.GetCount() > 4) {
             error = parent.name + " has more than four quad panes";

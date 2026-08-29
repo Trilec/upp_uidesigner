@@ -4,6 +4,47 @@ Remote GitHub `main` is authoritative. Refresh exact remote HEAD before acting, 
 
 Historical Theme acceptance and earlier Designer recovery checkpoints remain in Git history. This file is the current recovery checkpoint.
 
+## DESIGNER R7 SPLITTER PRESET REPAIR — 2026-08-29
+
+BASE:
+
+- UiDesigner base: `b3d21c131c03b7a4fba58e8927924dec13bbbe5a`.
+- Dependency used for focused validation: `upp_Ui 9d6d8240f197f9d3227bd564429f1c7290db0c73`.
+
+TASK:
+
+- Remove the stale two-pane UiSplitter Designer restriction and prove the
+  complete generated preset-package path.
+
+TOUCHED:
+
+- `UiDesigner/Catalog/UiDesignerCatalog.cpp`
+- `UiDesigner/Services/UiDesignerDrop.cpp`
+- `tests/UiSplitterCatalogTest/main.cpp`
+- `tests/UiSplitterCatalogTest/UiSplitterCatalogTest.upp`
+- `tests/PresetExportTests/main.cpp`
+- `tests/PresetExportTests/.generated-presets/` removed from source control
+- `.gitignore`
+- `docs/ACTIVE_WORK.md`
+
+STATUS: **REPAIR COMPLETE — BROADER R7 VALIDATION REMAINS SEPARATE.**
+
+PUBLISHED:
+
+- Local commit pending supervisor review; not pushed.
+
+VALIDATION:
+
+- `UiSplitterCatalogTest` Debug and Release: `checks=24 failed=0`.
+- Preset export: creation `3`, catalog `9`, total `12`, `failed=0`.
+- All 12 generated preset packages compiled and linked successfully.
+- The successful harness removed `.generated-presets`.
+
+NEXT ACTION:
+
+- Review the local repair commit, then run the broader R7 validation matrix
+  separately. Do not treat this focused repair as full Designer acceptance.
+
 ## DESIGNER CLOSURE R7 — VALIDATION REPAIR — 2026-08-28
 
 BASE:
