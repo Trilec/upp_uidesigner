@@ -388,8 +388,9 @@ void UiDesignerSideColumn::Layout()
                            max(0, (toolbar_h - action_h) / 2),
                            action_layout_.GetSize().cx, action_h);
 
-    // Leave a visible gutter between page content and the surrounding panel.
-    const int content_inset = DPI(8);
+    // Keep the panel's own content lane on the compact 4 px shell rhythm.
+    // Catalog rows retain their independent 6 px paint gutter.
+    const int content_inset = DPI(4);
     pages_.SetRect(content_inset, content_inset,
                    max(0, content_surface_.GetSize().cx - content_inset * 2),
                    max(0, content_surface_.GetSize().cy - content_inset * 2));

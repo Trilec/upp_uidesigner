@@ -50,8 +50,14 @@ UiDesignerWindowClosureHook::UiDesignerWindowClosureHook(UiDesignerWindow& owner
             if(!safe)
                 return;
             UiTitleCard::Style style = UiTheme::ResolveTitleCard(UiRole::Accent);
+            // Header identity is not a title-card composition. Disable every
+            // line path and replace the resolver title font with a known plain
+            // bold font so an underline cannot survive a theme refresh.
             style.title_line = false;
+            style.title_line_length = NONE;
             style.card_line = false;
+            style.card_line_length = NONE;
+            style.title_font = SansSerifZ(16).Bold();
             style.metrics.face_enabled = false;
             style.metrics.frame_enabled = false;
             style.metrics.shadow.enabled = false;
