@@ -28,7 +28,7 @@ struct UiDesignerStyleMetrics {
     static int InspectorNormalWidth()  { return DPI(InspectorNormalPixels); }
     static int InspectorMediumWidth()  { return DPI(InspectorMediumPixels); }
     static int InspectorWideWidth()    { return DPI(InspectorWidePixels); }
-    static int DesignerToolbarHeight() { return DPI(63); }
+    static int DesignerToolbarHeight() { return DPI(53); }
     static int Gap()                   { return DPI(8); }
     static int HeaderInset()           { return DPI(6); }
     static int LeftPillInset()         { return DPI(20); }

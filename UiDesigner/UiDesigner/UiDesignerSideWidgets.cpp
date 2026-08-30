@@ -194,7 +194,9 @@ UiDesignerSideColumn::UiDesignerSideColumn()
     tool_grid_.Add(action_layout_, 0, 1, false, true, Size(DPI(52), DPI(0)));
 
     content_surface_.SetCustomStyle(UiDesignerSurfaceStyle());
-    content_surface_.Add(pages_.SizePos());
+    // Keep the page stack inside the visible panel chrome instead of letting
+    // list/table content paint directly over its border.
+    content_surface_.Add(pages_);
 
     close_.SetCustomStyle(UiTheme::ResolveToolButton(UiRole::Subtle));
     close_.SetIcon(ICON_DESIGN_LEFT_PANEL_CLOSE_48())
@@ -387,6 +389,13 @@ void UiDesignerSideColumn::Layout()
     action_layout_.SetRect(action_layout_.GetRect().left,
                            max(0, (toolbar_h - action_h) / 2),
                            action_layout_.GetSize().cx, action_h);
+
+    // Keep every page inside the panel face/frame. This also prevents catalog
+    // rows from visually crossing the side-column boundary during scrolling.
+    const int content_inset = DPI(4);
+    pages_.SetRect(content_inset, content_inset,
+                   max(0, content_surface_.GetSize().cx - content_inset * 2),
+                   max(0, content_surface_.GetSize().cy - content_inset * 2));
 }
 
 }

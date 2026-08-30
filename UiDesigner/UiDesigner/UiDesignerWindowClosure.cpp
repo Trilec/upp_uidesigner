@@ -23,22 +23,35 @@ UiDesignerWindowClosureHook::UiDesignerWindowClosureHook(UiDesignerWindow& owner
             return;
         UiDesignerWindow& window = *safe;
 
-        // UiDesigner.rc embeds the application artwork as resource 5555.
-        // Reuse that resource for both the native window and the header so
-        // the application never substitutes the shared-library brand icon.
+        // UiDesigner.rc embeds the project-owned application artwork as
+        // resource 5555. Reuse that exact image for native and header identity.
         const Image brand = Win32Icon(5555);
         window.Icon(brand);
-        window.brand_.SetMedia(brand, Size(DPI(18), DPI(18)))
-                     .SetMediaAlign(UiAlign::CENTER, UiAlign::CENTER)
-                     .SetMediaGap(DPI(4))
-                     .SetContentInset(DPI(2))
-                     .ShowTitleLine(false)
-                     .ShowCardLine(false);
         window.version_.ClearIcon();
 
-        // Keep one compact identity block at the left: brand icon, Designer,
-        // then version. The Accent title-card resolver can enable a card line,
-        // so the final shell hook also owns the no-line presentation contract.
+        const auto ApplyBrandChrome = [safe, brand] {
+            if(!safe)
+                return;
+            // The header identity is not a card. Preserve Accent typography but
+            // remove every card/title surface so no theme refresh can restore
+            // the unwanted line below Designer.
+            UiTitleCard::Style style = UiTheme::ResolveTitleCard(UiRole::Accent);
+            style.title_line = false;
+            style.card_line = false;
+            style.metrics.face_enabled = false;
+            style.metrics.frame_enabled = false;
+            style.metrics.shadow.enabled = false;
+            safe->brand_.SetCustomStyle(style)
+                        .SetMedia(brand, Size(DPI(18), DPI(18)))
+                        .SetMediaAlign(UiAlign::CENTER, UiAlign::CENTER)
+                        .SetMediaGap(DPI(3))
+                        .SetContentInset(DPI(1))
+                        .ShowTitleLine(false)
+                        .ShowCardLine(false);
+        };
+        ApplyBrandChrome();
+
+        // Compact left identity: project icon + Designer + version, then actions.
         window.header_layout_.PauseLayout();
         window.header_layout_.ClearItems();
         window.header_layout_.Add(window.brand_).Fixed(DPI(120)).MinCross(DPI(30));
@@ -55,19 +68,15 @@ UiDesignerWindowClosureHook::UiDesignerWindowClosureHook(UiDesignerWindow& owner
         window.header_layout_.Add(window.exit_).Fixed(DPI(36)).MinCross(DPI(24));
         window.header_layout_.ResumeLayout(true);
 
-        const auto RefreshHeaderThemeChrome = [safe] {
+        // Keep status text off the footer border.
+        window.footer_.HSizePos(DPI(6), DPI(4)).VSizePos();
+
+        const auto RefreshHeaderThemeChrome = [safe, ApplyBrandChrome] {
             if(!safe)
                 return;
-            // Re-resolve application chrome after every theme revision, then
-            // reassert the identity presentation that the Accent TitleCard
-            // resolver must not override (no line, tight icon/title spacing).
             safe->theme_select_.SetCustomStyle(
                 UiTheme::ResolveDropdown(UiRole::Standard));
-            safe->brand_.SetCustomStyle(UiTheme::ResolveTitleCard(UiRole::Accent))
-                        .ShowTitleLine(false)
-                        .ShowCardLine(false)
-                        .SetContentInset(DPI(2))
-                        .SetMediaGap(DPI(4));
+            ApplyBrandChrome();
             safe->version_.SetCustomStyle(UiTheme::ResolveLabel(UiRole::Accent))
                           .ClearIcon();
             safe->header_layout_.Layout();

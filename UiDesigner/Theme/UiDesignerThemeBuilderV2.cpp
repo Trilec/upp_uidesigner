@@ -93,6 +93,17 @@ static void PaintThemeSurface(Draw& w, Size size)
 
 UiDesignerThemeGalleryV2::UiDesignerThemeGalleryV2()
 {
+    // Feedback duplicated the progress sample already shown in Numeric &
+    // Sliders. Reuse that existing group shell for a full-width Table sample,
+    // leaving DATA to present List and Tree at readable widths.
+    table_.Remove();
+    feedback_label_.Remove();
+    feedback_progress_.Remove();
+    data_group_.SetSubTitle("List and tree");
+    feedback_group_.SetTitle("TABLE")
+                   .SetSubTitle("Tabular selection and scrolling");
+    feedback_group_.Add(table_);
+
     RebuildColumnPlacement();
     RebindPanelSamples();
     ApplyThemeStylesV2();
@@ -103,18 +114,18 @@ void UiDesignerThemeGalleryV2::RebuildColumnPlacement()
     for(int i = 0; i < 3; ++i)
         control_columns_[i].ClearItems();
 
-    // DATA and CHOICES intentionally trade columns: data-heavy controls get
-    // the wider first-column flow while choices sit with navigation.
     control_columns_[0].Add(controls_reference_panel_).Fixed(DPI(108));
     control_columns_[0].Add(buttons_group_).Fixed(DPI(164));
     control_columns_[0].Add(data_group_).Fixed(DPI(252));
 
     control_columns_[1].Add(numbers_group_).Fixed(DPI(212));
     control_columns_[1].Add(inputs_group_).Fixed(DPI(226));
-    control_columns_[1].Add(feedback_group_).Fixed(DPI(126));
+    control_columns_[1].Add(choices_group_).Fixed(DPI(158));
 
-    control_columns_[2].Add(choices_group_).Fixed(DPI(178));
+    // Navigation now starts the third column; the former Feedback group is the
+    // dedicated Table sample below it.
     control_columns_[2].Add(navigation_group_).Fixed(DPI(292));
+    control_columns_[2].Add(feedback_group_).Fixed(DPI(252));
 }
 
 void UiDesignerThemeGalleryV2::RebindPanelSamples()
@@ -425,8 +436,6 @@ void UiDesignerThemeGalleryV2::ApplyThemeStylesV2()
     ApplySampleThemeV2(tab_, "UiTab", false);
     ApplySampleThemeV2(accordion_, "UiAccordion", false);
     ApplySampleThemeV2(feedback_group_, "UiGroupPanel", true);
-    ApplySampleThemeV2(feedback_label_, "UiLabel", false);
-    ApplySampleThemeV2(feedback_progress_, "UiProgressBar", false);
 
     ApplySampleThemeV2(container_plain_panel_, "UiPanel", true);
     ApplySampleThemeV2(container_plain_label_, "UiLabel", false);
@@ -462,10 +471,23 @@ void UiDesignerThemeGalleryV2::Layout()
 {
     UiDesignerThemeGallery::Layout();
     const int inset = DPI(12);
-    const int w = buttons_group_.GetSize().cx;
+
+    int w = buttons_group_.GetSize().cx;
     const int split_x = inset + DPI(150);
     split_button_.SetRect(split_x, DPI(48),
                           max(0, w - split_x - inset), DPI(32));
+
+    // DATA now gives List and Tree half the available width each.
+    w = data_group_.GetSize().cx;
+    const int data_gap = DPI(8);
+    const int data_w = max(DPI(80), (w - inset * 2 - data_gap) / 2);
+    list_.SetRect(inset, DPI(48), data_w, DPI(178));
+    tree_.SetRect(inset + data_w + data_gap, DPI(48), data_w, DPI(178));
+
+    // TABLE uses the former Feedback shell as an independent full-width sample.
+    w = feedback_group_.GetSize().cx;
+    table_.SetRect(inset, DPI(48), max(0, w - inset * 2),
+                   max(DPI(120), feedback_group_.GetSize().cy - DPI(62)));
 }
 
 void UiDesignerThemeGalleryV2::Paint(Draw& w)
