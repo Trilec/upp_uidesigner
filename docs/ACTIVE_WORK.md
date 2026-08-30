@@ -64,10 +64,10 @@ Curt visually checked the build based on `434cd73...` and it is still NOT accept
 - Preset export: 12/12 generated packages built, failed=0.
 
 ## STATUS
-The previous visual checkpoint was insufficient; this correction must be compiled before claiming any visual PASS.
+Source correction commit prepared as `4996ffeecf9dae74faf7c218b62e417ff5e8f636`; Windows compile and Curt visual acceptance remain pending.
 
 ## NEXT ACTION
-1. Publish and verify this single coherent Designer correction.
+1. Verify `4996ffeecf9dae74faf7c218b62e417ff5e8f636` is on Designer `main`.
 2. Gary fetches current `upp_Ui/main` and `upp_uidesigner/main` and records both SHAs.
 3. Gary builds Debug directly to `E:\apps\github\upp_uidesigner\build\UiDesigner.exe`.
 4. Gary launches that exact executable and leaves it running.
