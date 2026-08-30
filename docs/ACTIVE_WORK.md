@@ -7,60 +7,69 @@ Remote GitHub `main` is authoritative. Refresh both repositories before acting; 
 - Windows checkout: `E:\apps\github\upp_uidesigner`.
 - U++: `E:\upp-18468\umk.exe`, assembly `github`, `CLANGx64`.
 - Canonical executable: `E:\apps\github\upp_uidesigner\build\UiDesigner.exe`.
-- Designer uses `main` only; generated executables go directly under `build/`.
+- Build/test executables stay directly under `build/`.
 
 ## ACTIVE OBJECTIVE
-Finish the current R7 visual-polish pass and hand one Debug executable to Curt for immediate inspection.
-Gary only pulls current `main`, compiles, launches and reports mechanical failures; he does not redesign the UI.
+Finish the bounded R7 shell/layout correction and hand one fresh Debug executable to Curt for visual inspection.
+Do not restart the broad R7 validation matrix until this visual gate passes.
 
 ## CURRENT RECOVERY BASE
-- Designer base for this repair: `1a01daa72e55899f06bff4ffcc49a489806d6317`.
-- Current reusable-controls head observed before this repair: `0fd8df299bca20d27e19d755693f65eff4dcdca6`.
-- Required reusable dark-marker repair ancestor: `337d29993dc3e96537d6c429758e5ca573a4621e`.
-- Required UiTable themed-scrollbar ancestor: `d0589472daf7fefc458d62458f7caf231d2d8698`.
-- Always fetch both heads because `upp_Ui` advances independently.
+- Designer visual-review base: `434cd73d89ae1bce8c7ede9764db1a2ca0af7b88`.
+- Its parent icon checkpoint: `42d89a9dff06dd7457b5f12c43b16830ac377512`.
+- Reusable controls continue independently on `upp_Ui/main`; fetch before Windows build.
+- Required reusable dark-marker ancestor remains `337d29993dc3e96537d6c429758e5ca573a4621e`.
+- Required UiTable themed-scrollbar ancestor remains `d0589472daf7fefc458d62458f7caf231d2d8698`.
 
-## CURRENT CONTRACTS
+## DURABLE CONTRACTS
 - `UiDesigner -> upp_Ui`; reusable-control defects belong in `upp_Ui`, not Designer workarounds.
 - One authoritative Dark toggle remains in the top-right application header.
 - Theme Studio roles remain Standard/Subtle/Accent/Alert with independent Panel and Control axes.
 - Inherited Theme Studio fields stay inherited; only authored values become local overrides.
-- UiTable uses theme-aware `UiScrollBar`; PropertyEditor follows active `UiTheme`.
-- UiDesigner branding uses the project-owned `UiDesigner/UiDesigner/icon.ico` and `icon.png`, never a generic shared brand icon.
-- Header identity is icon + Designer + version before Save/Load/Export, with no title/card underline and no duplicate version icon.
-- Side/tool strips use the compact toolbar height; page content remains inset within visible panel chrome.
-- `docs/ACTIVE_WORK.md` stays 50-100 physical lines and contains current recovery state only.
+- Header identity is project icon + Designer + version before Save/Load/Export.
+- Header identity has no TitleCard face/frame/shadow/title line/card line.
+- Side-column chrome sizing is independent from the center preview toolbar.
+- Catalog rows must have a visible horizontal gutter inside their containing panel.
+- `docs/ACTIVE_WORK.md` remains a short recovery document, not project history.
 
-## LATEST VERIFIED AUTOMATED EVIDENCE
+## LATEST CURT VISUAL RESULT
+Curt visually checked the build based on `434cd73...` and it is still NOT accepted.
+- PASS: the unwanted blue line below Designer is gone.
+- FAIL: the project icon is still absent from the header identity.
+- FAIL: the left/right side action strips still read too tall.
+- FAIL: the catalog rows still appear flush against the panel edge; the requested inset is not visibly present.
+- Theme Studio composition changes cannot be accepted from the Designer-only screenshot and remain pending visual confirmation.
+
+## ROOT CAUSE OF THE MISSED VISUAL FIX
+- The header used `Win32Icon(5555)` as an in-client `Image`; the screenshot proves that path did not provide visible media in this shell.
+- The prior 4 px page-stack inset did not alter the actual full-width catalog row rectangles.
+- Side-column height still reused the shared Designer toolbar metric rather than having its own compact metric.
+
+## CURRENT CORRECTION
+- Embed the existing package `icon.png` through `UiDesignerBrand.brc` and decode it with `PNGRaster` for the header/client image.
+- Keep resource 5555 only as fallback/native resource compatibility.
+- Add `plugin/png` to the UiDesigner package dependency slice.
+- Add an independent `SideToolbarHeight()` of 49 px; retain the center Designer toolbar at 53 px.
+- Use the side metric for open and closed side-column chrome.
+- Increase side page inset to 8 px.
+- Give every catalog row an explicit 6 px left/right gutter in `UiDesignerCatalogList::ItemRect()`.
+- Preserve the existing footer inset and no-line header styling.
+- Preserve the Theme Studio rebalancing already present in `434cd73...`: no Feedback duplication, Choices shortened/moved, Navigation raised, Table separated from Data.
+
+## LATEST AUTOMATED EVIDENCE BEFORE THIS VISUAL CORRECTION
 - ThemeDarkIntegrationTest Debug/Release: `18/0`.
 - ThemeBuilderContractTest Debug/Release: `57/0`.
 - UiThemeSurfaceRegressionTest Debug/Release: `13/0`.
 - ThemeAdapterCoverageTest Debug/Release: `3757/0`.
 - UiSplitterCatalogTest Debug/Release: `24/0`.
 - Preset export: 12/12 generated packages built, failed=0.
-- Retained ThemeDocument, Label, List/Edit, Dropdown/Accordion suites passed Debug/Release.
-
-## LATEST CURT VISUAL REVIEW
-- Dark resolver work is materially improved.
-- Remaining shell regressions: missing/wrong header icon, residual line under Designer, oversized side/Theme Studio tool strips, catalog rows touching/crossing panel chrome, and footer text touching its border.
-- Theme Studio composition also needs less duplication and more usable Data/Table space.
-
-## CURRENT REPAIR
-- Embed the existing project `icon.png` through a U++ `.brc`; keep `icon.ico` as the executable resource and use the same project artwork for the header/window image.
-- Make the header identity visually flat: no TitleCard face/frame/title line/card line; keep version immediately after Designer.
-- Reduce shared Designer toolbar height from 63 to 53 px.
-- Inset side-column page stacks by 4 px and footer status text by 6 px.
-- Remove visible FEEDBACK duplication by reusing that group shell as a dedicated TABLE sample.
-- Keep DATA as List + Tree at half-width each.
-- Move CHOICES below Inputs at 158 px high; move NAVIGATION to the top of the third column; place TABLE below it at full width.
 
 ## STATUS
-Implementation checkpoint is being prepared for a single Windows compile and Curt visual review.
-Do not restart the broad R7 matrix before this visual pass.
+The previous visual checkpoint was insufficient; this correction must be compiled before claiming any visual PASS.
 
 ## NEXT ACTION
-1. Publish and verify the coherent Designer checkpoint.
-2. Gary pulls current `upp_Ui/main` and `upp_uidesigner/main`.
-3. Gary builds Debug directly to `E:\apps\github\upp_uidesigner\build\UiDesigner.exe` and launches that exact file.
-4. Curt checks header icon/line/version, compact panel strips, list containment/footer inset, Theme Studio Choices/Data/Navigation/Table layout, and Light -> Dark -> Light.
-5. If visual PASS, close R7 bookkeeping; if FAIL, record only the exact remaining visual defect.
+1. Publish and verify this single coherent Designer correction.
+2. Gary fetches current `upp_Ui/main` and `upp_uidesigner/main` and records both SHAs.
+3. Gary builds Debug directly to `E:\apps\github\upp_uidesigner\build\UiDesigner.exe`.
+4. Gary launches that exact executable and leaves it running.
+5. Curt checks header icon, compact side strips, visible catalog gutter, footer inset, Theme Studio rebalancing, and Light -> Dark -> Light.
+6. If visual PASS, resume R7 closure; if FAIL, record the exact remaining visual defect without broadening scope.
