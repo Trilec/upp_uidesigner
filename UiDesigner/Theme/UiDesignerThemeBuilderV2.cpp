@@ -371,13 +371,13 @@ void UiDesignerThemeGalleryV2::ApplySampleThemeV2(
     const ValueMap authored = effective.GetStyleOverrides(
         CurrentStyleTargetV2(effective, type, panel_sample));
 
+    // Inherited fields must stay inherited. Materializing every resolver value
+    // as a local override freezes the sample to the palette that happened to be
+    // active when it was built and suppresses later Light/Dark resolver changes.
     for(const UiDesignerThemeOverrideSpec& property : spec->theme_overrides) {
         const int q = authored.Find(property.id);
-        const Value value = q >= 0
-            ? authored.GetValue(q)
-            : adapter->ResolveFieldValue(base, *spec,
-                                         property.adapter_field_id, nullptr);
-        styled.theme_overrides.Set(property.id, value);
+        if(q >= 0)
+            styled.theme_overrides.Set(property.id, authored.GetValue(q));
     }
     adapter->ApplyPreviewStyle(ctrl, styled, *spec, nullptr);
 

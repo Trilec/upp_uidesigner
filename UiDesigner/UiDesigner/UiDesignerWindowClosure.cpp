@@ -23,23 +23,51 @@ UiDesignerWindowClosureHook::UiDesignerWindowClosureHook(UiDesignerWindow& owner
             return;
         UiDesignerWindow& window = *safe;
 
-        // One brand icon is used for the native window, the header identity and
-        // the version badge. This avoids three subtly different brand signals.
         const Image brand = ICON_BRAND_NEWLOGO_V5_48();
         window.Icon(brand);
         window.brand_.SetMedia(brand, Size(DPI(18), DPI(18)))
-                     .SetMediaAlign(UiAlign::CENTER, UiAlign::CENTER);
-        window.version_.SetIcon(brand, UiIconRenderMode::PreserveColor)
-                       .SetIconSize(DPI(10), DPI(10));
+                     .SetMediaAlign(UiAlign::CENTER, UiAlign::CENTER)
+                     .SetMediaGap(DPI(4))
+                     .SetContentInset(DPI(2))
+                     .ShowTitleLine(false)
+                     .ShowCardLine(false);
+        window.version_.ClearIcon();
+
+        // Keep one compact identity block at the left: brand icon, Designer,
+        // then version. The Accent title-card resolver can enable a card line,
+        // so the final shell hook also owns the no-line presentation contract.
+        window.header_layout_.PauseLayout();
+        window.header_layout_.ClearItems();
+        window.header_layout_.Add(window.brand_).Fixed(DPI(120)).MinCross(DPI(30));
+        window.header_layout_.Add(window.version_).Fixed(DPI(82)).MinCross(DPI(24));
+        window.header_layout_.Add(window.save_).Fixed(DPI(92)).MinCross(DPI(24));
+        window.header_layout_.Add(window.load_).Fixed(DPI(92)).MinCross(DPI(24));
+        window.header_layout_.Add(window.export_).Fixed(DPI(100)).MinCross(DPI(24));
+        window.header_layout_.AddSpacer(1).Expand(1).MinMain(DPI(10));
+        window.header_layout_.Add(window.designer_mode_).Fixed(DPI(92)).MinCross(DPI(24));
+        window.header_layout_.Add(window.theme_mode_).Fixed(DPI(120)).MinCross(DPI(24));
+        window.header_layout_.Add(window.theme_select_).Fixed(DPI(150)).MinCross(DPI(24));
+        window.header_layout_.Add(window.dark_).Fixed(DPI(36)).MinCross(DPI(24));
+        window.header_layout_.Add(window.help_).Fixed(DPI(36)).MinCross(DPI(24));
+        window.header_layout_.Add(window.exit_).Fixed(DPI(36)).MinCross(DPI(24));
+        window.header_layout_.ResumeLayout(true);
 
         const auto RefreshHeaderThemeChrome = [safe] {
             if(!safe)
                 return;
-            // Header controls are application chrome, not Theme Studio samples.
-            // Re-resolve the dropdown after every theme revision so neither the
-            // collapsed field nor its popup can retain a stale Light custom style.
+            // Re-resolve application chrome after every theme revision, then
+            // reassert the identity presentation that the Accent TitleCard
+            // resolver must not override (no line, tight icon/title spacing).
             safe->theme_select_.SetCustomStyle(
                 UiTheme::ResolveDropdown(UiRole::Standard));
+            safe->brand_.SetCustomStyle(UiTheme::ResolveTitleCard(UiRole::Accent))
+                        .ShowTitleLine(false)
+                        .ShowCardLine(false)
+                        .SetContentInset(DPI(2))
+                        .SetMediaGap(DPI(4));
+            safe->version_.SetCustomStyle(UiTheme::ResolveLabel(UiRole::Accent))
+                          .ClearIcon();
+            safe->header_layout_.Layout();
             safe->Refresh();
         };
 
