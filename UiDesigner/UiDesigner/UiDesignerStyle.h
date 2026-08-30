@@ -29,6 +29,9 @@ struct UiDesignerStyleMetrics {
     static int InspectorMediumWidth()  { return DPI(InspectorMediumPixels); }
     static int InspectorWideWidth()    { return DPI(InspectorWidePixels); }
     static int DesignerToolbarHeight() { return DPI(53); }
+    // Side-column chrome is intentionally tighter than the center preview
+    // toolbar. Keep this independent so visual tuning cannot regress both.
+    static int SideToolbarHeight()     { return DPI(49); }
     static int Gap()                   { return DPI(8); }
     static int HeaderInset()           { return DPI(6); }
     static int LeftPillInset()         { return DPI(20); }

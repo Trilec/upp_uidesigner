@@ -124,7 +124,9 @@ Rect UiDesignerCatalogList::ItemRect(int index) const
 {
     const int top = DPI(72);
     const int row = DPI(42);
-    return RectC(0, top + index * row - scroll_, GetSize().cx, row);
+    const int inset = DPI(6);
+    return RectC(inset, top + index * row - scroll_,
+                 max(0, GetSize().cx - inset * 2), row);
 }
 
 int UiDesignerCatalogList::RowAt(Point p) const

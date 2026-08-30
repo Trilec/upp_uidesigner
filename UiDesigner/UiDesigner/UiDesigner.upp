@@ -5,11 +5,13 @@ uses
 	Ui,
 	Utilities/PropertyEditor,
 	UiDesigner/Services,
-	UiDesigner/Theme;
+	UiDesigner/Theme,
+	plugin/png;
 
 file
 	UiDesignerStyle.h,
 	UiDesignerVersion.h,
+	UiDesignerBrand.brc,
 	UiDesignerHierarchyModel.h,
 	UiDesignerHierarchyModel.cpp,
 	UiDesignerWidgets.h,

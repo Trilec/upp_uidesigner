@@ -194,8 +194,6 @@ UiDesignerSideColumn::UiDesignerSideColumn()
     tool_grid_.Add(action_layout_, 0, 1, false, true, Size(DPI(52), DPI(0)));
 
     content_surface_.SetCustomStyle(UiDesignerSurfaceStyle());
-    // Keep the page stack inside the visible panel chrome instead of letting
-    // list/table content paint directly over its border.
     content_surface_.Add(pages_);
 
     close_.SetCustomStyle(UiTheme::ResolveToolButton(UiRole::Subtle));
@@ -319,7 +317,7 @@ int UiDesignerSideColumn::GetToolRowHeight(int width) const
     const int action_width = DPI(52);
     const int panel_width = max(DPI(32), width - action_width);
     const int content_width = max(DPI(1), panel_width - DPI(24));
-    return max(UiDesignerStyleMetrics::DesignerToolbarHeight(),
+    return max(UiDesignerStyleMetrics::SideToolbarHeight(),
                tool_layout_.MeasureHeightForWidth(content_width) + DPI(8));
 }
 
@@ -347,7 +345,7 @@ void UiDesignerSideColumn::Layout()
     const int w = GetSize().cx;
     const int h = GetSize().cy;
     if(width_ == PANE_CLOSED) {
-        tool_grid_.SetRect(0, 0, w, UiDesignerStyleMetrics::DesignerToolbarHeight());
+        tool_grid_.SetRect(0, 0, w, UiDesignerStyleMetrics::SideToolbarHeight());
         tool_panel_.Show();
         action_layout_.Show();
         content_surface_.Hide();
@@ -360,7 +358,7 @@ void UiDesignerSideColumn::Layout()
     }
 
     const int toolbar_h = width_ == PANE_CLOSED
-        ? UiDesignerStyleMetrics::DesignerToolbarHeight() : GetToolRowHeight(w);
+        ? UiDesignerStyleMetrics::SideToolbarHeight() : GetToolRowHeight(w);
     const int action_w = min(DPI(52), max(0, w));
     const int panel_w = max(0, w - action_w);
     if(right_) {
@@ -390,9 +388,8 @@ void UiDesignerSideColumn::Layout()
                            max(0, (toolbar_h - action_h) / 2),
                            action_layout_.GetSize().cx, action_h);
 
-    // Keep every page inside the panel face/frame. This also prevents catalog
-    // rows from visually crossing the side-column boundary during scrolling.
-    const int content_inset = DPI(4);
+    // Leave a visible gutter between page content and the surrounding panel.
+    const int content_inset = DPI(8);
     pages_.SetRect(content_inset, content_inset,
                    max(0, content_surface_.GetSize().cx - content_inset * 2),
                    max(0, content_surface_.GetSize().cy - content_inset * 2));

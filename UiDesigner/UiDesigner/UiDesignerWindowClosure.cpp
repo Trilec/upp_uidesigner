@@ -1,8 +1,21 @@
 #include "UiDesignerWindow.h"
 #include <Ui/UiIcons.h>
 #include <UiDesigner/Services/UiDesignerAdvancedCatalog.h>
+#include <plugin/png/png.h>
+#include "UiDesignerBrand.brc"
 
 namespace Upp {
+
+static Image LoadUiDesignerBrand()
+{
+    static Image brand;
+    ONCELOCK {
+        PNGRaster png;
+        brand = png.LoadString(String((const char *)uidesigner_brand_png,
+                                      uidesigner_brand_png_length));
+    }
+    return brand;
+}
 
 void UiDesignerWindow::Paint(Draw& w)
 {
@@ -23,18 +36,19 @@ UiDesignerWindowClosureHook::UiDesignerWindowClosureHook(UiDesignerWindow& owner
             return;
         UiDesignerWindow& window = *safe;
 
-        // UiDesigner.rc embeds the project-owned application artwork as
-        // resource 5555. Reuse that exact image for native and header identity.
-        const Image brand = Win32Icon(5555);
-        window.Icon(brand);
+        // The Windows resource remains the native executable icon. For the
+        // in-client identity, decode the actual project icon.png directly so
+        // the header never depends on Win32 resource extraction semantics.
+        Image brand = LoadUiDesignerBrand();
+        if(brand.IsEmpty())
+            brand = Win32Icon(5555);
+        if(!brand.IsEmpty())
+            window.Icon(brand);
         window.version_.ClearIcon();
 
         const auto ApplyBrandChrome = [safe, brand] {
             if(!safe)
                 return;
-            // The header identity is not a card. Preserve Accent typography but
-            // remove every card/title surface so no theme refresh can restore
-            // the unwanted line below Designer.
             UiTitleCard::Style style = UiTheme::ResolveTitleCard(UiRole::Accent);
             style.title_line = false;
             style.card_line = false;
