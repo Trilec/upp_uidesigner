@@ -23,7 +23,10 @@ UiDesignerWindowClosureHook::UiDesignerWindowClosureHook(UiDesignerWindow& owner
             return;
         UiDesignerWindow& window = *safe;
 
-        const Image brand = ICON_BRAND_NEWLOGO_V5_48();
+        // UiDesigner.rc embeds the application artwork as resource 5555.
+        // Reuse that resource for both the native window and the header so
+        // the application never substitutes the shared-library brand icon.
+        const Image brand = Win32Icon(5555);
         window.Icon(brand);
         window.brand_.SetMedia(brand, Size(DPI(18), DPI(18)))
                      .SetMediaAlign(UiAlign::CENTER, UiAlign::CENTER)

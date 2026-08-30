@@ -14,6 +14,12 @@ Finish R7 Dark-mode visual integration and let Curt perform the immediate Light 
 The application has one authoritative Dark-mode control: the top-right header toggle.
 Do not restore a second Theme Studio mode toggle.
 
+## LATEST ICON REPAIR
+- The native window and header now use the existing UiDesigner `icon.ico` through
+  Windows resource 5555; the shared Ui library brand icon is not substituted.
+- Header identity remains icon + Designer + version, with no title/card line and
+  no duplicate version icon.
+
 ## CURRENT RECOVERY BASE
 - Designer repair base: `05447e54570a63fd3977011e01482f2dd4b7d342`.
 - Required reusable marker/theme repair: `337d29993dc3e96537d6c429758e5ca573a4621e`.
@@ -58,6 +64,7 @@ Curt confirmed the root/client and general Dark integration improved, but three 
 - `upp_Ui/Utilities/PropertyEditor/PropertyEditorBase.cpp`.
 - `upp_Ui/Utilities/PropertyEditor/PropertyEditorPaint.cpp`.
 - `UiDesigner/Theme/UiDesignerThemeBuilderV2.cpp`.
+- `UiDesigner/UiDesigner/UiDesignerWindow.cpp`.
 - `UiDesigner/UiDesigner/UiDesignerWindowClosure.cpp`.
 - `docs/ACTIVE_WORK.md`.
 

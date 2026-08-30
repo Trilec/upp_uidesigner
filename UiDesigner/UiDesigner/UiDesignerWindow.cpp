@@ -275,9 +275,6 @@ void UiDesignerWindow::BuildHeader()
     brand_.SetTitle("Designer").ShowTitleLine(false).ShowCardLine(false)
           .SetContentInset(DPI(4)).SetMediaGap(DPI(9))
           .SetMediaReserve(0).SetMediaMin(DPI(15)).SetMediaAutoFit(false);
-    brand_.SetMedia(ICON_BRAND_NEWLOGO_V5_48(), Size(DPI(18), DPI(18)))
-          .SetMediaAlign(UiAlign::CENTER, UiAlign::CENTER);
-
     save_.SetCustomStyle(UiTheme::ResolveButton(UiRole::Accent));
     save_.SetText("Save").SetSplitWidth(DPI(31));
     save_.Add("Save", "save").Add("Save As", "save_as");
