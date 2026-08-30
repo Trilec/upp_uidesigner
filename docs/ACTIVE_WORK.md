@@ -15,7 +15,7 @@ Do not restart the broad R7 validation matrix until this visual gate passes.
 
 ## CURRENT RECOVERY BASE
 - Designer visual-review base: `434cd73d89ae1bce8c7ede9764db1a2ca0af7b88`.
-- Its parent icon checkpoint: `42d89a9dff06dd7457b5f12c43b16830ac377512`.
+- Published source correction: `796be63309285a03df30582ad5cf0f0d1c90953d`.
 - Reusable controls continue independently on `upp_Ui/main`; fetch before Windows build.
 - Required reusable dark-marker ancestor remains `337d29993dc3e96537d6c429758e5ca573a4621e`.
 - Required UiTable themed-scrollbar ancestor remains `d0589472daf7fefc458d62458f7caf231d2d8698`.
@@ -44,7 +44,7 @@ Curt visually checked the build based on `434cd73...` and it is still NOT accept
 - The prior 4 px page-stack inset did not alter the actual full-width catalog row rectangles.
 - Side-column height still reused the shared Designer toolbar metric rather than having its own compact metric.
 
-## CURRENT CORRECTION
+## PUBLISHED CORRECTION
 - Embed the existing package `icon.png` through `UiDesignerBrand.brc` and decode it with `PNGRaster` for the header/client image.
 - Keep resource 5555 only as fallback/native resource compatibility.
 - Add `plugin/png` to the UiDesigner package dependency slice.
@@ -64,11 +64,11 @@ Curt visually checked the build based on `434cd73...` and it is still NOT accept
 - Preset export: 12/12 generated packages built, failed=0.
 
 ## STATUS
-Source correction commit prepared as `1cedbc135a625773b225f3f0e7b6def48dcb1802`; Windows compile and Curt visual acceptance remain pending.
+Source correction `796be63309285a03df30582ad5cf0f0d1c90953d` is published; Windows compile and Curt visual acceptance remain pending.
 
 ## NEXT ACTION
-1. Verify `1cedbc135a625773b225f3f0e7b6def48dcb1802` is on Designer `main`.
-2. Gary fetches current `upp_Ui/main` and `upp_uidesigner/main` and records both SHAs.
+1. Fetch Designer `main` and verify `796be63309285a03df30582ad5cf0f0d1c90953d` is an ancestor.
+2. Gary fetches current `upp_Ui/main` and records its SHA.
 3. Gary builds Debug directly to `E:\apps\github\upp_uidesigner\build\UiDesigner.exe`.
 4. Gary launches that exact executable and leaves it running.
 5. Curt checks header icon, compact side strips, visible catalog gutter, footer inset, Theme Studio rebalancing, and Light -> Dark -> Light.
