@@ -50,14 +50,11 @@ UiDesignerWindowClosureHook::UiDesignerWindowClosureHook(UiDesignerWindow& owner
             if(!safe)
                 return;
             UiTitleCard::Style style = UiTheme::ResolveTitleCard(UiRole::Accent);
-            // Header identity is not a title-card composition. Disable every
-            // line path and replace the resolver title font with a known plain
-            // bold font so an underline cannot survive a theme refresh.
+            // Header identity intentionally keeps the Accent recipe, but its two
+            // independent divider booleans are instance-level overrides. Do not
+            // destroy line length/style configuration merely to hide the lines.
             style.title_line = false;
-            style.title_line_length = NONE;
             style.card_line = false;
-            style.card_line_length = NONE;
-            style.title_font = SansSerifZ(16).Bold();
             style.metrics.face_enabled = false;
             style.metrics.frame_enabled = false;
             style.metrics.shadow.enabled = false;
@@ -102,6 +99,27 @@ UiDesignerWindowClosureHook::UiDesignerWindowClosureHook(UiDesignerWindow& owner
             safe->header_layout_.Layout();
             safe->Refresh();
         };
+
+        // ApplyThemeToShell() installs the generic Accent TitleCard recipe,
+        // whose card divider is enabled. Several UI actions call that method
+        // directly after their model event, so reassert the Designer-specific
+        // two-boolean override after those actions as well as after theme events.
+        window.designer_mode_.WhenAction << RefreshHeaderThemeChrome;
+        window.theme_mode_.WhenAction << RefreshHeaderThemeChrome;
+        window.theme_select_.WhenAction << RefreshHeaderThemeChrome;
+        window.dark_.WhenAction << RefreshHeaderThemeChrome;
+        window.theme_inspector_.WhenPreview <<
+            [RefreshHeaderThemeChrome](const String&, const Value&) {
+                RefreshHeaderThemeChrome();
+            };
+        window.theme_inspector_.WhenCommit <<
+            [RefreshHeaderThemeChrome](const String&, const Value&) {
+                RefreshHeaderThemeChrome();
+            };
+        window.theme_inspector_.WhenReset <<
+            [RefreshHeaderThemeChrome](const String&) {
+                RefreshHeaderThemeChrome();
+            };
 
         // Preset activation and preview dragging use the same location-aware
         // pipeline. Catalog rows deliberately carry the `preset:` envelope for
