@@ -70,6 +70,34 @@ CONSOLE_APP_MAIN
             "theme_card_line_thickness", "theme_card_line_gap"})
         CheckNoThemeField(section, id);
 
+    // Button content placement is ordinary authored Appearance state. A theme
+    // can colour/style the button but cannot move its text/icon arrangement.
+    for(const char *type : {"UiButton", "UiToolButton", "UiSplitButton"}) {
+        const UiDesignerControlSpec *button = catalog.Find(type);
+        Check(button != nullptr, String(type) + " exists");
+        for(const char *id : {"align_h", "align_v", "icon_side",
+                              "content_gap", "icon_render_mode"})
+            CheckNormalProperty(button, id);
+        for(const char *id : {"style_align_h", "style_align_v",
+                              "style_icon_side", "style_content_gap",
+                              "style_icon_render_mode"})
+            CheckNoThemeField(button, id);
+    }
+
+    // The Tab visual family and placement are control configuration. Theme
+    // styling may change colours/metrics inside that family but not select a
+    // different family or move the strip/icon.
+    const UiDesignerControlSpec *tab = catalog.Find("UiTab");
+    Check(tab != nullptr, "UiTab exists");
+    for(const char *id : {"visual", "placement", "tab_icon_side"})
+        CheckNormalProperty(tab, id);
+    for(const char *id : {"style_visual", "icon_side", "style_tab_font_face"})
+        CheckNoThemeField(tab, id);
+
+    const UiDesignerControlSpec *group = catalog.Find("UiGroupPanel");
+    Check(group != nullptr, "UiGroupPanel exists");
+    CheckNoThemeField(group, "header_mode");
+
     const UiDesignerControlSpec *list = catalog.Find("UiList");
     Check(list != nullptr, "UiList exists");
     CheckNoThemeField(list, "show_row_separator");
