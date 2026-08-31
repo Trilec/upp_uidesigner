@@ -13,7 +13,7 @@ Close R7 theme-ownership cleanup. Theme/preset/role/Light-Dark changes may alter
 
 ## PUBLISHED CHECKPOINT
 - Required `upp_Ui/main`: `e7197e5698b7e1b38ab75935f598a1cf329d287e`.
-- Designer code/test checkpoint: `8d63b88d60d6cc58402cc00a643f71b1d2621f4b`.
+- Designer implementation checkpoint: `389f5abc058ef1c6c1c7e29d59a9141254d7dc75`.
 - This recovery-doc commit is expected to be a direct Designer descendant of that checkpoint.
 - Retained dark-marker ancestor: `337d29993dc3e96537d6c429758e5ca573a4621e`.
 - Retained themed-scrollbar ancestor: `d0589472daf7fefc458d62458f7caf231d2d8698`.
@@ -37,6 +37,7 @@ Rule: Style fields may remain for local/custom-style compatibility, but Theme St
 - `ThemeAdapterCoverageTest` now checks the live Theme schema/adapters and explicit structural exclusions instead of retaining stale field inventory.
 - Added `tests/ThemeStructureOwnershipTest`.
 - `ThemeDarkIntegrationTest` now returns a failing process exit code when checks fail.
+- Catalog base normalization is intentionally isolated as `UiDesignerInspectorCatalogImpl.inc`; temporary `Legacy` naming is removed.
 
 ## IMPORTANT NON-REGRESSIONS
 - Do not restore theme-driven TitleCard card-line visibility for Standard/Accent roles.
@@ -48,7 +49,7 @@ Rule: Style fields may remain for local/custom-style compatibility, but Theme St
 IMPLEMENTATION COMPLETE — PLATFORM VALIDATION PENDING. Source and tests are published; this session cannot execute the Windows U++/CLANGx64 binaries.
 
 ## GARY NEXT
-1. Pull both `main` branches with `--ff-only`; record exact SHAs. `upp_Ui` must be `e7197e5698b7e1b38ab75935f598a1cf329d287e` or a descendant; Designer must contain `8d63b88d60d6cc58402cc00a643f71b1d2621f4b`.
+1. Pull both `main` branches with `--ff-only`; record exact SHAs. `upp_Ui` must be `e7197e5698b7e1b38ab75935f598a1cf329d287e` or a descendant; Designer must be `389f5abc058ef1c6c1c7e29d59a9141254d7dc75` or a descendant.
 2. Build/run `Utilities/UiThemeStructureContractTest` Debug and Release; require exit 0 / failed=0.
 3. Build/run Designer `tests/ThemeStructureOwnershipTest`, `tests/ThemeAdapterCoverageTest`, `tests/ThemeDarkIntegrationTest` and `tests/ThemeBuilderContractTest` Debug and Release; require exit 0 / failed=0. Coverage check count may change only because retired structural Theme fields are no longer part of the schema.
 4. Build canonical UiDesigner Debug to `build\UiDesigner.exe`, launch it, and leave it running for Curt.
