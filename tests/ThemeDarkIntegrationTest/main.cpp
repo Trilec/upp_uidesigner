@@ -139,4 +139,5 @@ CONSOLE_APP_MAIN
            << " table=" << ColorText(dark_table.table_bg) << "\n";
     Cout() << "THEME_DARK_INTEGRATION_SUMMARY checks=" << checks
            << " failed=" << failed << '\n';
+    SetExitCode(failed ? 1 : 0);
 }
