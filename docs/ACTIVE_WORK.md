@@ -13,7 +13,7 @@ Close the R7 theming-ownership cleanup, then resume the retained validation matr
 
 ## CURRENT CHECKPOINT
 - `upp_Ui` implementation head before platform validation: `27d98c3936c1b63bf582ed2bfd5288304363e610`.
-- UiDesigner implementation/test head before this recovery-doc update: `3c60552e44cc4037d276dacb486cb7d347714af5`.
+- UiDesigner implementation/test head before this recovery-doc update: `ca140403e1dc6d5bca35bc694c208f2d0e9615e0`.
 - Required reusable TitleCard layout-fix ancestor: `1e6907c4fe6e15adeb9daed06d5a12fd884e3f39`.
 - Required dark-marker ancestor: `337d29993dc3e96537d6c429758e5ca573a4621e`.
 - Required UiTable themed-scrollbar ancestor: `d0589472daf7fefc458d62458f7caf231d2d8698`.
