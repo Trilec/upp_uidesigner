@@ -6,65 +6,73 @@ Remote GitHub `main` is authoritative. Refresh both repositories before acting; 
 - Reusable controls: `Trilec/upp_Ui`, branch `main`.
 - Windows checkout: `E:\apps\github\upp_uidesigner`.
 - U++: `E:\upp-18468\umk.exe`, assembly `github`, `CLANGx64`.
-- Canonical executable: `E:\apps\github\upp_uidesigner\build\UiDesigner.exe`.
+- Canonical Designer executable: `E:\apps\github\upp_uidesigner\build\UiDesigner.exe`.
 
 ## ACTIVE OBJECTIVE
-Finish the bounded R7 visual-polish pass. Do not restart the broad matrix until Curt accepts the shell geometry visually.
+Close the R7 theming-ownership cleanup, then resume the retained validation matrix. Theme changes must remain visual; authored structure/configuration must not silently change with a preset, role, Light/Dark switch, or Theme Studio refresh.
 
-## CURRENT RECOVERY BASE
-- Designer base before TitleCard ownership repair: `4309e40350383e5983496c73cbe27b578d8fafe0`.
-- Reusable-controls base before TitleCard layout fix: `1780907a1aa50b3a64a4baf70d573718ebe45161`.
-- Published reusable TitleCard layout fix: `1e6907c4fe6e15adeb9daed06d5a12fd884e3f39`.
-- Required dark-marker ancestor remains `337d29993dc3e96537d6c429758e5ca573a4621e`.
-- Required UiTable themed-scrollbar ancestor remains `d0589472daf7fefc458d62458f7caf231d2d8698`.
+## CURRENT CHECKPOINT
+- `upp_Ui` implementation head before platform validation: `27d98c3936c1b63bf582ed2bfd5288304363e610`.
+- UiDesigner implementation/test head before this recovery-doc update: `3c60552e44cc4037d276dacb486cb7d347714af5`.
+- Required reusable TitleCard layout-fix ancestor: `1e6907c4fe6e15adeb9daed06d5a12fd884e3f39`.
+- Required dark-marker ancestor: `337d29993dc3e96537d6c429758e5ca573a4621e`.
+- Required UiTable themed-scrollbar ancestor: `d0589472daf7fefc458d62458f7caf231d2d8698`.
 
-## DURABLE CONTRACTS
-- `UiDesigner -> upp_Ui`; reusable-control defects belong in `upp_Ui`, not Designer workarounds.
-- `UiTitleCard::ShowTitleLine(false)` alone hides the title divider; line length/style remain configuration for when enabled.
-- `UiTitleCard::ShowCardLine(false)` independently hides the card divider.
-- Card-line geometry changes must invalidate layout because they affect minimum size/content-cell placement.
-- Header identity is project icon + Designer + version before Save/Load/Export.
-- Designer brand keeps Accent theme styling but overrides both TitleCard visibility booleans to false.
-- Theme Studio roles remain Standard/Subtle/Accent/Alert with independent Panel and Control axes.
-- One application Dark toggle remains authoritative.
-- Catalog rows keep their explicit 6 px horizontal paint gutter.
-- Shell/page spacing uses one compact 4 px outer rhythm; do not stack larger container insets around it.
-- Side-column and center/Theme action strips remain compact and independently tunable.
+## THEME OWNERSHIP CONTRACT
+Theme may own:
+- palette/fill/ink and state colours;
+- fonts and theme typography;
+- frame appearance, radius, shadows and paint metrics;
+- colours used to style an optional element when that element is enabled.
 
-## TITLECARD AUDIT RESULT
-- Paint correctly checks `title_line` and `card_line` independently in both content-cell and no-content-cell paths.
-- The visible Designer line was not evidence that `ShowTitleLine(false)` itself was broken.
-- Minimal/role Accent TitleCard resolution intentionally enables the card divider.
-- `ApplyThemeToShell()` reapplies that generic Accent recipe during workspace/theme actions, which can overwrite the Designer instance override.
-- Prior defensive changes that set line lengths to `NONE` and replace the title font were therefore the wrong ownership fix.
+Control/document configuration owns:
+- optional element visibility;
+- divider/line existence and authored geometry/mode;
+- icon identity and icon/media placement;
+- orientation and requested tab visual family;
+- scrollbar arrow presence/layout;
+- list separator/badge presentation modes;
+- equivalent structural choices on future controls.
 
-## CURRENT FIXES
-- `upp_Ui`: `SetCardLine`, `SetCardLineSide`, and `ShowCardLine` now call `RefreshLayout()` before repaint; visibility semantics are unchanged.
-- UiDesigner: the brand keeps normal resolver line lengths/styles and only sets `title_line=false` and `card_line=false`.
-- UiDesigner reasserts the brand instance override after Designer/Theme mode, preset, Dark-toggle, Theme Inspector, and theme-model refresh paths.
-- Existing project icon PNG/resource handling is unchanged.
+Rule: a theme may style an element, but must not create, remove, move or change the authored mode of that element.
 
-## SPACING REGRESSION ROOT CAUSE
-- The offset was Designer-owned, not a UiTheme inset change.
-- A prior pass raised the shared shell `Gap()` from 4 to 8 px.
-- It also raised the side-page inset from 4 to 8 px while Theme Studio already had its own inner spacing.
-- Those values stacked, pushing Theme Studio content down and making action/content panels read oversized or crowded.
-- Current shell `Gap()` and side-page inset are back to 4 px; catalog-row gutter remains a separate 6 px local paint inset.
+## IMPLEMENTED IN `upp_Ui`
+- Public `UiTheme` now fronts the retained resolver implementation and reapplies the structural ownership contract at resolver boundaries.
+- Covered resolver families: Button, ToolButton, Toggle, ScrollBar, GroupPanel, Dropdown, Tab, TitleCard and List.
+- UiTab reapplies the caller-requested visual recipe after role tuning so style geometry agrees with the requested visual, not only the enum value.
+- UiTitleCard theme resolution keeps its real defaults: title divider ON, card divider OFF; title/card line geometry, media/text placement and media-auto-fit stay authored configuration.
+- Theme-provided line colours remain available to style dividers when the caller enables them.
+- Focused package added: `Utilities/UiThemeStructureContractTest`.
 
-## PRE-FIX AUTOMATED BASELINE
+## IMPLEMENTED IN UIDESIGNER
+- TitleCard structural fields that already have normal authored Appearance properties are removed from the Theme override surface.
+- The same removal propagates to semantic Accordion sections that reuse TitleCard appearance.
+- List row-separator visibility and right-text badge mode are no longer exposed as Theme overrides.
+- Existing normal TitleCard authoring paths remain unchanged.
+- Focused package added: `tests/ThemeStructureOwnershipTest`.
+- Catalog package membership records the retained inspector-catalog implementation checkpoint used by the small ownership wrapper.
+
+## IMPORTANT NON-REGRESSIONS
+- Do not restore theme-driven `UiTitleCard` card-line visibility for Standard/Accent roles.
+- Do not hide the default TitleCard title divider globally; Designer's brand header intentionally disables both dividers as an instance choice.
+- Do not reintroduce nested/fake UiSplitter restrictions; UiSplitter remains multi-pane and UiQuadSplitter remains max four.
+- Do not move authored structural choices back into Theme Studio merely because their Style fields still exist for local/custom style compatibility.
+
+## PRE-CLEANUP AUTOMATED BASELINE
 - ThemeDarkIntegrationTest Debug/Release: `18/0`.
 - ThemeBuilderContractTest Debug/Release: `57/0`.
 - UiThemeSurfaceRegressionTest Debug/Release: `13/0`.
-- ThemeAdapterCoverageTest Debug/Release: `3757/0`.
+- ThemeAdapterCoverageTest Debug/Release: `3757/0` (count may legitimately reduce because retired structural Theme fields no longer participate).
 - UiSplitterCatalogTest Debug/Release: `24/0`.
 - Preset export: 12/12 packages built, failed=0.
 
 ## STATUS
-Reusable TitleCard fix is published. Designer TitleCard ownership repair is being published for a fresh Windows Debug build and Curt visual review.
+IMPLEMENTATION COMPLETE — PLATFORM VALIDATION PENDING. GitHub source changes are on `main`; this session cannot run the Windows U++ 18468/CLANGx64 binaries.
 
 ## NEXT ACTION
-1. Gary fetches current `upp_uidesigner/main` and `upp_Ui/main`, recording both SHAs.
-2. Build Debug directly to `E:\apps\github\upp_uidesigner\build\UiDesigner.exe` and launch that exact file.
-3. Curt checks that the Designer header has no title or card divider through Designer/Theme/Dark switches.
-4. Curt rechecks compact Theme Studio spacing and role/palette strip alignment.
-5. If visual PASS, resume R7 closure validation. If FAIL, record only the exact remaining visual defect.
+1. Fetch current `upp_Ui/main` and `upp_uidesigner/main`; record exact SHAs and verify the Designer dependency contains `27d98c3936c1b63bf582ed2bfd5288304363e610` or a descendant.
+2. Build/run `Utilities/UiThemeStructureContractTest` Debug and Release; expect failed=0.
+3. Build/run `tests/ThemeStructureOwnershipTest` Debug and Release; expect failed=0.
+4. Re-run ThemeAdapterCoverageTest and ThemeBuilderContractTest Debug/Release; a lower coverage check count is acceptable only from the deliberately retired Theme fields, with failed=0.
+5. Build the canonical UiDesigner Debug executable and visually switch preset, role, Designer/Theme workspace and Light/Dark. Confirm authored divider/media/tab/list structure does not change.
+6. If focused validation passes, resume the retained R7 closure matrix rather than broadening this fix into unrelated demos.
