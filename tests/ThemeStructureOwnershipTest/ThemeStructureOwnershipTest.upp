@@ -1,0 +1,14 @@
+description "UiDesigner theme versus structure ownership regression";
+
+uses
+    Core,
+    Ui,
+    Utilities/PropertyEditor,
+    UiDesigner/Catalog,
+    UiDesigner/Theme;
+
+mainconfig
+    "CONSOLE" = "1";
+
+file
+    main.cpp;
