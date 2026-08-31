@@ -2,10 +2,10 @@
 
 // Keep the existing catalog organization implementation intact, but compile
 // its public entry point under a private name so this file can enforce the
-// theme/configuration ownership boundary after all legacy normalization has
-// run. The .inc file is the exact prior implementation checkpoint.
+// theme/configuration ownership boundary after the base normalization has
+// run. The .inc file is the retained implementation checkpoint.
 #define OrganizeUiDesignerControlSpec OrganizeUiDesignerControlSpecRaw
-#include "UiDesignerInspectorCatalogLegacy.inc"
+#include "UiDesignerInspectorCatalogImpl.inc"
 #undef OrganizeUiDesignerControlSpec
 
 namespace Upp {
