@@ -21,17 +21,17 @@ void Check(bool ok, const String& what)
 void CheckNoThemeField(const UiDesignerControlSpec *spec,
                        const char *id)
 {
+    const String type = spec ? spec->type_id : String("missing");
     Check(spec && spec->FindThemeOverride(id) == nullptr,
-          String(spec ? spec->type_id : "missing") +
-          " does not expose structural theme field " + id);
+          type + " does not expose structural theme field " + id);
 }
 
 void CheckNormalProperty(const UiDesignerControlSpec *spec,
                          const char *id)
 {
+    const String type = spec ? spec->type_id : String("missing");
     Check(spec && spec->FindProperty(id) != nullptr,
-          String(spec ? spec->type_id : "missing") +
-          " keeps authored property " + id);
+          type + " keeps authored property " + id);
 }
 
 }
