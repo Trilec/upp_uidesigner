@@ -10,4 +10,5 @@ file
     UiDesignerCatalog.cpp,
     UiDesignerBuiltins.cpp,
     UiDesignerInspectorCatalog.cpp,
+    UiDesignerInspectorCatalogLegacy.inc,
     README.md;
