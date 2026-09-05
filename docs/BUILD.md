@@ -24,20 +24,21 @@ The runner performs:
 
 1. architecture guard;
 2. PropertyEditorCore probe;
-3. PropertyEditor tests;
-4. original UiDesigner tests;
-5. RegressionTests;
-6. FoundationTests;
-7. Theme structure-ownership regression;
-8. Theme adapter live-schema coverage;
-9. Dark integration regression;
-10. Theme Builder contract regression;
-11. UiSplitter catalog regression;
-12. CLI build and catalog/schema smoke;
-13. MCP build plus newline and Content-Length framing smoke;
-14. canonical UiDesigner GUI build;
-15. generated complete-package export/build/process smoke;
-16. blank/three-pane/dialog preset generated-package builds.
+3. PropertyEditor tests plus the current override-commit regression from `upp_Ui`;
+4. the current reusable `UiThemeStructureContractTest`;
+5. original UiDesigner tests;
+6. RegressionTests;
+7. FoundationTests;
+8. Designer Theme structure-ownership regression;
+9. Theme adapter live-schema coverage;
+10. Dark integration regression;
+11. Theme Builder contract regression;
+12. UiSplitter catalog regression;
+13. CLI build and catalog/schema smoke;
+14. MCP build plus newline and Content-Length framing smoke;
+15. canonical UiDesigner GUI build;
+16. generated complete-package export/build/process smoke;
+17. blank/three-pane/dialog preset generated-package builds.
 
 Every deterministic executable is required to return process exit 0. Do not restore retired Theme fields or weaken a regression merely to reproduce an obsolete historical check count.
 
@@ -54,6 +55,8 @@ The automated runner is the source-level/release gate; a visible desktop session
 ```text
 Utilities/PropertyEditorCoreProbe
 Utilities/PropertyEditorTests
+Utilities/PropertyEditorOverrideCommitTest
+Utilities/UiThemeStructureContractTest
 Tests
 RegressionTests
 FoundationTests
