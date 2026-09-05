@@ -57,11 +57,11 @@ Utilities/PropertyEditorTests
 Tests
 RegressionTests
 FoundationTests
-tests/ThemeStructureOwnershipTest
-tests/ThemeAdapterCoverageTest
-tests/ThemeDarkIntegrationTest
-tests/ThemeBuilderContractTest
-tests/UiSplitterCatalogTest
+ThemeStructureOwnershipTest
+ThemeAdapterCoverageTest
+ThemeDarkIntegrationTest
+ThemeBuilderContractTest
+UiSplitterCatalogTest
 UiDesigner/CLI
 UiDesigner/MCP
 UiDesigner/UiDesigner
@@ -72,10 +72,10 @@ Dependent library packages build automatically.
 Representative commands:
 
 ```powershell
-E:\upp-18468\umk.exe github "tests/ThemeStructureOwnershipTest" CLANGx64 -br "E:\apps\github\upp_uidesigner\build\UiDesignerThemeStructureOwnershipTest.exe"
-E:\upp-18468\umk.exe github "tests/ThemeAdapterCoverageTest" CLANGx64 -br "E:\apps\github\upp_uidesigner\build\UiDesignerThemeAdapterCoverageTest.exe"
-E:\upp-18468\umk.exe github "tests/ThemeDarkIntegrationTest" CLANGx64 -br "E:\apps\github\upp_uidesigner\build\UiDesignerThemeDarkIntegrationTest.exe"
-E:\upp-18468\umk.exe github "tests/ThemeBuilderContractTest" CLANGx64 -br "E:\apps\github\upp_uidesigner\build\UiDesignerThemeBuilderContractTest.exe"
+E:\upp-18468\umk.exe github "ThemeStructureOwnershipTest" CLANGx64 -br "E:\apps\github\upp_uidesigner\build\UiDesignerThemeStructureOwnershipTest.exe"
+E:\upp-18468\umk.exe github "ThemeAdapterCoverageTest" CLANGx64 -br "E:\apps\github\upp_uidesigner\build\UiDesignerThemeAdapterCoverageTest.exe"
+E:\upp-18468\umk.exe github "ThemeDarkIntegrationTest" CLANGx64 -br "E:\apps\github\upp_uidesigner\build\UiDesignerThemeDarkIntegrationTest.exe"
+E:\upp-18468\umk.exe github "ThemeBuilderContractTest" CLANGx64 -br "E:\apps\github\upp_uidesigner\build\UiDesignerThemeBuilderContractTest.exe"
 E:\upp-18468\umk.exe github "UiDesigner/CLI" CLANGx64 -br "E:\apps\github\upp_uidesigner\build\uidesigner_cli.exe"
 E:\upp-18468\umk.exe github "UiDesigner/MCP" CLANGx64 -br "E:\apps\github\upp_uidesigner\build\uidesigner_mcp.exe"
 E:\upp-18468\umk.exe github "UiDesigner/UiDesigner" CLANGx64 -br +GUI "E:\apps\github\upp_uidesigner\build\UiDesigner.exe"
