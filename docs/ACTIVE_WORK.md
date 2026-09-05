@@ -4,54 +4,63 @@ Remote GitHub `main` is authoritative. Refresh both repositories before acting; 
 ## SOURCE OF TRUTH
 - Designer: `Trilec/upp_uidesigner`, branch `main`.
 - Reusable controls: `Trilec/upp_Ui`, branch `main`.
-- Windows checkout: `E:\apps\github\upp_uidesigner`; reusable checkout: `E:\apps\github\upp_Ui`.
+- Windows checkouts: `E:\apps\github\upp_uidesigner`, `E:\apps\github\upp_Ui`.
 - U++: `E:\upp-18468\umk.exe`, assembly `github`, `CLANGx64`.
 - Canonical Designer executable: `E:\apps\github\upp_uidesigner\build\UiDesigner.exe`.
 
-## TASK
-Close R7 theme-ownership cleanup. Theme/preset/role/Light-Dark changes may alter visual styling, but must not silently create, remove, move or change authored structural/configuration choices.
+## ACTIVE TASK
+Finish the UiDesigner release candidate against the actual current `upp_Ui/main`. Do not start the embedded AI assistant implementation until this gate and Curt's final visual acceptance pass.
 
-## PUBLISHED CHECKPOINT
-- Required `upp_Ui/main`: `e7197e5698b7e1b38ab75935f598a1cf329d287e`.
-- Designer implementation checkpoint: `389f5abc058ef1c6c1c7e29d59a9141254d7dc75`.
-- This recovery-doc commit is expected to be a direct Designer descendant of that checkpoint.
-- Retained dark-marker ancestor: `337d29993dc3e96537d6c429758e5ca573a4621e`.
-- Retained themed-scrollbar ancestor: `d0589472daf7fefc458d62458f7caf231d2d8698`.
+## CURRENT CHECKPOINTS
+- Current reusable source inspected: `8b8f6c3c8c776814c0d9ceda99456c3931840505`.
+- Gary's earlier UiGraph R10A Windows PASS was at `b701107fe02cb9bbd0181519d548c18d2dfcc1e1`; current Ui main has advanced beyond it.
+- Designer release-cleanup source checkpoint before this recovery update: `fb818f054b807496b91a7339d33cfe146de07443`.
+- Theme-ownership implementation ancestor: `389f5abc058ef1c6c1c7e29d59a9141254d7dc75`.
 
-## OWNERSHIP CONTRACT
-Theme may own palette/fill/ink, fonts/typography, frame appearance, radius, shadows, paint metrics, and colours used by an optional element when enabled.
-Control/document configuration owns optional-element visibility, line/divider existence and mode, icon/media placement, orientation, requested Tab visual family, ScrollBar arrow presence/layout, List separator/badge modes, and equivalent structural choices.
-Rule: Style fields may remain for local/custom-style compatibility, but Theme Studio must not become a second owner of structure.
+## COMPLETED SOURCE WORK
+- Theme changes no longer own structural choices such as TitleCard divider visibility, icon/media placement, requested Tab visual, ScrollBar arrow layout or List separator/badge modes.
+- Designer brand explicitly disables its own TitleCard dividers; default TitleCard title divider remains ON and card divider OFF.
+- Compact shell/page rhythm restored to ~4 px; catalog rows keep their local gutter.
+- Project icon/header and Theme Studio sample rebalancing are retained.
+- CLI/MCP final link roots now include `UiDesigner/Theme`; `UiDesigner/Services` remains cycle-free/headless.
+- `RunSupervisorValidation.ps1` now includes Regression/Foundation plus Theme ownership, Theme coverage, Dark, Theme Builder and UiSplitter gates, CLI/MCP smokes, generated-package proof and canonical GUI build.
+- Root/build documentation no longer treats old migration-era failure counts or CLI/MCP link failure as current acceptance state.
+- Current Designer source audit found no direct use of retired UiGraph shape enum names or old ProgressRing cap API.
 
-## IMPLEMENTED — `upp_Ui`
-- Public `UiTheme` enforces the structural contract at resolver boundaries for Button, ToolButton, Toggle, ScrollBar, GroupPanel, Dropdown, Tab, TitleCard and List.
-- ToolButton uses its own centered structural defaults rather than Button defaults.
-- Requested Tab visual is reapplied after role tuning so enum, geometry and paint mode agree.
-- TitleCard keeps authored divider/media/text-placement structure; theme still provides colours for enabled dividers.
-- Resolver implementation is intentionally isolated as `UiThemeResolverImpl.h`; temporary `UiThemeLegacy.h` naming is removed.
-- Focused regression package: `Utilities/UiThemeStructureContractTest`.
+## CURRENT UPP_UI INTEGRATION RISK
+Since the previous Designer dependency checkpoint, `upp_Ui` has advanced through UiGraph hierarchy/render/shape work, UiGeometry/UiShapePath/UiShapes, UiChartRing, PropertyEditor fixes and other control updates.
+Source inspection found no obvious direct R10 shape-API break in Designer, but only a real Windows build/test against current main closes this integration risk.
 
-## IMPLEMENTED — UIDESIGNER
-- Structural Theme overrides removed for Button-family content placement, GroupPanel header mode, Tab visual/placement aliases, TitleCard/Accordion divider-media structure, and List separator/badge modes.
-- Normal authored Appearance/configuration properties remain available where applicable.
-- `ThemeAdapterCoverageTest` now checks the live Theme schema/adapters and explicit structural exclusions instead of retaining stale field inventory.
-- Added `tests/ThemeStructureOwnershipTest`.
-- `ThemeDarkIntegrationTest` now returns a failing process exit code when checks fail.
-- Catalog base normalization is intentionally isolated as `UiDesignerInspectorCatalogImpl.inc`; temporary `Legacy` naming is removed.
+## AI ASSISTANT — POST-RC DIRECTION
+Authority: `docs/AI_ASSISTANT_ARCHITECTURE.md`.
+- Embed AgentFlow directly when the assistant is part of UiDesigner.
+- Reuse `UiDesignerAutomationService` as the canonical application-control/tool surface.
+- Embedded agent calls that service directly; it does not route itself through MCP.
+- MCP remains the transport for an external ChatGPT/Codex/Claude-style host operating UiDesigner.
+- External applications/services later use AgentFlow capability broker / Agent Bridge.
+- Recommended first UI: Assistant icon -> collapsible/resizable bottom drawer, optional modeless pop-out later.
+- Conversation edits must follow revision check -> preview/plan -> typed command -> undo/history -> canonical projection refresh.
+- No second document model, arbitrary JSON mutation, hidden provider session authority or private chain-of-thought UI.
+- DeepSeek Harness is an architectural reference for provider/tool/session capability seams, not a UiDesigner dependency.
 
-## IMPORTANT NON-REGRESSIONS
-- Do not restore theme-driven TitleCard card-line visibility for Standard/Accent roles.
-- Do not globally hide the default TitleCard title divider; individual controls such as Designer brand may disable it explicitly.
-- Do not reintroduce fake/nested UiSplitter limits; UiSplitter remains multi-pane and UiQuadSplitter remains max four.
-- Do not move retired structural choices back into Theme Studio because a compatible Style member still exists.
+## RELEASE ACCEPTANCE
+Automated:
+1. Refresh both mains; record exact SHAs.
+2. Run `RunSupervisorValidation.ps1`; every deterministic executable must exit 0.
+3. If a failure is mechanical, fix the smallest dependency/include/signature/package issue. Architecture/state/theme issues return to supervisor.
+
+Interactive:
+- icon/header/no Designer divider;
+- 4 px shell rhythm and catalog gutter;
+- compact/aligned Theme Studio;
+- Light -> Dark -> Light preserves authored structure;
+- toolbox/hierarchy/canvas add/move/reparent;
+- Inspector preview/commit/reset and Behavior Inspector;
+- save/load/export/user-code preservation;
+- normal workspace/theme switching without crash/assert.
 
 ## STATUS
-IMPLEMENTATION COMPLETE — PLATFORM VALIDATION PENDING. Source and tests are published; this session cannot execute the Windows U++/CLANGx64 binaries.
+SOURCE/RELEASE PREP COMPLETE — CURRENT UPP_UI WINDOWS VALIDATION PENDING.
 
-## GARY NEXT
-1. Pull both `main` branches with `--ff-only`; record exact SHAs. `upp_Ui` must be `e7197e5698b7e1b38ab75935f598a1cf329d287e` or a descendant; Designer must be `389f5abc058ef1c6c1c7e29d59a9141254d7dc75` or a descendant.
-2. Build/run `Utilities/UiThemeStructureContractTest` Debug and Release; require exit 0 / failed=0.
-3. Build/run Designer `tests/ThemeStructureOwnershipTest`, `tests/ThemeAdapterCoverageTest`, `tests/ThemeDarkIntegrationTest` and `tests/ThemeBuilderContractTest` Debug and Release; require exit 0 / failed=0. Coverage check count may change only because retired structural Theme fields are no longer part of the schema.
-4. Build canonical UiDesigner Debug to `build\UiDesigner.exe`, launch it, and leave it running for Curt.
-5. Only fix an obvious mechanical compile/include/signature/package-link issue locally if required; publish that small fix and report the new SHA. Any architecture/theme/state behavior issue comes back to supervisor.
-6. Report exact heads, build/test results, clean/dirty tree, any source edit, and whether the app is left running. Do not broaden into unrelated validation or redesign.
+## AFTER PASS
+Record exact validated heads/results, clean stale release-status prose, accept/tag the RC, then begin Assistant A1: direct embedded tool gateway over `UiDesignerAutomationService`.
