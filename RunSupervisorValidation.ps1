@@ -41,6 +41,11 @@ $propertyTests = Join-Path $OutputRoot 'PropertyEditorTests.exe'
 $designerTests = Join-Path $OutputRoot 'UiDesignerTests.exe'
 $regressionTests = Join-Path $OutputRoot 'UiDesignerRegressionTests.exe'
 $foundationTests = Join-Path $OutputRoot 'UiDesignerFoundationTests.exe'
+$themeStructure = Join-Path $OutputRoot 'UiDesignerThemeStructureOwnershipTest.exe'
+$themeCoverage = Join-Path $OutputRoot 'UiDesignerThemeAdapterCoverageTest.exe'
+$themeDark = Join-Path $OutputRoot 'UiDesignerThemeDarkIntegrationTest.exe'
+$themeBuilder = Join-Path $OutputRoot 'UiDesignerThemeBuilderContractTest.exe'
+$splitterCatalog = Join-Path $OutputRoot 'UiDesignerUiSplitterCatalogTest.exe'
 $cli = Join-Path $OutputRoot 'uidesigner_cli.exe'
 $mcp = Join-Path $OutputRoot 'uidesigner_mcp.exe'
 $app = Join-Path $OutputRoot 'UiDesigner.exe'
@@ -50,6 +55,11 @@ Build-Package 'Utilities/PropertyEditorTests' $propertyTests $true
 Build-Package 'Tests' $designerTests $true
 Build-Package 'RegressionTests' $regressionTests $true
 Build-Package 'FoundationTests' $foundationTests
+Build-Package 'tests/ThemeStructureOwnershipTest' $themeStructure
+Build-Package 'tests/ThemeAdapterCoverageTest' $themeCoverage
+Build-Package 'tests/ThemeDarkIntegrationTest' $themeDark
+Build-Package 'tests/ThemeBuilderContractTest' $themeBuilder
+Build-Package 'tests/UiSplitterCatalogTest' $splitterCatalog
 Build-Package 'UiDesigner/CLI' $cli
 Build-Package 'UiDesigner/MCP' $mcp
 Build-Package 'UiDesigner/UiDesigner' $app $true
@@ -59,6 +69,11 @@ Invoke-Checked 'PropertyEditorTests' { & $propertyTests }
 Invoke-Checked 'UiDesignerTests' { & $designerTests }
 Invoke-Checked 'UiDesignerRegressionTests' { & $regressionTests }
 Invoke-Checked 'UiDesignerFoundationTests' { & $foundationTests }
+Invoke-Checked 'ThemeStructureOwnershipTest' { & $themeStructure }
+Invoke-Checked 'ThemeAdapterCoverageTest' { & $themeCoverage }
+Invoke-Checked 'ThemeDarkIntegrationTest' { & $themeDark }
+Invoke-Checked 'ThemeBuilderContractTest' { & $themeBuilder }
+Invoke-Checked 'UiSplitterCatalogTest' { & $splitterCatalog }
 
 Invoke-Checked 'CLI list-controls' { & $cli 'list-controls' 'spacer' }
 Invoke-Checked 'CLI schema Spacer' { & $cli 'schema' 'Spacer' }
