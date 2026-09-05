@@ -66,7 +66,9 @@ try {
         throw "Generated executable was not produced: $generatedExe"
     }
 
-    $process = Start-Process -FilePath $generatedExe -PassThru
+    # Run from build/, not the generated source/package directory. The compiled
+    # ThemeDocument must not depend on finding theme.json in the process CWD.
+    $process = Start-Process -FilePath $generatedExe -WorkingDirectory $OutputRoot -PassThru
     Start-Sleep -Milliseconds 1500
     if($process.HasExited) {
         throw "Generated executable exited early with code $($process.ExitCode)"
