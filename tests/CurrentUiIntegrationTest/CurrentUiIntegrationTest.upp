@@ -1,0 +1,15 @@
+description "Current Ui integration, ProgressRing and export refusal contracts";
+
+uses
+    Core,
+    Ui,
+    Utilities/PropertyEditorCore,
+    UiDesigner/Services,
+    UiDesigner/Preview,
+    UiDesigner/Theme;
+
+mainconfig
+    "CONSOLE" = "1";
+
+file
+    main.cpp;

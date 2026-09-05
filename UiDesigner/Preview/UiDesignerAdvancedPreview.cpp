@@ -1,5 +1,6 @@
 #include "UiDesignerPreview.h"
 #include <Ui/UiIcons.h>
+#include <Ui/UiProgressRing.h>
 
 namespace Upp {
 
@@ -69,6 +70,36 @@ static UiDesignerApplyResult ApplyDesignerNodeGraph(
     const Value& value)
 {
     return ApplyAdvancedCommon(ctrl, property, value);
+}
+
+static UiDesignerApplyResult ApplyDesignerProgressRing(
+    Ctrl& ctrl, const UiDesignerControlSpec&, const String& property,
+    const Value& value)
+{
+    UiProgressRing* ring = dynamic_cast<UiProgressRing*>(&ctrl);
+    if(!ring)
+        return UiDesignerApplyResult::Rejected;
+    if(property == "total") {
+        ring->SetTotal((int)value);
+        return UiDesignerApplyResult::RequiresSubtreeRebuild;
+    }
+    else if(property == "value") ring->SetData(value);
+    else if(property == "show_percent") ring->Percent((bool)value);
+    else if(property == "center_text") {
+        if(AsString(value).IsEmpty()) ring->ClearText();
+        else ring->SetText(AsString(value));
+    }
+    else if(property == "animate_on_show") ring->AnimateOnShow((bool)value);
+    else if(property == "intro_duration") ring->SetIntroDuration((int)value);
+    else if(property == "indeterminate_duration") ring->SetIndeterminateDuration((int)value);
+    else if(property == "role") {
+        const String role = AsString(value);
+        ring->SetRole(role == "Accent" ? UiRole::Accent :
+                      role == "Alert" ? UiRole::Alert :
+                      role == "Subtle" ? UiRole::Subtle : UiRole::Standard);
+    }
+    else return ApplyAdvancedCommon(ctrl, property, value);
+    return UiDesignerApplyResult::AppliedControlState;
 }
 
 static void RegisterAdvancedPreviewAdapters()
@@ -157,6 +188,13 @@ static void RegisterAdvancedPreviewAdapters()
         };
         registry.Register(pick(doc));
     }
+
+    UiDesignerPreviewAdapter ring;
+    ring.id = "runtime:UiProgressRing";
+    ring.create = [] { return One<Ctrl>(new UiProgressRing); };
+    ring.initialize = [](Ctrl& ctrl, const UiDesignerControlSpec& spec) { ctrl.Tip(spec.help); };
+    ring.apply = ApplyDesignerProgressRing;
+    registry.Register(pick(ring));
 
     UiDesignerPreviewAdapter range;
     range.id = "runtime:UiRangeSlider";

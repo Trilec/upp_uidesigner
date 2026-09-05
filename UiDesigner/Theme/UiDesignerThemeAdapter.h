@@ -97,6 +97,7 @@ const UiDesignerThemeAdapter& UiDesignerCheckThemeAdapterInstance();
 const UiDesignerThemeAdapter& UiDesignerRadioThemeAdapterInstance();
 const UiDesignerThemeAdapter& UiDesignerToggleThemeAdapterInstance();
 const UiDesignerThemeAdapter& UiDesignerProgressThemeAdapterInstance();
+const UiDesignerThemeAdapter& UiDesignerProgressRingThemeAdapterInstance();
 const UiDesignerThemeAdapter& UiDesignerSliderThemeAdapterInstance();
 const UiDesignerThemeAdapter& UiDesignerScrollBarThemeAdapterInstance();
 const UiDesignerThemeAdapter& UiDesignerSliderThemeAdapterV2Instance();

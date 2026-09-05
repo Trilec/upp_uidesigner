@@ -71,6 +71,8 @@ enum class UiDesignerRuntimeKind : word {
     UppSplitter,
     UppHScrollBar,
     UppVScrollBar,
+
+    UiProgressRing,
 };
 
 enum class UiDesignerContentHostKind : byte {
@@ -280,6 +282,10 @@ struct UiDesignerControlSpec : Moveable<UiDesignerControlSpec> {
     bool preview = true;
     bool inspector = true;
     bool codegen = true;
+    // Explicit contract for controls supplied by registered production adapters
+    // instead of the built-in runtime-kind switch. Export must not infer this
+    // from Placeholder alone. The adapter integration test verifies the binding.
+    bool adapter_backed_runtime = false;
     bool theme = true;
     bool stock_upp = false;
 

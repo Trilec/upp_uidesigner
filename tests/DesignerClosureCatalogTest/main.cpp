@@ -202,6 +202,12 @@ CONSOLE_APP_MAIN
               ".SetIcon(ICON_DESIGN_WIDGETS_48())") >= 0,
           "generated GroupPanel code preserves the authored header icon");
 
+    Check(session.CommitProperty("icon", "None", error),
+          "GroupPanel authored icon clears through the normal property command");
+    group_project = generator.Generate(session.Document(), "GeneratedGroupWindow");
+    Check(group_project.IsValid() && group_project.generated_source.Find(".ClearIcon()") >= 0,
+          "generated GroupPanel code explicitly clears the authored icon");
+
     Check(String(UI_DESIGNER_VERSION) == "v1.0.1-RC2",
           "Designer closure bumps the visible release candidate version");
 

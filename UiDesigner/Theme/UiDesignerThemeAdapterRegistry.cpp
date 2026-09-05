@@ -25,6 +25,8 @@ bool IsEditRuntimeKind(UiDesignerRuntimeKind kind)
 
 const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(const String& id)
 {
+    if(id == "progress_ring")
+        return &UiDesignerProgressRingThemeAdapterInstance();
     if(id == "list")
         return &UiDesignerListThemeAdapterInstance();
     if(id == "edit")
@@ -62,6 +64,8 @@ const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(const String& id)
 
 const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(UiDesignerRuntimeKind kind)
 {
+    if(kind == UiDesignerRuntimeKind::UiProgressRing)
+        return &UiDesignerProgressRingThemeAdapterInstance();
     if(kind == UiDesignerRuntimeKind::UiList)
         return &UiDesignerListThemeAdapterInstance();
     if(IsEditRuntimeKind(kind))

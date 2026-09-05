@@ -612,8 +612,11 @@ void UiDesignerCodeGenerator::EmitSetup(
     }
     if(spec.FindProperty("icon")) {
         const String icon_name = Effective("icon", spec.FindProperty("icon")->default_value);
-        if(IsButtonFamily(spec.runtime_kind) ||
-           spec.runtime_kind == UiDesignerRuntimeKind::UiLabel)
+        if(spec.runtime_kind == UiDesignerRuntimeKind::UiGroupPanel && icon_name == "None")
+            out << "\t" << member << ".ClearIcon();\n";
+        else if(IsButtonFamily(spec.runtime_kind) ||
+           spec.runtime_kind == UiDesignerRuntimeKind::UiLabel ||
+           spec.runtime_kind == UiDesignerRuntimeKind::UiGroupPanel)
             out << "\t" << member << ".SetIcon(" << EmitCatalogIcon(icon_name) << ");\n";
         else if(spec.runtime_kind == UiDesignerRuntimeKind::UiTitleCard) {
             if(icon_name == "None")
@@ -768,7 +771,18 @@ void UiDesignerCodeGenerator::EmitSetup(
             out << "\t" << member << ".SetData("
                 << EmitValue(Effective("checked", false)) << ");\n";
     }
-    if(spec.FindProperty("value")) {
+    if(spec.runtime_kind == UiDesignerRuntimeKind::UiProgressRing) {
+        out << "\t" << member << ".Set(" << (int)Effective("value", 50)
+            << ", " << (int)Effective("total", 100) << ");\n";
+        out << "\t" << member << ".Percent(" << EmitValue(Effective("show_percent", true)) << ");\n";
+        const String text = AsString(Effective("center_text", String()));
+        if(text.IsEmpty()) out << "\t" << member << ".ClearText();\n";
+        else out << "\t" << member << ".SetText(" << CppString(text) << ");\n";
+        out << "\t" << member << ".AnimateOnShow(" << EmitValue(Effective("animate_on_show", true)) << ");\n";
+        out << "\t" << member << ".SetIntroDuration(" << (int)Effective("intro_duration", 600) << ");\n";
+        out << "\t" << member << ".SetIndeterminateDuration(" << (int)Effective("indeterminate_duration", 1100) << ");\n";
+    }
+    if(spec.FindProperty("value") && spec.runtime_kind != UiDesignerRuntimeKind::UiProgressRing) {
         const Value value = Effective("value", 50);
         if(spec.runtime_kind == UiDesignerRuntimeKind::UiSlider)
             out << "\t" << member << ".SetRange("
@@ -1419,6 +1433,20 @@ UiDesignerGeneratedProject UiDesignerCodeGenerator::Generate(
         const UiDesignerControlSpec* spec = catalog_.Find(node.type);
         if(!spec)
             continue;
+        if(!spec->IsSemanticItem() &&
+           (!spec->preview || spec->preview_adapter_id.IsEmpty() || spec->runtime_cpp_type.IsEmpty())) {
+            result.diagnostics.Add("Unresolved production runtime contract: " + node.type);
+            return result;
+        }
+        if(!spec->codegen) {
+            result.diagnostics.Add("Control is not production-exportable: " + node.type);
+            return result;
+        }
+        if(spec->runtime_kind == UiDesignerRuntimeKind::Placeholder &&
+           !spec->adapter_backed_runtime) {
+            result.diagnostics.Add("Placeholder control has no production runtime contract: " + node.type);
+            return result;
+        }
         if(spec->codegen_adapter_id != "control" &&
            spec->codegen_adapter_id != "spacer" &&
            spec->codegen_adapter_id != "tab_page_deferred" &&

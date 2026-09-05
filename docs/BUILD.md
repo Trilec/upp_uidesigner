@@ -33,7 +33,7 @@ The runner performs:
 9. Theme adapter live-schema coverage;
 10. Dark integration regression;
 11. Theme Builder contract regression;
-12. UiSplitter catalog regression;
+12. UiSplitter catalog regression, DesignerClosureCatalogTest and CurrentUiIntegrationTest;
 13. CLI build and catalog/schema smoke;
 14. MCP build plus newline and Content-Length framing smoke;
 15. canonical UiDesigner GUI build;
@@ -65,6 +65,8 @@ ThemeAdapterCoverageTest
 ThemeDarkIntegrationTest
 ThemeBuilderContractTest
 UiSplitterCatalogTest
+DesignerClosureCatalogTest
+CurrentUiIntegrationTest
 UiDesigner/CLI
 UiDesigner/MCP
 UiDesigner/UiDesigner
@@ -109,3 +111,9 @@ After the automated gate passes, leave the newly built `build\UiDesigner.exe` ru
 - no crash/assert during normal workspace/theme switching.
 
 Only after this gate and the visual audit pass should the release candidate be accepted.
+
+## Current source integration checkpoint
+
+ProgressRing is included in the Foundation generated fixture, together with GroupPanel icon set/clear. The new CurrentUiIntegrationTest verifies its scalar/configuration separation, actual Preview Ctrl, appearance schema and export safety. The existing DesignerClosureCatalogTest is now part of the supervisor runner.
+
+These are source changes awaiting Windows validation, not release acceptance. See ACTIVE_WORK.md for the six remaining control integrations and open data/theme export findings. The runner currently requests Release builds (`-br`); repeat affected packages in Debug on the Windows host before accepting the tranche.

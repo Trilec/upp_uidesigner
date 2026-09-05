@@ -1,4 +1,5 @@
 #include "UiDesignerAdvancedCatalog.h"
+#include <UiDesigner/Theme/UiDesignerThemeAdapter.h>
 
 namespace Upp {
 
@@ -130,6 +131,7 @@ static void FinalizeAdvancedLeaf(UiDesignerControlSpec& spec)
     spec.preview = true;
     spec.inspector = true;
     spec.codegen = true;
+    spec.adapter_backed_runtime = true;
     spec.theme = false;
     AddUiDesignerCommonProperties(spec);
     spec.defaults.Set("visible", true);
@@ -204,6 +206,51 @@ static UiDesignerControlSpec MakeNodeGraphSpec()
     return spec;
 }
 
+static UiDesignerControlSpec MakeProgressRingSpec()
+{
+    UiDesignerControlSpec spec;
+    spec.type_id = "UiProgressRing";
+    spec.display_name = "Progress Ring";
+    spec.category = "Ui Controls";
+    spec.runtime_cpp_type = "UiProgressRing";
+    spec.default_base_name = "progress_ring";
+    spec.help = "Circular progress. Total 0 selects indeterminate mode; empty center text uses the percentage setting.";
+    spec.icon_key = "controls";
+    spec.runtime_kind = UiDesignerRuntimeKind::UiProgressRing;
+    spec.default_size = Size(96, 96);
+    spec.minimum_size = Size(48, 48);
+    FinalizeAdvancedLeaf(spec);
+    spec.data_capability = UiDesignerDataCapability::Scalar;
+    spec.data_adapter_id = "scalar";
+
+    auto Add = [&](UiDesignerPropertySpec p) {
+        p.domain = PropertyEditorDomain::Behaviour;
+        p.impact = PropertyImpactControlState | PropertyImpactPaint | PropertyImpactCode;
+        spec.defaults.Set(p.id, p.default_value);
+        spec.properties.Add(pick(p));
+    };
+    // Total is applied before the scalar value. The runtime owns clamping and
+    // the indeterminate state; there is no second Designer progress model.
+    Add(UiDesignerNumberProperty("total", "Total (0 = indeterminate)", 100,
+                                0, 1000000000, 1, PropertyEditorKind::Integer));
+    Add(UiDesignerNumberProperty("value", "Value", 50,
+                                0, 1000000000, 1, PropertyEditorKind::Integer));
+    Add(UiDesignerBoolProperty("show_percent", "Show percentage", true));
+    UiDesignerPropertySpec text = UiDesignerTextProperty("center_text", "Center text");
+    text.default_value = String();
+    Add(text);
+    Add(UiDesignerBoolProperty("animate_on_show", "Animate on show", true));
+    Add(UiDesignerNumberProperty("intro_duration", "Intro duration (ms)", 600,
+                                1, 60000, 1, PropertyEditorKind::Integer));
+    Add(UiDesignerNumberProperty("indeterminate_duration", "Indeterminate duration (ms)", 1100,
+                                1, 60000, 1, PropertyEditorKind::Integer));
+    spec.theme = true;
+    spec.theme_adapter_id = "progress_ring";
+    if(const UiDesignerThemeAdapter* adapter = UiDesignerGetThemeAdapter(spec))
+        adapter->AddThemeOverrides(spec);
+    return spec;
+}
+
 void RegisterUiDesignerAdvancedCatalog(UiDesignerCatalog& catalog)
 {
     if(UiDesignerControlSpec *tool = MutableSpec(catalog, "UiToolButton"))
@@ -219,6 +266,8 @@ void RegisterUiDesignerAdvancedCatalog(UiDesignerCatalog& catalog)
         ApplyWorkingSizingEditors(
             *const_cast<UiDesignerControlSpec *>(&catalog[i]));
 
+    if(!catalog.Find("UiProgressRing"))
+        catalog.Register(MakeProgressRingSpec());
     if(!catalog.Find("UiRangeSlider"))
         catalog.Register(MakeRangeSliderSpec());
     if(!catalog.Find("UiNodeGraph"))

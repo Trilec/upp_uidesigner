@@ -1,66 +1,49 @@
 # ACTIVE WORK
-Remote GitHub `main` is authoritative. Refresh both repositories before acting; never force-update `main`.
+Remote main is authoritative. Fetch both repositories before work/publish; never force-push.
 
-## SOURCE OF TRUTH
-- Designer: `Trilec/upp_uidesigner`, branch `main`.
-- Reusable controls: `Trilec/upp_Ui`, branch `main`.
-- Windows checkouts: `E:\apps\github\upp_uidesigner`, `E:\apps\github\upp_Ui`.
-- U++: `E:\upp-18468\umk.exe`, assembly `github`, `CLANGx64`.
-- Canonical Designer executable: `E:\apps\github\upp_uidesigner\build\UiDesigner.exe`.
+BASE:
+- UiDesigner: e872e43c1704901fc3499dcaaef8213234d995b2
+- upp_Ui: 408c82c418fb87fb56cce4cac6752dd69add9dcf
 
-## ACTIVE TASK
-Finish the UiDesigner release candidate against the actual current `upp_Ui/main`. Do not start the embedded AI assistant implementation until this gate and Curt's final visual acceptance pass.
+TASK: Current public Ui authoring coverage and release closure audit.
+STATUS: PARTIAL — first coherent source tranche; RC remains blocked by coverage gaps.
+PUBLISHED: This checkpoint; resolve its SHA with git log -1 -- docs/ACTIVE_WORK.md.
+VALIDATION: Source/blob identity and static checks only. Windows/U++ validation pending.
 
-## CURRENT CHECKPOINTS
-- Current reusable source inspected: `8b8f6c3c8c776814c0d9ceda99456c3931840505`.
-- Gary's earlier UiGraph R10A Windows PASS was at `b701107fe02cb9bbd0181519d548c18d2dfcc1e1`; current Ui main has advanced beyond it.
-- Designer release-cleanup source checkpoint before this recovery update: `5d64e991b7a26771716a7a80866185e14a978427`.
-- Theme-ownership implementation ancestor: `389f5abc058ef1c6c1c7e29d59a9141254d7dc75`.
+TOUCHED:
+- Catalog runtime contract; Services advanced catalog; Preview advanced adapters.
+- CodeGen production eligibility and GroupPanel icon parity.
+- Theme ProgressRing adapter and package/registry membership.
+- CurrentUiIntegrationTest; DesignerClosureCatalogTest; FoundationTests generated fixture.
+- RunSupervisorValidation.ps1; docs/BUILD.md; this recovery file.
 
-## COMPLETED SOURCE WORK
-- Theme changes no longer own structural choices such as TitleCard divider visibility, icon/media placement, requested Tab visual, ScrollBar arrow layout or List separator/badge modes.
-- Designer brand explicitly disables its own TitleCard dividers; default TitleCard title divider remains ON and card divider OFF.
-- Compact shell/page rhythm restored to ~4 px; catalog rows keep their local gutter.
-- Project icon/header and Theme Studio sample rebalancing are retained.
-- CLI/MCP final link roots now include `UiDesigner/Theme`; `UiDesigner/Services` remains cycle-free/headless.
-- `RunSupervisorValidation.ps1` now also gates current `upp_Ui` PropertyEditor override-commit and UiTheme structure contracts, then Regression/Foundation, Designer Theme ownership/coverage/Dark/Builder, UiSplitter, CLI/MCP smokes, generated-package proof and canonical GUI build.
-- Root/build documentation no longer treats old migration-era failure counts or CLI/MCP link failure as current acceptance state.
-- Current Designer source audit found no direct use of retired UiGraph shape enum names or old ProgressRing cap API.
+COMPLETED SOURCE:
+- UiProgressRing is an actual Ctrl with scalar value, separate total (0 indeterminate),
+  automatic/custom center text and document-owned animation configuration.
+- ProgressRing appearance overrides use the current cap_roundness API and resolve
+  the reusable control's actual theme. No Designer-local ring renderer.
+- GroupPanel generates SetIcon or ClearIcon consistently with Preview.
+- codegen=false and unresolved production contracts reject C++ export.
+- Explicit adapter_backed_runtime preserves RangeSlider/NodeGraph adapter support;
+  Placeholder by itself is not evidence of a missing runtime.
+- Supervisor gate now runs the existing closure/catalog regression and new integration test.
+- Generated Foundation fixture exercises ProgressRing and GroupPanel set/clear APIs.
 
-## CURRENT UPP_UI INTEGRATION RISK
-Since the previous Designer dependency checkpoint, `upp_Ui` has advanced through UiGraph hierarchy/render/shape work, UiGeometry/UiShapePath/UiShapes, UiChartRing, PropertyEditor fixes and other control updates.
-Source inspection found no obvious direct R10 shape-API break in Designer, but only a real Windows build/test against current main closes this integration risk.
+REMAINING PUBLIC CONTROLS:
+UiRangeSliderEdit, UiDateTime, UiColorMatrix, UiMatrixSelector, UiChartRing, UiGallery.
+No catalog-only stubs have been added for these. Each requires its complete value/data,
+configuration, real Preview, appearance, generation and test contract.
 
-## AI ASSISTANT — POST-RC DIRECTION
-Authority: `docs/AI_ASSISTANT_ARCHITECTURE.md`.
-- Embed AgentFlow directly when the assistant is part of UiDesigner.
-- Reuse `UiDesignerAutomationService` as the canonical application-control/tool surface.
-- Embedded agent calls that service directly; it does not route itself through MCP.
-- MCP remains the transport for an external ChatGPT/Codex/Claude-style host operating UiDesigner.
-- External applications/services later use AgentFlow capability broker / Agent Bridge.
-- Recommended first UI: Assistant icon -> collapsible/resizable bottom drawer, optional modeless pop-out later.
-- Conversation edits must follow revision check -> preview/plan -> typed command -> undo/history -> canonical projection refresh.
-- No second document model, arbitrary JSON mutation, hidden provider session authority or private chain-of-thought UI.
-- DeepSeek Harness is an architectural reference for provider/tool/session capability seams, not a UiDesigner dependency.
+OTHER AUDIT FINDINGS TO CLOSE:
+- List/Tree authored data reaches Preview but is absent from generated setup.
+- Export writes theme.json but generated startup does not apply the ThemeDocument.
+- Existing slider/range and splitter configuration coverage needs further review.
+- Full 49-control coverage matrix and release harness audit are still in progress.
 
-## RELEASE ACCEPTANCE
-Automated:
-1. Refresh both mains; record exact SHAs.
-2. Run `RunSupervisorValidation.ps1`; every deterministic executable must exit 0.
-3. If a failure is mechanical, fix the smallest dependency/include/signature/package issue. Architecture/state/theme issues return to supervisor.
+NEXT ACTION: Publish this tranche, verify remote commit/main containment, then implement
+remaining controls in coherent groups. Do not wait for Windows to continue source work.
 
-Interactive:
-- icon/header/no Designer divider;
-- 4 px shell rhythm and catalog gutter;
-- compact/aligned Theme Studio;
-- Light -> Dark -> Light preserves authored structure;
-- toolbox/hierarchy/canvas add/move/reparent;
-- Inspector preview/commit/reset and Behavior Inspector;
-- save/load/export/user-code preservation;
-- normal workspace/theme switching without crash/assert.
-
-## STATUS
-SOURCE/RELEASE PREP COMPLETE — CURRENT UPP_UI WINDOWS VALIDATION PENDING.
-
-## AFTER PASS
-Record exact validated heads/results, clean stale release-status prose, accept/tag the RC, then begin Assistant A1: direct embedded tool gateway over `UiDesignerAutomationService`.
+WINDOWS: E:\apps\github\upp_uidesigner and E:\apps\github\upp_Ui, main.
+Run RunSupervisorValidation.ps1 with current github.var nests and CLANGx64.
+Record both exact heads, individual build/test results and visible-desktop checks.
+No Windows PASS is claimed here. No AI drawer/provider/AgentFlow runtime work before RC closure.

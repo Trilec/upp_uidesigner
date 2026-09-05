@@ -153,6 +153,21 @@ static bool BuildFixture(UiDesignerSession& session, String& error)
         error = "Unable to bind page action";
         return false;
     }
+    UiDesignerNodeId group_icon = AddThroughDrop(session, "UiGroupPanel", box);
+    if(!group_icon) { error = "Unable to add GroupPanel icon fixture"; return false; }
+    session.Select(group_icon);
+    if(!session.CommitProperty("icon", "ICON_DESIGN_WIDGETS_48", error))
+        return false;
+    UiDesignerNodeId group_clear = AddThroughDrop(session, "UiGroupPanel", box);
+    if(!group_clear) { error = "Unable to add GroupPanel clear fixture"; return false; }
+    UiDesignerNodeId ring = AddThroughDrop(session, "UiProgressRing", box);
+    if(!ring) { error = "Unable to add ProgressRing fixture"; return false; }
+    session.Select(ring);
+    if(!session.CommitProperty("total", 200, error) ||
+       !session.CommitProperty("value", 75, error) ||
+       !session.CommitProperty("animate_on_show", false, error) ||
+       !session.CommitThemeOverride("cap_roundness", 35, error))
+        return false;
     error.Clear();
     return true;
 }
