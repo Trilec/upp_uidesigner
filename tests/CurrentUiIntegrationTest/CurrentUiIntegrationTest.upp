@@ -12,4 +12,5 @@ mainconfig
     "CONSOLE" = "1";
 
 file
-    main.cpp;
+    main.cpp,
+    ModelDataFixture.h;

@@ -298,6 +298,10 @@ struct UiDesignerControlSpec : Moveable<UiDesignerControlSpec> {
     }
 };
 
+// Theme installs the appearance-schema decorator at application startup.
+// Base catalog producers only declare theme_adapter_id and do not link Theme.
+void UiDesignerSetThemeSchemaDecorator(Function<void(UiDesignerControlSpec&)> decorator);
+
 struct UiDesignerPreset {
     String id;
     String display_name;

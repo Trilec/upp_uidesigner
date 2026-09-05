@@ -291,10 +291,23 @@ const UiDesignerEventSpec* UiDesignerControlSpec::FindEvent(
     return nullptr;
 }
 
+static Function<void(UiDesignerControlSpec&)>& ThemeSchemaDecorator()
+{
+    static Function<void(UiDesignerControlSpec&)> decorator;
+    return decorator;
+}
+
+void UiDesignerSetThemeSchemaDecorator(Function<void(UiDesignerControlSpec&)> decorator)
+{
+    ThemeSchemaDecorator() = pick(decorator);
+}
+
 void UiDesignerCatalog::Register(UiDesignerControlSpec spec)
 {
     if(Find(spec.type_id))
         return;
+    if(ThemeSchemaDecorator())
+        ThemeSchemaDecorator()(spec);
     OrganizeUiDesignerControlSpec(spec, controls_);
     controls_.Add(pick(spec));
 }

@@ -1,5 +1,7 @@
+#include "ModelDataFixture.h"
 #include <Core/Core.h>
 #include <Ui/UiProgressRing.h>
+#include <Ui/UiRangeSliderEdit.h>
 #include <Ui/UiTheme.h>
 #include <UiDesigner/Services/UiDesignerSession.h>
 #include <UiDesigner/Preview/UiDesignerPreview.h>
@@ -86,8 +88,90 @@ CONSOLE_APP_MAIN
     session.NewDocument("blank");
     Check(session.AddControl("UiRangeSlider") != 0 && session.AddControl("UiNodeGraph") != 0,
           "adapter-backed controls author successfully");
+    for(const char* type : {"UiRangeSlider", "UiNodeGraph"}) {
+        const auto* adapter_spec = session.Catalog().Find(type);
+        Check(adapter_spec && UiDesignerPreviewFactory::Adapter(*adapter_spec),
+              "production adapter resolves through real registry");
+        if(adapter_spec) {
+            auto runtime = UiDesignerPreviewFactory::Create(*adapter_spec);
+            Check(runtime && (String(type) == "UiRangeSlider"
+                  ? dynamic_cast<UiRangeSlider*>(runtime.Get()) != nullptr
+                  : dynamic_cast<UiNodeGraph*>(runtime.Get()) != nullptr),
+                  "production adapter constructs the authoritative Ui Ctrl");
+        }
+    }
     project = generator.Generate(session.Document(), "AdapterFixture");
     Check(project.IsValid(), "registered RangeSlider and NodeGraph remain exportable");
+
+    session.NewDocument("blank");
+    auto range_id = session.AddControl("UiRangeSliderEdit");
+    Check(range_id != 0, "RangeSliderEdit authors");
+    if(!range_id) { SetExitCode(1); return; }
+    const auto* range_spec = session.Catalog().Find("UiRangeSliderEdit");
+    Check(range_spec && range_spec->codegen && range_spec->adapter_backed_runtime &&
+          !range_spec->FindProperty("role") && range_spec->theme_overrides.IsEmpty(),
+          "composition has an explicit adapter contract and no invented style family");
+    Check(session.CommitProperty("range", PropertyEditorMakeVector(-100.0, 500.0), error) &&
+          session.CommitProperty("step", 0.5, error) &&
+          session.CommitProperty("precision", 2, error) &&
+          session.CommitProperty("value", PropertyEditorMakeVector(-20.5, 120.5), error) &&
+          session.CommitProperty("direction", "V", error) &&
+          session.CommitProperty("field_width", 88, error) &&
+          session.CommitProperty("gap", 9, error) &&
+          session.CommitProperty("inset", 4, error), "range value and configuration commit separately");
+    Check(UiDesignerBuildScalarDataPropertyModel(*range_spec, *session.Document().Find(range_id), data) &&
+          (double)data.Find("value")->minimum == -100 &&
+          (double)data.Find("value")->maximum == 500 &&
+          data.Find("value")->decimals == 2,
+          "Data editor uses authored domain and precision");
+    Check(session.InspectorModel().Find("value") &&
+          (double)session.InspectorModel().Find("value")->maximum == 500 &&
+          session.InspectorModel().Find("value")->decimals == 2,
+          "Inspector rebuild honors configuration schema impact");
+    canvas.RebuildDocument();
+    auto* range_runtime = dynamic_cast<UiRangeSliderEdit*>(canvas.FindRuntime(range_id));
+    Check(range_runtime && range_runtime->GetLowerValue() == -20.5 &&
+          range_runtime->GetUpperValue() == 120.5 && range_runtime->GetMin() == -100 &&
+          range_runtime->GetMax() == 500 && range_runtime->GetStep() == 0.5 &&
+          range_runtime->GetDirection() == UiDirection::V &&
+          range_runtime->GetFieldWidth() == DPI(88) && range_runtime->GetGap() == DPI(9) &&
+          range_runtime->GetInset() == DPI(4), "real range composition preserves complete configuration");
+    project = generator.Generate(session.Document(), "RangeEditFixture");
+    Check(project.IsValid() && project.generated_header.Find("UiRangeSliderEdit") >= 0 &&
+          project.generated_source.Find(".SetRange(-100, 500)") >= 0 &&
+          project.generated_source.Find(".SetStep(0.5)") >= 0 &&
+          project.generated_source.Find(".SetDirection(UiDirection::V)") >= 0 &&
+          project.generated_source.Find(".SetFieldWidth(DPI(88))") >= 0 &&
+          project.generated_source.Find(".SetPrecision(2)") >= 0,
+          "generated range setup uses current composition API");
+    Check(UiDesignerDeserialize(UiDesignerSerialize(session.Document(), true), loaded, error) &&
+          loaded.Find(range_id) && loaded.Find(range_id)->GetProperty("value").Is<ValueArray>() &&
+          ((ValueArray)loaded.Find(range_id)->GetProperty("value")).GetCount() == 2,
+          "range remains one two-element value across serialization");
+
+    session.NewDocument("blank");
+    UiDesignerNodeId model_box = session.AddControl("UiBoxLayout"), list_id, tree_id;
+    Check(AddAuthoredModelFixture(session, model_box, list_id, tree_id),
+          "authored list and nested tree fixture commits through Commands");
+    canvas.RebuildDocument();
+    auto* list_runtime = dynamic_cast<UiList*>(canvas.FindRuntime(list_id));
+    auto* tree_runtime = dynamic_cast<UiTree*>(canvas.FindRuntime(tree_id));
+    Check(list_runtime && list_runtime->Model().GetCount() == 1 &&
+          list_runtime->Model().Get(0).description == "Detail" &&
+          list_runtime->Model().Get(0).right_text == "Badge" &&
+          list_runtime->Model().Get(0).checked && !list_runtime->Model().Get(0).enabled,
+          "real Preview preserves list item fields");
+    Check(tree_runtime && tree_runtime->Model().Get(tree_runtime->Model().Root()).text == "Authored root",
+          "real Preview preserves authored tree root");
+    project = generator.Generate(session.Document(), "ModelFixture");
+    Check(project.IsValid() && project.generated_source.Find("Authored list row") >= 0 &&
+          project.generated_source.Find("item.description = \"Detail\"") >= 0 &&
+          project.generated_source.Find("item.right_text = \"Badge\"") >= 0 &&
+          project.generated_source.Find("Color(12, 34, 56)") >= 0 &&
+          project.generated_source.Find("model.Set(model.Root(), UiModelItem(\"Authored root\"") >= 0 &&
+          project.generated_source.Find("Nested authored leaf") >= 0 &&
+          project.generated_source.Find("model.AddChild(child_1, item)") >= 0,
+          "generated models preserve authored items, hierarchy and typed nested payloads");
 
     UiDesignerControlSpec placeholder;
     placeholder.type_id = "UnimplementedFixture";

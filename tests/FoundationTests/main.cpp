@@ -1,3 +1,4 @@
+#include "../CurrentUiIntegrationTest/ModelDataFixture.h"
 #include <Core/Core.h>
 #include <UiDesigner/Services/UiDesignerServices.h>
 
@@ -168,6 +169,26 @@ static bool BuildFixture(UiDesignerSession& session, String& error)
        !session.CommitProperty("animate_on_show", false, error) ||
        !session.CommitThemeOverride("cap_roundness", 35, error))
         return false;
+    UiDesignerNodeId range_edit = AddThroughDrop(session, "UiRangeSliderEdit", box);
+    if(!range_edit) { error = "Unable to add range edit fixture"; return false; }
+    session.Select(range_edit);
+    if(!session.CommitProperty("range", PropertyEditorMakeVector(-100.0, 500.0), error) ||
+       !session.CommitProperty("step", 0.5, error) ||
+       !session.CommitProperty("value", PropertyEditorMakeVector(-20.5, 120.5), error) ||
+       !session.CommitProperty("direction", "V", error) ||
+       !session.CommitProperty("precision", 2, error))
+        return false;
+    UiDesignerNodeId list, tree;
+    if(!AddAuthoredModelFixture(session, box, list, tree)) {
+        error = "Unable to add authored List/Tree fixture"; return false;
+    }
+    if(!BindAction(session, range_edit, UiDesignerActionType::CallNamedHandler,
+                   0, Value(), String(), "OnRangeCommitted")) return false;
+    UiDesignerActionBinding changing;
+    changing.event_id = "WhenChanging";
+    changing.action = UiDesignerActionType::CallNamedHandler;
+    changing.handler_name = "OnRangeChanging";
+    if(!session.Commands().SetActionBinding(range_edit, changing)) return false;
     error.Clear();
     return true;
 }
@@ -323,8 +344,8 @@ static void RunTests(FoundationTester& t)
     t.Check((int)UiDesignerMapValue(absolute_child.add_defaults, "x", -1) == 40 &&
                 (int)UiDesignerMapValue(absolute_child.add_defaults, "y", -1) == 32,
             "AbsoluteLayout drop stores snapped local X/Y");
-    t.Check((int)UiDesignerMapValue(absolute_child.add_defaults, "width", -1) == 190 &&
-                (int)UiDesignerMapValue(absolute_child.add_defaults, "height", -1) == 34,
+    t.Check((int)UiDesignerMapValue(absolute_child.add_defaults, "width", -1) == 80 &&
+                (int)UiDesignerMapValue(absolute_child.add_defaults, "height", -1) == 25,
             "AbsoluteLayout drop preserves the child size");
     UiDesignerNodeId absolute_button = 0;
     t.Check(session.ExecuteDrop(absolute_child, &absolute_button, error),
@@ -364,8 +385,8 @@ static void RunTests(FoundationTester& t)
     t.Check(roundtrip_absolute_button &&
                 (int)roundtrip_absolute_button->GetProperty("x", -1) == 40 &&
                 (int)roundtrip_absolute_button->GetProperty("y", -1) == 32 &&
-                (int)roundtrip_absolute_button->GetProperty("width", -1) == 190 &&
-                (int)roundtrip_absolute_button->GetProperty("height", -1) == 34,
+                (int)roundtrip_absolute_button->GetProperty("width", -1) == 80 &&
+                (int)roundtrip_absolute_button->GetProperty("height", -1) == 25,
             "AbsoluteLayout child rectangle survives serialization");
 
     UiDesignerSession normalized_theme;
@@ -412,7 +433,7 @@ static void RunTests(FoundationTester& t)
     t.Check(project.generated_source.Find(
                 ".Add(button_n", 0) >= 0 &&
             project.generated_source.Find(
-                "DPI(40), DPI(32), DPI(190), DPI(34)") >= 0,
+                "DPI(40), DPI(32), DPI(80), DPI(25)") >= 0,
             "AbsoluteLayout emits exact DPI-scaled child placement");
     t.Check(project.generated_source.Find("Break(IDOK)") >= 0,
             "Accept action emits compile-safe dialog break");

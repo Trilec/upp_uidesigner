@@ -1,6 +1,7 @@
 #include "UiDesignerPreview.h"
 #include <Ui/UiIcons.h>
 #include <Ui/UiProgressRing.h>
+#include <Ui/UiRangeSliderEdit.h>
 
 namespace Upp {
 
@@ -50,6 +51,30 @@ static UiDesignerApplyResult ApplyDesignerRangeSlider(
         }
     }
     return ApplyAdvancedCommon(ctrl, property, value);
+}
+
+static UiDesignerApplyResult ApplyDesignerRangeSliderEdit(
+    Ctrl& ctrl, const UiDesignerControlSpec&, const String& property, const Value& value)
+{
+    auto* range = dynamic_cast<UiRangeSliderEdit*>(&ctrl);
+    if(!range) return UiDesignerApplyResult::Rejected;
+    if(property == "range") {
+        Vector<double> pair = PropertyEditorReadVector(value, 2);
+        range->SetRange(pair[0], pair[1]);
+        return UiDesignerApplyResult::RequiresSubtreeRebuild;
+    }
+    if(property == "step") {
+        range->SetStep((double)value);
+        return UiDesignerApplyResult::RequiresSubtreeRebuild;
+    }
+    if(property == "value") { range->SetData(value); return UiDesignerApplyResult::AppliedControlState; }
+    if(property == "direction") range->SetDirection(AsString(value) == "V" ? UiDirection::V : UiDirection::H);
+    else if(property == "field_width") range->SetFieldWidth(DPI((int)value));
+    else if(property == "gap") range->SetGap(DPI((int)value));
+    else if(property == "inset") range->SetInset(DPI((int)value));
+    else if(property == "precision") range->SetPrecision((int)value);
+    else return ApplyAdvancedCommon(ctrl, property, value);
+    return UiDesignerApplyResult::AppliedLocalLayout;
 }
 
 static One<Ctrl> CreateDesignerNodeGraph()
@@ -204,6 +229,13 @@ static void RegisterAdvancedPreviewAdapters()
     };
     range.apply = ApplyDesignerRangeSlider;
     registry.Register(pick(range));
+
+    UiDesignerPreviewAdapter range_edit;
+    range_edit.id = "runtime:UiRangeSliderEdit";
+    range_edit.create = [] { return One<Ctrl>(new UiRangeSliderEdit); };
+    range_edit.initialize = [](Ctrl& ctrl, const UiDesignerControlSpec& spec) { ctrl.Tip(spec.help); };
+    range_edit.apply = ApplyDesignerRangeSliderEdit;
+    registry.Register(pick(range_edit));
 
     UiDesignerPreviewAdapter graph;
     graph.id = "runtime:UiNodeGraph";

@@ -167,6 +167,20 @@ String UiDesignerCodeGenerator::EmitValue(const Value& value) const
         return Format("%.12g", (double)value);
     if(value.Is<Color>())
         return EmitColor((Color)value);
+    if(value.Is<ValueArray>()) {
+        String code = "([] { ValueArray value; ";
+        for(const Value& item : (ValueArray)value)
+            code << "value.Add(" << EmitValue(item) << "); ";
+        return code + "return Value(value); }())";
+    }
+    if(value.Is<ValueMap>()) {
+        const ValueMap map = value;
+        String code = "([] { ValueMap value; ";
+        for(int i = 0; i < map.GetCount(); i++)
+            code << "value.Set(" << EmitValue(map.GetKey(i)) << ", "
+                 << EmitValue(map.GetValue(i)) << "); ";
+        return code + "return Value(value); }())";
+    }
     return "ParseJSON(" + CppString(AsJSON(value, false)) + ")";
 }
 
@@ -781,6 +795,16 @@ void UiDesignerCodeGenerator::EmitSetup(
         out << "\t" << member << ".AnimateOnShow(" << EmitValue(Effective("animate_on_show", true)) << ");\n";
         out << "\t" << member << ".SetIntroDuration(" << (int)Effective("intro_duration", 600) << ");\n";
         out << "\t" << member << ".SetIndeterminateDuration(" << (int)Effective("indeterminate_duration", 1100) << ");\n";
+    }
+    if(spec.type_id == "UiRangeSliderEdit") {
+        Vector<double> domain = PropertyEditorReadVector(Effective("range", PropertyEditorMakeVector(0.0, 100.0)), 2);
+        out << "\t" << member << ".SetRange(" << EmitValue(domain[0]) << ", " << EmitValue(domain[1]) << ");\n";
+        out << "\t" << member << ".SetStep(" << EmitValue(Effective("step", 1.0)) << ");\n";
+        out << "\t" << member << ".SetDirection(UiDirection::" << (AsString(Effective("direction", "H")) == "V" ? "V" : "H") << ");\n";
+        out << "\t" << member << ".SetFieldWidth(DPI(" << (int)Effective("field_width", 78) << "));\n";
+        out << "\t" << member << ".SetGap(DPI(" << (int)Effective("gap", 6) << "));\n";
+        out << "\t" << member << ".SetInset(DPI(" << (int)Effective("inset", 0) << "));\n";
+        out << "\t" << member << ".SetPrecision(" << (int)Effective("precision", 3) << ");\n";
     }
     if(spec.FindProperty("value") && spec.runtime_kind != UiDesignerRuntimeKind::UiProgressRing) {
         const Value value = Effective("value", 50);
@@ -1472,7 +1496,7 @@ UiDesignerGeneratedProject UiDesignerCodeGenerator::Generate(
     String gh;
     gh << "#ifndef " << guard << "\n#define " << guard << "\n\n"
        << "#include <CtrlLib/CtrlLib.h>\n#include <Ui/Ui.h>\n"
-       << "#include <Ui/UiColorPicker/UiColorPicker.h>\n\n"
+       << "#include <Ui/UiColorPicker/UiColorPicker.h>\n#include <Ui/UiDataModels.h>\n\n"
        << NamespaceOpen(options.namespace_name)
        << "class " << base << " : public TopWindow {\n"
        << "public:\n\ttypedef " << base << " CLASSNAME;\n"
@@ -1511,8 +1535,10 @@ UiDesignerGeneratedProject UiDesignerCodeGenerator::Generate(
         if(node.id == document.GetRootId())
             continue;
         const UiDesignerControlSpec* spec = catalog_.Find(node.type);
-        if(spec)
+        if(spec) {
             EmitSetup(gs, node, *spec);
+            EmitModelData(gs, node);
+        }
     }
     gs << "}\n\nvoid " << base << "::BuildLayout()\n{\n";
     if(const UiDesignerNode* root = document.Find(document.GetRootId()))

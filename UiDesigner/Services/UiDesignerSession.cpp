@@ -66,7 +66,8 @@ void UiDesignerSession::WireEvents()
     document_.WhenChanged = [=](const UiDesignerChangeSet& changes) {
         if(projection_)
             projection_->ApplyChangeSet(changes);
-        if(changes.schema_changed || !changes.structure.IsEmpty())
+        if(changes.schema_changed || !changes.structure.IsEmpty() ||
+           HasUiDesignerImpact(changes.CombinedImpact(), UiDesignerImpactInspectorSchema))
             RebuildInspector();
         else if(HasNormalPropertyChange(changes))
             SyncInspectorValues(changes);
@@ -740,6 +741,8 @@ void UiDesignerSession::RebuildInspector()
             }
         }
         property.AddTo(inspector_model_, value, mixed);
+        if(PropertyEditorItem* item = inspector_model_.Find(property.id))
+            UiDesignerConfigureValueEditor(*control, *primary, *item);
     }
     inspector_model_.StructureChanged();
     WhenInspectorChanged();

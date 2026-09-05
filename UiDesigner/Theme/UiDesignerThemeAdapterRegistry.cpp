@@ -115,4 +115,18 @@ bool UiDesignerThemeAdapterSupports(const UiDesignerControlSpec& spec)
     return adapter && adapter->Supports(spec.runtime_kind);
 }
 
+namespace {
+struct RegisterThemeSchemaDecorator {
+    RegisterThemeSchemaDecorator()
+    {
+        UiDesignerSetThemeSchemaDecorator([](UiDesignerControlSpec& spec) {
+            if(spec.theme && spec.theme_overrides.IsEmpty())
+                if(const auto* adapter = UiDesignerGetThemeAdapter(spec))
+                    adapter->AddThemeOverrides(spec);
+        });
+    }
+};
+RegisterThemeSchemaDecorator s_theme_schema_decorator;
+}
+
 } // namespace Upp

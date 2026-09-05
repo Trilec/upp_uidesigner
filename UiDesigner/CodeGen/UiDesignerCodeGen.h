@@ -87,6 +87,7 @@ private:
                           const String& suffix = String()) const;
     void EmitSetup(String& out, const UiDesignerNode& node,
                    const UiDesignerControlSpec& spec) const;
+    void EmitModelData(String& out, const UiDesignerNode& node) const;
     void EmitChildren(String& out, const UiDesignerDocument& document,
                       const UiDesignerNode& node) const;
     void EmitSpacer(String& out, const UiDesignerNode& spacer,

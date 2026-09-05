@@ -7,4 +7,5 @@ uses
 file
     UiDesignerCodeGen.h,
     UiDesignerCodeGen.cpp,
+    UiDesignerModelDataCodeGen.cpp,
     README.md;

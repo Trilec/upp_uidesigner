@@ -17,6 +17,12 @@ bool UiDesignerBuildScalarDataPropertyModel(
     const UiDesignerControlSpec& spec, const UiDesignerNode& node,
     PropertyEditorModel& model);
 
+// Resolve an editor's domain from canonical configuration, shared by Inspector
+// and Data. No second value or range is stored in the projection.
+void UiDesignerConfigureValueEditor(const UiDesignerControlSpec& spec,
+                                     const UiDesignerNode& node,
+                                     PropertyEditorItem& item);
+
 class UiDesignerApplicationCatalog : public UiDesignerCatalog {
 public:
     UiDesignerApplicationCatalog();

@@ -1,5 +1,4 @@
 #include "UiDesignerAdvancedCatalog.h"
-#include <UiDesigner/Theme/UiDesignerThemeAdapter.h>
 
 namespace Upp {
 
@@ -111,6 +110,8 @@ bool UiDesignerBuildScalarDataPropertyModel(
     UiDesignerPropertySpec projected = *value;
     projected.group = "Scalar";
     projected.AddTo(model, node.GetProperty("value", value->default_value), false);
+    if(PropertyEditorItem* item = model.Find("value"))
+        UiDesignerConfigureValueEditor(spec, node, *item);
     model.SetGroupSubtitle(
         "Scalar", spec.display_name +
             " · one authored value shared by Data, Preview and code generation");
@@ -188,6 +189,80 @@ static UiDesignerControlSpec MakeRangeSliderSpec()
     return spec;
 }
 
+static UiDesignerControlSpec MakeRangeSliderEditSpec()
+{
+    UiDesignerControlSpec spec;
+    spec.type_id = "UiRangeSliderEdit";
+    spec.display_name = "Range Slider Edit";
+    spec.category = "Advanced";
+    spec.runtime_cpp_type = "UiRangeSliderEdit";
+    spec.default_base_name = "range_slider_edit";
+    spec.help = "One lower/upper value pair, with direct numeric entry. Child controls supply their reusable themes; this composition has no independent style family.";
+    spec.default_size = Size(360, 32);
+    spec.minimum_size = Size(180, 28);
+    FinalizeAdvancedLeaf(spec);
+    // The composition exposes no SetRole or independent Style. Do not offer
+    // a role property which Preview and exported runtime would silently ignore.
+    for(int i = spec.properties.GetCount() - 1; i >= 0; --i)
+        if(spec.properties[i].id == "role") spec.properties.Remove(i);
+    int role = spec.defaults.Find("role");
+    if(role >= 0) spec.defaults.Remove(role);
+    spec.data_capability = UiDesignerDataCapability::Scalar;
+    spec.data_adapter_id = "scalar";
+    auto Add = [&](UiDesignerPropertySpec p) {
+        p.group = "Range";
+        p.domain = PropertyEditorDomain::Behaviour;
+        p.impact = PropertyImpactControlState | PropertyImpactLocalLayout |
+                   PropertyImpactInspectorSchema | PropertyImpactCode;
+        spec.defaults.Set(p.id, p.default_value);
+        spec.properties.Add(pick(p));
+    };
+    UiDesignerPropertySpec domain;
+    domain.id = "range"; domain.label = "Domain (min, max)";
+    domain.group = "Configuration"; domain.kind = PropertyEditorKind::Vector2;
+    domain.default_value = PropertyEditorMakeVector(0.0, 100.0);
+    domain.help = "Runtime normalizes the domain in one SetRange call before applying the value pair.";
+    Add(domain);
+    Add(UiDesignerNumberProperty("step", "Step", 1.0, 0, 1000000000, 0.1, PropertyEditorKind::Double));
+    UiDesignerPropertySpec direction;
+    direction.id = "direction"; direction.label = "Direction";
+    direction.kind = PropertyEditorKind::Choice; direction.default_value = "H";
+    direction.choices.Add(PropertyEditorChoice("H", "Horizontal"));
+    direction.choices.Add(PropertyEditorChoice("V", "Vertical"));
+    Add(direction);
+    Add(UiDesignerNumberProperty("field_width", "Field width", 78, 40, 4096, 1, PropertyEditorKind::Integer));
+    Add(UiDesignerNumberProperty("gap", "Field gap", 6, 0, 4096, 1, PropertyEditorKind::Integer));
+    Add(UiDesignerNumberProperty("inset", "Inset", 0, 0, 4096, 1, PropertyEditorKind::Integer));
+    Add(UiDesignerNumberProperty("precision", "Precision", 3, 0, 12, 1, PropertyEditorKind::Integer));
+    UiDesignerPropertySpec pair;
+    pair.id = "value"; pair.label = "Lower / upper"; pair.group = "Value";
+    pair.kind = PropertyEditorKind::Custom; pair.custom_editor = "property.range.double";
+    pair.editor_variant = "range"; pair.default_value = PropertyEditorMakeVector(25.0, 75.0);
+    pair.minimum = 0.0; pair.maximum = 100.0; pair.step = 1.0;
+    pair.row_span = 1; pair.expanded_row_span = 2;
+    // Last: domain and precision must be configured before the actual value.
+    Add(pair);
+    for(const char* event : {"WhenChanging", "WhenAction"}) {
+        UiDesignerEventSpec& e = spec.events.Add();
+        e.id = event; e.label = event;
+    }
+    spec.capabilities |= UiDesignerCapabilityAcceptActions;
+    return spec;
+}
+
+void UiDesignerConfigureValueEditor(const UiDesignerControlSpec& spec,
+                                     const UiDesignerNode& node,
+                                     PropertyEditorItem& item)
+{
+    if(spec.type_id != "UiRangeSliderEdit" || item.id != "value") return;
+    Vector<double> domain = PropertyEditorReadVector(
+        node.GetProperty("range", PropertyEditorMakeVector(0.0, 100.0)), 2);
+    item.minimum = min(domain[0], domain[1]);
+    item.maximum = max(domain[0], domain[1]);
+    item.step = node.GetProperty("step", 1.0);
+    item.decimals = (int)node.GetProperty("precision", 3);
+}
+
 static UiDesignerControlSpec MakeNodeGraphSpec()
 {
     UiDesignerControlSpec spec;
@@ -246,8 +321,7 @@ static UiDesignerControlSpec MakeProgressRingSpec()
                                 1, 60000, 1, PropertyEditorKind::Integer));
     spec.theme = true;
     spec.theme_adapter_id = "progress_ring";
-    if(const UiDesignerThemeAdapter* adapter = UiDesignerGetThemeAdapter(spec))
-        adapter->AddThemeOverrides(spec);
+    // The linked Theme implementation decorates this base schema at catalog registration.
     return spec;
 }
 
@@ -270,6 +344,8 @@ void RegisterUiDesignerAdvancedCatalog(UiDesignerCatalog& catalog)
         catalog.Register(MakeProgressRingSpec());
     if(!catalog.Find("UiRangeSlider"))
         catalog.Register(MakeRangeSliderSpec());
+    if(!catalog.Find("UiRangeSliderEdit"))
+        catalog.Register(MakeRangeSliderEditSpec());
     if(!catalog.Find("UiNodeGraph"))
         catalog.Register(MakeNodeGraphSpec());
     if(!catalog.FindPreset("Demo"))
