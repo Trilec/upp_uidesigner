@@ -55,11 +55,11 @@ Build-Package 'Utilities/PropertyEditorTests' $propertyTests $true
 Build-Package 'Tests' $designerTests $true
 Build-Package 'RegressionTests' $regressionTests $true
 Build-Package 'FoundationTests' $foundationTests
-Build-Package 'tests/ThemeStructureOwnershipTest' $themeStructure
-Build-Package 'tests/ThemeAdapterCoverageTest' $themeCoverage
-Build-Package 'tests/ThemeDarkIntegrationTest' $themeDark
-Build-Package 'tests/ThemeBuilderContractTest' $themeBuilder
-Build-Package 'tests/UiSplitterCatalogTest' $splitterCatalog
+Build-Package 'ThemeStructureOwnershipTest' $themeStructure
+Build-Package 'ThemeAdapterCoverageTest' $themeCoverage
+Build-Package 'ThemeDarkIntegrationTest' $themeDark
+Build-Package 'ThemeBuilderContractTest' $themeBuilder
+Build-Package 'UiSplitterCatalogTest' $splitterCatalog
 Build-Package 'UiDesigner/CLI' $cli
 Build-Package 'UiDesigner/MCP' $mcp
 Build-Package 'UiDesigner/UiDesigner' $app $true
