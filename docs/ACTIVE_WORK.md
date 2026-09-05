@@ -14,7 +14,7 @@ Finish the UiDesigner release candidate against the actual current `upp_Ui/main`
 ## CURRENT CHECKPOINTS
 - Current reusable source inspected: `8b8f6c3c8c776814c0d9ceda99456c3931840505`.
 - Gary's earlier UiGraph R10A Windows PASS was at `b701107fe02cb9bbd0181519d548c18d2dfcc1e1`; current Ui main has advanced beyond it.
-- Designer release-cleanup source checkpoint before this recovery update: `fb818f054b807496b91a7339d33cfe146de07443`.
+- Designer release-cleanup source checkpoint before this recovery update: `5d64e991b7a26771716a7a80866185e14a978427`.
 - Theme-ownership implementation ancestor: `389f5abc058ef1c6c1c7e29d59a9141254d7dc75`.
 
 ## COMPLETED SOURCE WORK
@@ -23,7 +23,7 @@ Finish the UiDesigner release candidate against the actual current `upp_Ui/main`
 - Compact shell/page rhythm restored to ~4 px; catalog rows keep their local gutter.
 - Project icon/header and Theme Studio sample rebalancing are retained.
 - CLI/MCP final link roots now include `UiDesigner/Theme`; `UiDesigner/Services` remains cycle-free/headless.
-- `RunSupervisorValidation.ps1` now includes Regression/Foundation plus Theme ownership, Theme coverage, Dark, Theme Builder and UiSplitter gates, CLI/MCP smokes, generated-package proof and canonical GUI build.
+- `RunSupervisorValidation.ps1` now also gates current `upp_Ui` PropertyEditor override-commit and UiTheme structure contracts, then Regression/Foundation, Designer Theme ownership/coverage/Dark/Builder, UiSplitter, CLI/MCP smokes, generated-package proof and canonical GUI build.
 - Root/build documentation no longer treats old migration-era failure counts or CLI/MCP link failure as current acceptance state.
 - Current Designer source audit found no direct use of retired UiGraph shape enum names or old ProgressRing cap API.
 
