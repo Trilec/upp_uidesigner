@@ -20,3 +20,12 @@ on the selected representative control while authoring.
 Controls without a stable Designer Theme adapter remain visual context only; do not invent a
 Theme Studio-only property model for them. Add or extend the real adapter first if such a
 control is to become editable here.
+
+
+## Designer Preview and generated applications
+
+Theme Studio style recipes now cross the real application boundary. The Designer canvas inherits the recipe selected by appearance, control/panel domain, catalog type and semantic role, then layers active per-control overrides on top.
+
+Complete-package and component export use the same recipe resolver. Export flattens inherited recipes into generated C++ style setup while preserving the original Designer document in `design.json`. `studio_preview` remains sample-only.
+
+Generated C++ applies the compiled `UiTheme` preset/mode before any control style is resolved. `theme.json` is an optional source/authoring artifact; the executable does not load it and therefore has no process-working-directory dependency.

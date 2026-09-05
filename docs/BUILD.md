@@ -127,3 +127,26 @@ The existing Catalog/CodeGen/Session Theme link seam still requires executable r
 to link Theme; new advanced catalog specs receive Theme decoration through a
 Catalog-owned callback installed by Theme, without a Services source dependency.
 Exported ThemeDocument application is still an open release blocker.
+
+
+## Exported ThemeDocument contract
+
+Complete-package and component export compile the committed ThemeDocument into generated C++:
+
+1. `UiTheme::Set(preset, mode)` runs at the start of `BuildGeneratedUi()`, before controls resolve styles.
+2. The Theme Studio recipe for the current appearance/domain/type/role is inherited by each control.
+3. An active per-control Theme override wins over that recipe; a disabled/reset local override inherits the recipe.
+4. `studio_preview` is sample-only and is not emitted.
+5. `design.json` remains the canonical unflattened Designer document.
+6. `theme.json` is optional source metadata. Generated runtime code never searches the working directory for it, so missing/invalid runtime files cannot change the compiled appearance.
+
+Component-only exports use the same generated `BuildGeneratedUi()` initialization and deliberately omit the package entry point. The embedding application must link `Ui`, as before; it does not need UiDesigner packages.
+
+Focused Windows Debug proof:
+
+```powershell
+E:\upp-18468\umk.exe github "ExportedThemeContractTest" CLANGx64 -b "E:\apps\github\upp_uidesigner\build\UiDesignerExportedThemeContractTestDebug.exe"
+E:\apps\github\upp_uidesigner\build\UiDesignerExportedThemeContractTestDebug.exe
+```
+
+The normal supervisor gate runs the same package in its release build, and the Foundation generated-package smoke compiles/launches a visibly non-default Pill/Dark fixture.
