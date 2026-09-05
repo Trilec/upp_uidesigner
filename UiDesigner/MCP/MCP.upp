@@ -2,7 +2,8 @@ description "UiDesigner stdio MCP/JSON-RPC host";
 
 uses
     Core,
-    UiDesigner/Services;
+    UiDesigner/Services,
+    UiDesigner/Theme;
 
 mainconfig
     "CONSOLE" = "1";
