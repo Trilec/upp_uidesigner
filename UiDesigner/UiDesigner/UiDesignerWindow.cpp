@@ -1328,6 +1328,7 @@ void UiDesignerWindow::ApplyThemeToShell()
     preview_scroll_.SetCustomStyle(UiDesignerPreviewStyle());
     gallery_scroll_.SetCustomStyle(UiTheme::ResolveScrollPanel(UiRole::Subtle));
     theme_gallery_pill_.ApplyTheme(theme);
+    preview_canvas_.SetRuntimeTheme(theme);
     preview_canvas_.SetAccent(theme.accent);
     theme_gallery_.SetThemeDocument(&session_.Theme());
     RefreshLayout(); Refresh();

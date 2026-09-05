@@ -1513,6 +1513,24 @@ void UiDesignerPreviewCanvas::Bind(
 void UiDesignerPreviewCanvas::SetCatalog(const UiDesignerCatalog *catalog) { catalog_ = catalog; }
 void UiDesignerPreviewCanvas::SetDocument(const UiDesignerDocument *document) { document_ = document; }
 void UiDesignerPreviewCanvas::SetOverlay(const UiDesignerTransientOverlay *overlay) { overlay_ = overlay; }
+
+void UiDesignerPreviewCanvas::SetRuntimeTheme(const UiDesignerThemeSnapshot& theme)
+{
+    if(has_runtime_theme_ && runtime_theme_.ToValue() == theme.ToValue())
+        return;
+    runtime_theme_ = theme;
+    has_runtime_theme_ = true;
+    RebuildDocument();
+}
+
+void UiDesignerPreviewCanvas::ClearRuntimeTheme()
+{
+    if(!has_runtime_theme_)
+        return;
+    has_runtime_theme_ = false;
+    runtime_theme_ = UiDesignerThemeSnapshot();
+    RebuildDocument();
+}
 void UiDesignerPreviewCanvas::SetSelection(const UiDesignerSelection *selection)
 {
     selection_ = selection;
@@ -1705,9 +1723,14 @@ void UiDesignerPreviewCanvas::ApplyAllProperties(
     const UiDesignerThemeAdapter* adapter = UiDesignerGetThemeAdapter(*spec);
     UiDesignerNode effective = node;
     if(theme_overrides_suppressed_) {
+        // Suppression means "show the Theme baseline without local instance
+        // exceptions", not "disable the authored ThemeDocument".
         effective.theme_overrides.Clear();
         effective.theme_override_saved.Clear();
     }
+    if(has_runtime_theme_)
+        effective = UiDesignerResolveRuntimeThemedNode(
+            effective, runtime_theme_, *spec);
     if(overlay_) {
         const Value canonical_role = node.GetProperty("role", "Standard");
         const Value transient_role = overlay_->Resolve(

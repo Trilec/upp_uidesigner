@@ -27,6 +27,13 @@ struct UiDesignerCodeGenerationOptions : Moveable<UiDesignerCodeGenerationOption
     String appearance_mode = "ThemeFirst";
     bool include_source_design = true;
     bool include_theme = true;
+
+    // Export may compile a ThemeDocument into the generated component. The
+    // strings intentionally stay dependency-free: CodeGen does not depend on
+    // Designer ThemeCore, it only emits the reusable UiTheme context.
+    bool apply_compiled_theme = false;
+    String compiled_theme_preset = "Minimal";
+    String compiled_theme_mode = "Light";
 };
 
 struct UiDesignerGeneratedFile : Moveable<UiDesignerGeneratedFile> {

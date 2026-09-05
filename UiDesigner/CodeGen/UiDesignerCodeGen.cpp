@@ -124,6 +124,30 @@ bool UiDesignerValidateCppIdentifier(const String& value, String& error)
     return true;
 }
 
+static bool IsGeneratedThemePresetName(const String& value)
+{
+    return value == "Minimal" || value == "Pill" || value == "Linear" ||
+           value == "Solid" || value == "Outline" || value == "Compact" ||
+           value == "Layered";
+}
+
+static bool IsGeneratedThemeModeName(const String& value)
+{
+    return value == "Light" || value == "Dark" || value == "System";
+}
+
+static String GeneratedThemePresetExpr(const String& value)
+{
+    return "UiThemePreset::" + (IsGeneratedThemePresetName(value)
+        ? value : String("Minimal"));
+}
+
+static String GeneratedThemeModeExpr(const String& value)
+{
+    return "UiThemeMode::" + (IsGeneratedThemeModeName(value)
+        ? value : String("Light"));
+}
+
 bool UiDesignerValidateGenerationOptions(
     const UiDesignerCodeGenerationOptions& options, String& error)
 {
@@ -135,6 +159,12 @@ bool UiDesignerValidateGenerationOptions(
         for(const String& part : parts)
             if(!UiDesignerValidateCppIdentifier(part, error))
                 return false;
+    }
+    if(options.apply_compiled_theme &&
+       (!IsGeneratedThemePresetName(options.compiled_theme_preset) ||
+        !IsGeneratedThemeModeName(options.compiled_theme_mode))) {
+        error = "Invalid compiled theme preset/mode";
+        return false;
     }
     error.Clear();
     return true;
@@ -1525,8 +1555,12 @@ UiDesignerGeneratedProject UiDesignerCodeGenerator::Generate(
     String gs;
     gs << "#include \"" << options.class_name << ".generated.h\"\n\n"
        << NamespaceOpen(options.namespace_name)
-       << "void " << base << "::BuildGeneratedUi()\n{\n"
-       << "\tTitle(" << CppString(options.class_name) << ").Sizeable().Zoomable();\n"
+       << "void " << base << "::BuildGeneratedUi()\n{\n";
+    if(options.apply_compiled_theme)
+        gs << "\t// Compiled from UiDesigner ThemeDocument before controls resolve styles.\n"
+           << "\tUiTheme::Set(" << GeneratedThemePresetExpr(options.compiled_theme_preset)
+           << ", " << GeneratedThemeModeExpr(options.compiled_theme_mode) << ");\n";
+    gs << "\tTitle(" << CppString(options.class_name) << ").Sizeable().Zoomable();\n"
        << "\tSetRect(0, 0, DPI(" << document.GetVirtualSize().cx
        << "), DPI(" << document.GetVirtualSize().cy << "));\n"
        << "\tBuildControls();\n\tBuildLayout();\n\tBindGeneratedActions();\n}\n\n"

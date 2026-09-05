@@ -1,4 +1,5 @@
 #include "UiDesignerExport.h"
+#include "UiDesignerRuntimeTheme.h"
 
 namespace Upp {
 
@@ -110,9 +111,28 @@ UiDesignerGeneratedProject UiDesignerExportService::BuildCppProject(
     const UiDesignerExportRequest& request,
     String& error) const
 {
+    UiDesignerDocument runtime_document;
+    runtime_document.ReplaceFrom(document, "Compile authored theme", false);
+    UiDesignerApplyRuntimeThemeRecipes(
+        runtime_document, theme.Get(), catalog_);
+
+    UiDesignerCodeGenerationOptions generation = request.generation;
+    generation.apply_compiled_theme = true;
+    generation.compiled_theme_preset = theme.Get().preset;
+    generation.compiled_theme_mode = theme.Get().mode;
+
     UiDesignerCodeGenerator generator(catalog_);
     UiDesignerGeneratedProject project =
-        generator.Generate(document, request.generation);
+        generator.Generate(runtime_document, generation);
+
+    // The generated C++ is flattened with inherited ThemeDocument recipes, but
+    // source-design artifacts remain canonical: recipes stay in theme.json /
+    // project metadata rather than masquerading as local node overrides.
+    const String source_design = UiDesignerSerialize(document, true);
+    project.json = source_design;
+    for(UiDesignerGeneratedFile& file : project.files)
+        if(file.relative_path == "design.json")
+            file.content = source_design;
     if(!project.IsValid()) {
         error = project.diagnostics.IsEmpty()
             ? "Code generation failed"

@@ -7,6 +7,7 @@
 #include <UiDesigner/Catalog/UiDesignerCatalog.h>
 #include <UiDesigner/Services/UiDesignerProjection.h>
 #include <UiDesigner/Services/UiDesignerDrop.h>
+#include <UiDesigner/Services/UiDesignerRuntimeTheme.h>
 #include "UiDesignerGeometrySnapshot.h"
 
 namespace Upp {
@@ -284,6 +285,8 @@ public:
     void SetCatalog(const UiDesignerCatalog *catalog);
     void SetDocument(const UiDesignerDocument *document);
     void SetOverlay(const UiDesignerTransientOverlay *overlay);
+    void SetRuntimeTheme(const UiDesignerThemeSnapshot& theme);
+    void ClearRuntimeTheme();
     void SetSelection(const UiDesignerSelection *selection) override;
     void SetAccent(Color accent) { accent_ = accent; Refresh(); }
     void SetTransientVirtualSize(const Size& size);
@@ -389,6 +392,8 @@ private:
     bool transient_virtual_size_set_ = false;
     bool capture_paused_ = false;
     bool theme_overrides_suppressed_ = false;
+    bool has_runtime_theme_ = false;
+    UiDesignerThemeSnapshot runtime_theme_;
     Size transient_virtual_size_;
     Color accent_ = Color(37, 99, 235);
 };
