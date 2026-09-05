@@ -138,13 +138,13 @@ static bool IsGeneratedThemeModeName(const String& value)
 
 static String GeneratedThemePresetExpr(const String& value)
 {
-    return "UiThemePreset::" + (IsGeneratedThemePresetName(value)
+    return String("UiThemePreset::") + (IsGeneratedThemePresetName(value)
         ? value : String("Minimal"));
 }
 
 static String GeneratedThemeModeExpr(const String& value)
 {
-    return "UiThemeMode::" + (IsGeneratedThemeModeName(value)
+    return String("UiThemeMode::") + (IsGeneratedThemeModeName(value)
         ? value : String("Light"));
 }
 

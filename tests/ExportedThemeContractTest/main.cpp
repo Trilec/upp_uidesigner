@@ -86,8 +86,9 @@ CONSOLE_APP_MAIN
 
     const UiDesignerNode effective = UiDesignerResolveRuntimeThemedNode(
         *session.Document().Find(button_id), theme.Get(), *spec);
-    Check(effective.theme_overrides.Find("face_normal") >= 0 &&
-          (Color)effective.theme_overrides.Get("face_normal") == recipe_color,
+    const int recipe_q = effective.theme_overrides.Find("face_normal");
+    Check(recipe_q >= 0 &&
+          (Color)effective.theme_overrides.GetValue(recipe_q) == recipe_color,
           "shared runtime resolver selects exact appearance/domain/type/role recipe");
     Check(AsString(effective.GetProperty("icon_side", "Left")) != "Right",
           "shared runtime resolver excludes studio_preview");

@@ -33,7 +33,7 @@ The runner performs:
 9. Theme adapter live-schema coverage;
 10. Dark integration regression;
 11. Theme Builder contract regression;
-12. UiSplitter catalog regression, DesignerClosureCatalogTest and CurrentUiIntegrationTest;
+12. UiSplitter catalog regression, DesignerClosureCatalogTest, CurrentUiIntegrationTest and ExportedThemeContractTest;
 13. CLI build and catalog/schema smoke;
 14. MCP build plus newline and Content-Length framing smoke;
 15. canonical UiDesigner GUI build;
@@ -67,6 +67,7 @@ ThemeBuilderContractTest
 UiSplitterCatalogTest
 DesignerClosureCatalogTest
 CurrentUiIntegrationTest
+ExportedThemeContractTest
 UiDesigner/CLI
 UiDesigner/MCP
 UiDesigner/UiDesigner
