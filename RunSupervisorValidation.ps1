@@ -49,6 +49,7 @@ $themeDark = Join-Path $OutputRoot 'UiDesignerThemeDarkIntegrationTest.exe'
 $themeBuilder = Join-Path $OutputRoot 'UiDesignerThemeBuilderContractTest.exe'
 $currentUi = Join-Path $OutputRoot 'UiDesignerCurrentUiIntegrationTest.exe'
 $closureCatalog = Join-Path $OutputRoot 'UiDesignerClosureCatalogTest.exe'
+$exportedTheme = Join-Path $OutputRoot 'UiDesignerExportedThemeContractTest.exe'
 $splitterCatalog = Join-Path $OutputRoot 'UiDesignerUiSplitterCatalogTest.exe'
 $cli = Join-Path $OutputRoot 'uidesigner_cli.exe'
 $mcp = Join-Path $OutputRoot 'uidesigner_mcp.exe'
@@ -67,6 +68,7 @@ Build-Package 'ThemeDarkIntegrationTest' $themeDark
 Build-Package 'ThemeBuilderContractTest' $themeBuilder
 Build-Package 'CurrentUiIntegrationTest' $currentUi
 Build-Package 'DesignerClosureCatalogTest' $closureCatalog
+Build-Package 'ExportedThemeContractTest' $exportedTheme
 Build-Package 'UiSplitterCatalogTest' $splitterCatalog
 Build-Package 'UiDesigner/CLI' $cli
 Build-Package 'UiDesigner/MCP' $mcp
@@ -85,6 +87,7 @@ Invoke-Checked 'ThemeDarkIntegrationTest' { & $themeDark }
 Invoke-Checked 'ThemeBuilderContractTest' { & $themeBuilder }
 Invoke-Checked 'CurrentUiIntegrationTest' { & $currentUi }
 Invoke-Checked 'DesignerClosureCatalogTest' { & $closureCatalog }
+Invoke-Checked 'ExportedThemeContractTest' { & $exportedTheme }
 Invoke-Checked 'UiSplitterCatalogTest' { & $splitterCatalog }
 
 Invoke-Checked 'CLI list-controls' { & $cli 'list-controls' 'spacer' }

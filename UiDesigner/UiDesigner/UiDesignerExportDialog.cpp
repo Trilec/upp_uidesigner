@@ -63,7 +63,7 @@ void UiDesignerExportDialog::BuildControls()
     overwrite_.WhenAction = [=] { RefreshPreview(); };
 
     include_design_.SetText("Include source design JSON").SetData(true);
-    include_theme_.SetText("Include Theme JSON").SetData(true);
+    include_theme_.SetText("Include Theme JSON (source metadata)").SetData(true);
     preserve_user_.SetText("Preserve user-owned .h/.cpp files").SetData(true);
     include_design_.WhenAction = include_theme_.WhenAction =
         preserve_user_.WhenAction = [=] { RefreshPreview(); };

@@ -102,6 +102,15 @@ static bool BuildFixture(UiDesignerSession& session, String& error)
         UiDesignerImpactControlState | UiDesignerImpactCode);
     session.Commands().SetProperty(accept_button, "text", "Accept",
         UiDesignerImpactControlState | UiDesignerImpactCode);
+    session.Commands().SetProperty(accept_button, "role", "Accent",
+        UiDesignerImpactPaint | UiDesignerImpactCode);
+    if(!session.Theme().Commit("preset", "Pill", "Fixture Pill theme", error) ||
+       !session.Theme().Commit("mode", "Dark", "Fixture Dark theme", error))
+        return false;
+    session.Theme().SetActiveStyleTarget("Dark|control|UiButton|Accent");
+    if(!session.Theme().Commit("studio.face_normal", Color(24, 72, 120),
+                               "Fixture Accent face", error))
+        return false;
     session.Commands().SetProperty(stock, "text", "Stock U++ label",
         UiDesignerImpactControlState | UiDesignerImpactCode);
 
@@ -466,6 +475,12 @@ static void RunTests(FoundationTester& t)
         fixture.Document(), fixture.Theme(), complete);
     t.Check(first.success && first.written_files.GetCount() >= 7,
             "complete package export succeeds atomically");
+    const String compiled_theme_source = LoadFile(AppendFileName(
+        complete.destination, "GeneratedUiWindow.generated.cpp"));
+    t.Check(compiled_theme_source.Find(
+                "UiTheme::Set(UiThemePreset::Pill, UiThemeMode::Dark)") >= 0 &&
+            compiled_theme_source.Find("Color(24, 72, 120)") >= 0,
+            "complete package compiles the authored non-default ThemeDocument");
     const String user_path = AppendFileName(
         complete.destination, "GeneratedUiWindow.cpp");
     SaveFile(user_path, "// preserved user code\n");

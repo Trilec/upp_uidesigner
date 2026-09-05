@@ -1,0 +1,15 @@
+description "Exported ThemeDocument Preview and generated-application fidelity";
+
+uses
+    Core,
+    Ui,
+    Utilities/PropertyEditorCore,
+    UiDesigner/Services,
+    UiDesigner/Preview,
+    UiDesigner/Theme;
+
+mainconfig
+    "CONSOLE" = "1";
+
+file
+    main.cpp;
