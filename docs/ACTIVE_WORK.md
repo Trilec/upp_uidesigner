@@ -11,6 +11,7 @@ PUBLISHED:
 - Runtime/export implementation: 45eb5a7575b68a04532c6d1a67f8bcd153d4c27b
 - Focused regression/generated-fixture gate: de610d1dc1361a32089c4b0af382f49667bcc5bc
 - Final source-review hardening: c9770b1db2d1c96bc2edbd3a4a9527180a087596
+- Generated-process CWD proof: bb7a497a9b4da407fb1a3c675ce9c883884dff72
 - This recovery-doc update is expected to be a direct descendant.
 
 VALIDATION:
