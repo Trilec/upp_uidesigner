@@ -6,8 +6,7 @@ uses
     UiDesigner/Commands,
     UiDesigner/Catalog,
     UiDesigner/CodeGen,
-    UiDesigner/ThemeCore,
-    UiDesigner/Theme;
+    UiDesigner/ThemeCore;
 
 file
     UiDesignerServices.h,
