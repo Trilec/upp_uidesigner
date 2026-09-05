@@ -38,6 +38,8 @@ Invoke-Checked 'Architecture guard' {
 
 $probe = Join-Path $OutputRoot 'PropertyEditorCoreProbe.exe'
 $propertyTests = Join-Path $OutputRoot 'PropertyEditorTests.exe'
+$propertyOverride = Join-Path $OutputRoot 'PropertyEditorOverrideCommitTest.exe'
+$uiThemeStructure = Join-Path $OutputRoot 'UiThemeStructureContractTest.exe'
 $designerTests = Join-Path $OutputRoot 'UiDesignerTests.exe'
 $regressionTests = Join-Path $OutputRoot 'UiDesignerRegressionTests.exe'
 $foundationTests = Join-Path $OutputRoot 'UiDesignerFoundationTests.exe'
@@ -52,6 +54,8 @@ $app = Join-Path $OutputRoot 'UiDesigner.exe'
 
 Build-Package 'Utilities/PropertyEditorCoreProbe' $probe
 Build-Package 'Utilities/PropertyEditorTests' $propertyTests $true
+Build-Package 'Utilities/PropertyEditorOverrideCommitTest' $propertyOverride
+Build-Package 'Utilities/UiThemeStructureContractTest' $uiThemeStructure
 Build-Package 'Tests' $designerTests $true
 Build-Package 'RegressionTests' $regressionTests $true
 Build-Package 'FoundationTests' $foundationTests
@@ -66,6 +70,8 @@ Build-Package 'UiDesigner/UiDesigner' $app $true
 
 Invoke-Checked 'PropertyEditorCoreProbe' { & $probe }
 Invoke-Checked 'PropertyEditorTests' { & $propertyTests }
+Invoke-Checked 'PropertyEditorOverrideCommitTest' { & $propertyOverride }
+Invoke-Checked 'UiThemeStructureContractTest' { & $uiThemeStructure }
 Invoke-Checked 'UiDesignerTests' { & $designerTests }
 Invoke-Checked 'UiDesignerRegressionTests' { & $regressionTests }
 Invoke-Checked 'UiDesignerFoundationTests' { & $foundationTests }
