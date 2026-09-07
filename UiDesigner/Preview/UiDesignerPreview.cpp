@@ -1722,16 +1722,17 @@ void UiDesignerPreviewCanvas::ApplyAllProperties(
         return;
     const UiDesignerThemeAdapter* adapter = UiDesignerGetThemeAdapter(*spec);
     UiDesignerNode effective = [&] {
+        UiDesignerNode base(node);
+        if(theme_overrides_suppressed_) {
+            // Suppression means "show the Theme baseline without local
+            // instance exceptions", not "disable the authored ThemeDocument".
+            base.theme_overrides.Clear();
+            base.theme_override_saved.Clear();
+        }
         if(has_runtime_theme_)
-            return UiDesignerResolveRuntimeThemedNode(node, runtime_theme_, *spec);
-        return node;
+            return UiDesignerResolveRuntimeThemedNode(base, runtime_theme_, *spec);
+        return base;
     }();
-    if(theme_overrides_suppressed_) {
-        // Suppression means "show the Theme baseline without local instance
-        // exceptions", not "disable the authored ThemeDocument".
-        effective.theme_overrides.Clear();
-        effective.theme_override_saved.Clear();
-    }
     if(overlay_) {
         const Value canonical_role = node.GetProperty("role", "Standard");
         const Value transient_role = overlay_->Resolve(

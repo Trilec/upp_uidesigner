@@ -294,8 +294,19 @@ public:
         bool authored = false;
         for(const UiDesignerThemeOverrideSpec& p : spec.theme_overrides)
             if(node.theme_overrides.Find(p.id) >= 0) { authored = true; break; }
-        if(!authored && ButtonRole(node) == UiRole::Standard)
+
+        const UiRole role = ButtonRole(node);
+        if(!authored) {
+            if(role == UiRole::Standard)
+                return;
+            if(spec.runtime_kind == UiDesignerRuntimeKind::UiToolButton)
+                out << "\t" << member << ".SetCustomStyle(UiTheme::ResolveToolButton("
+                    << RoleExpr(node.GetProperty("role", "Standard")) << "));\n";
+            else
+                out << "\t" << member << ".SetCustomStyle(UiTheme::ResolveButton("
+                    << RoleExpr(node.GetProperty("role", "Standard")) << "));\n";
             return;
+        }
         const String var = member + "_style";
         if(spec.runtime_kind == UiDesignerRuntimeKind::UiToolButton)
             out << "\tUiButton::Style " << var << " = UiTheme::ResolveToolButton("
