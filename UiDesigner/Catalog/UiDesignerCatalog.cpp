@@ -401,6 +401,20 @@ bool UiDesignerCatalog::CanParent(const String& child_type,
         reason = "Unknown parent type: " + parent_type;
         return false;
     }
+
+    // Page/section owners are structurally semantic. Ordinary runtime controls
+    // belong inside a UiTabPage / UiAccordionSection, never directly under the
+    // owner. Keep drop planning consistent with ValidateDocument so a valid
+    // plan cannot manufacture a document that export later rejects.
+    if(parent_type == "UiTab" && child_type != "UiTabPage") {
+        reason = "Tab accepts only direct Tab Page children";
+        return false;
+    }
+    if(parent_type == "UiAccordion" && child_type != "UiAccordionSection") {
+        reason = "Accordion accepts only direct Accordion Section children";
+        return false;
+    }
+
     if(child->IsSemanticItem() && !child->semantic_owner_type.IsEmpty()) {
         if(parent_type != child->semantic_owner_type) {
             reason = child->display_name + " requires parent " + child->semantic_owner_type;

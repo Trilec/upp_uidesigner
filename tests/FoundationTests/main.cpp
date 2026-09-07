@@ -137,8 +137,27 @@ static bool BuildFixture(UiDesignerSession& session, String& error)
 
     UiDesignerNodeId stack_a = AddThroughDrop(session, "UiPanel", stack);
     UiDesignerNodeId stack_b = AddThroughDrop(session, "UiPanel", stack);
-    UiDesignerNodeId tab_a = AddThroughDrop(session, "UiPanel", tab);
-    UiDesignerNodeId tab_b = AddThroughDrop(session, "UiPanel", tab);
+
+    // UiTab owns semantic UiTabPage nodes. Adding the Tab through the command
+    // path creates two default pages; fixture content must go inside those
+    // pages rather than bypassing the same structure production export enforces.
+    const UiDesignerNode* tab_node = session.Document().Find(tab);
+    if(!tab_node || tab_node->children.GetCount() < 2) {
+        error = "Tab fixture is missing its default semantic pages";
+        return false;
+    }
+    const UiDesignerNodeId tab_page_a = tab_node->children[0];
+    const UiDesignerNodeId tab_page_b = tab_node->children[1];
+    const UiDesignerNode* page_a = session.Document().Find(tab_page_a);
+    const UiDesignerNode* page_b = session.Document().Find(tab_page_b);
+    if(!page_a || !page_b || page_a->type != "UiTabPage" ||
+       page_b->type != "UiTabPage") {
+        error = "Tab fixture default children are not UiTabPage nodes";
+        return false;
+    }
+    UiDesignerNodeId tab_a = AddThroughDrop(session, "UiPanel", tab_page_a);
+    UiDesignerNodeId tab_b = AddThroughDrop(session, "UiPanel", tab_page_b);
+
     UiDesignerNodeId split_a = AddThroughDrop(session, "UiPanel", splitter);
     UiDesignerNodeId split_b = AddThroughDrop(session, "UiPanel", splitter);
     if(!stack_a || !stack_b || !tab_a || !tab_b || !split_a || !split_b) {
@@ -429,7 +448,11 @@ static void RunTests(FoundationTester& t)
     const UiDesignerCodeGenerationOptions generation = FixtureOptions();
     UiDesignerGeneratedProject project = generator.Generate(
         fixture.Document(), generation);
-    t.Check(project.IsValid(), "generated project validates");
+    const String generation_diagnostic = Join(project.diagnostics, " | ");
+    t.Check(project.IsValid(),
+            "generated project validates" +
+                (generation_diagnostic.IsEmpty()
+                    ? String() : ": " + generation_diagnostic));
     t.Check(project.generated_header.Find("Spacer") < 0,
             "Spacer does not emit a runtime member");
     t.Check(project.generated_header.Find("UiAbsoluteLayout") >= 0,

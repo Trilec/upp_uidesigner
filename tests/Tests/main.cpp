@@ -784,6 +784,70 @@ CONSOLE_APP_MAIN
     Check(!drop_session.PlanAddControl("UiLabel", root, Point(10, 10), true).valid,
           "root window rejects a second direct child");
 
+    // Semantic page/section owners must never accept ordinary runtime children
+    // directly. The drop planner and document validator must enforce the same
+    // structure so a successful drop cannot become an export-time invalid doc.
+    UiDesignerSession tab_drop_session;
+    tab_drop_session.NewDocument("blank");
+    const UiDesignerNodeId tab_drop =
+        tab_drop_session.AddControl("UiTab",
+                                    tab_drop_session.Document().GetRootId());
+    const UiDesignerNode* tab_drop_node =
+        tab_drop_session.Document().Find(tab_drop);
+    Check(tab_drop_node && tab_drop_node->children.GetCount() == 2,
+          "Tab creation supplies two semantic default pages");
+    Check(!tab_drop_session.PlanAddControl("UiPanel", tab_drop).valid,
+          "Tab rejects a direct runtime child outside UiTabPage");
+    UiDesignerNodeId tab_drop_page =
+        tab_drop_node && !tab_drop_node->children.IsEmpty()
+            ? tab_drop_node->children[0] : 0;
+    UiDesignerDropPlan tab_page_panel_plan =
+        tab_drop_session.PlanAddControl("UiPanel", tab_drop_page);
+    UiDesignerNodeId tab_page_panel = 0;
+    drop_error.Clear();
+    Check(tab_page_panel_plan.valid &&
+              tab_drop_session.ExecuteDrop(tab_page_panel_plan,
+                                           &tab_page_panel, drop_error) &&
+              tab_page_panel != 0,
+          "TabPage accepts its runtime content through the normal drop path: " +
+              drop_error);
+    String semantic_drop_error;
+    Check(tab_drop_session.Catalog().ValidateDocument(
+              tab_drop_session.Document(), semantic_drop_error),
+          "Tab drop path preserves a document-valid semantic hierarchy: " +
+              semantic_drop_error);
+
+    UiDesignerSession accordion_drop_session;
+    accordion_drop_session.NewDocument("blank");
+    const UiDesignerNodeId accordion_drop =
+        accordion_drop_session.AddControl(
+            "UiAccordion", accordion_drop_session.Document().GetRootId());
+    const UiDesignerNode* accordion_drop_node =
+        accordion_drop_session.Document().Find(accordion_drop);
+    Check(accordion_drop_node && accordion_drop_node->children.GetCount() == 3,
+          "Accordion creation supplies semantic default sections");
+    Check(!accordion_drop_session.PlanAddControl("UiPanel", accordion_drop).valid,
+          "Accordion rejects a direct runtime child outside UiAccordionSection");
+    UiDesignerNodeId accordion_drop_section =
+        accordion_drop_node && !accordion_drop_node->children.IsEmpty()
+            ? accordion_drop_node->children[0] : 0;
+    UiDesignerDropPlan section_panel_plan =
+        accordion_drop_session.PlanAddControl("UiPanel",
+                                              accordion_drop_section);
+    UiDesignerNodeId section_panel = 0;
+    drop_error.Clear();
+    Check(section_panel_plan.valid &&
+              accordion_drop_session.ExecuteDrop(section_panel_plan,
+                                                 &section_panel, drop_error) &&
+              section_panel != 0,
+          "AccordionSection accepts its runtime content through the normal drop path: " +
+              drop_error);
+    semantic_drop_error.Clear();
+    Check(accordion_drop_session.Catalog().ValidateDocument(
+              accordion_drop_session.Document(), semantic_drop_error),
+          "Accordion drop path preserves a document-valid semantic hierarchy: " +
+              semantic_drop_error);
+
     UiDesignerSession grid_allocation_session;
     grid_allocation_session.NewDocument("blank");
     const UiDesignerNodeId allocation_grid =
