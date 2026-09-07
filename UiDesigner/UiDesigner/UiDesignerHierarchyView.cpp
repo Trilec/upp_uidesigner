@@ -395,6 +395,22 @@ void UiDesignerHierarchyView::Paint(Draw& w)
     }
 }
 
+void UiDesignerHierarchyView::LeftDown(Point p, dword flags)
+{
+    const Rect header = GetHeaderRect();
+    if(header.Contains(p))
+        return;
+    tree_.LeftDown(p - Point(0, header.bottom), flags);
+}
+
+void UiDesignerHierarchyView::LeftUp(Point p, dword flags)
+{
+    const Rect header = GetHeaderRect();
+    if(header.Contains(p))
+        return;
+    tree_.LeftUp(p - Point(0, header.bottom), flags);
+}
+
 Rect UiDesignerHierarchyView::GetHeaderRect() const
 {
     return RectC(0, 0, GetSize().cx, DPI(24));

@@ -202,6 +202,8 @@ public:
     Event<> WhenDelete;
     virtual void Layout() override;
     virtual void Paint(Draw& w) override;
+    virtual void LeftDown(Point p, dword flags) override;
+    virtual void LeftUp(Point p, dword flags) override;
 private:
     class HierarchyTree : public UiTree {
     public:
