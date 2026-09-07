@@ -20,6 +20,7 @@ file
     ../../UiDesigner/UiDesigner/UiDesignerSideWidgets.cpp,
     ../../UiDesigner/UiDesigner/UiDesignerCatalogList.cpp,
     ../../UiDesigner/UiDesigner/UiDesignerHierarchyView.cpp,
+    ../../UiDesigner/UiDesigner/UiDesignerHierarchyRename.cpp,
     ../../UiDesigner/UiDesigner/UiDesignerCodeView.cpp;
 
 mainconfig

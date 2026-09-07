@@ -81,7 +81,8 @@ CONSOLE_APP_MAIN
     project = generator.Generate(session.Document(), "IndeterminateFixture");
     Check(project.generated_source.Find(".Set(75, 0)") >= 0, "indeterminate generation retains canonical value");
 
-    session.Document().SetThemeOverrideActive(id, "cap_roundness", false);
+    session.Document().SetThemeOverrideActive(
+        id, "cap_roundness", false, UiDesignerImpactPaint | UiDesignerImpactCode);
     project = generator.Generate(session.Document(), "InactiveOverrideFixture");
     Check(project.generated_source.Find(".cap_roundness = 35") < 0,
           "disabled ring override is not generated");
