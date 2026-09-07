@@ -423,7 +423,8 @@ static void RunTests(FoundationTester& t)
     t.Check(!cyclic.valid, "drop planner rejects descendant target");
 
     UiDesignerSession fixture;
-    t.Check(BuildFixture(fixture, error), "complete codegen fixture builds in model");
+    const bool fixture_ok = BuildFixture(fixture, error);
+    t.Check(fixture_ok, "complete codegen fixture builds in model: " + error);
     UiDesignerCodeGenerator generator(fixture.Catalog());
     const UiDesignerCodeGenerationOptions generation = FixtureOptions();
     UiDesignerGeneratedProject project = generator.Generate(

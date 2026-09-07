@@ -257,8 +257,16 @@ CONSOLE_APP_MAIN
               column_selection[0].id == first_column_row.id,
           "UiTree column action preserves the existing row selection");
 
-    Check(dialog_session.Catalog().GetPresets().GetCount() == 8,
-          "Preset catalogue exposes the eight composable layout fragments");
+    static const char *layout_presets[] = {
+        "HolyGrail", "Magazine", "SPA", "CardGrid", "SplitScreen",
+        "FPattern", "HeaderWithActions", "DesignerWorkbench"
+    };
+    bool has_layout_presets = true;
+    for(const char *id : layout_presets)
+        has_layout_presets &= dialog_session.Catalog().FindPreset(id) != nullptr;
+    Check(has_layout_presets &&
+              dialog_session.Catalog().GetPresets().GetCount() >= 8,
+          "Preset catalogue exposes all eight composable layout fragments");
     UiDesignerSession preset_session;
     preset_session.NewDocument("blank");
     UiDesignerNodeId inserted_preset = 0;

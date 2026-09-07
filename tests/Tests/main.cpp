@@ -413,9 +413,9 @@ CONSOLE_APP_MAIN
           "UiPanel exposes four independent FillRecipe face states without legacy rows");
     Check(panel_theme_spec && panel_theme_spec->FindThemeOverride("frame.style") &&
               panel_theme_spec->FindThemeOverride("frame.width") &&
-              panel_theme_spec->FindThemeOverride("skin") &&
-              panel_theme_spec->FindThemeOverride("frame.normal"),
-          "UiPanel exposes shared frame style, width, per-state colors and separate skin");
+              panel_theme_spec->FindThemeOverride("frame.normal") &&
+              panel_theme_spec->FindThemeOverride("skin") == nullptr,
+          "UiPanel exposes shared frame style, width and per-state colors without an unbacked skin field");
     UiDesignerSession panel_override_session;
     const UiDesignerNodeId panel_override_node =
         panel_override_session.AddControl("UiPanel");
