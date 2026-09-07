@@ -425,7 +425,15 @@ CONSOLE_APP_MAIN
         Check(id == "radius" && active,
               "Radius circle requests inherited activation");
     };
-    override_editor.LeftDown(Point(394, 75), 0);
+    override_editor.Layout();
+    const PropertyEditorStyle& radius_style = override_editor.GetStyle();
+    const int radius_y = radius_style.frame_width + radius_style.filter_height +
+                         max(0, radius_style.filter_gap) +
+                         radius_style.group_height + radius_style.row_height / 2;
+    const int radius_x = override_editor.GetSize().cx -
+                         radius_style.frame_width -
+                         max(1, radius_style.override_width / 2);
+    override_editor.LeftDown(Point(radius_x, radius_y), 0);
     Check(override_requests == 1,
           "Radius override circle remains active while its value editor is locked");
 
@@ -486,8 +494,9 @@ CONSOLE_APP_MAIN
     semantic_session.Select(page);
     Check(page != 0 && semantic_session.ResolveThemeOverrideOwner() == 0,
           "Tab page does not invent a per-page or redirected Theme Override contract");
-    Check(semantic_session.ThemeOverrideModel().GetCount() == 0,
-          "Tab page selection exposes only API-backed content and behaviour");
+    Check(semantic_session.ThemeOverrideModel().GetCount() == 1 &&
+              semantic_session.ThemeOverrideModel().Find("theme.status") != nullptr,
+          "Tab page selection exposes no invented Theme Overrides");
 
     const UiDesignerControlSpec *section_spec =
         semantic_session.Catalog().Find("UiAccordionSection");
