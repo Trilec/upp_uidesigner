@@ -3,64 +3,69 @@
 Remote GitHub `main` is authoritative. Fetch both repositories before work/publish; never force-push.
 Recovery state only; Git history is implementation history.
 
-BASE: `e071343bee0bb53a23a432551f831683972c1036`
-TASK: **Close Foundation generated-project regression, then finish RC validation**
-TOUCHED:
-- `UiDesigner/Catalog/UiDesignerCatalog.cpp`
-- `tests/FoundationTests/main.cpp`
-- `tests/Tests/main.cpp`
-- `docs/ACTIVE_WORK.md`
-STATUS: **SOURCE REPAIR PUBLISHED — WINDOWS VALIDATION PENDING**
-PUBLISHED: `b9bbebb913636d639240152f422c115c19bf323b`
-VALIDATION: source/diff/API/package review complete; Windows rerun pending.
-NEXT ACTION: rerun Foundation first, then ExportedThemeContractTest and the complete supervisor gate.
+TASK: **Close Foundation/generated Theme RC and finish validation**
+STATUS: **SOURCE FIXES PUBLISHED — WINDOWS VALIDATION PENDING**
+CURRENT SOURCE CHECKPOINT: `2343679341e46fb128b71596f5255b972253bfaa`
+REQUIRED upp_Ui SOURCE CHECKPOINT: `dc196091ba1452bc7bd2091124cc4391d22503a3`
 
-## VERIFIED / REPORTED INPUT
+## VERIFIED INPUT
 
-Gary validated the reusable PropertyEditor first-wheel repair on Windows:
-- required PropertyEditor repair `b9c3a863ee424d49f8897b1970897200726c94fc` was an ancestor;
-- tested upp_Ui HEAD `0968129f882e5ffc8bf65a3ed87fdfc5f3f5a357`;
+PropertyEditor first-wheel repair was already Windows-validated:
 - PropertyEditorTests Debug + Release: `77/0`;
 - PropertyEditorOverrideCommitTest Debug + Release: `6/0`.
 
-At UiDesigner `e071343...`:
-- Tests Debug: PASS;
-- RegressionTests Debug: PASS;
-- FoundationTests built but returned `73 checks / 16 failures`.
+Foundation previously failed `16` assertions because its normal drop fixture could put ordinary
+controls directly below UiTab while canonical validation requires UiTabPage ownership.
 
-The Foundation failures were one cascade. Its fixture used the normal drop planner to place
-ordinary UiPanel controls directly below UiTab. The plan succeeded, but
-`ValidateDocument()` correctly requires UiTab direct children to be semantic UiTabPage nodes.
-Code generation therefore stopped before any source/package emitters ran.
+Repair already published:
+- `CanParent/CanInsert` enforce the same UiTab / UiAccordion semantic-owner structure as
+  `ValidateDocument`;
+- Foundation content lives inside the real default UiTabPage nodes;
+- CodeGen/export expectations were not weakened;
+- generation failures now print their actual diagnostic.
 
-## CURRENT REPAIR
+## LATEST WINDOWS BLOCKERS AND REPAIRS
 
-- `CanParent/CanInsert` now preserve the same semantic-owner structure enforced by
-  `ValidateDocument`: UiTab accepts only UiTabPage directly and UiAccordion accepts only
-  UiAccordionSection directly.
-- Foundation content is placed inside the two real default UiTabPage nodes created with UiTab.
-- Tests protect both rejection of invalid direct owner drops and valid content drops into
-  UiTabPage / UiAccordionSection.
-- Foundation now prints CodeGen diagnostics on a future generated-project validation failure.
-- CodeGen/export expectations were not weakened or rewritten.
+Validation at UiDesigner `f777eb5822f633217432fd29f3d9106536295559` stopped compiling `Tests`.
+
+Blocker 1 was reusable upp_Ui:
+- `Vector<UiGraphPortRef>::Reserve()` relocation assertion in the compiled H2 backend.
+- fixed in upp_Ui `dc196091ba1452bc7bd2091124cc4391d22503a3` with the supported `is_upp_guest` relocation contract while
+  preserving aggregate initialization.
+
+Blocker 2 was local test source:
+- the new semantic Accordion regression reused `accordion_drop_session`,
+  `accordion_drop`, and `accordion_drop_node` names already present later in the same
+  `CONSOLE_APP_MAIN` scope;
+- fixed in `2343679341e46fb128b71596f5255b972253bfaa` by renaming only the new fixture identifiers;
+- no behavior or expectation changed.
 
 ## REQUIRED NEXT GATE
 
-1. FoundationTests Debug. Require all checks PASS and exit 0.
-2. ExportedThemeContractTest Debug. Require `failed=0` and exit 0.
-3. If both pass, run `RunSupervisorValidation.ps1` completely.
-4. Then complete the remaining generated/manual Theme fidelity audit.
-5. Preserve the separate upp_Ui final graph/performance/manual acceptance path; current upp_Ui
-   may contain newer unrelated UiGraph work, so fetch current main and preserve it.
+1. Fetch both mains and verify the checkpoints above are ancestors.
+2. Build/run Designer `Tests` Debug first.
+3. If PASS, run `RegressionTests` Debug.
+4. Run `FoundationTests` Debug; require all checks PASS / exit 0.
+5. Run `ExportedThemeContractTest` Debug; require `failed=0`.
+6. Run `RunSupervisorValidation.ps1` completely.
+7. Finish generated/manual Theme fidelity:
+   - Preview -> CodeGen -> generated application;
+   - Light / Dark / non-default preset;
+   - inherited Theme recipe;
+   - active local override wins;
+   - disabled/reset local override inherits;
+   - no runtime `theme.json` CWD dependency;
+   - ComponentOnly parity;
+   - re-export preserves user code.
+8. Continue current upp_Ui automated + manual UiGraph acceptance only after Designer focused gates pass.
 
-## CONTRACTS TO PRESERVE
+## CONTRACTS
 
 - UiTab direct children are UiTabPage; page content lives below the page.
 - UiAccordion direct children are UiAccordionSection; section content lives below the section.
-- A successful drop plan must not create a document that canonical validation rejects.
-- Designer document/data -> Preview -> CodeGen -> generated application must preserve authored state.
-- ThemeDocument preset/mode and inherited style recipes compile into generated output;
-  active instance override wins; disabled/reset local override inherits again.
-- `theme.json` is optional authoring metadata, never a generated runtime/CWD dependency.
-- Reusable `upp_Ui` defects are fixed in `upp_Ui`, not through Designer workarounds.
+- A valid drop plan must not create a document canonical validation rejects.
+- Designer document/data -> Preview -> CodeGen -> generated app preserves authored state.
+- ThemeDocument inheritance/override precedence remains unchanged.
+- `theme.json` is optional authoring metadata, not a generated runtime dependency.
+- Reusable defects are fixed in upp_Ui, not through Designer workarounds.
 - Do not start remaining controls or AI/AgentFlow work before RC/theme closure.
