@@ -84,7 +84,7 @@ CONSOLE_APP_MAIN
         const PropertyEditorItem *value_item = scalar_projection.Find("value");
         Check(projected && value_item &&
               AsString(value_item->value) == "Projected scalar value" &&
-              value_item->group == "Scalar",
+              value_item->group == "Data",
               "UiDoc Data pane projection uses the canonical authored value property");
     }
 

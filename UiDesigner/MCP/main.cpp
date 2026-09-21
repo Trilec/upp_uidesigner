@@ -1,6 +1,10 @@
 #include "UiDesignerMcpServer.h"
 #include <iostream>
 #include <string>
+#ifdef PLATFORM_WIN32
+#include <fcntl.h>
+#include <io.h>
+#endif
 
 using namespace Upp;
 
@@ -54,6 +58,11 @@ static void WriteMessage(const String& response, bool framed)
 
 CONSOLE_APP_MAIN
 {
+#ifdef PLATFORM_WIN32
+    // MCP lengths and CRLF framing describe bytes, not CRT text-mode lines.
+    _setmode(_fileno(stdin), _O_BINARY);
+    _setmode(_fileno(stdout), _O_BINARY);
+#endif
     UiDesignerMcpServer server;
     std::string message;
     bool framed = false;

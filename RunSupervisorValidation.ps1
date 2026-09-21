@@ -7,6 +7,23 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $repoRoot = $PSScriptRoot
+$runLogs = Join-Path $OutputRoot ('supervisor-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
+
+function Run-Test([string]$executable) {
+    $name = [IO.Path]::GetFileNameWithoutExtension($executable)
+    $stdout = Join-Path $runLogs ($name + '.stdout.log')
+    $stderr = Join-Path $runLogs ($name + '.stderr.log')
+    $process = Start-Process -FilePath $executable -WorkingDirectory $repoRoot `
+        -WindowStyle Hidden -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+    $null = $process.Handle
+    $process.WaitForExit()
+    Get-Content -LiteralPath $stdout
+    Get-Content -LiteralPath $stderr
+    Write-Host "$name exit: $($process.ExitCode)"
+    if($null -eq $process.ExitCode -or $process.ExitCode -ne 0) {
+        throw "$name failed with exit code $($process.ExitCode); evidence: $runLogs"
+    }
+}
 
 function Invoke-Checked([string]$label, [scriptblock]$command) {
     Write-Host "`n== $label =="
@@ -31,6 +48,7 @@ if(-not (Test-Path -LiteralPath $UmkPath -PathType Leaf)) {
     throw "umk was not found at $UmkPath"
 }
 New-Item -ItemType Directory -Path $OutputRoot -Force | Out-Null
+New-Item -ItemType Directory -Path $runLogs -Force | Out-Null
 
 Invoke-Checked 'Architecture guard' {
     powershell -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'ValidateArchitecture.ps1')
@@ -74,21 +92,21 @@ Build-Package 'UiDesigner/CLI' $cli
 Build-Package 'UiDesigner/MCP' $mcp
 Build-Package 'UiDesigner/UiDesigner' $app $true
 
-Invoke-Checked 'PropertyEditorCoreProbe' { & $probe }
-Invoke-Checked 'PropertyEditorTests' { & $propertyTests }
-Invoke-Checked 'PropertyEditorOverrideCommitTest' { & $propertyOverride }
-Invoke-Checked 'UiThemeStructureContractTest' { & $uiThemeStructure }
-Invoke-Checked 'UiDesignerTests' { & $designerTests }
-Invoke-Checked 'UiDesignerRegressionTests' { & $regressionTests }
-Invoke-Checked 'UiDesignerFoundationTests' { & $foundationTests }
-Invoke-Checked 'ThemeStructureOwnershipTest' { & $themeStructure }
-Invoke-Checked 'ThemeAdapterCoverageTest' { & $themeCoverage }
-Invoke-Checked 'ThemeDarkIntegrationTest' { & $themeDark }
-Invoke-Checked 'ThemeBuilderContractTest' { & $themeBuilder }
-Invoke-Checked 'CurrentUiIntegrationTest' { & $currentUi }
-Invoke-Checked 'DesignerClosureCatalogTest' { & $closureCatalog }
-Invoke-Checked 'ExportedThemeContractTest' { & $exportedTheme }
-Invoke-Checked 'UiSplitterCatalogTest' { & $splitterCatalog }
+Run-Test $probe
+Run-Test $propertyTests
+Run-Test $propertyOverride
+Run-Test $uiThemeStructure
+Run-Test $designerTests
+Run-Test $regressionTests
+Run-Test $foundationTests
+Run-Test $themeStructure
+Run-Test $themeCoverage
+Run-Test $themeDark
+Run-Test $themeBuilder
+Run-Test $currentUi
+Run-Test $closureCatalog
+Run-Test $exportedTheme
+Run-Test $splitterCatalog
 
 Invoke-Checked 'CLI list-controls' { & $cli 'list-controls' 'spacer' }
 Invoke-Checked 'CLI schema Spacer' { & $cli 'schema' 'Spacer' }

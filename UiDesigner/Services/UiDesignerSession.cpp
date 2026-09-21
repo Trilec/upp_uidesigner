@@ -455,10 +455,10 @@ bool UiDesignerSession::InsertPreset(const String& preset_id,
     const UiDesignerNode *target_node = document_.Find(target);
     const UiDesignerControlSpec *target_spec = target_node
         ? catalog_.Find(target_node->type) : nullptr;
-    if(!target_node || !target_spec ||
+    if(!target_node || (target != document_.GetRootId() && (!target_spec ||
        (target_spec->content_host == UiDesignerContentHostKind::None &&
         !HasUiDesignerCapability(target_spec->capabilities,
-                                 UiDesignerCapabilityContainer))) {
+                                 UiDesignerCapabilityContainer))))) {
         error = "Select a container or layout before inserting a preset";
         return false;
     }

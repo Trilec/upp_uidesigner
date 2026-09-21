@@ -48,6 +48,15 @@ PropertyEditorKind ProjectedKind(const UiDesignerThemeOverrideSpec& property)
         return PropertyEditorKind::NumericInt;
     if(bounded && property.kind == PropertyEditorKind::Double)
         return PropertyEditorKind::NumericDouble;
+    if(property.kind == PropertyEditorKind::Choice && property.choices.GetCount() == 4) {
+        Index<String> directions;
+        for(const PropertyEditorChoice& choice : property.choices)
+            directions.FindAdd(ToLower(AsString(choice.value)));
+        if(directions.GetCount() == 4 && directions.Find("left") >= 0 &&
+           directions.Find("right") >= 0 && directions.Find("top") >= 0 &&
+           directions.Find("bottom") >= 0)
+            return PropertyEditorKind::Custom;
+    }
     return property.kind;
 }
 
@@ -81,6 +90,13 @@ void CheckProjectedThemeField(const UiDesignerThemeOverrideSpec& property,
         return;
     Check(item->kind == ProjectedKind(property),
           prefix + "preserves projected editor kind");
+    if(property.kind == PropertyEditorKind::Choice &&
+       ProjectedKind(property) == PropertyEditorKind::Custom) {
+        Check(item->custom_editor == "property.matrix" && item->editor_variant == "Cardinal4",
+              prefix + "projects four directions into Cardinal4");
+        Check(item->choices.GetCount() == 4 && item->inline_editor && item->expanded_row_span >= 3,
+              prefix + "preserves directional choices and expandable editor");
+    }
     Check(item->domain == PropertyEditorDomain::Theme,
           prefix + "remains Theme-domain data");
 }

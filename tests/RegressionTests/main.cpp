@@ -50,7 +50,7 @@ static String LegacySiblingOrderJson()
     })JSON";
 }
 
-CONSOLE_APP_MAIN
+GUI_APP_MAIN
 {
     PropertyEditorModel metadata_model;
     metadata_model.AddText("name", "Name", "button", "Identity");
@@ -340,27 +340,34 @@ CONSOLE_APP_MAIN
 
     const Rect width_mode = hierarchy.GetWidthModeRect(1);
     hierarchy.LeftDown(width_mode.CenterPoint(), 0);
+    Check(!hierarchy.IsNodeDragPollArmed(),
+          "Hierarchy width action does not arm a node drag");
     hierarchy.LeftUp(width_mode.CenterPoint(), 0);
     Check(sizing_requests == 1 && sizing_node == button && !requested_height,
-          "Hierarchy W icon routes one width-mode request");
+          Format("Hierarchy W icon routes one width-mode request (requests=%d node=%lld expected=%lld height=%d)",
+                 sizing_requests, (int64)sizing_node, (int64)button, (int)requested_height));
 
     const Rect height_mode = hierarchy.GetHeightModeRect(1);
     hierarchy.LeftDown(height_mode.CenterPoint(), 0);
+    Check(!hierarchy.IsNodeDragPollArmed(),
+          "Hierarchy height action does not arm a node drag");
     hierarchy.LeftUp(height_mode.CenterPoint(), 0);
     Check(sizing_requests == 2 && sizing_node == button && requested_height,
-          "Hierarchy H icon routes one height-mode request");
+          Format("Hierarchy H icon routes one height-mode request (requests=%d node=%lld expected=%lld height=%d)",
+                 sizing_requests, (int64)sizing_node, (int64)button, (int)requested_height));
 
     UiDesignerSession sizing_session;
     sizing_session.NewDocument("blank");
     const UiDesignerNodeId sizing_label = sizing_session.AddControl("UiLabel");
     const UiDesignerNodeId sizing_box = sizing_session.AddControl("UiBoxLayout");
+    const Value box_width_before = sizing_session.Document().GetProperty(sizing_box, "width_mode");
     sizing_session.Select(sizing_box);
     const uint64 sizing_selection_revision = sizing_session.State().selection.revision;
     String sizing_error;
     Check(sizing_session.CycleSizingMode(sizing_label, false, sizing_error),
           "Unselected Label width mode cycles by exact node identity: " + sizing_error);
     Check(sizing_session.Document().Find(sizing_label)->GetProperty("width_mode", "Fit") == "Fixed" &&
-              sizing_session.Document().Find(sizing_box)->GetProperty("width_mode", "Fit") == "Fit",
+              sizing_session.Document().Find(sizing_box)->GetProperty("width_mode", "Fit") == box_width_before,
           "Hierarchy sizing mutates the clicked Label and not the selected BoxLayout");
     Check(sizing_session.State().selection.primary == sizing_box &&
               sizing_session.State().selection.revision == sizing_selection_revision,
@@ -397,6 +404,8 @@ CONSOLE_APP_MAIN
     };
     const Point header_screen = hierarchy.GetScreenRect().TopLeft() +
                                 Point(DPI(20), DPI(15));
+    session.NewDocument("blank");
+    hierarchy.Rebuild();
     const int count_before_header_drop = session.Document().GetCount();
     hierarchy.TrackCatalogDrop("UiPanel", header_screen);
     Check(hierarchy.HasDropTarget(),
@@ -491,6 +500,11 @@ CONSOLE_APP_MAIN
 
     const UiDesignerNodeId tab = semantic_session.AddControl("UiTab", root);
     const UiDesignerNodeId page = semantic_session.Commands().AddTabPage(tab, "Page");
+    Check(semantic_session.Commands().SetProperty(page, "icon", "ICON_DESIGN_DESCRIPTION_48",
+              UiDesignerImpactPaint | UiDesignerImpactCode) &&
+              semantic_session.Commands().SetProperty(section, "icon", "ICON_DESIGN_DESCRIPTION_48",
+              UiDesignerImpactPaint | UiDesignerImpactCode),
+          "Semantic fixture authors explicit page and section icons");
     semantic_session.Select(page);
     Check(page != 0 && semantic_session.ResolveThemeOverrideOwner() == 0,
           "Tab page does not invent a per-page or redirected Theme Override contract");
@@ -571,7 +585,7 @@ CONSOLE_APP_MAIN
 
     const String semantic_code =
         semantic_session.GenerateCode("SemanticInspectorFixture");
-    Check(semantic_code.Find(".SetTabIcon(") >= 0 &&
+    Check(semantic_code.Find(", \"Page\", ICON_DESIGN_DESCRIPTION_48())") >= 0 &&
               semantic_code.Find(".SetTabTip(") >= 0 &&
               semantic_code.Find(".SetTabClosable(") >= 0 &&
               semantic_code.Find(".SetTabDraggable(") >= 0,

@@ -8,7 +8,7 @@ uses
     UiDesigner/Theme;
 
 mainconfig
-    "CONSOLE" = "1";
+    "" = "GUI";
 
 file
     main.cpp;

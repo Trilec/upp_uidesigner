@@ -1,6 +1,7 @@
 #include <Core/Core.h>
 #include <UiDesigner/Catalog/UiDesignerCatalog.h>
 #include <UiDesigner/Theme/UiDesignerThemeAdapter.h>
+#include <Ui/UiTab.h>
 
 using namespace Upp;
 
@@ -36,7 +37,7 @@ void CheckNormalProperty(const UiDesignerControlSpec *spec,
 
 }
 
-CONSOLE_APP_MAIN
+GUI_APP_MAIN
 {
     UiDesignerCatalog catalog;
     RegisterUiDesignerBuiltins(catalog);
@@ -93,6 +94,32 @@ CONSOLE_APP_MAIN
         CheckNormalProperty(tab, id);
     for(const char *id : {"style_visual", "icon_side", "style_tab_font_face"})
         CheckNoThemeField(tab, id);
+
+    const UiDesignerThemeAdapter* tab_adapter = tab ? UiDesignerGetThemeAdapter(*tab) : nullptr;
+    Check(tab_adapter != nullptr, "Tab runtime Theme adapter exists");
+    if(tab_adapter) {
+        const char* families[] = {"Classic", "Underline", "Segmented", "Rail", "Document"};
+        const UiTabVisual visuals[] = {UITAB_CLASSIC, UITAB_UNDERLINE, UITAB_SEGMENTED,
+                                       UITAB_RAIL, UITAB_DOCUMENT};
+        const char* codes[] = {"UITAB_CLASSIC", "UITAB_UNDERLINE", "UITAB_SEGMENTED",
+                               "UITAB_RAIL", "UITAB_DOCUMENT"};
+        for(int i = 0; i < __countof(families); ++i) {
+            UiDesignerNode node;
+            node.id = 42;
+            node.type = "UiTab";
+            node.properties.Set("visual", families[i]);
+            node.properties.Set("role", "Accent");
+            node.SetThemeOverride("radius", 17);
+            UiTab runtime;
+            tab_adapter->ApplyPreviewStyle(runtime, node, *tab, nullptr);
+            Check(runtime.GetVisual() == visuals[i],
+                  String("Theme appearance preserves authored Tab family ") + families[i]);
+            String generated;
+            tab_adapter->EmitSetup(generated, "tab", node, *tab);
+            Check(generated.Find(String("UiTheme::ResolveTab(UiRole::Accent, ") + codes[i] + ")") >= 0,
+                  String("Generated Theme seeds authored Tab family ") + families[i]);
+        }
+    }
 
     const UiDesignerControlSpec *group = catalog.Find("UiGroupPanel");
     Check(group != nullptr, "UiGroupPanel exists");

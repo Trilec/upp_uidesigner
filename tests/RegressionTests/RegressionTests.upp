@@ -24,4 +24,4 @@ file
     ../../UiDesigner/UiDesigner/UiDesignerCodeView.cpp;
 
 mainconfig
-    "" = "CONSOLE";
+    "" = "GUI";

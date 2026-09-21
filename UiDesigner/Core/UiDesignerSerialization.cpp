@@ -343,9 +343,9 @@ static void NormalizePlacementProperties(ValueMap& properties,
             properties.Set("height_mode",
                            MigrateLegacySizingMode(properties.GetValue(properties.Find("v_sizing"))));
         const int horizontal = properties.Find("h_sizing");
-        const int vertical = properties.Find("v_sizing");
         if(horizontal >= 0)
             properties.Remove(horizontal);
+        const int vertical = properties.Find("v_sizing");
         if(vertical >= 0)
             properties.Remove(vertical);
     }

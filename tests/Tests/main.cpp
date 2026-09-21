@@ -69,7 +69,7 @@ static bool SameButtonStyle(const UiButton::Style& a, const UiButton::Style& b)
            a.skin.content_inset == b.skin.content_inset;
 }
 
-CONSOLE_APP_MAIN
+GUI_APP_MAIN
 {
     UiDesignerCatalog catalog;
     Check(PropertyEditorKindName(PropertyEditorKind::ColorPalette) == "ColorPalette" &&
@@ -1665,9 +1665,9 @@ CONSOLE_APP_MAIN
 
     UiBoxLayout resize_box(UiDirection::H);
     resize_box.SetRect(0, 0, 240, 80);
-    auto *resize_box_button = new UiButton;
-    resize_box_button->SetText("One");
-    resize_box.Add(*resize_box_button);
+    UiButton resize_box_button;
+    resize_box_button.SetText("One");
+    resize_box.Add(resize_box_button);
     const int box_layout_count_before = resize_box.GetLayoutCallCount();
     resize_box.Layout();
     resize_box.Layout();
@@ -1678,9 +1678,9 @@ CONSOLE_APP_MAIN
 
     UiGridLayout resize_grid;
     resize_grid.SetRect(0, 0, 240, 120);
-    auto *resize_grid_button = new UiButton;
-    resize_grid_button->SetText("Cell");
-    resize_grid.Add(*resize_grid_button, 0, 0, false, false);
+    UiButton resize_grid_button;
+    resize_grid_button.SetText("Cell");
+    resize_grid.Add(resize_grid_button, 0, 0, false, false);
     const int grid_layout_count_before = resize_grid.GetLayoutCallCount();
     resize_grid.Layout();
     resize_grid.Layout();

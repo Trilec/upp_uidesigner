@@ -1,4 +1,5 @@
 #include "UiDesignerChartRingEditor.h"
+#include <Ui/UiTheme.h>
 
 namespace Upp {
 
@@ -138,6 +139,14 @@ public:
         return true;
     }
     ValueArray GetValue() const { return draft_.GetValue(); }
+
+    void Paint(Draw& w) override
+    {
+        UiPanel::Style style = UiTheme::ResolvePanel(UiRole::Standard);
+        style.metrics.shadow.enabled = false;
+        UiPaintFaceFrameDash(w, Rect(Point(0, 0), GetSize()),
+                            style.palette, style.metrics, ST_NORMAL);
+    }
 
     void Layout() override
     {

@@ -26,6 +26,9 @@ public:
     void AddThemeOverrides(UiDesignerControlSpec& spec) const override
     {
         UiDesignerGroupPanelThemeAdapterInstance().AddThemeOverrides(spec);
+        for(int i = spec.theme_overrides.GetCount() - 1; i >= 0; --i)
+            if(spec.theme_overrides[i].adapter_field_id == "header_mode")
+                spec.theme_overrides.Remove(i);
     }
 
     bool HasField(const String& field_id) const override

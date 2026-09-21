@@ -228,8 +228,8 @@ CONSOLE_APP_MAIN
     gallery.SetRect(0, 0, DPI(960), DPI(760));
     gallery.Layout();
     Check(gallery.GetDataSampleColumn() == 0 &&
-          gallery.GetChoicesSampleColumn() == 2,
-          "Theme gallery places DATA in column 1 and CHOICES in column 3");
+          gallery.GetChoicesSampleColumn() == 1,
+          "Theme gallery places DATA in column 1 and CHOICES in column 2 (dedicated Table layout)");
     Check(gallery.IsSaveSampleContained(),
           "Theme gallery Save split-button stays inside its Buttons group");
 

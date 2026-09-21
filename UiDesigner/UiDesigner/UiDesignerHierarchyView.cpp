@@ -51,7 +51,13 @@ void UiDesignerHierarchyView::HierarchyTree::LeftDown(Point p, dword flags)
 {
     ResetManualDrag(false);
     const UiTreeNodeRef pressed = GetNodeAt(p);
-    const bool accessory = p.x >= GetSize().cx - DPI(56);
+    const UiTree::Style& style = GetStyle();
+    const Rect inner = UiStyledInnerRect(GetSize(), style.metrics, style.skin);
+    int columns_width = 0;
+    const Vector<int>& widths = GetColumnWidths();
+    for(int i = 0; i < widths.GetCount(); ++i)
+        columns_width += max(DPI(16), widths[i]) + (i ? style.accessory_gap : 0);
+    const bool accessory = p.x >= inner.right - style.h_padding - columns_width;
     UiTree::LeftDown(p, flags);
 
     if(!pressed.IsValid() || accessory)
@@ -425,23 +431,27 @@ Rect UiDesignerHierarchyView::GetNameRect(int index) const
 
 Rect UiDesignerHierarchyView::GetTypeRect(int index) const
 {
-    Rect row = RectC(0, GetHeaderRect().bottom + index * DPI(30),
-                     GetSize().cx, DPI(30));
-    return Rect(row.right - DPI(150), row.top, row.right - DPI(56), row.bottom);
+    const Rect width = GetWidthModeRect(index);
+    const UiTree::Style& style = tree_.GetStyle();
+    return RectC(width.left - style.accessory_gap - DPI(94),
+                 width.top, DPI(94), width.Height());
 }
 
 Rect UiDesignerHierarchyView::GetWidthModeRect(int index) const
 {
-    Rect row = RectC(0, GetHeaderRect().bottom + index * DPI(30),
-                     GetSize().cx, DPI(30));
-    return RectC(row.right - DPI(52), row.top, DPI(24), row.Height());
+    const Rect height = GetHeightModeRect(index);
+    return RectC(height.left - tree_.GetStyle().accessory_gap - DPI(24),
+                 height.top, DPI(24), height.Height());
 }
 
 Rect UiDesignerHierarchyView::GetHeightModeRect(int index) const
 {
-    Rect row = RectC(0, GetHeaderRect().bottom + index * DPI(30),
-                     GetSize().cx, DPI(30));
-    return RectC(row.right - DPI(24), row.top, DPI(24), row.Height());
+    const UiTree::Style& style = tree_.GetStyle();
+    const Rect inner = UiStyledInnerRect(tree_.GetSize(), style.metrics, style.skin);
+    const int row_height = max(DPI(18), style.row_height);
+    return RectC(inner.right - style.h_padding - DPI(24),
+                 GetHeaderRect().bottom + inner.top + index * row_height,
+                 DPI(24), row_height);
 }
 
 void UiDesignerHierarchyView::UpdateCatalogDrop(const String& type_id, Point screen)

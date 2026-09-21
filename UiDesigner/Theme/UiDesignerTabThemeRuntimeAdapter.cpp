@@ -54,22 +54,6 @@ static void DisambiguateTabThemeIds(UiDesignerControlSpec& spec)
             property.id = String("style_") + property.id;
 }
 
-static bool FindAuthoredVisual(const UiDesignerNode& node,
-                               const UiDesignerControlSpec& spec,
-                               UiTabVisual& visual)
-{
-    for(const UiDesignerThemeOverrideSpec& property : spec.theme_overrides) {
-        if(property.adapter_field_id != "visual")
-            continue;
-        const int q = node.theme_overrides.Find(property.id);
-        if(q < 0)
-            return false;
-        visual = RuntimeTabVisual(node.theme_overrides.GetValue(q));
-        return true;
-    }
-    return false;
-}
-
 class UiDesignerTabThemeRuntimeAdapter final : public UiDesignerThemeAdapter {
 public:
     const char *Id() const override { return "tab_runtime"; }
@@ -82,6 +66,11 @@ public:
     void AddThemeOverrides(UiDesignerControlSpec& spec) const override
     {
         Base().AddThemeOverrides(spec);
+        for(int i = spec.theme_overrides.GetCount() - 1; i >= 0; --i) {
+            const String& id = spec.theme_overrides[i].adapter_field_id;
+            if(id == "visual" || id == "icon_side" || id == "tab_font_face")
+                spec.theme_overrides.Remove(i);
+        }
         DisambiguateTabThemeIds(spec);
     }
 
@@ -109,11 +98,11 @@ public:
     {
         UiTab *tab = dynamic_cast<UiTab *>(&ctrl);
         if(tab) {
-            // UiTab keeps its visual family as instance state. Resolve the
-            // effective recipe value first so the base adapter selects the
-            // matching theme variant before it applies authored fields.
-            const Value value = Base().ResolveFieldValue(
-                node, spec, "visual", overlay);
+            // The visual family is authored control configuration, not a Theme field.
+            const Value value = overlay
+                ? overlay->Resolve(node.id, UiDesignerTransientValueKind::NormalProperty,
+                                   "visual", node.GetProperty("visual", "Classic"))
+                : node.GetProperty("visual", "Classic");
             tab->SetVisual(RuntimeTabVisual(value));
         }
         Base().ApplyPreviewStyle(ctrl, node, spec, overlay);
@@ -123,23 +112,18 @@ public:
                    const UiDesignerNode& node,
                    const UiDesignerControlSpec& spec) const override
     {
-        UiTabVisual visual = UITAB_CLASSIC;
-        const bool authored_visual = FindAuthoredVisual(node, spec, visual);
+        const UiTabVisual visual = RuntimeTabVisual(node.GetProperty("visual", "Classic"));
 
         String generated;
         Base().EmitSetup(generated, member, node, spec);
 
-        if(authored_visual) {
-            // The base adapter emits a role-aware UiTab::Style recipe. Replace
-            // its resolver seed so locally authored style deltas inherit from
-            // the same visual family that the runtime instance will use.
+        if(visual != UITAB_CLASSIC) {
+            // Seed appearance deltas from the control's authored visual family.
             const String classic = "UITAB_CLASSIC";
             const int q = generated.Find(classic);
             if(q >= 0)
                 generated = generated.Left(q) + RuntimeTabVisualCode(visual) +
                             generated.Mid(q + classic.GetCount());
-            out << "\t" << member << ".SetVisual("
-                << RuntimeTabVisualCode(visual) << ");\n";
         }
 
         out << generated;
