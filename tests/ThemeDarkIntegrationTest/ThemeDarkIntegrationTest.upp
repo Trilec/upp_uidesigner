@@ -4,10 +4,11 @@ uses
     CtrlLib,
     Ui,
     Utilities/PropertyEditor,
-    UiDesigner/Theme;
+    UiDesigner/Theme,
+    UiDesigner/Preview;
 
 mainconfig
-    "CONSOLE" = "1";
+    "" = "GUI";
 
 file
     main.cpp;

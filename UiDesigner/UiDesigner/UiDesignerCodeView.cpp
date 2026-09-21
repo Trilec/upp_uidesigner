@@ -3,6 +3,27 @@
 
 namespace Upp {
 
+UiBaseEdit::Style UiDesignerReadOnlyEditStyle()
+{
+    UiBaseEdit::Style style = UiTheme::ResolveEdit(UiTheme::GetContext(), UiRole::Standard);
+    // The reusable editor's optional read-only paper uses the OS palette.
+    // Designer viewers must retain the selected application theme instead.
+    style.show_readonly_bg = false;
+    style.metrics.face_enabled = true;
+    const UiFill surface = UiTheme::ResolvePanel(UiPanelRole::Surface).palette.face[ST_NORMAL];
+    for(int state = ST_NORMAL; state <= ST_DISABLED; ++state)
+        style.palette.face[state] = surface;
+    return style;
+}
+
+void UiDesignerCodeView::RefreshTheme()
+{
+    edit_.SetCustomStyle(UiDesignerReadOnlyEditStyle());
+    copy_.SetCustomStyle(UiTheme::ResolveToolButton(UiRole::Subtle));
+    fullscreen_.SetCustomStyle(UiTheme::ResolveToolButton(UiRole::Subtle));
+    Refresh();
+}
+
 UiDesignerCodeView::UiDesignerCodeView()
 {
     Add(edit_);
@@ -34,6 +55,7 @@ UiDesignerCodeView::UiDesignerCodeView()
                .NoWantFocus();
     fullscreen_.Tip("Open generated code in a full-screen dialog");
     fullscreen_.WhenAction = [=] { ShowFullscreen(); };
+    RefreshTheme();
 }
 
 void UiDesignerCodeView::SetCode(const String& code)
@@ -67,6 +89,7 @@ void UiDesignerCodeView::ShowFullscreen()
     TopWindow dialog;
     UiMultiEdit code;
     code.SetReadOnly();
+    code.SetCustomStyle(UiDesignerReadOnlyEditStyle());
     code.SetData(GetCode());
     dialog.Title("Generated code").Sizeable().Zoomable();
     dialog.Add(code.SizePos());

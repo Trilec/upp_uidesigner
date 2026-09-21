@@ -1322,6 +1322,12 @@ void UiDesignerWindow::ApplyThemeToShell()
     ApplyUiDesignerPropertyEditorStyle(data_editor_, theme);
     ApplyUiDesignerPropertyEditorStyle(behaviors_, theme);
     ApplyUiDesignerPropertyEditorStyle(theme_inspector_, theme);
+    hierarchy_.RefreshTheme();
+    code_.RefreshTheme();
+    theme_code_.RefreshTheme();
+    diagnostics_shell_.SetCustomStyle(UiDesignerReadOnlyEditStyle());
+    data_shell_.SetCustomStyle(UiDesignerReadOnlyEditStyle());
+    diagnostics_panel_.SetCustomStyle(UiDesignerSurfaceStyle(UiRole::Standard, theme));
     // This is an intentional instance override from DesignerExportGrid, not
     // a generic theme pill. Reapply it after global theme changes.
     aspect_pill_.SetCustomStyle(UiDesignerReferencePillStyle(theme));

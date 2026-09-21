@@ -2,6 +2,7 @@
 #include <Ui/UiTheme.h>
 #include <Utilities/PropertyEditor/PropertyEditor.h>
 #include <UiDesigner/Theme/UiDesignerThemeGallery.h>
+#include <UiDesigner/Preview/UiDesignerPreview.h>
 
 using namespace Upp;
 
@@ -52,14 +53,25 @@ static void Check(bool ok, const char *what)
     }
 }
 
-CONSOLE_APP_MAIN
+GUI_APP_MAIN
 {
+    UiDesignerPreviewCanvas canvas;
+    canvas.SetRect(0, 0, 64, 64);
+    auto RootPaint = [&]() {
+        ImageDraw draw(64, 64);
+        canvas.Paint(draw);
+        Image image = draw;
+        const RGBA pixel = image[32][32];
+        return Color(pixel.r, pixel.g, pixel.b);
+    };
     UiDesignerThemeSnapshot snapshot;
     snapshot.preset = "Minimal";
 
     snapshot.mode = "Light";
     UiDesignerApplyGlobalTheme(snapshot);
     UiPanel::Style light_surface = UiTheme::ResolvePanel(UiPanelRole::Surface);
+    Check(RootPaint() == light_surface.palette.face[ST_NORMAL].color,
+          "Preview root paints the selected Light surface");
     UiLabel::Style light_label = UiTheme::ResolveLabel(UiRole::Standard);
     UiDropdown::Style light_dropdown = UiTheme::ResolveDropdown(UiRole::Accent);
     UiSlider::Style light_slider = UiTheme::ResolveSlider();
@@ -85,6 +97,8 @@ CONSOLE_APP_MAIN
     snapshot.mode = "Dark";
     UiDesignerApplyGlobalTheme(snapshot);
     UiPanel::Style dark_surface = UiTheme::ResolvePanel(UiPanelRole::Surface);
+    Check(RootPaint() == dark_surface.palette.face[ST_NORMAL].color,
+          "Existing Preview root repaints with the selected Dark surface");
     UiLabel::Style dark_label = UiTheme::ResolveLabel(UiRole::Standard);
     UiDropdown::Style dark_dropdown = UiTheme::ResolveDropdown(UiRole::Accent);
     UiSlider::Style dark_slider = UiTheme::ResolveSlider();
@@ -117,6 +131,8 @@ CONSOLE_APP_MAIN
     snapshot.mode = "Light";
     UiDesignerApplyGlobalTheme(snapshot);
     PropertyEditorStyle light_again = PropertyEditorStyle::System();
+    Check(RootPaint() == light_surface.palette.face[ST_NORMAL].color,
+          "Preview root restores its Light surface after Dark");
     Check(IsLightFace(light_again.background) && IsDarkInk(light_again.label_ink),
           "Dark to Light restores the Light PropertyEditor style");
 

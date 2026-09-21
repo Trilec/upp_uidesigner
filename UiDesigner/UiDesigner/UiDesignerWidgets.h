@@ -173,6 +173,7 @@ public:
     typedef UiDesignerHierarchyView CLASSNAME;
     UiDesignerHierarchyView();
     ~UiDesignerHierarchyView();
+    void RefreshTheme();
     void SetCatalog(const UiDesignerCatalog *catalog);
     void SetDocument(const UiDesignerDocument *document);
     void SetSelection(const UiDesignerSelection *selection);
@@ -253,10 +254,13 @@ private:
     int catalog_drop_index_ = -1;
 };
 
+UiBaseEdit::Style UiDesignerReadOnlyEditStyle();
+
 class UiDesignerCodeView : public ParentCtrl {
 public:
     typedef UiDesignerCodeView CLASSNAME;
     UiDesignerCodeView();
+    void RefreshTheme();
     void SetCode(const String& code);
     String GetCode() const;
     virtual void Layout() override;

@@ -3093,7 +3093,11 @@ void UiDesignerPreviewCanvas::Paint(Draw& w)
     const bool measure = detailed_timing_enabled_ && !capture_paused_;
     const int64 paint_start = measure ? usecs() : 0;
     stats_.full_canvas_repaints++;
-    w.DrawRect(GetSize(), SColorPaper());
+    // The Preview root belongs to the selected Ui theme, not the OS palette.
+    const UiPanel::Style surface = UiTheme::ResolvePanel(UiPanelRole::Surface);
+    const UiFill& fill = surface.palette.face[ST_NORMAL];
+    w.DrawRect(GetSize(), fill.IsSolid() && !IsNull(fill.color)
+                           ? fill.color : SColorFace());
     if(document_)
         for(const UiDesignerPreviewInstance& instance : instances_)
             if(instance.semantic)

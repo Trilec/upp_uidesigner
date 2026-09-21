@@ -73,7 +73,7 @@ UiDesignerWindowClosureHook::UiDesignerWindowClosureHook(UiDesignerWindow& owner
         // Compact left identity: project icon + Designer + version, then actions.
         window.header_layout_.PauseLayout();
         window.header_layout_.ClearItems();
-        window.header_layout_.Add(window.brand_).Fixed(DPI(120)).MinCross(DPI(30));
+        window.header_layout_.Add(window.brand_).Fit().MinMain(DPI(120)).MinCross(DPI(30));
         window.header_layout_.Add(window.version_).Fixed(DPI(82)).MinCross(DPI(24));
         window.header_layout_.Add(window.save_).Fixed(DPI(92)).MinCross(DPI(24));
         window.header_layout_.Add(window.load_).Fixed(DPI(92)).MinCross(DPI(24));

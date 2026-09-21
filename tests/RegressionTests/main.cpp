@@ -1,6 +1,7 @@
 #include <UiDesigner/Services/UiDesignerServices.h>
 #include <UiDesigner/UiDesigner/UiDesignerWidgets.h>
 #include <Utilities/PropertyEditor/PropertyEditor.h>
+#include <UiDesigner/Theme/UiDesignerThemeGallery.h>
 
 using namespace Upp;
 
@@ -52,6 +53,28 @@ static String LegacySiblingOrderJson()
 
 GUI_APP_MAIN
 {
+    UiDesignerHierarchyView themed_hierarchy;
+    UiMultiEdit readonly_viewer;
+    readonly_viewer.SetReadOnly();
+    readonly_viewer.SetRect(0, 0, 160, 100);
+    for(const char* mode : {"Light", "Dark", "Light"}) {
+        UiDesignerThemeSnapshot appearance;
+        appearance.mode = mode;
+        UiDesignerApplyGlobalTheme(appearance);
+        themed_hierarchy.RefreshTheme();
+        const UiTree* tree = dynamic_cast<UiTree*>(themed_hierarchy.GetFirstChild());
+        Check(tree && tree->GetStyle().palette.face[ST_NORMAL].color ==
+                        UiTheme::ResolveTree().palette.face[ST_NORMAL].color,
+              String("Hierarchy refreshes its own surface in ") + mode);
+        readonly_viewer.SetCustomStyle(UiDesignerReadOnlyEditStyle());
+        ImageDraw paint(160, 100);
+        readonly_viewer.Paint(paint);
+        Image rendered = paint;
+        const RGBA pixel = rendered[50][80];
+        const bool dark = pixel.r < 100 && pixel.g < 100 && pixel.b < 100;
+        Check(dark == (String(mode) == "Dark"),
+              String("Read-only code/diagnostics viewer paints selected ") + mode);
+    }
     PropertyEditorModel metadata_model;
     metadata_model.AddText("name", "Name", "button", "Identity");
     metadata_model.StructureChanged();

@@ -21,10 +21,7 @@ static UiTree::Style UiDesignerHierarchyTreeStyle()
     style.glyph_style = UITREEGLYPH_CHEVRON;
     style.metrics.frame_enabled = false;
     style.metrics.shadow.enabled = false;
-    style.selected_face = Blend(SColorHighlight(), SColorPaper(), 80);
-    style.selected_frame = style.selected_face;
-    style.hot_face = Blend(SColorFace(), SColorPaper(), 55);
-    style.hot_frame = style.hot_face;
+    // Keep the resolved theme's selection/hover colours with our layout metrics.
     return style;
 }
 
@@ -383,15 +380,24 @@ void UiDesignerHierarchyView::Layout()
                   max(0, GetSize().cy - header.bottom));
 }
 
+void UiDesignerHierarchyView::RefreshTheme()
+{
+    tree_.SetCustomStyle(UiDesignerHierarchyTreeStyle());
+    Refresh();
+}
+
 void UiDesignerHierarchyView::Paint(Draw& w)
 {
-    w.DrawRect(GetHeaderRect(), Blend(SColorFace(), SColorPaper(), 70));
+    const UiPanel::Style surface = UiTheme::ResolvePanel(UiPanelRole::Surface);
+    const Color paper = surface.palette.face[ST_NORMAL].color;
+    const Color ink = UiTheme::ResolveLabel(UiRole::Standard).palette.ink[ST_NORMAL];
+    w.DrawRect(GetHeaderRect(), paper);
     const Font normal = SansSerifZ(9);
     const Font bold = SansSerifZ(9).Bold();
-    w.DrawText(DPI(8), DPI(5), "Name", bold, SColorText());
-    w.DrawText(GetTypeRect(0).left + DPI(4), DPI(5), "Type", normal, SColorText());
-    w.DrawText(GetWidthModeRect(0).left + DPI(7), DPI(5), "W", bold, SColorText());
-    w.DrawText(GetHeightModeRect(0).left + DPI(7), DPI(5), "H", bold, SColorText());
+    w.DrawText(DPI(8), DPI(5), "Name", bold, ink);
+    w.DrawText(GetTypeRect(0).left + DPI(4), DPI(5), "Type", normal, ink);
+    w.DrawText(GetWidthModeRect(0).left + DPI(7), DPI(5), "W", bold, ink);
+    w.DrawText(GetHeightModeRect(0).left + DPI(7), DPI(5), "H", bold, ink);
 
     if(header_drop_) {
         const Color color = header_plan_.valid ? Color(34, 197, 94)
