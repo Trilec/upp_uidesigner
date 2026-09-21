@@ -1,6 +1,7 @@
 #include "UiDesignerCatalog.h"
 #include <UiDesigner/Theme/UiDesignerThemeAdapter.h>
 #include <UiDesigner/Core/UiDesignerChartRingData.h>
+#include <UiDesigner/Core/UiDesignerDateTimeData.h>
 
 namespace Upp {
 
@@ -242,7 +243,7 @@ void UiDesignerPropertySpec::AddTo(PropertyEditorModel& model,
         : bounded && kind == PropertyEditorKind::Double
             ? PropertyEditorKind::NumericDouble : kind;
     PropertyEditorItem& item = model.Add(id, label, projected_kind,
-                                         IsNull(value) ? default_value : value,
+                                         IsNull(value) && !preserve_null ? default_value : value,
                                          group);
     item.help = help;
     item.domain = domain;
@@ -538,6 +539,10 @@ bool UiDesignerCatalog::ValidateDocument(const UiDesignerDocument& document,
         const UiDesignerControlSpec* spec = Find(node.type);
         if(!spec) {
             error = "Unregistered control type: " + node.type;
+            return false;
+        }
+        if(node.type == "UiDateTime" && !UiDesignerValidateDateTimeNode(node, error)) {
+            error = node.name + ": " + error;
             return false;
         }
         if(node.type == "UiChartRing" && !UiDesignerValidateChartRingNode(node, error)) {

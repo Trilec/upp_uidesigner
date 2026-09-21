@@ -8,4 +8,6 @@ file
     UiDesignerCodeGen.h,
     UiDesignerCodeGen.cpp,
     UiDesignerModelDataCodeGen.cpp,
+    UiDesignerDateTimeCodeGen.h,
+    UiDesignerDateTimeCodeGen.cpp,
     README.md;

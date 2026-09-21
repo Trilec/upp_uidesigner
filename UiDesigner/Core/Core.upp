@@ -11,6 +11,7 @@ file
     UiDesignerDocument.h,
     UiDesignerDocument.cpp,
     UiDesignerChartRingData.h,
+    UiDesignerDateTimeData.h,
     UiDesignerOverlay.h,
     UiDesignerOverlay.cpp,
     UiDesignerSerialization.h,

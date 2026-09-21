@@ -18,5 +18,6 @@ file
     UiDesignerGridPreviewAdapter.cpp,
     UiDesignerAdvancedPreview.cpp,
     UiDesignerChartRingPreview.cpp,
+    UiDesignerDateTimePreview.cpp,
     UiDesignerPreview.cpp,
     README.md;

@@ -1,10 +1,15 @@
 #include "UiDesignerCodeGen.h"
+#include "UiDesignerDateTimeCodeGen.h"
 #include <UiDesigner/Core/UiDesignerChartRingData.h>
 
 namespace Upp {
 
 void UiDesignerCodeGenerator::EmitModelData(String& out, const UiDesignerNode& node) const
 {
+    if(node.type == "UiDateTime") {
+        UiDesignerEmitDateTimeSetup(out, MemberName(node), node);
+        return;
+    }
     if(node.type == "UiChartRing") {
         // Generate() has already validated this payload through the catalog.
         // Emit the real collection API, never the inherited no-op Ctrl::SetData.

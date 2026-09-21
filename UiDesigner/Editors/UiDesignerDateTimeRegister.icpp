@@ -1,0 +1,11 @@
+#include <Core/Core.h>
+#include "UiDesignerDateTimeEditor.h"
+
+namespace Upp {
+// U++ initialization unit: retain this registration even when the editor is
+// constructed only through its string id. No application-shell edit is needed.
+INITBLOCK
+{
+    RegisterUiDesignerDateTimeEditor();
+}
+}

@@ -1,4 +1,5 @@
 #include "UiDesignerAdvancedCatalog.h"
+#include "UiDesignerDateTimeCatalog.h"
 #include <UiDesigner/Core/UiDesignerChartRingData.h>
 
 namespace Upp {
@@ -255,6 +256,10 @@ void UiDesignerConfigureValueEditor(const UiDesignerControlSpec& spec,
                                      const UiDesignerNode& node,
                                      PropertyEditorItem& item)
 {
+    if(spec.type_id == "UiDateTime") {
+        UiDesignerConfigureDateTimeEditor(node, item);
+        return;
+    }
     if(spec.type_id != "UiRangeSliderEdit" || item.id != "value") return;
     Vector<double> domain = PropertyEditorReadVector(
         node.GetProperty("range", PropertyEditorMakeVector(0.0, 100.0)), 2);
@@ -398,6 +403,7 @@ void RegisterUiDesignerAdvancedCatalog(UiDesignerCatalog& catalog)
         ApplyWorkingSizingEditors(
             *const_cast<UiDesignerControlSpec *>(&catalog[i]));
 
+    RegisterUiDesignerDateTimeCatalog(catalog);
     if(!catalog.Find("UiProgressRing"))
         catalog.Register(MakeProgressRingSpec());
     if(!catalog.Find("UiChartRing"))

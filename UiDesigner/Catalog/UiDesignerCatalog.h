@@ -74,6 +74,7 @@ enum class UiDesignerRuntimeKind : word {
 
     UiProgressRing,
     UiChartRing,
+    UiDateTime,
 };
 
 enum class UiDesignerContentHostKind : byte {
@@ -212,6 +213,8 @@ struct UiDesignerPropertySpec : Moveable<UiDesignerPropertySpec> {
 
     Array<PropertyEditorChoice> choices;
 
+    // Null can be an authored value rather than an instruction to use the default.
+    bool preserve_null = false;
     bool resettable = true;
     bool read_only = false;
     bool designer_only = false;
@@ -225,6 +228,7 @@ struct UiDesignerPropertySpec : Moveable<UiDesignerPropertySpec> {
           default_value(other.default_value), minimum(other.minimum),
           maximum(other.maximum), step(other.step), decimals(other.decimals),
           row_span(other.row_span), expanded_row_span(other.expanded_row_span),
+          preserve_null(other.preserve_null),
           resettable(other.resettable), read_only(other.read_only),
           designer_only(other.designer_only)
     {

@@ -19,6 +19,8 @@ file
     UiDesignerPresets.cpp,
     UiDesignerAdvancedCatalog.h,
     UiDesignerAdvancedCatalog.cpp,
+    UiDesignerDateTimeCatalog.h,
+    UiDesignerDateTimeCatalog.cpp,
     UiDesignerRuntimeTheme.h,
     UiDesignerRuntimeTheme.cpp,
     UiDesignerPresetPlacement.cpp,

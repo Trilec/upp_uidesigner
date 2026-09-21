@@ -16,6 +16,7 @@ file
     UiDesignerCoreControlThemeAdapters.cpp,
     UiDesignerProgressRingThemeAdapter.cpp,
     UiDesignerChartRingThemeAdapter.cpp,
+    UiDesignerDateTimeThemeAdapter.cpp,
     UiDesignerSliderScrollBarThemeAdapterV2.cpp,
     UiDesignerContainerTabThemeAdapters.cpp,
     UiDesignerGroupPanelThemeAdapterV3.cpp,

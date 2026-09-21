@@ -1,110 +1,70 @@
 # ACTIVE WORK
 
-Remote main is authoritative. Fetch before work and immediately before publishing.
-No feature branch: Curt requested sequential coding on main, then local senior validation.
+Remote main is authoritative. Sequential coding on main; no feature branch.
+Fetch before work and immediately before publishing. Keep published and locally
+reported validation separate. The graph project's own gates are not Designer gates.
 
-## Local closure — UID-LOCAL-CLOSURE-02
+## Current checkpoint — UID-DATETIME-01
 
-BASE: Designer `6034445839be439ce763e13fb0a52a0632224021`; reusable Ui
-`57e8d38167cde7cee2bc62b0093979af86ca91ca` (held fixed during validation).
-TASK: **UID-LOCAL-CLOSURE-02 — ChartRing and existing Designer release acceptance**
-TOUCHED: Tests/RegressionTests GUI harnesses and fixtures; Core sizing migration;
-Session preset insertion; Hierarchy column geometry; Theme structural ownership;
-MCP Windows framing; ChartRing dialog background; supervisor process evidence.
-STATUS: Automated Debug and consolidated Release gates PASS after bounded repairs.
-Manual acceptance PARTIAL; this is not full release acceptance.
-PUBLISHED: resolve the commit containing this entry with `git log -1 -- docs/ACTIVE_WORK.md`.
-VALIDATION: github.var resolves the local repositories and build output;
-E:/upp-18468/umk.exe, CLANGx64, bundled Clang 21.1.1. ChartRing Debug 82/0,
-complete application compiled, complete/component runtime verifiers failed=0
-from foreign CWD without theme.json. Tests 1292/0 exit 0; RegressionTests 79/0
-exit 0; Foundation 73/0, ExportedTheme 24/0, CurrentUiIntegration 64/0, all exit 0.
-Additional Debug: ownership 89/0, coverage 9177/0, builder 57/0, closure catalog 37/0.
-ChartRing final Debug and Release each 82/0 with both runtime verifiers exit 0.
-Consolidated Release runner completed exit 0, including all 12 preset packages,
-CLI/MCP and generated application process smoke. Canonical UiDesigner.exe rebuilt.
-NEXT ACTION: investigate remaining dark hierarchy/Preview surface observations;
-finish visible ChartRing/ProgressRing, Theme and generated-application acceptance.
-See UID_LOCAL_CLOSURE_02_REPORT.md for exact completed and pending boundaries.
+BASE: `a602b446810a57a25fbb2945ae0be2822f031bf7` / main.
+Initial inspection base: `7a01c6aa2320a8d48902db028a98254710111ac0`.
+DEPENDENCY INSPECTED: upp_Ui `57e8d38167cde7cee2bc62b0093979af86ca91ca`.
+TASK: UiDateTime Designer catalog, scalar editor, Preview, Theme and generated runtime.
+TOUCHED: Catalog nullable projection/registration and validation; new Core DateTime
+value contract; Services registration/configuration; Editors registration/value editor;
+new Preview/Theme/CodeGen adapters and their .upp membership; focused tests/fixture;
+RunSupervisorValidation.ps1; this document and DATETIME_INTEGRATION.md.
+STATUS: IMPLEMENTATION COMPLETE — PLATFORM VALIDATION PENDING.
+PUBLISHED: commit containing this entry; resolve with git log -1 -- docs/ACTIVE_WORK.md.
+VALIDATION: complete touched-source reconstruction against fetched blob hashes;
+source/API/package/dependency/diff review and local git diff --check. No Windows
+compilation, executable run, or visual acceptance performed for this new checkpoint.
+NEXT ACTION: run DateTimeIntegrationTest generated-fixture script in Debug, then
+Release; rebuild canonical Designer and manually inspect Date/Time/DateTime through
+Inspector and Data. Then run the combined Designer supervisor gate.
 
-Causes repaired: two leaked test buttons triggered U++ heap-leak reporting and
-a shutdown access violation; GUI-linked aggregates lacked GUI lifecycle entry
-points; preset insertion rejected the non-catalog Window root; legacy alias
-removal reused an index invalidated by the first removal; hierarchy header/hit
-rectangles omitted the Tree's inner padding. Regression fixtures now explicitly
-author tested icons, preserve actual initial sizing, and drop into an empty root.
-The supervisor runner now explicitly waits and checks each test's exit code,
-retaining stdout/stderr under build/supervisor-<timestamp>.
-Retired Button/GroupPanel/Tab structural Theme aliases are no longer exposed;
-Tab preview/generated styles use the authored visual family (five-family coverage).
-Coverage now verifies Cardinal4 projection explicitly. Gallery column and Data
-heading assertions were stale relative to published 434cd73 and 6034445 changes.
-MCP Windows text mode doubled CR in framed headers; binary stdin/stdout repairs it.
-ChartRing dialog now paints the resolved panel surface instead of a light default.
+UiDateTime uses one local ISO datetime_value or null. Mode, seconds, bounds, null
+policy and presentation are document configuration. Untouched hidden components
+survive mode changes. Native Time values are emitted into generated C++; there is
+no generated dependency on Designer, locale parsing or the wall clock. Null must not
+be replaced by a property default. The typed-value editor supplies explicit Apply
+as well as native picker commits; UI code stays in Editors, not headless Services.
+See DATETIME_INTEGRATION.md and tests/DateTimeIntegrationTest/README.md.
 
-Evidence: build/UID-CHARTRING-01-Debug-20260921-223536;
-build/UID-LOCAL-CLOSURE-02-*; build/*-closure.*.log;
-build/Tests-owned-fixtures.*.log; build/Regression-contracts.*.log;
-build/UID-LOCAL-CLOSURE-02-supervisor-complete.log;
-build/UID-CHARTRING-01-Release-20260921-231551;
-build/UID-CHARTRING-01-Debug-20260921-231657.
+The nine dark-theme/title files were not edited in this checkpoint. Main advanced
+to a602b446 while this work was prepared; its changes were confined to those nine
+files, and the new checkpoint is based on that tip. They are preserved, not replaced.
 
-BASE: `09f281f80036e8e9c4c6a3a246be957b410244ac` / main
-TASK: **UID-CHARTRING-01 — ChartRing Designer integration**
-TOUCHED: Core segment contract; Catalog/data binding; Editors; Preview/Theme adapters;
-CodeGen collection output; application Data wiring; package manifests;
-`tests/ChartRingIntegrationTest`; `RunSupervisorValidation.ps1`; this file and
-`docs/CHARTRING_INTEGRATION.md` (complete path inventory there).
-STATUS: **IMPLEMENTATION COMPLETE — PLATFORM VALIDATION PENDING**
-PUBLISHED: commit containing this recovery entry; resolve with `git log -1 -- docs/ACTIVE_WORK.md`.
-VALIDATION: source/API/diff/package review only. No Windows compilation, execution or visual acceptance in this remote session.
-NEXT ACTION: local senior runs the focused ChartRing Debug gate, fixes genuine in-scope defects,
-then completes Designer-only RC/Theme/export closure and the consolidated Release gate.
+## Accepted/reported preceding work
 
-## Implemented source
+UID-LOCAL-CLOSURE-02 at 7a01c6aa (with the dependency above) passed automated gates:
+ChartRing Debug/Release 82/0 and complete/component runtime verifiers failed=0;
+Tests 1292/0; Regression 79/0; Foundation 73/0; ExportedTheme 24/0;
+CurrentUiIntegration 64/0; Theme ownership 89/0; adapter coverage 9177/0;
+Theme builder 57/0; closure catalog 37/0; PropertyEditor 77/0;
+UiThemeStructure 1092/0. All 12 generated presets built and the full Release
+supervisor runner exited 0. Evidence locations are retained in
+UID_LOCAL_CLOSURE_02_REPORT.md, not replaced by the new source review.
 
-- ChartRing is registered separately from ProgressRing with one authored ordered
-  `segments` property, optional total and centre text.
-- Inspector/Data share a typed segment editor: draft add/remove/reorder, automatic
-  or explicit colour, Apply as one existing command; Cancel leaves data unchanged.
-- Real UiChartRing Preview, independent Theme adapter, typed persistence and actual
-  collection API code generation. No upp_Ui or UiGraph source changes.
-- Focused integration suite plus complete/component generated-runtime verifier.
-- No new permanent Theme Studio sample tile; the existing curated gallery is unchanged.
+The senior subsequently reported ThemeDarkIntegration Debug/Release 21/0,
+Regression Debug/Release 85/0, canonical Release application build PASS and
+whitespace checks PASS for the dark surfaces/heading correction. The nine files
+are now published at a602b446. This remote session did not execute those tests.
+Curt reports the ProgressRing manual interaction and visual inspection passed.
 
-## Existing RC evidence / unfinished acceptance
+Remaining visual acceptance is NOT silently marked complete:
+- full manual Theme-role isolation;
+- side-by-side Designer Preview versus exported application comparison;
+- new DateTime picker/editor and mode/range/null/presentation interaction.
 
-PropertyEditor's prior reported Debug/Release results: 77/0; override-commit 6/0.
-Foundation semantic Tab fixture/parenting was repaired at b9bbebb...; duplicate
-Accordion test identifiers were repaired at 234367.... Latest prior recovery was
-09f281f.... Successful final Designer acceptance after those fixes is not recorded.
-Do not label them currently failing without reproducing, or passed without evidence.
+## Contracts and next scope
 
-The local senior has implementation authority for bounded Designer/ChartRing and
-Theme/export defects, with regression tests. Ordinary failures should be diagnosed,
-fixed and retested rather than bounced to Gary one assertion at a time.
-
-## Consolidated acceptance
-
-1. Pull current main in Designer and upp_Ui; record exact revisions/toolchain.
-2. Run `tests/ChartRingIntegrationTest/BuildGeneratedFixture.ps1 -DebugBuild`.
-3. Build/run affected Designer Tests, RegressionTests, FoundationTests,
-   ExportedThemeContractTest and CurrentUiIntegrationTest in Debug.
-4. Run `RunSupervisorValidation.ps1` fully (Release; now includes ChartRing).
-5. Exercise the real Designer: segment editor, property/data and Theme overrides,
-   undo/redo, save/load, export, generated application visual parity, foreign CWD,
-   ComponentOnly and user-code preservation.
-6. Record actual outputs, screenshots/log locations, tested SHAs and remaining work.
-
-The graph project's features and 10k/performance validation are NOT Designer gates.
-A dependency compile blocker matters only because it prevents the Designer build.
-
-## Boundaries retained
-
-- Canonical Document and separate Theme; commands own durable edits and undo.
-- Tab/Page/content and Accordion/Section/content semantics remain unchanged.
-- Theme preset/mode and explicit style recipes compile into runtime output.
-- Active instance override wins; disabled/reset inherits; studio_preview stays sample-only.
+- Canonical Document and separate Theme; Commands own durable edits and undo.
+- Tab/Page/content and Accordion/Section/content ownership stays unchanged.
+- Theme preset/mode and explicit recipes compile into runtime output; active local
+  overrides win, disabled/reset local overrides inherit, studio_preview is sample-only.
 - Global palette/role-slot/metric metadata is not a new production style mapping.
-- Remaining control integrations: UiDateTime, UiColorMatrix, UiMatrixSelector, UiGallery.
-- Embedded AgentFlow/assistant implementation is not part of this checkpoint.
+- Complete/component generated applications do not search CWD for theme.json.
+- Preserve user-owned code on re-export.
+- Remaining new control integrations: UiColorMatrix, UiMatrixSelector, UiGallery.
+- Embedded AgentFlow/assistant runtime/UI is a separate later checkpoint.

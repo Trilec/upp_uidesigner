@@ -11,6 +11,7 @@
 namespace Upp {
 
 const UiDesignerThemeAdapter& UiDesignerChartRingThemeAdapterInstance();
+const UiDesignerThemeAdapter& UiDesignerDateTimeThemeAdapterInstance();
 
 namespace {
 
@@ -28,6 +29,8 @@ bool IsEditRuntimeKind(UiDesignerRuntimeKind kind)
 
 const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(const String& id)
 {
+    if(id == "date_time")
+        return &UiDesignerDateTimeThemeAdapterInstance();
     if(id == "chart_ring")
         return &UiDesignerChartRingThemeAdapterInstance();
     if(id == "progress_ring")
@@ -69,6 +72,8 @@ const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(const String& id)
 
 const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(UiDesignerRuntimeKind kind)
 {
+    if(kind == UiDesignerRuntimeKind::UiDateTime)
+        return &UiDesignerDateTimeThemeAdapterInstance();
     if(kind == UiDesignerRuntimeKind::UiChartRing)
         return &UiDesignerChartRingThemeAdapterInstance();
     if(kind == UiDesignerRuntimeKind::UiProgressRing)

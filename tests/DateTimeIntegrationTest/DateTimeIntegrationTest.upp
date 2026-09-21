@@ -1,0 +1,19 @@
+description "UiDesigner DateTime authoring, persistence, Preview and generated-runtime contracts";
+
+uses
+    Core,
+    CtrlLib,
+    Ui,
+    UiDesigner/Services,
+    UiDesigner/Theme,
+    UiDesigner/Preview,
+    UiDesigner/Editors;
+
+file
+    Fixture.h,
+    main.cpp,
+    README.md,
+    BuildGeneratedFixture.ps1;
+
+mainconfig
+    "" = "GUI";
