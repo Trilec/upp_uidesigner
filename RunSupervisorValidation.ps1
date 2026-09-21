@@ -107,6 +107,11 @@ Invoke-Checked 'Creation preset generated-package builds' {
         -UmkPath $UmkPath -Assembly $Assembly -Config $Config -OutputRoot $OutputRoot
 }
 
+Invoke-Checked 'ChartRing integration and generated runtime proof' {
+    powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'tests\ChartRingIntegrationTest\BuildGeneratedFixture.ps1') `
+        -UmkPath $UmkPath -Assembly $Assembly -Config $Config -OutputRoot $OutputRoot
+}
+
 Write-Host "`nUiDesigner supervisor validation sequence completed."
 Write-Host "GUI executable: $app"
 Write-Host 'Interactive design, drag/drop and dialog validation still requires a visible desktop session.'

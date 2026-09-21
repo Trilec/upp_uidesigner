@@ -9,6 +9,9 @@
 #undef UiDesignerThemeAdapterSupports
 
 namespace Upp {
+
+const UiDesignerThemeAdapter& UiDesignerChartRingThemeAdapterInstance();
+
 namespace {
 
 bool IsEditRuntimeKind(UiDesignerRuntimeKind kind)
@@ -25,6 +28,8 @@ bool IsEditRuntimeKind(UiDesignerRuntimeKind kind)
 
 const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(const String& id)
 {
+    if(id == "chart_ring")
+        return &UiDesignerChartRingThemeAdapterInstance();
     if(id == "progress_ring")
         return &UiDesignerProgressRingThemeAdapterInstance();
     if(id == "list")
@@ -64,6 +69,8 @@ const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(const String& id)
 
 const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(UiDesignerRuntimeKind kind)
 {
+    if(kind == UiDesignerRuntimeKind::UiChartRing)
+        return &UiDesignerChartRingThemeAdapterInstance();
     if(kind == UiDesignerRuntimeKind::UiProgressRing)
         return &UiDesignerProgressRingThemeAdapterInstance();
     if(kind == UiDesignerRuntimeKind::UiList)

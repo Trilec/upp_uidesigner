@@ -6,6 +6,7 @@ uses
 	Utilities/PropertyEditor,
 	UiDesigner/Services,
 	UiDesigner/Theme,
+	UiDesigner/Editors,
 	plugin/png;
 
 file

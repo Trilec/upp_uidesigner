@@ -1,9 +1,34 @@
 #include "UiDesignerCodeGen.h"
+#include <UiDesigner/Core/UiDesignerChartRingData.h>
 
 namespace Upp {
 
 void UiDesignerCodeGenerator::EmitModelData(String& out, const UiDesignerNode& node) const
 {
+    if(node.type == "UiChartRing") {
+        // Generate() has already validated this payload through the catalog.
+        // Emit the real collection API, never the inherited no-op Ctrl::SetData.
+        Vector<UiDesignerChartRingSegment> segments;
+        String error;
+        if(!UiDesignerReadChartRingSegments(
+               node.GetProperty("segments", ValueArray()), segments, error))
+            return;
+        const String member = MemberName(node);
+        out << "\t" << member << ".ClearSegments();\n";
+        for(const auto& segment : segments)
+            out << "\t" << member << ".AddSegment("
+                << Format("%.17g", segment.value) << ", "
+                << (segment.label.IsEmpty() ? String("\"\"") : EmitValue(segment.label)) << ", "
+                << (IsNull(segment.color) ? String("Null") : EmitColor(segment.color)) << ");\n";
+        out << "\t" << member << ".SetTotal("
+            << Format("%.17g", (double)node.GetProperty("explicit_total", 0.0)) << ");\n";
+        const String text = node.GetProperty("center_text", String());
+        if(text.IsEmpty())
+            out << "\t" << member << ".ClearCenterText();\n";
+        else
+            out << "\t" << member << ".SetCenterText(" << EmitValue(text) << ");\n";
+        return;
+    }
     if(node.type != "UiList" && node.type != "UiTree") return;
     const Value value = node.GetData("root");
     if(!value.Is<ValueMap>()) return;

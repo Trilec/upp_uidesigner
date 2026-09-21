@@ -1,71 +1,64 @@
 # ACTIVE WORK
 
-Remote GitHub `main` is authoritative. Fetch both repositories before work/publish; never force-push.
-Recovery state only; Git history is implementation history.
+Remote main is authoritative. Fetch before work and immediately before publishing.
+No feature branch: Curt requested sequential coding on main, then local senior validation.
 
-TASK: **Close Foundation/generated Theme RC and finish validation**
-STATUS: **SOURCE FIXES PUBLISHED — WINDOWS VALIDATION PENDING**
-CURRENT SOURCE CHECKPOINT: `2343679341e46fb128b71596f5255b972253bfaa`
-REQUIRED upp_Ui SOURCE CHECKPOINT: `dc196091ba1452bc7bd2091124cc4391d22503a3`
+BASE: `09f281f80036e8e9c4c6a3a246be957b410244ac` / main
+TASK: **UID-CHARTRING-01 — ChartRing Designer integration**
+TOUCHED: Core segment contract; Catalog/data binding; Editors; Preview/Theme adapters;
+CodeGen collection output; application Data wiring; package manifests;
+`tests/ChartRingIntegrationTest`; `RunSupervisorValidation.ps1`; this file and
+`docs/CHARTRING_INTEGRATION.md` (complete path inventory there).
+STATUS: **IMPLEMENTATION COMPLETE — PLATFORM VALIDATION PENDING**
+PUBLISHED: commit containing this recovery entry; resolve with `git log -1 -- docs/ACTIVE_WORK.md`.
+VALIDATION: source/API/diff/package review only. No Windows compilation, execution or visual acceptance in this remote session.
+NEXT ACTION: local senior runs the focused ChartRing Debug gate, fixes genuine in-scope defects,
+then completes Designer-only RC/Theme/export closure and the consolidated Release gate.
 
-## VERIFIED INPUT
+## Implemented source
 
-PropertyEditor first-wheel repair was already Windows-validated:
-- PropertyEditorTests Debug + Release: `77/0`;
-- PropertyEditorOverrideCommitTest Debug + Release: `6/0`.
+- ChartRing is registered separately from ProgressRing with one authored ordered
+  `segments` property, optional total and centre text.
+- Inspector/Data share a typed segment editor: draft add/remove/reorder, automatic
+  or explicit colour, Apply as one existing command; Cancel leaves data unchanged.
+- Real UiChartRing Preview, independent Theme adapter, typed persistence and actual
+  collection API code generation. No upp_Ui or UiGraph source changes.
+- Focused integration suite plus complete/component generated-runtime verifier.
+- No new permanent Theme Studio sample tile; the existing curated gallery is unchanged.
 
-Foundation previously failed `16` assertions because its normal drop fixture could put ordinary
-controls directly below UiTab while canonical validation requires UiTabPage ownership.
+## Existing RC evidence / unfinished acceptance
 
-Repair already published:
-- `CanParent/CanInsert` enforce the same UiTab / UiAccordion semantic-owner structure as
-  `ValidateDocument`;
-- Foundation content lives inside the real default UiTabPage nodes;
-- CodeGen/export expectations were not weakened;
-- generation failures now print their actual diagnostic.
+PropertyEditor's prior reported Debug/Release results: 77/0; override-commit 6/0.
+Foundation semantic Tab fixture/parenting was repaired at b9bbebb...; duplicate
+Accordion test identifiers were repaired at 234367.... Latest prior recovery was
+09f281f.... Successful final Designer acceptance after those fixes is not recorded.
+Do not label them currently failing without reproducing, or passed without evidence.
 
-## LATEST WINDOWS BLOCKERS AND REPAIRS
+The local senior has implementation authority for bounded Designer/ChartRing and
+Theme/export defects, with regression tests. Ordinary failures should be diagnosed,
+fixed and retested rather than bounced to Gary one assertion at a time.
 
-Validation at UiDesigner `f777eb5822f633217432fd29f3d9106536295559` stopped compiling `Tests`.
+## Consolidated acceptance
 
-Blocker 1 was reusable upp_Ui:
-- `Vector<UiGraphPortRef>::Reserve()` relocation assertion in the compiled H2 backend.
-- fixed in upp_Ui `dc196091ba1452bc7bd2091124cc4391d22503a3` with the supported `is_upp_guest` relocation contract while
-  preserving aggregate initialization.
+1. Pull current main in Designer and upp_Ui; record exact revisions/toolchain.
+2. Run `tests/ChartRingIntegrationTest/BuildGeneratedFixture.ps1 -DebugBuild`.
+3. Build/run affected Designer Tests, RegressionTests, FoundationTests,
+   ExportedThemeContractTest and CurrentUiIntegrationTest in Debug.
+4. Run `RunSupervisorValidation.ps1` fully (Release; now includes ChartRing).
+5. Exercise the real Designer: segment editor, property/data and Theme overrides,
+   undo/redo, save/load, export, generated application visual parity, foreign CWD,
+   ComponentOnly and user-code preservation.
+6. Record actual outputs, screenshots/log locations, tested SHAs and remaining work.
 
-Blocker 2 was local test source:
-- the new semantic Accordion regression reused `accordion_drop_session`,
-  `accordion_drop`, and `accordion_drop_node` names already present later in the same
-  `CONSOLE_APP_MAIN` scope;
-- fixed in `2343679341e46fb128b71596f5255b972253bfaa` by renaming only the new fixture identifiers;
-- no behavior or expectation changed.
+The graph project's features and 10k/performance validation are NOT Designer gates.
+A dependency compile blocker matters only because it prevents the Designer build.
 
-## REQUIRED NEXT GATE
+## Boundaries retained
 
-1. Fetch both mains and verify the checkpoints above are ancestors.
-2. Build/run Designer `Tests` Debug first.
-3. If PASS, run `RegressionTests` Debug.
-4. Run `FoundationTests` Debug; require all checks PASS / exit 0.
-5. Run `ExportedThemeContractTest` Debug; require `failed=0`.
-6. Run `RunSupervisorValidation.ps1` completely.
-7. Finish generated/manual Theme fidelity:
-   - Preview -> CodeGen -> generated application;
-   - Light / Dark / non-default preset;
-   - inherited Theme recipe;
-   - active local override wins;
-   - disabled/reset local override inherits;
-   - no runtime `theme.json` CWD dependency;
-   - ComponentOnly parity;
-   - re-export preserves user code.
-8. Continue current upp_Ui automated + manual UiGraph acceptance only after Designer focused gates pass.
-
-## CONTRACTS
-
-- UiTab direct children are UiTabPage; page content lives below the page.
-- UiAccordion direct children are UiAccordionSection; section content lives below the section.
-- A valid drop plan must not create a document canonical validation rejects.
-- Designer document/data -> Preview -> CodeGen -> generated app preserves authored state.
-- ThemeDocument inheritance/override precedence remains unchanged.
-- `theme.json` is optional authoring metadata, not a generated runtime dependency.
-- Reusable defects are fixed in upp_Ui, not through Designer workarounds.
-- Do not start remaining controls or AI/AgentFlow work before RC/theme closure.
+- Canonical Document and separate Theme; commands own durable edits and undo.
+- Tab/Page/content and Accordion/Section/content semantics remain unchanged.
+- Theme preset/mode and explicit style recipes compile into runtime output.
+- Active instance override wins; disabled/reset inherits; studio_preview stays sample-only.
+- Global palette/role-slot/metric metadata is not a new production style mapping.
+- Remaining control integrations: UiDateTime, UiColorMatrix, UiMatrixSelector, UiGallery.
+- Embedded AgentFlow/assistant implementation is not part of this checkpoint.

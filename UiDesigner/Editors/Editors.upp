@@ -1,0 +1,10 @@
+description "UiDesigner-specific property value editors";
+
+uses
+    Ui,
+    Utilities/PropertyEditor,
+    UiDesigner/Core;
+
+file
+    UiDesignerChartRingEditor.h,
+    UiDesignerChartRingEditor.cpp;

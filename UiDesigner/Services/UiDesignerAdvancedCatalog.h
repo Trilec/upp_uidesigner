@@ -10,9 +10,9 @@ namespace Upp {
 // here once the corresponding Ui runtime is available.
 void RegisterUiDesignerAdvancedCatalog(UiDesignerCatalog& catalog);
 
-// Projects a Scalar-capable control's canonical `value` property into the Data
-// pane editor model. The node property remains authoritative; this helper does
-// not create or maintain a parallel data payload.
+// Projects a Scalar-capable control's catalog-bound data_property_id into the
+// Data editor model (normally value; ChartRing binds segments). The authored
+// property remains authoritative: no parallel node.data payload is maintained.
 bool UiDesignerBuildScalarDataPropertyModel(
     const UiDesignerControlSpec& spec, const UiDesignerNode& node,
     PropertyEditorModel& model);

@@ -1,5 +1,6 @@
 #include "UiDesignerCatalog.h"
 #include <UiDesigner/Theme/UiDesignerThemeAdapter.h>
+#include <UiDesigner/Core/UiDesignerChartRingData.h>
 
 namespace Upp {
 
@@ -537,6 +538,10 @@ bool UiDesignerCatalog::ValidateDocument(const UiDesignerDocument& document,
         const UiDesignerControlSpec* spec = Find(node.type);
         if(!spec) {
             error = "Unregistered control type: " + node.type;
+            return false;
+        }
+        if(node.type == "UiChartRing" && !UiDesignerValidateChartRingNode(node, error)) {
+            error = node.name + ": " + error;
             return false;
         }
         if(node.type == "UiAccordionSection" &&

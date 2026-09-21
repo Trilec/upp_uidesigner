@@ -73,6 +73,7 @@ enum class UiDesignerRuntimeKind : word {
     UppVScrollBar,
 
     UiProgressRing,
+    UiChartRing,
 };
 
 enum class UiDesignerContentHostKind : byte {
@@ -270,6 +271,9 @@ struct UiDesignerControlSpec : Moveable<UiDesignerControlSpec> {
     ValueMap data_defaults;
     UiDesignerDataCapability data_capability = UiDesignerDataCapability::None;
     String data_adapter_id;
+    // Scalar projects one existing authored property, which may itself be a
+    // structured Value. It never creates a second node.data payload.
+    String data_property_id = "value";
 
     String preview_adapter_id;
     String codegen_adapter_id;

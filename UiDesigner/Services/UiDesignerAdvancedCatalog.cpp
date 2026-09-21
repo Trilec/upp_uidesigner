@@ -1,4 +1,5 @@
 #include "UiDesignerAdvancedCatalog.h"
+#include <UiDesigner/Core/UiDesignerChartRingData.h>
 
 namespace Upp {
 
@@ -102,21 +103,21 @@ bool UiDesignerBuildScalarDataPropertyModel(
 {
     if(spec.data_capability != UiDesignerDataCapability::Scalar)
         return false;
-    const UiDesignerPropertySpec *value = spec.FindProperty("value");
+    const UiDesignerPropertySpec *value = spec.FindProperty(spec.data_property_id);
     if(!value)
         return false;
 
     model.Clear();
     UiDesignerPropertySpec projected = *value;
-    projected.group = "Scalar";
-    projected.AddTo(model, node.GetProperty("value", value->default_value), false);
-    if(PropertyEditorItem* item = model.Find("value"))
+    projected.group = "Data";
+    projected.AddTo(model, node.GetProperty(value->id, value->default_value), false);
+    if(PropertyEditorItem* item = model.Find(value->id))
         UiDesignerConfigureValueEditor(spec, node, *item);
     model.SetGroupSubtitle(
-        "Scalar", spec.display_name +
+        "Data", spec.display_name +
             " · one authored value shared by Data, Preview and code generation");
     model.StructureChanged();
-    return model.Find("value") != nullptr;
+    return model.Find(value->id) != nullptr;
 }
 
 static void FinalizeAdvancedLeaf(UiDesignerControlSpec& spec)
@@ -325,6 +326,63 @@ static UiDesignerControlSpec MakeProgressRingSpec()
     return spec;
 }
 
+static UiDesignerControlSpec MakeChartRingSpec()
+{
+    UiDesignerControlSpec spec;
+    spec.type_id = "UiChartRing";
+    spec.display_name = "Chart Ring";
+    spec.category = "Ui Controls";
+    spec.runtime_cpp_type = "UiChartRing";
+    spec.default_base_name = "chart_ring";
+    spec.help = "Proportional segments, not progress. Edit the ordered segment collection in Inspector or Data. Automatic colours follow the theme.";
+    spec.icon_key = "controls";
+    spec.runtime_kind = UiDesignerRuntimeKind::UiChartRing;
+    spec.default_size = Size(144, 144);
+    spec.minimum_size = Size(48, 48);
+    FinalizeAdvancedLeaf(spec);
+    spec.data_capability = UiDesignerDataCapability::Scalar;
+    spec.data_adapter_id = "scalar";
+    spec.data_property_id = "segments";
+
+    ValueArray initial;
+    initial.Add(UiDesignerChartRingSegmentValue(40, "First"));
+    initial.Add(UiDesignerChartRingSegmentValue(35, "Second"));
+    initial.Add(UiDesignerChartRingSegmentValue(25, "Third"));
+    UiDesignerPropertySpec segments;
+    segments.id = "segments";
+    segments.label = "Segments";
+    segments.group = "Data";
+    segments.domain = PropertyEditorDomain::Content;
+    segments.Editor("designer.chart-ring.segments");
+    segments.default_value = initial;
+    segments.help = "Ordered value / label / optional colour records. Apply commits one undoable edit; Cancel leaves the document unchanged.";
+    segments.impact = PropertyImpactControlState | PropertyImpactPaint | PropertyImpactCode;
+    spec.defaults.Set(segments.id, initial);
+    spec.properties.Add(pick(segments));
+
+    UiDesignerPropertySpec total;
+    total.id = "explicit_total";
+    total.label = "Total (0 = automatic)";
+    total.group = "Configuration";
+    total.kind = PropertyEditorKind::Double;
+    total.domain = PropertyEditorDomain::Behaviour;
+    total.default_value = 0.0;
+    total.minimum = 0.0;
+    total.step = 1.0;
+    total.help = "0 normalizes against the segment sum. A larger explicit total leaves a visible remainder. A smaller total is resolved by the runtime.";
+    total.impact = PropertyImpactControlState | PropertyImpactPaint | PropertyImpactCode;
+    spec.defaults.Set(total.id, total.default_value);
+    spec.properties.Add(pick(total));
+    UiDesignerPropertySpec text = UiDesignerTextProperty("center_text", "Center text");
+    spec.defaults.Set(text.id, text.default_value);
+    spec.properties.Add(pick(text));
+
+    // No invented action events: the reusable chart is presentation-only.
+    spec.theme = true;
+    spec.theme_adapter_id = "chart_ring";
+    return spec;
+}
+
 void RegisterUiDesignerAdvancedCatalog(UiDesignerCatalog& catalog)
 {
     if(UiDesignerControlSpec *tool = MutableSpec(catalog, "UiToolButton"))
@@ -342,6 +400,8 @@ void RegisterUiDesignerAdvancedCatalog(UiDesignerCatalog& catalog)
 
     if(!catalog.Find("UiProgressRing"))
         catalog.Register(MakeProgressRingSpec());
+    if(!catalog.Find("UiChartRing"))
+        catalog.Register(MakeChartRingSpec());
     if(!catalog.Find("UiRangeSlider"))
         catalog.Register(MakeRangeSliderSpec());
     if(!catalog.Find("UiRangeSliderEdit"))

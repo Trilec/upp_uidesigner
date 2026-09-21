@@ -1,0 +1,19 @@
+description "ChartRing Designer data, editor, Preview, Theme and generated output contracts";
+
+uses
+    Core,
+    CtrlLib,
+    Ui,
+    UiDesigner/Services,
+    UiDesigner/Preview,
+    UiDesigner/Theme,
+    UiDesigner/Editors;
+
+file
+    main.cpp,
+    Fixture.h,
+    BuildGeneratedFixture.ps1,
+    README.md;
+
+mainconfig
+    "" = "GUI";

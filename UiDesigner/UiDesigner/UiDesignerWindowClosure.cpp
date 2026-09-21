@@ -1,6 +1,7 @@
 #include "UiDesignerWindow.h"
 #include <Ui/UiIcons.h>
 #include <UiDesigner/Services/UiDesignerAdvancedCatalog.h>
+#include <UiDesigner/Editors/UiDesignerChartRingEditor.h>
 #include <plugin/png/png.h>
 #include "UiDesignerBrand.brc"
 
@@ -30,6 +31,7 @@ void UiDesignerWindow::Paint(Draw& w)
 
 UiDesignerWindowClosureHook::UiDesignerWindowClosureHook(UiDesignerWindow& owner)
 {
+    RegisterUiDesignerChartRingEditor();
     Ptr<UiDesignerWindow> safe = &owner;
     PostCallback([safe] {
         if(!safe)
@@ -156,6 +158,8 @@ UiDesignerWindowClosureHook::UiDesignerWindowClosureHook(UiDesignerWindow& owner
             if(!safe)
                 return;
             UiDesignerWindow& w = *safe;
+            if(w.data_projection_refreshing_)
+                return;
             const UiDesignerNodeId selected = w.session_.State().selection.primary;
             const UiDesignerNode *node = selected
                 ? w.session_.Document().Find(selected) : nullptr;
@@ -164,13 +168,17 @@ UiDesignerWindowClosureHook::UiDesignerWindowClosureHook(UiDesignerWindow& owner
             if(!node || !spec ||
                spec->data_capability != UiDesignerDataCapability::Scalar)
                 return;
+            const UiDesignerPropertySpec* property = spec->FindProperty(spec->data_property_id);
+            if(!property)
+                return;
 
             const bool prior_guard = w.data_projection_refreshing_;
             w.data_projection_refreshing_ = true;
+            const String token = "scalar:" + property->id;
             w.data_model_.Clear();
-            w.data_model_.Add("Value", String("scalar:value"), true);
-            w.data_list_.SetData(String("scalar:value"));
-            w.data_selected_token_ = String("scalar:value");
+            w.data_model_.Add(property->label, token, true);
+            w.data_list_.SetData(token);
+            w.data_selected_token_ = token;
 
             if(!UiDesignerBuildScalarDataPropertyModel(
                    *spec, *node, w.data_editor_model_)) {
@@ -193,12 +201,12 @@ UiDesignerWindowClosureHook::UiDesignerWindowClosureHook(UiDesignerWindow& owner
             w.data_projection_refreshing_ = prior_guard;
         };
 
-        // The normal Data handler deliberately ignores Scalar controls. Append
-        // the scalar path so the canonical property continues through the same
-        // Session command/undo/Preview/codegen pipeline.
+        // One-property Data projections use the same Session command path as
+        // Inspector. The catalog identifies that property (normally value;
+        // ChartRing uses its ordered segments collection).
         window.data_editor_.WhenCommit << [safe](const String& id,
                                                   const Value& value) {
-            if(!safe || id != "value")
+            if(!safe)
                 return;
             UiDesignerWindow& w = *safe;
             const UiDesignerNodeId selected = w.session_.State().selection.primary;
@@ -207,14 +215,15 @@ UiDesignerWindowClosureHook::UiDesignerWindowClosureHook(UiDesignerWindow& owner
             const UiDesignerControlSpec *spec = node
                 ? w.session_.Catalog().Find(node->type) : nullptr;
             if(!node || !spec ||
-               spec->data_capability != UiDesignerDataCapability::Scalar)
+               spec->data_capability != UiDesignerDataCapability::Scalar ||
+               id != spec->data_property_id)
                 return;
             String error;
-            if(!w.session_.CommitProperty("value", value, error))
+            if(!w.session_.CommitProperty(id, value, error))
                 w.RefreshStatus(error);
         };
         window.data_editor_.WhenReset << [safe](const String& id) {
-            if(!safe || id != "value")
+            if(!safe)
                 return;
             UiDesignerWindow& w = *safe;
             const UiDesignerNodeId selected = w.session_.State().selection.primary;
@@ -223,10 +232,11 @@ UiDesignerWindowClosureHook::UiDesignerWindowClosureHook(UiDesignerWindow& owner
             const UiDesignerControlSpec *spec = node
                 ? w.session_.Catalog().Find(node->type) : nullptr;
             if(!node || !spec ||
-               spec->data_capability != UiDesignerDataCapability::Scalar)
+               spec->data_capability != UiDesignerDataCapability::Scalar ||
+               id != spec->data_property_id)
                 return;
             String error;
-            if(!w.session_.ResetProperty("value", error))
+            if(!w.session_.ResetProperty(id, error))
                 w.RefreshStatus(error);
         };
 

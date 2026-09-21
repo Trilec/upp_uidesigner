@@ -10,6 +10,7 @@ file
     UiDesignerSizing.h,
     UiDesignerDocument.h,
     UiDesignerDocument.cpp,
+    UiDesignerChartRingData.h,
     UiDesignerOverlay.h,
     UiDesignerOverlay.cpp,
     UiDesignerSerialization.h,
