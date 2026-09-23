@@ -25,6 +25,7 @@ public:
 
     UiDesignerThemeGalleryV2();
 
+    void SetCatalog(const UiDesignerCatalog* catalog);
     void SetThemeDocument(UiDesignerThemeDocument *theme);
     void SetPanelRole(UiRole role);
     void SetControlRole(UiRole role);

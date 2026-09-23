@@ -4,7 +4,35 @@ Remote main is authoritative. Sequential coding on main; no feature branch.
 Fetch before work and immediately before publishing. Keep published and locally
 reported validation separate. The graph project's own gates are not Designer gates.
 
-## Current checkpoint — UID-DATETIME-01
+## Current Theme Studio repair — UID-STUDIO-LIVE-01
+
+BASE: `2ecd474b64d972a48f074feee0ebeee1d6133088` / main.
+DEPENDENCY: upp_Ui `8114269abd91cc33569f68117bef4fd4d537897a` (native Tab paint repair).
+TASK: live independent Panel/Control Role preview, populated Table, dark active Tab.
+TOUCHED: `UiDesigner/Theme/UiDesignerThemeBuilderV2.{h,cpp}`;
+`tests/ThemeStudioRoleTest/{main.cpp,ThemeStudioRoleTest.upp}`;
+`docs/THEME_STUDIO_LIVE_ROLES.md`; this file.
+STATUS: IMPLEMENTATION COMPLETE — PLATFORM VALIDATION PENDING.
+PUBLISHED: commit containing this entry; recover with `git log -1 -- tests/ThemeStudioRoleTest/main.cpp`.
+VALIDATION: complete pinned originals reconstructed with matching Git blob hashes;
+source/API/package/full-diff review and local git diff --check PASS. No Windows
+compile or executable/visual result is claimed for this new checkpoint.
+NEXT ACTION: Gary pulls both mains, builds/runs only ThemeStudioRoleTest and
+Utilities/UiTabThemePaintTest, builds canonical Release UiDesigner.exe and leaves
+it open. Curt performs all visual acceptance. No full regression matrix here.
+
+The role dropdowns now consume WhenSelectData, not the non-selection WhenAction.
+Programmatic synchronization is silent and uses item data. Existing sample adapter
+updates preserve independent role axes; omitted compound slider/editor and
+breadcrumb samples now update too. Table has three named columns and six rows,
+with mode/Control Role presentation independent of its GroupPanel's Panel Role.
+Native UiTab no longer invents an OS light face for a transparent active cap.
+Read THEME_STUDIO_LIVE_ROLES.md for scope, regression markers and visual checks.
+
+The next section retains the separate DateTime validation boundary; it is not a
+requirement to rerun that whole task before Curt can inspect these visual repairs.
+
+## Retained DateTime checkpoint — UID-DATETIME-01
 
 BASE: `a602b446810a57a25fbb2945ae0be2822f031bf7` / main.
 Initial inspection base: `7a01c6aa2320a8d48902db028a98254710111ac0`.
@@ -15,7 +43,7 @@ value contract; Services registration/configuration; Editors registration/value 
 new Preview/Theme/CodeGen adapters and their .upp membership; focused tests/fixture;
 RunSupervisorValidation.ps1; this document and DATETIME_INTEGRATION.md.
 STATUS: IMPLEMENTATION COMPLETE — PLATFORM VALIDATION PENDING.
-PUBLISHED: commit containing this entry; resolve with git log -1 -- docs/ACTIVE_WORK.md.
+PUBLISHED: `2ecd474b64d972a48f074feee0ebeee1d6133088`.
 VALIDATION: complete touched-source reconstruction against fetched blob hashes;
 source/API/package/dependency/diff review and local git diff --check. No Windows
 compilation, executable run, or visual acceptance performed for this new checkpoint.

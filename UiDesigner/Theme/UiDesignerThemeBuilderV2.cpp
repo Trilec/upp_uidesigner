@@ -104,6 +104,24 @@ UiDesignerThemeGalleryV2::UiDesignerThemeGalleryV2()
                    .SetSubTitle("Tabular selection and scrolling");
     feedback_group_.Add(table_);
 
+    // Illustrative data belongs to the gallery, never to the reusable table.
+    // Build it once: changing a role must not reset selection, edits or scroll.
+    UiTableModel& model = table_.Model();
+    model.SetSize(6, 3);
+    model.SetHeader(UITABLE_COLUMN_AXIS, 0, UiTableHeader("Item"));
+    model.SetHeader(UITABLE_COLUMN_AXIS, 1, UiTableHeader("Status"));
+    model.SetHeader(UITABLE_COLUMN_AXIS, 2, UiTableHeader("Count"));
+    const char* items[] = {"Layout", "Buttons", "Inputs", "Navigation", "Data", "Export"};
+    const char* states[] = {"Ready", "Selected", "Editing", "Ready", "Review", "Queued"};
+    for(int row = 0; row < 6; ++row) {
+        model.SetHeader(UITABLE_ROW_AXIS, row, UiTableHeader(AsString(row + 1)));
+        model.SetCellValue(row, 0, items[row]);
+        model.SetCellValue(row, 1, states[row]);
+        model.SetCellValue(row, 2, (row + 1) * 3);
+    }
+    table_.SetColumnWidth(0, DPI(108)).SetColumnWidth(1, DPI(96))
+          .SetColumnWidth(2, DPI(64)).SetActiveCell(1, 1);
+
     RebuildColumnPlacement();
     RebindPanelSamples();
     ApplyThemeStylesV2();
@@ -152,6 +170,14 @@ void UiDesignerThemeGalleryV2::RebindPanelSamples()
     bind(container_numeric_panel_, "UiPanel");
     bind(container_choice_group_, "UiGroupPanel");
     bind(container_scroll_panel_, "UiScrollPanel");
+}
+
+void UiDesignerThemeGalleryV2::SetCatalog(const UiDesignerCatalog* catalog)
+{
+    UiDesignerThemeGallery::SetCatalog(catalog);
+    // The legacy catalog setter applies legacy panel-role defaults. Finish
+    // with the two universal role axes even when the catalog is rebound later.
+    ApplyThemeStylesV2();
 }
 
 void UiDesignerThemeGalleryV2::SetThemeDocument(
@@ -429,6 +455,11 @@ void UiDesignerThemeGalleryV2::ApplyThemeStylesV2()
     ApplySampleThemeV2(inputs_group_, "UiGroupPanel", true);
     ApplySampleThemeV2(line_edit_, "UiLineEdit", false);
     ApplySampleThemeV2(multi_edit_, "UiMultiEdit", false);
+    ApplySampleThemeV2(slider_edit_.Slider(), "UiSlider", false);
+    ApplySampleThemeV2(slider_edit_.Field(), "UiFloatEdit", false);
+    // This composition has no independent catalog recipe. Its two text roles
+    // still preview the selected Control Role and refresh with the current mode.
+    breadcrumbs_.ClearCustomStyle().SetRoles(control_role_, control_role_);
     ApplySampleThemeV2(data_group_, "UiGroupPanel", true);
     ApplySampleThemeV2(list_, "UiList", false);
     ApplySampleThemeV2(tree_, "UiTree", false);
@@ -458,10 +489,35 @@ void UiDesignerThemeGalleryV2::ApplyThemeStylesV2()
     ApplySampleThemeV2(container_scroll_panel_, "UiScrollPanel", true);
     ApplySampleThemeV2(container_scroll_label_, "UiLabel", false);
 
-    // The table has no Theme Studio catalog recipe of its own yet, so it must
-    // remain on the reusable UiTheme path rather than retaining a stale
-    // custom/default palette across Light/Dark switches.
+    // The Table has no editable gallery recipe yet. Start with its complete
+    // current-mode theme (including dark warning/error colours), then project
+    // this sample's Control Role through existing semantic resolvers. Its
+    // surrounding GroupPanel remains on the independent Panel Role.
     table_.ClearCustomStyle();
+    UiTable::Style table_style = table_.GetStyle();
+    const UiPanel::Style table_surface = UiTheme::ResolvePanel(control_role_);
+    const UiLabel::Style table_text = UiTheme::ResolveLabel(control_role_);
+    const UiList::Style table_selection = UiTheme::ResolveList(control_role_);
+    const UiDropdown::Style table_edge = UiTheme::ResolveDropdown(control_role_);
+    if(table_surface.palette.face[ST_NORMAL].IsSolid())
+        table_style.table_bg = table_surface.palette.face[ST_NORMAL].color;
+    table_style.header_bg = table_surface.palette.face[ST_HOT].IsSolid()
+        ? table_surface.palette.face[ST_HOT].color : table_style.table_bg;
+    table_style.header_hot_bg = table_edge.palette.face[ST_HOT].IsSolid()
+        ? table_edge.palette.face[ST_HOT].color : table_style.header_bg;
+    table_style.row_header_bg = table_style.header_bg;
+    table_style.header_ink = table_style.cell_ink = table_text.palette.ink[ST_NORMAL];
+    table_style.muted_ink = table_text.palette.ink[ST_DISABLED];
+    if(!IsNull(table_selection.selected_face))
+        table_style.selection_bg = table_selection.selected_face;
+    table_style.active_bg = table_style.selection_bg;
+    if(!IsNull(table_edge.palette.frame[ST_PRESSED]))
+        table_style.active_border = table_style.selection_border =
+            table_style.resize_guide = table_edge.palette.frame[ST_PRESSED];
+    table_style.show_column_headers = true;
+    table_style.show_row_headers = true;
+    table_style.row_header_width = DPI(30);
+    table_.SetCustomStyle(table_style);
 
     Layout();
     Refresh();
@@ -520,18 +576,22 @@ UiDesignerThemeToolbarV2::UiDesignerThemeToolbarV2()
                       .Add("Subtle", (int)UiRole::Subtle)
                       .Add("Accent", (int)UiRole::Accent)
                       .Add("Alert", (int)UiRole::Alert);
-    panel_role_drop_.Select((int)panel_role_v2_);
-    control_role_drop_.Select((int)control_role_v2_);
+    panel_role_drop_.SetDataSilently((int)panel_role_v2_);
+    control_role_drop_.SetDataSilently((int)control_role_v2_);
     panel_role_drop_.Tip("Panel Role: Standard / Subtle / Accent / Alert — does not change Control Role");
     control_role_drop_.Tip("Control Role: Standard / Subtle / Accent / Alert — does not change Panel Role");
 
-    panel_role_drop_.WhenAction = [=] {
-        if(!syncing_)
-            SetPanelRoleV2((UiRole)(int)panel_role_drop_.GetData());
+    // UiDropdown selection publishes WhenSelectData, not Ctrl::WhenAction.
+    // Remove the legacy callbacks so a selection has exactly one route.
+    panel_role_drop_.WhenAction.Clear();
+    control_role_drop_.WhenAction.Clear();
+    panel_role_drop_.WhenSelectData = [=](Value value) {
+        if(!syncing_ && !IsNull(value))
+            SetPanelRoleV2((UiRole)(int)value);
     };
-    control_role_drop_.WhenAction = [=] {
-        if(!syncing_)
-            SetControlRoleV2((UiRole)(int)control_role_drop_.GetData());
+    control_role_drop_.WhenSelectData = [=](Value value) {
+        if(!syncing_ && !IsNull(value))
+            SetControlRoleV2((UiRole)(int)value);
     };
 }
 
@@ -552,7 +612,7 @@ void UiDesignerThemeToolbarV2::SetPanelRoleV2(UiRole role)
         role = UiRole::Standard;
     panel_role_v2_ = role;
     syncing_ = true;
-    panel_role_drop_.Select((int)role);
+    panel_role_drop_.SetDataSilently((int)role);
     syncing_ = false;
     if(gallery_v2_)
         gallery_v2_->SetPanelRole(role);
@@ -567,7 +627,7 @@ void UiDesignerThemeToolbarV2::SetControlRoleV2(UiRole role)
     control_role_v2_ = role;
     control_role_ = role;
     syncing_ = true;
-    control_role_drop_.Select((int)role);
+    control_role_drop_.SetDataSilently((int)role);
     syncing_ = false;
     if(gallery_v2_)
         gallery_v2_->SetControlRole(role);

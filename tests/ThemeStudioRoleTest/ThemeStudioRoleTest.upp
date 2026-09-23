@@ -1,0 +1,12 @@
+description "Theme Studio dropdown-to-sample live role and table regressions";
+
+uses
+    CtrlLib,
+    Ui,
+    UiDesigner/Theme;
+
+file
+    main.cpp;
+
+mainconfig
+    "" = "GUI";
