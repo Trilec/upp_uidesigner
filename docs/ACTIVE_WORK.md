@@ -12,14 +12,20 @@ TASK: live independent Panel/Control Role preview, populated Table, dark active 
 TOUCHED: `UiDesigner/Theme/UiDesignerThemeBuilderV2.{h,cpp}`;
 `tests/ThemeStudioRoleTest/{main.cpp,ThemeStudioRoleTest.upp}`;
 `docs/THEME_STUDIO_LIVE_ROLES.md`; this file.
-STATUS: IMPLEMENTATION COMPLETE — PLATFORM VALIDATION PENDING.
+STATUS: WINDOWS FOCUSED VALIDATION COMPLETE — CURT VISUAL ACCEPTANCE PENDING.
 PUBLISHED: commit containing this entry; recover with `git log -1 -- tests/ThemeStudioRoleTest/main.cpp`.
 VALIDATION: complete pinned originals reconstructed with matching Git blob hashes;
 source/API/package/full-diff review and local git diff --check PASS. No Windows
 compile or executable/visual result is claimed for this new checkpoint.
-NEXT ACTION: Gary pulls both mains, builds/runs only ThemeStudioRoleTest and
-Utilities/UiTabThemePaintTest, builds canonical Release UiDesigner.exe and leaves
-it open. Curt performs all visual acceptance. No full regression matrix here.
+WINDOWS FOLLOW-UP: the first Release run passed UiTabThemePaintTest 21/0 but
+exposed 30 deterministic ThemeStudioRoleTest failures. The bounded repair makes
+UiPanel Standard resolve the universal role instead of the legacy Surface
+fallback, makes the Slider adapter role-aware, and rebuilds Breadcrumbs role ink
+when the live Control Role changes. Final Release validation passes
+UiTabThemePaintTest 21/0 and ThemeStudioRoleTest 340/0, both exit 0; canonical
+Release UiDesigner.exe also compiles and links successfully. The repair is
+published in the commit containing this entry; Curt performs all visual
+acceptance from the launched canonical executable. No full regression matrix here.
 
 The role dropdowns now consume WhenSelectData, not the non-selection WhenAction.
 Programmatic synchronization is silent and uses item data. Existing sample adapter

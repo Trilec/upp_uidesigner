@@ -228,27 +228,23 @@ public:
         UiPanel *c = dynamic_cast<UiPanel *>(&ctrl);
         if(!c) return;
         UiPanel::Style s = UiTheme::ResolvePanel(ContainerRole(node));
-        bool authored = false;
         for(const UiDesignerThemeOverrideSpec& p : spec.theme_overrides) {
             bool active = false;
             Value v = Effective(node, p, overlay, active);
             if(active) {
-                authored = true;
                 ApplyPanelCommon(s.palette, s.metrics, s.transparent,
                                  p.adapter_field_id, v);
             }
         }
-        if(authored || ContainerRole(node) != UiRole::Standard)
-            c->SetCustomStyle(s);
-        else
-            c->ClearCustomStyle();
+        // UiPanel's reusable no-argument default resolves the legacy Surface
+        // panel role. Theme Studio uses the universal UiRole axis, where
+        // Standard is intentionally distinct for role-tuned presets.
+        c->SetCustomStyle(s);
     }
     void EmitSetup(String& out, const String& member,
                    const UiDesignerNode& node,
                    const UiDesignerControlSpec& spec) const override
     {
-        if(!HasAuthored(node, spec) && ContainerRole(node) == UiRole::Standard)
-            return;
         const String var = member + "_style";
         out << "\tUiPanel::Style " << var << " = UiTheme::ResolvePanel("
             << RoleExpr(node.GetProperty("role", "Standard")) << ");\n";

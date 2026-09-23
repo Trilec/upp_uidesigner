@@ -459,7 +459,10 @@ void UiDesignerThemeGalleryV2::ApplyThemeStylesV2()
     ApplySampleThemeV2(slider_edit_.Field(), "UiFloatEdit", false);
     // This composition has no independent catalog recipe. Its two text roles
     // still preview the selected Control Role and refresh with the current mode.
-    breadcrumbs_.ClearCustomStyle().SetRoles(control_role_, control_role_);
+    UiBreadcrumbs::Style breadcrumb_style = UiBreadcrumbs::ResolveThemeStyle();
+    breadcrumb_style.text_role = control_role_;
+    breadcrumb_style.current_role = control_role_;
+    breadcrumbs_.SetCustomStyle(breadcrumb_style);
     ApplySampleThemeV2(data_group_, "UiGroupPanel", true);
     ApplySampleThemeV2(list_, "UiList", false);
     ApplySampleThemeV2(tree_, "UiTree", false);
