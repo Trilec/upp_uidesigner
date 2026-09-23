@@ -6,8 +6,10 @@ attachment (checkpoint B) is pending. Curt retains final visual/design judgement
 ## Source and ownership
 
 Designer started at `ec6c541d2040cbd1b390339aec1e661844f89980`; that commit was
-already on origin/main when fetched, and is preserved. Implementation publication
-is recorded in ACTIVE_WORK.md. No reset, rebase or force push was used.
+already on origin/main when fetched, and is preserved. Implementation commit
+`c5e09de9c43d34349e874a8cabfc17c6b373036d` was pushed, fetched and verified on
+origin/main. A subsequent documentation-only commit records that publication;
+the tested executable source is unchanged. No reset, rebase or force push was used.
 
 Reusable Ui started at `297beabdea87e3cc2c32282968e262ef68392abb`. During this task
 another workflow advanced that checkout to
@@ -120,5 +122,7 @@ wait for the bounded network worker to finish cancellation. Conversation is
 memory-only; no durable replay, shell access or background jobs exist.
 
 Full source diff, package membership and declarations were reviewed. Whitespace
-checks passed. Designer cleanliness and remote containment are verified after
-publication; the unrelated reusable-Ui example edit remains user-owned.
+checks passed. Designer was clean after the implementation commit; its remote
+identity matched the local commit after fetch. The unrelated reusable-Ui example
+edit remains user-owned. The final documentation commit and final cleanliness
+are reported in the task handoff.

@@ -13,9 +13,10 @@ reported validation separate. The graph project's own gates are not Designer gat
 - TOUCHED: AppChat, Assistant/AssistantUi, shared Commands/Services/ThemeCore,
   native window, assistant tests, validation runner and documentation.
 - STATUS: PASS for embedded functional checkpoint A; final visual judgement is Curt's.
-- PUBLISHED: pending final checkpoint validation.
+- PUBLISHED: `c5e09de9c43d34349e874a8cabfc17c6b373036d`; fetched and confirmed
+  on origin/main after push. The following documentation-only commit records publication.
 - VALIDATION: see `ASSISTANT_IMPLEMENTATION_REPORT.md` for final evidence.
-- NEXT ACTION: publish verified A; optional live MCP attachment B remains pending.
+- NEXT ACTION: Curt's final visual judgement; optional live MCP attachment B remains pending.
   AgentFlow integration is not part of this task.
 
 ## Current Theme Studio repair — UID-STUDIO-LIVE-01
