@@ -1,4 +1,5 @@
 #include "UiDesignerSession.h"
+#include "UiDesignerExport.h"
 #include <UiDesigner/Theme/UiDesignerThemeAdapter.h>
 
 namespace Upp {
@@ -1114,14 +1115,18 @@ bool UiDesignerSession::Redo()
 
 String UiDesignerSession::GenerateCode(const String& class_name) const
 {
-    UiDesignerCodeGenerator generator(catalog_);
-    return generator.GenerateSource(document_, class_name);
+    UiDesignerExportRequest request;
+    request.generation.class_name = class_name;
+    String error;
+    return UiDesignerExportService(catalog_).BuildCppProject(document_, theme_, request, error).source;
 }
 
 String UiDesignerSession::GenerateHeader(const String& class_name) const
 {
-    UiDesignerCodeGenerator generator(catalog_);
-    return generator.GenerateHeader(document_, class_name);
+    UiDesignerExportRequest request;
+    request.generation.class_name = class_name;
+    String error;
+    return UiDesignerExportService(catalog_).BuildCppProject(document_, theme_, request, error).header;
 }
 
 }

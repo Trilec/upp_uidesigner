@@ -909,6 +909,23 @@ String UiDesignerThemeDocument::Serialize(bool pretty) const
     return AsJSON(root, pretty);
 }
 
+bool UiDesignerThemeDocument::ImportTheme(const String& json, String& error)
+{
+    UiDesignerThemeDocument loaded;
+    if(!loaded.Deserialize(json, error))
+        return false;
+    return CommitSnapshot(loaded.Get(), "Load theme", error);
+}
+
+bool UiDesignerThemeDocument::ResetCustomizations(String& error)
+{
+    UiDesignerThemeSnapshot defaults;
+    defaults.preset = value_.preset;
+    defaults.mode = value_.mode;
+    defaults.SyncLegacyAccent();
+    return CommitSnapshot(defaults, "Reset theme customisations", error);
+}
+
 bool UiDesignerThemeDocument::Deserialize(
     const String& json, String& error)
 {

@@ -124,6 +124,13 @@ CONSOLE_APP_MAIN
           "disabled local override is not emitted over inherited recipe");
     Check(generated.Find("theme.json") < 0,
           "generated runtime has no theme.json working-directory dependency");
+    Check(session.GenerateCode("ThemeWindow") == generated,
+          "Designer code view matches exported theme-aware source");
+    const String project_path = AppendFileName(temp, "saved.uidesign.json");
+    Check(session.Save(project_path, error), "project with authored theme saves");
+    UiDesignerSession restored;
+    Check(restored.Load(project_path, error) && restored.Theme().Serialize(false) == theme.Serialize(false),
+          "project reload restores preset, mode and complete authored theme");
 
     const String design_path = AppendFileName(request.destination, "design.json");
     Check(LoadFile(design_path) == UiDesignerSerialize(session.Document(), true),

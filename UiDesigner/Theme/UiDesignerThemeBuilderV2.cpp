@@ -107,13 +107,13 @@ UiDesignerThemeGalleryV2::UiDesignerThemeGalleryV2()
     // Illustrative data belongs to the gallery, never to the reusable table.
     // Build it once: changing a role must not reset selection, edits or scroll.
     UiTableModel& model = table_.Model();
-    model.SetSize(6, 3);
+    model.SetSize(4, 3);
     model.SetHeader(UITABLE_COLUMN_AXIS, 0, UiTableHeader("Item"));
     model.SetHeader(UITABLE_COLUMN_AXIS, 1, UiTableHeader("Status"));
     model.SetHeader(UITABLE_COLUMN_AXIS, 2, UiTableHeader("Count"));
     const char* items[] = {"Layout", "Buttons", "Inputs", "Navigation", "Data", "Export"};
     const char* states[] = {"Ready", "Selected", "Editing", "Ready", "Review", "Queued"};
-    for(int row = 0; row < 6; ++row) {
+    for(int row = 0; row < 4; ++row) {
         model.SetHeader(UITABLE_ROW_AXIS, row, UiTableHeader(AsString(row + 1)));
         model.SetCellValue(row, 0, items[row]);
         model.SetCellValue(row, 1, states[row]);
@@ -122,6 +122,15 @@ UiDesignerThemeGalleryV2::UiDesignerThemeGalleryV2()
     table_.SetColumnWidth(0, DPI(108)).SetColumnWidth(1, DPI(96))
           .SetColumnWidth(2, DPI(64)).SetActiveCell(1, 1);
 
+    rings_group_.SetTitle("RINGS").SetSubTitle("Progress and segmented chart");
+    rings_group_.Add(progress_ring_);
+    rings_group_.Add(chart_ring_);
+    progress_ring_.Set(68, 100);
+    chart_ring_.AddSegment(45, "Ready").AddSegment(30, "Active").AddSegment(25, "Queued");
+    chart_ring_.SetCenterText("Segments");
+    progress_ring_.WhenThemeSelect = [=] { SelectSample("UiProgressRing", &progress_ring_, false); };
+    chart_ring_.WhenThemeSelect = [=] { SelectSample("UiChartRing", &chart_ring_, false); };
+    rings_group_.WhenThemeSelect = [=] { SelectPanelSample("UiGroupPanel", &rings_group_); };
     RebuildColumnPlacement();
     RebindPanelSamples();
     ApplyThemeStylesV2();
@@ -143,7 +152,8 @@ void UiDesignerThemeGalleryV2::RebuildColumnPlacement()
     // Navigation now starts the third column; the former Feedback group is the
     // dedicated Table sample below it.
     control_columns_[2].Add(navigation_group_).Fixed(DPI(292));
-    control_columns_[2].Add(feedback_group_).Fixed(DPI(252));
+    control_columns_[2].Add(feedback_group_).Fixed(DPI(202));
+    control_columns_[2].Add(rings_group_).Fixed(DPI(170));
 }
 
 void UiDesignerThemeGalleryV2::RebindPanelSamples()
@@ -470,6 +480,9 @@ void UiDesignerThemeGalleryV2::ApplyThemeStylesV2()
     ApplySampleThemeV2(tab_, "UiTab", false);
     ApplySampleThemeV2(accordion_, "UiAccordion", false);
     ApplySampleThemeV2(feedback_group_, "UiGroupPanel", true);
+    ApplySampleThemeV2(rings_group_, "UiGroupPanel", true);
+    ApplySampleThemeV2(progress_ring_, "UiProgressRing", false);
+    ApplySampleThemeV2(chart_ring_, "UiChartRing", false);
 
     ApplySampleThemeV2(container_plain_panel_, "UiPanel", true);
     ApplySampleThemeV2(container_plain_label_, "UiLabel", false);
@@ -547,6 +560,11 @@ void UiDesignerThemeGalleryV2::Layout()
     w = feedback_group_.GetSize().cx;
     table_.SetRect(inset, DPI(48), max(0, w - inset * 2),
                    max(DPI(120), feedback_group_.GetSize().cy - DPI(62)));
+    const int ring_space = max(0, rings_group_.GetSize().cx - inset * 3);
+    const int ring_side = min(DPI(108), ring_space / 2);
+    progress_ring_.SetRect(inset + (ring_space / 2 - ring_side) / 2, DPI(48), ring_side, ring_side);
+    chart_ring_.SetRect(inset * 2 + ring_space / 2 + (ring_space / 2 - ring_side) / 2,
+                        DPI(48), ring_side, ring_side);
 }
 
 void UiDesignerThemeGalleryV2::Paint(Draw& w)

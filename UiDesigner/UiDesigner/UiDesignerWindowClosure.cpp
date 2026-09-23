@@ -75,7 +75,7 @@ UiDesignerWindowClosureHook::UiDesignerWindowClosureHook(UiDesignerWindow& owner
         window.header_layout_.ClearItems();
         window.header_layout_.Add(window.brand_).Fit().MinMain(DPI(120)).MinCross(DPI(30));
         window.header_layout_.Add(window.version_).Fixed(DPI(82)).MinCross(DPI(24));
-        window.header_layout_.Add(window.save_).Fixed(DPI(92)).MinCross(DPI(24));
+        window.header_layout_.Add(window.save_).Fixed(DPI(132)).MinCross(DPI(24));
         window.header_layout_.Add(window.load_).Fixed(DPI(92)).MinCross(DPI(24));
         window.header_layout_.Add(window.export_).Fixed(DPI(100)).MinCross(DPI(24));
         window.header_layout_.AddSpacer(1).Expand(1).MinMain(DPI(10));
@@ -108,7 +108,7 @@ UiDesignerWindowClosureHook::UiDesignerWindowClosureHook(UiDesignerWindow& owner
         // two-boolean override after those actions as well as after theme events.
         window.designer_mode_.WhenAction << RefreshHeaderThemeChrome;
         window.theme_mode_.WhenAction << RefreshHeaderThemeChrome;
-        window.theme_select_.WhenAction << RefreshHeaderThemeChrome;
+        window.theme_select_.WhenSelectData << [RefreshHeaderThemeChrome](Value) { RefreshHeaderThemeChrome(); };
         window.dark_.WhenAction << RefreshHeaderThemeChrome;
         window.theme_inspector_.WhenPreview <<
             [RefreshHeaderThemeChrome](const String&, const Value&) {

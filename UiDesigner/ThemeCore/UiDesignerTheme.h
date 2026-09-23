@@ -136,6 +136,8 @@ public:
                 const String& label, String& error);
     bool CommitPalette(bool dark, const UiDesignerThemePalette& palette,
                        const String& label, String& error);
+    bool ImportTheme(const String& json, String& error);
+    bool ResetCustomizations(String& error);
     void CancelPreview();
     bool Reset(const String& property, String& error);
 

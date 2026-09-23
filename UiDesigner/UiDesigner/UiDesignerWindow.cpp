@@ -241,6 +241,7 @@ void UiDesignerWindow::RefreshLoadMenu()
 {
     load_.ClearItems();
     load_.Add("Open…", "open");
+    load_.Add("Load Theme…", "theme");
     load_.AddSeparator();
     load_.Add("Blank form", "blank")
          .Add("Three-pane form", "three_pane")
@@ -276,10 +277,14 @@ void UiDesignerWindow::BuildHeader()
           .SetContentInset(DPI(4)).SetMediaGap(DPI(9))
           .SetMediaReserve(0).SetMediaMin(DPI(15)).SetMediaAutoFit(false);
     save_.SetCustomStyle(UiTheme::ResolveButton(UiRole::Accent));
-    save_.SetText("Save").SetSplitWidth(DPI(31));
-    save_.Add("Save", "save").Add("Save As", "save_as");
+    save_.SetText("Save Project").SetSplitWidth(DPI(31));
+    save_.Add("Save Project", "save").Add("Save Project As…", "save_as")
+         .Add("Save Theme As…", "theme")
+         .Add("Reset theme customisations…", "reset_theme");
     save_.WhenAction = [=] { SaveDocument(false); };
     save_.WhenSelect = [=](int, const Value& value) {
+        if((String)value == "theme") { SaveThemeAs(); return; }
+        if((String)value == "reset_theme") { ResetThemeCustomizations(); return; }
         SaveDocument((String)value == "save_as");
     };
 
@@ -291,6 +296,7 @@ void UiDesignerWindow::BuildHeader()
     load_.WhenSelect = [=](int, const Value& value) {
         const String action = value;
         if(action == "open") LoadDocument();
+        else if(action == "theme") LoadTheme();
         else if(action == "blank") session_.NewDocument("blank");
         else if(action == "dialog") session_.NewDocument("dialog");
         else if(action == "three_pane") session_.NewDocument("three_pane");
@@ -333,13 +339,12 @@ void UiDesignerWindow::BuildHeader()
                  .Add("Compact", "Compact")
                  .Add("Layered", "Layered");
     theme_select_.Select(0);
-    theme_select_.WhenAction = [=] {
+    theme_select_.WhenSelectData = [=](Value preset) {
         String error;
-        session_.Theme().Commit("preset", theme_select_.GetData(),
-                                "Select theme preset", error);
-        ApplyThemeToShell();
-        RefreshThemeInspector();
+        if(!session_.Theme().Commit("preset", preset, "Select theme preset", error))
+            RefreshStatus(error);
     };
+    theme_select_.Tip("Base preset: keeps authored colours, fonts and geometry. Reset a property to inherit this preset.");
 
     dark_.SetCustomStyle(UiTheme::ResolveToolButton(UiRole::Accent));
     dark_.SetIcon(ICON_ACTION_DARK_MODE_48()).SetIconSize(DPI(16), DPI(16));
@@ -360,7 +365,7 @@ void UiDesignerWindow::BuildHeader()
     exit_.WhenAction = [=] { Close(); };
 
     header_layout_.Add(brand_).Fixed(DPI(130)).MinCross(DPI(24));
-    header_layout_.Add(save_).Fixed(DPI(92)).MinCross(DPI(24));
+    header_layout_.Add(save_).Fixed(DPI(132)).MinCross(DPI(24));
     header_layout_.Add(load_).Fixed(DPI(92)).MinCross(DPI(24));
     header_layout_.Add(export_).Fixed(DPI(100)).MinCross(DPI(24));
     header_layout_.Add(version_).Fixed(DPI(106)).MinCross(DPI(24));
@@ -1290,6 +1295,7 @@ void UiDesignerWindow::ConnectServices()
 void UiDesignerWindow::ApplyThemeToShell()
 {
     const UiDesignerThemeSnapshot& theme = session_.Theme().GetEffective();
+    theme_select_.SetDataSilently(theme.preset);
     UiDesignerApplyGlobalTheme(theme);
     brand_.SetCustomStyle(UiTheme::ResolveTitleCard(UiRole::Accent));
     save_.SetCustomStyle(UiTheme::ResolveButton(UiRole::Accent));
@@ -1452,6 +1458,37 @@ void UiDesignerWindow::SaveDocument(bool save_as)
     String error;
     if(!session_.Save(current_file_, error)) Exclamation(error);
     else RefreshStatus("Saved " + current_file_);
+}
+
+void UiDesignerWindow::SaveThemeAs()
+{
+    FileSel fs;
+    fs.Type("Theme JSON", "*.json");
+    if(!fs.ExecuteSaveAs("Save Theme As")) return;
+    if(!SaveFile(~fs, session_.Theme().Serialize(true)))
+        Exclamation("Unable to save theme");
+    else
+        RefreshStatus("Theme saved; Save Project preserves it with the design");
+}
+
+void UiDesignerWindow::LoadTheme()
+{
+    FileSel fs;
+    fs.Type("Theme JSON", "*.json");
+    if(!fs.ExecuteOpen("Load Theme")) return;
+    String error;
+    if(!session_.Theme().ImportTheme(LoadFile(~fs), error))
+        Exclamation(error);
+    else
+        RefreshStatus("Theme loaded; design retained. Theme Undo restores the previous theme.");
+}
+
+void UiDesignerWindow::ResetThemeCustomizations()
+{
+    if(!PromptYesNo("Reset colours, fonts and authored theme properties to the current preset defaults? This can be undone."))
+        return;
+    String error;
+    if(!session_.Theme().ResetCustomizations(error)) Exclamation(error);
 }
 
 void UiDesignerWindow::LoadDocument()
@@ -1944,14 +1981,14 @@ void UiDesignerWindow::RefreshStatus(const String& status)
 bool UiDesignerWindow::Key(dword key, int count)
 {
     if(key == K_CTRL_Z) {
-        if(session_.Undo()) {
+        if(session_.State().active_workspace == "theme" ? session_.Theme().Undo() : session_.Undo()) {
             RefreshStatus("Undo");
             return true;
         }
         return false;
     }
     if(key == K_CTRL_Y) {
-        if(session_.Redo()) {
+        if(session_.State().active_workspace == "theme" ? session_.Theme().Redo() : session_.Redo()) {
             RefreshStatus("Redo");
             return true;
         }
@@ -2106,8 +2143,8 @@ void UiDesignerWindow::Layout()
 
 void UiDesignerWindow::Close()
 {
-    if(session_.Commands().IsDirty() &&
-       !PromptYesNo("The UiDesigner document has unsaved changes. Close anyway?"))
+    if((session_.Commands().IsDirty() || session_.Theme().IsDirty()) &&
+       !PromptYesNo("The UiDesigner project or theme has unsaved changes. Close anyway?"))
         return;
     TopWindow::Close();
 }

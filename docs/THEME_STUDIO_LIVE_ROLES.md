@@ -14,7 +14,9 @@ child adapters / role API. Catalog rebinding finishes with V2 universal roles,
 not the legacy panel-role interpretation.
 
 The Table previously allocated an empty 4x2 model. It now has Item / Status / Count
-headers and six populated rows. Sample construction happens once, not on Theme
+headers and four populated rows, with ProgressRing and ChartRing beneath it.
+Both ring samples are selectable and use the selected preset, mode and control
+role through their existing adapters. Sample construction happens once, not on Theme
 changes. Contents and active-cell selection survive role and mode changes. The
 Table has no editable catalog recipe here: its sample style starts with the full
 current-mode native Table style, then uses existing Panel/Label/List/Dropdown
@@ -49,3 +51,17 @@ Curt performs the visual checks: independently change both roles in Controls and
 Containers, repeat in Dark and back to Light, switch active tabs, and inspect
 populated table headers/data/selection. Existing explicitly authored recipe
 colours remain intentional overrides; role preview must not erase them.
+
+## Presets and theme files
+
+The header preset selector commits the base preset and reflects loaded/undone
+Theme state. Switching presets retains explicit colours, fonts and geometry;
+reset an individual field to inherit its new preset value. Save Project stores
+the design and complete ThemeDocument together. Save Project's menu offers
+Save Theme As (standalone JSON) and a confirmed Reset theme customisations action.
+Load's menu offers Load Theme, which replaces only the theme and is undoable.
+Ctrl+Z/Y in Theme Studio operate on theme history. Saving theme JSON does not
+mark the containing project saved. Code preview uses the same theme-aware
+generation as C++ export; compiled applications require re-export/rebuild after
+theme changes. The six palette slots remain persisted metadata under the existing
+contract; authored control recipes are the runtime colour overrides.

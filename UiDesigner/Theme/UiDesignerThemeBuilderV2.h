@@ -56,6 +56,9 @@ private:
     void ApplyThemeStylesV2();
 
     UiRole panel_role_v2_ = UiRole::Standard;
+    UiDesignerThemeSelectable<UiGroupPanel> rings_group_;
+    UiDesignerThemeSelectable<UiProgressRing> progress_ring_;
+    UiDesignerThemeSelectable<UiChartRing> chart_ring_;
 };
 
 class UiDesignerThemeToolbarV2 : public UiDesignerThemeToolbar {

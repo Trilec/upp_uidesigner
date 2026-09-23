@@ -6,6 +6,23 @@ reported validation separate. The graph project's own gates are not Designer gat
 
 ## Current Theme Studio repair — UID-STUDIO-LIVE-01
 
+### Local preset and theme-file workflow follow-up
+
+Base: `013fcb8268f979228a6c8c58e1b9930bbdd53e01`.
+Preset selection now uses WhenSelectData and silently synchronizes from the
+ThemeDocument after load/undo. Presets preserve authored recipes; inherited
+properties use the newly selected preset. Save Project retains design and theme;
+Save Theme As and Load Theme exchange standalone theme JSON. Import and explicit
+confirmed reset use Theme history, with Ctrl+Z/Y routed to Theme in Theme Studio.
+Close also checks unsaved Theme changes. The code view shares export generation.
+The gallery has four table rows and selectable ProgressRing/ChartRing samples.
+
+Release validation: ThemeStudioRoleTest 380/0, ExportedThemeContractTest 27/0,
+ThemeDocumentTest 31/0, UiTabThemePaintTest 21/0; all exit 0. Canonical Release
+Designer build passes. Evidence: `build/StudioPreset-20260923-163421`.
+Curt's interactive visual acceptance is pending. Palette-slot metadata retains
+its existing meaning; this follow-up does not introduce a new global palette map.
+
 BASE: `2ecd474b64d972a48f074feee0ebeee1d6133088` / main.
 DEPENDENCY: upp_Ui `8114269abd91cc33569f68117bef4fd4d537897a` (native Tab paint repair).
 TASK: live independent Panel/Control Role preview, populated Table, dark active Tab.

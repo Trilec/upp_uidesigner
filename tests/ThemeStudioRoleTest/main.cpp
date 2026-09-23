@@ -69,14 +69,14 @@ void Run()
         return;
 
     UiTable& table = *tables[0];
-    Check(table.Model().GetColumnCount() == 3 && table.Model().GetRowCount() == 6,
-          "table contains a populated three-column six-row sample");
+    Check(table.Model().GetColumnCount() == 3 && table.Model().GetRowCount() == 4,
+          "table contains a populated three-column four-row sample");
     Check(table.Model().GetHeader(UITABLE_COLUMN_AXIS, 0).text == "Item" &&
           table.Model().GetHeader(UITABLE_COLUMN_AXIS, 1).text == "Status" &&
           table.Model().GetHeader(UITABLE_COLUMN_AXIS, 2).text == "Count",
           "table has meaningful column headers");
     Check(table.Model().GetCellValue(0, 0) == "Layout" &&
-          table.Model().GetCellValue(5, 1) == "Queued" &&
+          table.Model().GetCellValue(3, 1) == "Ready" &&
           (int)table.Model().GetCellValue(2, 2) == 9,
           "table contains text, states and numeric data");
     table.Model().SetCellValue(0, 0, "User sample edit");
@@ -156,6 +156,33 @@ void Run()
     roles[1]->SelectByData((int)UiRole::Accent);
     Check(buttons[0]->GetStyle().palette.face[ST_NORMAL].color == authored,
           "returning to Accent restores its authored recipe");
+    for(const char* preset : {"Minimal", "Pill", "Linear", "Solid", "Outline", "Compact", "Layered"}) {
+        Check(theme.Commit("preset", preset, "Select preset", error), "preset commits");
+        gallery.RefreshTheme();
+        Check(buttons[0]->GetStyle().palette.face[ST_NORMAL].color == authored,
+              "preset switch retains authored colour");
+        Check(buttons[0]->GetStyle().metrics.radius == UiTheme::ResolveButton(UiRole::Accent).metrics.radius,
+              "unauthored button radius follows selected preset");
+    }
+    Vector<UiProgressRing*> progress_rings;
+    Vector<UiChartRing*> chart_rings;
+    Collect(gallery, progress_rings);
+    Collect(gallery, chart_rings);
+    Check(progress_rings.GetCount() == 1 && chart_rings.GetCount() == 1,
+          "gallery includes both ring samples");
+    const String saved_theme = theme.Serialize(false);
+    Check(theme.ResetCustomizations(error), "theme reset commits");
+    Check(theme.Get().preset == "Layered" && theme.Get().style_overrides.IsEmpty(),
+          "reset keeps preset and clears authored recipes");
+    Check(theme.Undo() && theme.Serialize(false) == saved_theme, "reset is fully undoable");
+    UiDesignerThemeDocument imported;
+    const String before_import = imported.Serialize(false);
+    Check(imported.ImportTheme(saved_theme, error) && imported.Serialize(false) == saved_theme,
+          "theme-only import preserves preset and recipes");
+    Check(imported.IsDirty() && imported.Undo() && imported.Serialize(false) == before_import,
+          "theme import is dirty and undoable");
+    Check(!imported.ImportTheme("invalid JSON", error) && imported.Serialize(false) == before_import,
+          "invalid theme import leaves current theme intact");
 }
 }
 

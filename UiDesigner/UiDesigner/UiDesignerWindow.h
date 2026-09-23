@@ -53,6 +53,9 @@ private:
     void ActivateToolbox(const String& id);
     void SaveDocument(bool save_as = false);
     void LoadDocument();
+    void LoadTheme();
+    void SaveThemeAs();
+    void ResetThemeCustomizations();
     void ExportProject(UiDesignerExportProfile profile);
 
     void RefreshHierarchy();

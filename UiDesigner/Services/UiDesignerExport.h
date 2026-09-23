@@ -41,12 +41,13 @@ public:
         const UiDesignerThemeDocument& theme,
         const UiDesignerCodeGenerationOptions& generation) const;
 
-private:
+    // Shared in-memory generation for export and the Designer code view.
     UiDesignerGeneratedProject BuildCppProject(
         const UiDesignerDocument& document,
         const UiDesignerThemeDocument& theme,
         const UiDesignerExportRequest& request,
         String& error) const;
+private:
     bool WriteSingleFileAtomic(const String& path, const String& content,
                                UiDesignerOverwritePolicy overwrite,
                                String& error) const;
