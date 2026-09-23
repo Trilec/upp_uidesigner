@@ -112,6 +112,7 @@ public:
     typedef UiDesignerThemeDocument CLASSNAME;
 
     UiDesignerThemeDocument();
+    uint64 GetRevision() const { return revision_; }
 
     const UiDesignerThemeSnapshot& Get() const { return value_; }
     const UiDesignerThemeSnapshot& GetEffective() const
@@ -138,6 +139,8 @@ public:
                        const String& label, String& error);
     bool ImportTheme(const String& json, String& error);
     bool ResetCustomizations(String& error);
+    // Caller validates adapter fields. This owns one independent Theme undo entry.
+    bool CommitRecipe(const String& target, const ValueMap& fields, String& error);
     void CancelPreview();
     bool Reset(const String& property, String& error);
 
@@ -168,6 +171,7 @@ private:
     void TruncateRedo();
 
     UiDesignerThemeSnapshot value_;
+    uint64 revision_ = 0;
     UiDesignerThemeSnapshot preview_;
     bool preview_active_ = false;
 

@@ -1,0 +1,3 @@
+description "Offline bounded chat protocol tests";
+uses AppChat;
+file main.cpp;

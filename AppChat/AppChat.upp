@@ -1,0 +1,4 @@
+description "Bounded application-independent chat and DeepSeek transport";
+uses Core;
+library(WIN32) "winhttp";
+file AppChat.h, AppChat.cpp, DeepSeek.cpp;

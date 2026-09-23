@@ -1,0 +1,4 @@
+description "Explicit paid-provider inspection and proposal smoke (never offline)";
+uses CtrlLib, UiDesigner/Assistant;
+file main.cpp;
+mainconfig "" = "GUI";

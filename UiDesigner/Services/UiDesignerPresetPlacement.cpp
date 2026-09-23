@@ -2,6 +2,45 @@
 
 namespace Upp {
 
+bool UiDesignerSession::BuildComposition(UiDesignerNodeId parent,
+    const Vector<UiDesignerCompositionItem>& items, UiDesignerDocument& prepared,
+    Vector<UiDesignerNodeId>& created, String& error) const
+{
+    if(items.IsEmpty() || items.GetCount() > 64 || !document_.Find(parent)) {
+        error = "Composition requires an existing parent and 1..64 items"; return false;
+    }
+    if(!UiDesignerDeserialize(UiDesignerSerialize(document_, false), prepared, error)) return false;
+    // Isolated construction uses the normal allocator and semantic drop rules.
+    // No command/event touches the live session until one ReplaceDocument commit.
+    UiDesignerCommandService construction(prepared);
+    UiDesignerDropService drops(prepared, catalog_, construction);
+    VectorMap<String, UiDesignerNodeId> refs;
+    for(const auto& item : items) {
+        if(item.reference.IsEmpty() || refs.Find(item.reference) >= 0) { error = "Duplicate/empty symbolic reference"; return false; }
+        UiDesignerNodeId target = parent;
+        if(!item.parent_reference.IsEmpty()) {
+            int q = refs.Find(item.parent_reference);
+            if(q < 0) { error = "Parent reference must precede its children"; return false; }
+            target = refs[q];
+        }
+        auto plan = drops.PlanAdd(item.type, target);
+        UiDesignerNodeId id = 0;
+        if(!plan.valid || !drops.Execute(plan, &id, &error)) {
+            if(error.IsEmpty()) error = plan.reason; return false;
+        }
+        refs.Add(item.reference, id); created.Add(id);
+        for(int i = 0; i < item.properties.GetCount(); i++) {
+            String key = AsString(item.properties.GetKey(i));
+            const auto* spec = catalog_.Find(item.type);
+            if(!spec || !spec->FindProperty(key) || key == "name" || key.StartsWith("document_") ||
+               !prepared.SetProperty(id, key, item.properties.GetValue(i), UiDesignerImpactStructure)) {
+                error = "Invalid composition field " + key; return false;
+            }
+        }
+    }
+    return catalog_.ValidateDocument(prepared, error);
+}
+
 static String UniquePlacedPresetName(const UiDesignerDocument& document,
                                      const String& base)
 {

@@ -12,6 +12,11 @@
 
 namespace Upp {
 
+struct UiDesignerCompositionItem : Moveable<UiDesignerCompositionItem> {
+    String reference, parent_reference, type;
+    ValueMap properties;
+};
+
 struct UiDesignerEditIntent {
     enum Phase { Begin, Preview, Commit, Cancel };
 
@@ -29,6 +34,7 @@ public:
     typedef UiDesignerSession CLASSNAME;
 
     UiDesignerSession();
+    uint64 GetDocumentGeneration() const { return document_generation_; }
 
     UiDesignerDocument& Document() { return document_; }
     const UiDesignerDocument& Document() const { return document_; }
@@ -85,6 +91,8 @@ public:
                      UiDesignerNodeId *created, String& error);
     bool InsertPreset(const String& preset_id, UiDesignerNodeId target,
                       int index, UiDesignerNodeId *created, String& error);
+    bool BuildComposition(UiDesignerNodeId parent, const Vector<UiDesignerCompositionItem>& items,
+                          UiDesignerDocument& prepared, Vector<UiDesignerNodeId>& created, String& error) const;
     bool InsertPresetAt(const String& preset_id, UiDesignerNodeId target,
                         Point canvas_position, bool has_canvas_position,
                         int index, int grid_row, int grid_column,
@@ -165,6 +173,7 @@ private:
     void SyncThemeOverrideValues(const UiDesignerChangeSet& changes);
 
     UiDesignerDocument document_;
+    uint64 document_generation_ = 0;
     UiDesignerCommandService commands_;
     UiDesignerApplicationCatalog catalog_;
     UiDesignerDropService drops_;

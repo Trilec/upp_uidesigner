@@ -144,6 +144,8 @@ Value UiDesignerAutomationService::GetControlSpec(const ValueMap& params) const
         item.Set("step", property.step);
         item.Set("read_only", property.read_only);
         item.Set("designer_only", property.designer_only);
+        item.Set("preserve_null", property.preserve_null);
+        item.Set("resettable", property.resettable);
         ValueArray choices;
         for(const PropertyEditorChoice& choice : property.choices) {
             ValueMap c;
@@ -177,6 +179,23 @@ Value UiDesignerAutomationService::GetControlSpec(const ValueMap& params) const
     result.Set("preview_adapter", spec->preview_adapter_id);
     result.Set("codegen_adapter", spec->codegen_adapter_id);
     result.Set("child_adapter", spec->child_adapter_id);
+    result.Set("semantic_owner_type", spec->semantic_owner_type);
+    result.Set("content_host", (int)spec->content_host);
+    result.Set("max_direct_children", spec->max_direct_children);
+    result.Set("accepts_semantic_children", spec->accepts_semantic_children);
+    result.Set("data_capability", (int)spec->data_capability);
+    result.Set("data_property", spec->data_property_id);
+    result.Set("data_defaults", spec->data_defaults);
+    ValueArray fields;
+    for(const auto& f : spec->theme_overrides) {
+        ValueMap m; m.Set("id", f.id); m.Set("adapter_field", f.adapter_field_id);
+        m.Set("kind", PropertyEditorKindName(f.kind)); m.Set("default", f.default_value);
+        m.Set("minimum", f.minimum); m.Set("maximum", f.maximum); m.Set("read_only", f.read_only);
+        m.Set("designer_only", f.designer_only); m.Set("resettable", f.resettable);
+        ValueArray choices; for(const auto& c : f.choices) choices.Add(c.value);
+        m.Set("choices", choices); fields.Add(m);
+    }
+    result.Set("theme_fields", fields);
     result.Set("properties", properties);
     result.Set("events", events);
     return Ok(result);

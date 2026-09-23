@@ -1,0 +1,3 @@
+description "Designer assistant context, schemas and human-approved proposals";
+uses AppChat, UiDesigner/Services, UiDesigner/Theme;
+file UiDesignerAssistant.h, UiDesignerAssistant.cpp, Skills.h;

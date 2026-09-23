@@ -4,6 +4,20 @@ Remote main is authoritative. Sequential coding on main; no feature branch.
 Fetch before work and immediately before publishing. Keep published and locally
 reported validation separate. The graph project's own gates are not Designer gates.
 
+## UID-ASSISTANT-01 — embedded assistant checkpoint A
+
+- BASE: Designer `ec6c541d2040cbd1b390339aec1e661844f89980`; reusable Ui
+  `297beabdea87e3cc2c32282968e262ef68392abb`.
+- TASK: native AppChat drawer, configurable DeepSeek/OpenRouter transport,
+  bounded schema tools and reviewed proposals through existing history ownership.
+- TOUCHED: AppChat, Assistant/AssistantUi, shared Commands/Services/ThemeCore,
+  native window, assistant tests, validation runner and documentation.
+- STATUS: PASS for embedded functional checkpoint A; final visual judgement is Curt's.
+- PUBLISHED: pending final checkpoint validation.
+- VALIDATION: see `ASSISTANT_IMPLEMENTATION_REPORT.md` for final evidence.
+- NEXT ACTION: publish verified A; optional live MCP attachment B remains pending.
+  AgentFlow integration is not part of this task.
+
 ## Current Theme Studio repair — UID-STUDIO-LIVE-01
 
 ### Local preset and theme-file workflow follow-up
@@ -118,4 +132,5 @@ Remaining visual acceptance is NOT silently marked complete:
 - Complete/component generated applications do not search CWD for theme.json.
 - Preserve user-owned code on re-export.
 - Remaining new control integrations: UiColorMatrix, UiMatrixSelector, UiGallery.
-- Embedded AgentFlow/assistant runtime/UI is a separate later checkpoint.
+- The native assistant direction is defined by AI_ASSISTANT_ARCHITECTURE.md;
+  UID-ASSISTANT-01 supersedes the earlier embedded AgentFlow proposal.

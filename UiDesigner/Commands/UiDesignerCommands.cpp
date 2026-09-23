@@ -187,6 +187,36 @@ bool UiDesignerCommandService::SetProperty(
         });
 }
 
+bool UiDesignerCommandService::ApplyEdits(const Vector<UiDesignerAuthoredEdit>& edits, const String& label)
+{
+    if(edits.IsEmpty() || edits.GetCount() > 256) {
+        last_error_ = "Expected 1..256 authored edits"; return false;
+    }
+    for(const auto& e : edits)
+        if(!document_.Find(e.node) || e.property.IsEmpty()) {
+            last_error_ = "Edit target no longer exists"; return false;
+        }
+    return ApplyAtomic(label, [&](UiDesignerChangeSet& aggregate) {
+        for(const auto& e : edits) {
+            bool style = e.kind != UiDesignerAuthoredEdit::Configuration;
+            Value before = style ? document_.GetThemeOverride(e.node, e.property)
+                                 : document_.GetProperty(e.node, e.property);
+            bool ok = e.kind == UiDesignerAuthoredEdit::Configuration
+                ? document_.SetProperty(e.node, e.property, e.value, e.impact)
+                : e.kind == UiDesignerAuthoredEdit::LocalStyle
+                ? document_.SetThemeOverride(e.node, e.property, e.value, e.impact)
+                : e.kind == UiDesignerAuthoredEdit::ResetStyle
+                ? document_.RemoveThemeOverride(e.node, e.property, e.impact)
+                : document_.SetThemeOverrideActive(e.node, e.property, (bool)e.value, e.impact);
+            if(!ok) { last_error_ = "Unable to apply " + e.property; return false; }
+            auto& c = aggregate.properties.Add(); c.node = e.node; c.property = e.property;
+            c.old_value = before; c.new_value = e.value; c.impact = e.impact;
+            c.kind = style ? UiDesignerPropertyChangeKind::ThemeOverride : UiDesignerPropertyChangeKind::Normal;
+        }
+        return true;
+    });
+}
+
 bool UiDesignerCommandService::SetData(
     UiDesignerNodeId node, const String& key, const Value& value,
     UiDesignerChangeImpact impact, const String& label)

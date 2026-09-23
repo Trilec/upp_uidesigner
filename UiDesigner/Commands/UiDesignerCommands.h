@@ -5,6 +5,14 @@
 
 namespace Upp {
 
+struct UiDesignerAuthoredEdit : Moveable<UiDesignerAuthoredEdit> {
+    UiDesignerNodeId node = 0;
+    String property;
+    Value value;
+    enum Kind { Configuration, LocalStyle, ResetStyle, EnableStyle } kind = Configuration;
+    UiDesignerChangeImpact impact = UiDesignerImpactControlState | UiDesignerImpactCode;
+};
+
 struct UiDesignerHistoryEntry {
     String label;
     String before_json;
@@ -17,6 +25,7 @@ public:
     typedef UiDesignerCommandService CLASSNAME;
 
     explicit UiDesignerCommandService(UiDesignerDocument& document);
+    bool ApplyEdits(const Vector<UiDesignerAuthoredEdit>& edits, const String& label);
 
     bool SetProperty(UiDesignerNodeId node, const String& property,
                      const Value& value, UiDesignerChangeImpact impact,

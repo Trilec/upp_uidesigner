@@ -11,6 +11,7 @@
 #include "UiDesignerWidgets.h"
 #include "UiDesignerExportDialog.h"
 #include "UiDesignerWindowClosure.h"
+#include <UiDesigner/AssistantUi/UiDesignerAssistantDrawer.h>
 
 namespace Upp {
 
@@ -178,6 +179,10 @@ private:
 
     UiPanel footer_surface_;
     UiLabel footer_;
+    UiButton assistant_entry_;
+    UiDesignerAssistantDrawer assistant_ { session_ };
+    bool assistant_open_ = false;
+    int assistant_height_ = 320;
 
     String current_file_;
     UiDesignerExportProfile last_export_profile_ =

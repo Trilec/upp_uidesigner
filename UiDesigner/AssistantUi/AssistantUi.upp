@@ -1,0 +1,3 @@
+description "Native Designer assistant drawer";
+uses UiDesigner/Assistant, Ui;
+file UiDesignerAssistantDrawer.h, UiDesignerAssistantDrawer.cpp;

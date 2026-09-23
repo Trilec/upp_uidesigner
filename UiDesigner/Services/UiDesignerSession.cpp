@@ -297,6 +297,7 @@ void UiDesignerSession::ApplyPresetDialog()
 
 void UiDesignerSession::NewDocument(const String& preset)
 {
+    ++document_generation_;
     commands_.ClearHistory();
     state_.selection.Clear();
     overlay_.Clear();
@@ -357,6 +358,7 @@ bool UiDesignerSession::Load(const String& path, String& error)
         error = commands_.GetLastError();
         return false;
     }
+    ++document_generation_;
     commands_.ClearHistory();
     commands_.MarkSaved();
     if(has_theme)

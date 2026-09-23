@@ -216,6 +216,14 @@ UiDesignerWindow::UiDesignerWindow() : interaction_overlay_(*this)
     footer_.SetText("Ready").SetAlign(UiAlign::LEFT, UiAlign::CENTER);
     footer_surface_.Add(footer_.SizePos());
     Add(footer_surface_);
+    footer_.HSizePos(0, 110);
+    assistant_entry_.SetText("Assistant");
+    footer_surface_.Add(assistant_entry_.RightPos(0, 104).VSizePos());
+    Add(assistant_); assistant_.Hide();
+    assistant_entry_.WhenAction = [=] { assistant_open_ = !assistant_open_; assistant_.Show(assistant_open_); Layout(); };
+    assistant_.WhenCollapse = [=] { assistant_open_ = false; assistant_.Hide(); Layout(); assistant_entry_.SetFocus(); };
+    assistant_.WhenHeight = [=](int h) { assistant_height_ = minmax(h, 240, max(240, GetSize().cy - 250)); Layout(); };
+    assistant_.Workspace = [=] { return workspaces_.GetActiveKey(); };
 
     ConnectServices();
     interaction_overlay_.SetDecorationsVisible(decorations_visible_);
@@ -1311,6 +1319,7 @@ void UiDesignerWindow::ApplyThemeToShell()
     theme_mode_.SetCustomStyle(UiTheme::ResolveButton(
         session_.State().active_workspace == "theme" ? UiRole::Accent : UiRole::Subtle));
     footer_surface_.SetCustomStyle(UiDesignerFooterStyle(theme));
+    assistant_.RefreshTheme();
     designer_left_.ApplyTheme(theme);
     designer_right_.ApplyTheme(theme);
     theme_right_.ApplyTheme(theme);
@@ -2090,9 +2099,11 @@ void UiDesignerWindow::Layout()
     header_layout_.SetRect(0, max(0, (header_h - header_content_h) / 2),
                            header_w, header_content_h);
     const int content_y = margin + header_h + gap;
-    const int content_h = max(0, size.cy - content_y - footer_h - gap - margin);
+    const int drawer_h = assistant_open_ ? min(assistant_height_, max(0, size.cy - content_y - footer_h - 80)) : 0;
+    const int content_h = max(0, size.cy - content_y - footer_h - gap - margin - drawer_h);
     Put(workspaces_, margin, content_y, max(0, size.cx - margin * 2), content_h);
-    Put(footer_surface_, margin, content_y + content_h + gap,
+    Put(assistant_, margin, content_y + content_h, max(0, size.cx - margin * 2), drawer_h);
+    Put(footer_surface_, margin, content_y + content_h + drawer_h + gap,
         max(0, size.cx - margin * 2), footer_h);
 
     const int left_w = designer_left_.GetDesiredWidth();
@@ -2146,6 +2157,7 @@ void UiDesignerWindow::Close()
     if((session_.Commands().IsDirty() || session_.Theme().IsDirty()) &&
        !PromptYesNo("The UiDesigner project or theme has unsaved changes. Close anyway?"))
         return;
+    assistant_.Stop();
     TopWindow::Close();
 }
 

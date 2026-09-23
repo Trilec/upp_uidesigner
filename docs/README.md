@@ -28,4 +28,4 @@ in `upp_Ui`, so they are reusable outside UiDesigner.
 
 - `ACTIVE_WORK.md` — compact current recovery checkpoint and release gate.
 - `IMPLEMENTATION_STATUS.md` — broader implemented/pending system status.
-- `AI_ASSISTANT_ARCHITECTURE.md` — post-RC embedded AgentFlow assistant direction. The existing `UiDesignerAutomationService` remains the canonical application-control surface; embedded intelligence calls it directly, while MCP remains an external-host transport adapter.
+- `AI_ASSISTANT_ARCHITECTURE.md` — native assistant direction (supersedes embedded AgentFlow). The existing `UiDesignerAutomationService` remains the canonical application-control surface; embedded intelligence calls it directly, while MCP remains an external-host transport adapter.

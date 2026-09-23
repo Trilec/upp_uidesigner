@@ -1,5 +1,9 @@
 # UiDesigner implementation status
 
+The native assistant implementation and its distinct offline/live acceptance
+boundaries are recorded in [ASSISTANT_IMPLEMENTATION_REPORT.md](ASSISTANT_IMPLEMENTATION_REPORT.md).
+Its current architecture is [AI_ASSISTANT_ARCHITECTURE.md](AI_ASSISTANT_ARCHITECTURE.md).
+
 ## Supervisor source status
 
 The greenfield UiDesigner source implementation is complete on the supervisor branch and is ready for the Windows/U++ validation pass.

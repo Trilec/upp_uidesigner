@@ -2,6 +2,17 @@
 
 namespace Upp {
 
+bool UiDesignerThemeDocument::CommitRecipe(const String& target, const ValueMap& fields, String& error)
+{
+    if(target.IsEmpty() || fields.IsEmpty() || fields.GetCount() > 256) {
+        error = "Expected an explicit recipe and 1..256 fields"; return false;
+    }
+    UiDesignerThemeSnapshot after = value_;
+    for(int i = 0; i < fields.GetCount(); ++i)
+        after.SetStyleOverride(target, AsString(fields.GetKey(i)), fields.GetValue(i));
+    return CommitSnapshot(after, "Assistant: edit Theme recipe", error);
+}
+
 static bool IsThemePresetName(const String& value)
 {
     static const char *names[] = {
@@ -792,6 +803,7 @@ bool UiDesignerThemeDocument::CommitSnapshot(
     preview_ = value_;
     preview_active_ = false;
     position_ = history_.GetCount();
+    ++revision_;
     WhenChanged();
     WhenHistoryChanged();
     error.Clear();
@@ -867,6 +879,7 @@ bool UiDesignerThemeDocument::Undo()
     preview_ = value_;
     preview_active_ = false;
     position_--;
+    ++revision_;
     WhenChanged();
     WhenHistoryChanged();
     return true;
@@ -880,6 +893,7 @@ bool UiDesignerThemeDocument::Redo()
     preview_ = value_;
     preview_active_ = false;
     position_++;
+    ++revision_;
     WhenChanged();
     WhenHistoryChanged();
     return true;
@@ -895,6 +909,7 @@ bool UiDesignerThemeDocument::Replace(
     history_.Clear();
     position_ = 0;
     saved_position_ = mark_saved ? 0 : -1;
+    ++revision_;
     WhenChanged();
     WhenHistoryChanged();
     return true;
@@ -956,6 +971,7 @@ bool UiDesignerThemeDocument::Deserialize(
     preview_active_ = false;
     history_.Clear();
     position_ = saved_position_ = 0;
+    ++revision_;
     WhenChanged();
     WhenHistoryChanged();
     return true;

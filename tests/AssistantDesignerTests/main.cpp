@@ -1,0 +1,110 @@
+#include <UiDesigner/AssistantUi/UiDesignerAssistantDrawer.h>
+using namespace Upp;
+static int checks = 0, failed = 0;
+static void Check(bool ok, const char* name) { checks++; if(!ok) { failed++; Cout() << "FAIL " << name << "\n"; } }
+static bool Ok(const Value& r) { return r["ok"] == true; }
+static String Authored(const UiDesignerDocument& document) { ValueMap v=UiDesignerDocumentToValue(document); v.RemoveKey("revision"); return AsJSON(v); }
+static String ProposalId(const Value& r) { return AsString(r["result"]["id"]); }
+static ValueMap Edit(UiDesignerNodeId node, const String& property, const Value& value, const String& kind = "configuration") {
+    ValueMap e; e.Set("node",node); e.Set("property",property); e.Set("value",value); e.Set("kind",kind); return e;
+}
+static ValueMap Group(const ValueArray& edits) { ValueMap a; a.Set("summary","Test proposal"); a.Set("edits",edits); return a; }
+GUI_APP_MAIN {
+  {
+    UiDesignerSession session; UiDesignerAssistantHost host(session);
+    auto a = session.AddControl("UiButton"), b = session.AddControl("UiButton");
+    session.Select(a); host.Capture("Designer");
+    String initial = Authored(session.Document());
+    Check(Ok(host.Execute("inspect_context",ValueMap())),"capture context");
+    Check(initial == Authored(session.Document()),"discussion/inspection has no mutation");
+    ValueMap query; query.Set("query","button"); Check(Ok(host.Execute("search_controls",query)),"catalog search");
+    ValueMap skill; skill.Set("id","typography-v1"); Check(Ok(host.Execute("retrieve_skill",skill)),"embedded skill arbitrary cwd");
+    ValueMap type; type.Set("type","UiButton"); auto spec = host.Execute("describe_control",type);
+    Check(Ok(spec) && spec["result"]["theme_fields"].Is<ValueArray>(),"actual theme field schema");
+    Check(ParseJSON(AsJSON(spec)).Is<ValueMap>(),"catalog including typed Color defaults serializes to provider JSON");
+    ValueMap inspect; ValueArray inspected; inspected.Add(a); inspect.Set("nodes",inspected);
+    Check(ParseJSON(AsJSON(host.Execute("inspect_nodes",inspect))).Is<ValueMap>(),"effective Color values serialize to provider JSON");
+    Check(!Ok(host.Execute("commit_property",ValueMap())),"legacy mutation not allowlisted");
+    ValueArray edits; edits.Add(Edit(a,"text","First")); edits.Add(Edit(b,"text","Second"));
+    ValueMap args = Group(edits); auto p = host.Execute("prepare_edits",args);
+    Check(Ok(p),"prepare full batch"); session.Select(b);
+    int history = session.Commands().GetHistoryPosition();
+    Check(Ok(host.Apply(ProposalId(p))),"human Apply captured nodes");
+    Check(session.Document().GetProperty(a,"text") == "First" && session.Document().GetProperty(b,"text") == "Second","selection change did not retarget");
+    Check(session.Commands().GetHistoryPosition() == history+1,"one history entry for batch");
+    Check(Ok(host.Apply(ProposalId(p))) && session.Commands().GetHistoryPosition() == history+1,"duplicate Apply returns receipt");
+    String applied = Authored(session.Document());
+    Check(session.Undo() && Authored(session.Document()) == initial,"Undo exact authored document");
+    Check(session.Redo() && Authored(session.Document()) == applied,"Redo exact authored document");
+    host.Capture("Designer"); history=session.Commands().GetHistoryPosition();
+    Value noop=host.Execute("prepare_edits",args);
+    Check(Ok(noop) && Ok(host.Apply(ProposalId(noop))) && history==session.Commands().GetHistoryPosition(),"no-op creates no history entry");
+    host.Capture("Designer"); edits.Add(Edit(b,"invented_property",true)); history=session.Commands().GetHistoryPosition();
+    Check(!Ok(host.Execute("prepare_edits",Group(edits))) && history==session.Commands().GetHistoryPosition() && applied==Authored(session.Document()),"invalid batch no partial state/history");
+    edits.Clear(); edits.Add(Edit(a,"text",123)); Check(!Ok(host.Execute("prepare_edits",Group(edits))),"invalid type rejected");
+    edits.Clear(); edits.Add(Edit(a,"text","Stale")); args=Group(edits); p=host.Execute("prepare_edits",args);
+    session.Commands().SetProperty(b,"text","Manual",UiDesignerImpactControlState);
+    Check(!Ok(host.Apply(ProposalId(p))),"document change invalidates proposal");
+    host.Capture("Designer"); p=host.Execute("prepare_edits",args); String error;
+    session.Theme().Commit("spacing",9,"Manual theme",error);
+    Check(!Ok(host.Apply(ProposalId(p))),"Theme change invalidates document proposal");
+    host.Capture("Designer"); p=host.Execute("prepare_edits",args); session.Theme().Undo(); session.Theme().Redo();
+    Check(!Ok(host.Apply(ProposalId(p))),"Theme undo redo still invalidates token");
+    host.Capture("Designer"); p=host.Execute("prepare_edits",args); host.Dismiss(ProposalId(p)); Check(!Ok(host.Apply(ProposalId(p))),"dismiss cannot apply");
+    p=host.Execute("prepare_edits",args); host.CancelPending(); Check(!Ok(host.Apply(ProposalId(p))),"cancel cannot apply pending proposal");
+    host.Capture("Designer"); ValueArray color_edits; color_edits.Add(Edit(a,"text_normal","#123456","style"));
+    auto color_proposal=host.Execute("prepare_edits",Group(color_edits));
+    Check(Ok(color_proposal) && Ok(host.Apply(ProposalId(color_proposal))) && session.Document().GetThemeOverride(a,"text_normal") == Color(18,52,86),"wire color becomes typed local style");
+    Check(session.Undo(),"typed color Undo");
+    host.Capture("Designer"); ValueMap font; font.Set("summary","Replace font"); font.Set("scope","local");
+    font.Set("family",Font::GetFaceName(0)); ValueArray nodes; nodes.Add(a); font.Set("nodes",nodes); font.Set("target","");
+    session.Commands().SetThemeOverride(a,"font_bold",true,UiDesignerImpactControlState);
+    session.Commands().SetThemeOverride(a,"font_italic",true,UiDesignerImpactControlState);
+    session.Commands().SetThemeOverride(a,"font_size",23,UiDesignerImpactControlState);
+    host.Capture("Designer"); p=host.Execute("prepare_font",font);
+    Check(Ok(p) && Ok(host.Apply(ProposalId(p))),"installed font replacement");
+    Check(session.Document().GetThemeOverride(a,"font_bold") == true,"font replacement preserves bold");
+    Check(session.Document().GetThemeOverride(a,"font_italic") == true && session.Document().GetThemeOverride(a,"font_size") == 23,"font replacement preserves italic and size");
+    Check(session.Undo(),"font replacement undo");
+    host.Capture("Theme Studio"); font.Set("scope","recipe"); font.Set("nodes",ValueArray()); font.Set("target","Light|control|UiButton|Standard");
+    p=host.Execute("prepare_font",font); String document_before=Authored(session.Document());
+    Check(Ok(p) && Ok(host.Apply(ProposalId(p))),"explicit Theme recipe font");
+    Check(document_before==Authored(session.Document()),"Theme recipe preserves authored controls");
+    Check(session.Theme().Get().studio_preview.IsEmpty(),"recipe does not change Studio preview");
+    Check(session.Theme().Undo(),"separate Theme Undo");
+    Check(Authored(session.Document()).Find("Replace font") < 0 && session.GenerateCode().Find("OPENROUTER_API_KEY") < 0,"transcript and credentials absent from authored/generated output");
+    host.Capture("Designer"); ValueMap insert; insert.Set("summary","Shell"); insert.Set("type",session.Catalog().GetPresets()[0].id); insert.Set("preset",true); insert.Set("parent",session.Document().Find(a)->parent);
+    p=host.Execute("prepare_insert",insert);
+    Check(!Ok(p),"nonempty Window is not replaced by shell");
+    {
+        UiDesignerSession shell; UiDesignerAssistantHost shell_host(shell); shell_host.Capture("Designer");
+        insert.Set("parent",shell.Document().GetRootId());
+        Value shell_p=shell_host.Execute("prepare_insert",insert);
+        Check(Ok(shell_p) && Ok(shell_host.Apply(ProposalId(shell_p))),"registered preset composition");
+        Check(shell.Catalog().ValidateDocument(shell.Document(),error),"shell canonical validation");
+    }
+    Check(session.Catalog().ValidateDocument(session.Document(),error),"canonical composition validation");
+    Check(!session.GenerateCode().IsEmpty(),"composition generation");
+    host.Capture("Designer"); insert.Set("preset",false); insert.Set("type","UiTabPage"); insert.Set("parent",a);
+    Check(!Ok(host.Execute("prepare_insert",insert)),"invalid semantic parenting rejected");
+    p=host.Execute("prepare_edits",args); session.NewDocument(); Check(!Ok(host.Apply(ProposalId(p))),"document switch invalidates proposal");
+    Check(!Ok(host.Execute("inspect_context",ValueMap())),"late tools rejected after switch");
+    host.Capture("Designer");
+    ValueMap composition; composition.Set("summary","Supported settings form"); composition.Set("parent",session.Document().GetRootId());
+    ValueArray tree; ValueMap item;
+    item.Set("ref","layout"); item.Set("parent_ref",""); item.Set("type","UiBoxLayout"); item.Set("properties",ValueMap()); tree.Add(item);
+    item.Set("ref","heading"); item.Set("parent_ref","layout"); item.Set("type","UiLabel");
+    ValueMap props; props.Set("text","Settings"); item.Set("properties",props); tree.Add(item);
+    item.Set("ref","save"); item.Set("type","UiButton"); props.Set("text","Save settings"); item.Set("properties",props); tree.Add(item);
+    composition.Set("items",tree); String empty_document=Authored(session.Document());
+    p=host.Execute("prepare_composition",composition); history=session.Commands().GetHistoryPosition();
+    Check(Ok(p) && Ok(host.Apply(ProposalId(p))),"typed symbolic subtree composition");
+    Check(session.Commands().GetHistoryPosition()==history+1,"composition has one live history entry");
+    Check(session.Undo() && Authored(session.Document())==empty_document,"composition undo restores original design");
+    host.Capture("Designer"); item.Set("parent_ref","missing"); tree.Set(2,item); composition.Set("items",tree);
+    Check(!Ok(host.Execute("prepare_composition",composition)) && Authored(session.Document())==empty_document,"invalid subtree leaves no partial authored state");
+    { UiDesignerAssistantDrawer drawer(session); Size authored=session.Document().GetVirtualSize(); drawer.SetRect(0,0,900,320); drawer.Hide(); drawer.Show(); drawer.SetRect(0,0,900,420);
+      Check(session.Document().GetVirtualSize()==authored,"drawer collapse and resize preserve authored dimensions"); }
+  }
+  Cout() << "AssistantDesignerTests checks=" << checks << " failed=" << failed << "\n"; SetExitCode(failed ? 1 : 0);
+}
