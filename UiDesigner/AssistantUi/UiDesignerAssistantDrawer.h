@@ -20,16 +20,17 @@ class UiDesignerAssistantDrawer : public UiPanel {
     UiLineEdit model, credential;
     UiMultiEdit transcript, proposal_detail;
     UiDesignerAssistantComposer composer;
-    UiButton send, stop, collapse, configure, apply, dismiss, affected;
+    UiButton send, stop, collapse, profile_toggle, configure, apply, dismiss, affected;
     AppChatProfile profile;
     ValueArray conversation;
     String history, submitted, last_projection;
-    bool was_active = false, configured = false;
+    bool was_active = false, configured = false, profile_open = false;
     int proposal_count = 0, drag_y = 0, initial_height = 0;
     void Submit();
     void Tick();
     void UpdateProposal();
     void Configure();
+    void SyncProfileSummary();
 public:
     explicit UiDesignerAssistantDrawer(UiDesignerSession&);
     ~UiDesignerAssistantDrawer();

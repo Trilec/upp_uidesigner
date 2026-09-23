@@ -2,7 +2,7 @@
 namespace Upp {
 UiDesignerAssistantDrawer::UiDesignerAssistantDrawer(UiDesignerSession& s) : host(s) {
     Ctrl* children[] = { &context, &profile_label, &provider, &model, &credential, &transcript,
-        &proposal_detail, &composer, &send, &stop, &collapse, &configure, &proposals, &apply, &dismiss, &affected };
+        &proposal_detail, &composer, &send, &stop, &collapse, &profile_toggle, &configure, &proposals, &apply, &dismiss, &affected };
     for(Ctrl* c : children) Add(*c);
     transcript.SetReadOnly(); proposal_detail.SetReadOnly();
     provider.Add("DeepSeek", "DeepSeek"); provider.Add("OpenRouter", "OpenRouter"); provider.SetData("OpenRouter");
@@ -10,20 +10,21 @@ UiDesignerAssistantDrawer::UiDesignerAssistantDrawer(UiDesignerSession& s) : hos
     model.SetPlaceholder("Model ID (tool-capable)");
     composer.SetPlaceholder("Discuss a design or request a proposal. Enter sends; Shift+Enter adds a line.");
     credential.SetTextUtf8("OPENROUTER_API_KEY"); credential.Tip("Environment-variable name only; never paste a key");
-    send.SetText("Send"); stop.SetText("Stop"); collapse.SetText("Collapse"); configure.SetText("Use profile");
-    apply.SetText("Apply"); dismiss.SetText("Dismiss"); affected.SetText("Show affected");
-    profile_label.SetText("Provider / model / key variable");
-    context.SetText("Configure a provider before sending. Enter sends; Shift+Enter adds a line.");
+    send.SetText("Send"); stop.SetText("Stop"); collapse.SetText("Collapse");
+    profile_toggle.SetText("Profile..."); configure.SetText("Save profile");
+    apply.SetText("Apply"); dismiss.SetText("Dismiss"); affected.SetText("Select affected");
+    context.SetText("Ready for a design question or proposal request.");
     send.WhenAction = [=] { Submit(); }; composer.WhenSend = [=] { Submit(); };
     stop.WhenAction = [=] { Stop(); }; collapse.WhenAction = [=] { WhenCollapse(); };
     configure.WhenAction = [=] { Configure(); };
+    profile_toggle.WhenAction = [=] { profile_open = !profile_open; SyncProfileSummary(); Layout(); Refresh(); };
     proposals.WhenSelectData = [=](const Value&) { UpdateProposal(); };
     provider.WhenSelectData = [=](const Value& value) {
         credential.SetTextUtf8(value == "OpenRouter" ? "OPENROUTER_API_KEY" : "DEEPSEEK_API_KEY");
-        configured = false;
+        configured = false; SyncProfileSummary();
     };
-    model.WhenChange = [=] { configured = false; };
-    credential.WhenChange = [=] { configured = false; };
+    model.WhenChange = [=] { configured = false; SyncProfileSummary(); };
+    credential.WhenChange = [=] { configured = false; SyncProfileSummary(); };
     apply.WhenAction = [=] {
         if(turn.active) return;
         Value result = host.Apply(AsString(proposals.GetData()));
@@ -38,10 +39,20 @@ UiDesignerAssistantDrawer::UiDesignerAssistantDrawer(UiDesignerSession& s) : hos
         provider.SetData(profile.provider); model.SetTextUtf8(profile.model); credential.SetTextUtf8(profile.credential_env);
         configured = true;
     }
+    SyncProfileSummary();
     SetTimeCallback(-100, [=] { Tick(); }, 1);
     RefreshTheme();
 }
 UiDesignerAssistantDrawer::~UiDesignerAssistantDrawer() { KillTimeCallback(1); Stop(); }
+void UiDesignerAssistantDrawer::SyncProfileSummary() {
+    if(configured)
+        profile_label.SetText(profile.provider + " / " + profile.model);
+    else if(profile_open)
+        profile_label.SetText("Assistant profile settings");
+    else
+        profile_label.SetText("Assistant profile not configured");
+    profile_toggle.SetText(profile_open ? "Close" : "Profile...");
+}
 void UiDesignerAssistantDrawer::Configure() {
     if(turn.active) return;
     String ref = TrimBoth(credential.GetTextUtf8());
@@ -53,7 +64,10 @@ void UiDesignerAssistantDrawer::Configure() {
     ValueMap settings; settings.Set("provider", profile.provider); settings.Set("endpoint", profile.endpoint);
     settings.Set("model", profile.model); settings.Set("credential_env", profile.credential_env);
     configured = SaveFile(ConfigFile("uidesigner-assistant.json"), AsJSON(settings, true));
-    context.SetText(configured ? "Profile selected. Send shares captured design context with " + profile.provider : "Unable to save application profile");
+    if(configured) profile_open = false;
+    SyncProfileSummary(); Layout();
+    context.SetText(configured ? "Profile saved. Requests share captured design context with " + profile.provider
+                               : "Unable to save application profile");
 }
 void UiDesignerAssistantDrawer::Submit() {
     if(turn.active) return;
@@ -62,9 +76,11 @@ void UiDesignerAssistantDrawer::Submit() {
     if(!configured || !profile.Validate(error)) { context.SetText(error.IsEmpty() ? "Select Use profile before sending." : error); return; }
     if(input.GetCount() > 16384) { context.SetText("Message too long (16 KiB limit)."); return; }
     if(!host.SameDocument()) { conversation.Clear(); host.CancelPending(); }
-    ValueMap scope = host.Capture(Workspace ? Workspace() : String("Designer"));
-    submitted = "Scope: " + AsJSON(scope);
-    context.SetText(submitted); context.Tip(submitted);
+    String workspace = Workspace ? Workspace() : String("Designer");
+    ValueMap scope = host.Capture(workspace);
+    submitted = "Context captured for " + workspace + ".";
+    context.SetText(submitted);
+    context.Tip("Captured request context (diagnostic): " + AsJSON(scope));
     ValueArray request; request.Add(AppChatMessage("system", host.SystemPrompt()));
     for(const Value& m : conversation) request.Add(m);
     request.Add(AppChatMessage("user", input));
@@ -98,10 +114,15 @@ void UiDesignerAssistantDrawer::Tick() {
     apply.Enable(!turn.active && proposal_count > 0);
 }
 void UiDesignerAssistantDrawer::UpdateProposal() {
+    proposal_detail.Clear(); proposal_detail.Tip("");
     for(const auto& p : host.Proposals()) if(p.id == proposals.GetData()) {
-        proposal_detail.SetTextUtf8(p.summary + "\nStatus: " + p.status + "\n" + p.receipt +
-            "\nExact scope: " + AsJSON(p.args, true));
+        String detail = p.summary + "\n\nStatus: " + p.status;
+        if(!p.receipt.IsEmpty()) detail << "\n\n" << p.receipt;
+        proposal_detail.SetTextUtf8(detail);
+        proposal_detail.Tip("Exact proposal scope (diagnostic): " + AsJSON(p.args, true));
+        break;
     }
+    Layout();
 }
 void UiDesignerAssistantDrawer::Paint(Draw& w) {
     UiPanel::Paint(w); w.DrawRect(0, 0, GetSize().cx, 4, SColorShadow());
@@ -112,8 +133,13 @@ void UiDesignerAssistantDrawer::RefreshTheme() {
     edit.show_readonly_bg = false;
     transcript.SetCustomStyle(edit); proposal_detail.SetCustomStyle(edit); composer.SetCustomStyle(edit);
     model.SetCustomStyle(edit); credential.SetCustomStyle(edit);
-    UiButton* buttons[] = { &send, &stop, &collapse, &configure, &apply, &dismiss, &affected };
+    UiButton* buttons[] = { &stop, &configure, &dismiss };
     for(auto* b : buttons) b->SetCustomStyle(UiTheme::ResolveButton(UiRole::Standard));
+    send.SetCustomStyle(UiTheme::ResolveButton(UiRole::Accent));
+    apply.SetCustomStyle(UiTheme::ResolveButton(UiRole::Accent));
+    profile_toggle.SetCustomStyle(UiTheme::ResolveButton(UiRole::Subtle));
+    collapse.SetCustomStyle(UiTheme::ResolveButton(UiRole::Subtle));
+    affected.SetCustomStyle(UiTheme::ResolveButton(UiRole::Subtle));
     Refresh();
 }
 void UiDesignerAssistantDrawer::LeftDown(Point p, dword) { if(p.y < 8) { drag_y = GetMousePos().y; initial_height = GetSize().cy; SetCapture(); } }
@@ -121,14 +147,49 @@ void UiDesignerAssistantDrawer::MouseMove(Point, dword) { if(HasCapture()) WhenH
 void UiDesignerAssistantDrawer::LeftUp(Point, dword) { if(HasCapture()) ReleaseCapture(); }
 void UiDesignerAssistantDrawer::Layout() {
     int w = GetSize().cx, h = GetSize().cy, gap = 6, row = 28;
-    provider.SetRect(6, 10, 120, row); model.SetRect(132, 10, 220, row); credential.SetRect(358, 10, 200, row);
-    configure.SetRect(564, 10, 100, row); stop.SetRect(max(670,w-186), 10, 80, row); collapse.SetRect(max(756,w-100), 10, 94, row);
-    profile_label.Hide(); context.SetRect(gap, 42, max(0,w-12), 24);
-    int split = w * 3 / 5, body = max(40,h-154);
-    transcript.SetRect(gap, 70, max(0,split-12), body);
-    proposals.SetRect(split, 70, max(0,w-split-6), row);
-    proposal_detail.SetRect(split, 104, max(0,w-split-6), max(0,body-68));
-    apply.SetRect(split, 70+body-28, 70, 28); dismiss.SetRect(split+76,70+body-28,80,28); affected.SetRect(split+162,70+body-28,120,28);
-    composer.SetRect(gap, h-76, max(0,w-106),70); send.SetRect(max(0,w-94),h-76,88,70);
+    int right = w - gap;
+    collapse.SetRect(max(gap, right - 94), 10, 94, row); right -= 100;
+    stop.SetRect(max(gap, right - 70), 10, 70, row); right -= 76;
+    profile_toggle.SetRect(max(gap, right - 90), 10, 90, row); right -= 96;
+    profile_label.Show(); profile_label.SetRect(gap + 4, 10, max(0, right - gap - 4), row);
+
+    int body_y;
+    if(profile_open) {
+        provider.Show(); model.Show(); credential.Show(); configure.Show();
+        provider.SetRect(gap, 44, 120, row);
+        model.SetRect(132, 44, 250, row);
+        credential.SetRect(388, 44, 210, row);
+        configure.SetRect(604, 44, 108, row);
+        context.SetRect(gap, 76, max(0, w - 2 * gap), 24);
+        body_y = 104;
+    }
+    else {
+        provider.Hide(); model.Hide(); credential.Hide(); configure.Hide();
+        context.SetRect(gap, 42, max(0, w - 2 * gap), 24);
+        body_y = 70;
+    }
+
+    int composer_h = 62;
+    int composer_y = max(body_y + 40, h - composer_h - gap);
+    int body = max(40, composer_y - body_y - gap);
+    bool have_proposal = proposal_count > 0;
+    int proposal_w = have_proposal ? min(380, max(300, w / 3)) : 0;
+    int transcript_w = max(0, w - 2 * gap - (have_proposal ? proposal_w + gap : 0));
+    transcript.SetRect(gap, body_y, transcript_w, body);
+
+    proposals.Show(have_proposal); proposal_detail.Show(have_proposal);
+    apply.Show(have_proposal); dismiss.Show(have_proposal); affected.Show(have_proposal);
+    if(have_proposal) {
+        int px = gap + transcript_w + gap;
+        proposals.SetRect(px, body_y, proposal_w, row);
+        apply.SetRect(px, body_y + 34, 66, row);
+        dismiss.SetRect(px + 72, body_y + 34, 76, row);
+        affected.SetRect(px + 154, body_y + 34, 112, row);
+        proposal_detail.SetRect(px, body_y + 68, proposal_w, max(0, body - 68));
+    }
+
+    int send_w = 80, send_h = 36;
+    composer.SetRect(gap, composer_y, max(0, w - 3 * gap - send_w), composer_h);
+    send.SetRect(max(gap, w - gap - send_w), composer_y + (composer_h - send_h) / 2, send_w, send_h);
 }
 }
