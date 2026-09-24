@@ -6,6 +6,13 @@ reported validation separate. The graph project's own gates are not Designer gat
 
 ## UID-ASSISTANT-FIRSTUSE-02 and TitleCard/Grid repair
 
+Follow-up: reported horizontal Box collapse reproduced with Box-first Grid child
+order and repaired by synchronizing surviving managed-item indices. Assistant
+now has a validated TitleCard/body/bottom-actions example, canonical explicit
+Grid placement, and local human text Apply. See `DIALOG_LAYOUT_FOLLOWUP.md` for
+diagnosis and final validation/publication evidence. Earlier acceptance below
+covered the simpler prompt and did not establish this reported variant.
+
 - BASE: Designer `bb50fb84fd295844a29246651ea3b5d9b708069f`; shared Ui
   `9f1cf55481db2b5039a9fe3bd66daee91acce726`. Newer main work preserved.
 - TASK: repair TitleCard role/line lengths and Grid Fit measurement; reproduce

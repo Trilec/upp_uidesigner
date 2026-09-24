@@ -11,7 +11,7 @@ GUI_APP_MAIN {
     String error;
     if(!profile.Validate(error)) { Cout()<<"NOT RUN: "<<error<<"\n"; SetExitCode(2); return; }
     int checks=0,failed=0;
-    {
+    for(int scenario=0;scenario<2;scenario++) {
         UiDesignerSession session;
         String original=Authored(session.Document());
         UiDesignerAssistantHost host(session); host.Capture("Designer");
@@ -19,7 +19,11 @@ GUI_APP_MAIN {
         AppChatTurn turn;
         turn.WhenActivity = [](const String& event) { Cout()<<event<<'\n'; };
         ValueArray messages; messages.Add(AppChatMessage("system",host.SystemPrompt()));
-        messages.Add(AppChatMessage("user","Create a simple dialog box template with just an OK and cancel perhaps a with a heading that I can use as a template."));
+        const char* prompt=scenario==0
+            ? "Create a simple dialog box template with just an OK and cancel perhaps a with a heading that I can use as a template."
+            : "Create a simple dialog box template with just an OK and cancel perhaps with a heading using a title card and an OK and cancel at the bottom.";
+        Cout()<<"Scenario "<<scenario+1<<": "<<prompt<<'\n';
+        messages.Add(AppChatMessage("user",prompt));
         turn.Start(std::make_shared<AppChatDeepSeekProvider>(profile),messages,host.Tools());
         TimeStop timer; Index<String> called;
         while(turn.active && timer.Seconds()<180) {
@@ -52,6 +56,16 @@ GUI_APP_MAIN {
             ok|=node.type=="UiButton" && text=="ok"; cancel|=node.type=="UiButton" && text=="cancel";
         }
         check(heading && ok && cancel,"exact prompt yields heading plus OK/Cancel visual template");
+        if(scenario==1) {
+            bool title=false,grid=false,panel=false,actions=false;
+            for(const auto& node:session.Document().GetNodes()) {
+                title|=node.type=="UiTitleCard";
+                grid|=node.type=="UiGridLayout" && node.GetProperty("rows",0)==3;
+                panel|=node.type=="UiPanel" && node.GetProperty("height_mode","")=="Expand";
+                actions|=node.type=="UiBoxLayout" && node.GetProperty("direction","")=="H" && node.GetProperty("grid_row",-1)==2;
+            }
+            check(title && grid && panel && actions,"requested TitleCard uses three-row layout and expanding body above bottom actions");
+        }
         check(applied && session.Undo() && Authored(session.Document())==original,"one-step Undo restores blank authored design");
         if(!turn.error.IsEmpty()) Cout()<<turn.error<<"\n";
     }

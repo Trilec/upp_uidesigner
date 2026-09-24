@@ -32,3 +32,9 @@ not need to be moved out of the Grid to select it.
 
 Regression evidence is in `TitleGridRegressionTest`: real GUI lifecycle, rendered
 line pixels, live Preview roles/sizing, covered-parent selection and emitted code.
+
+Follow-up: changing a nested Box direction rebuilds that control. Removing its
+managed item shifts sibling indices, so preview now updates the surviving
+indices before reattaching the rebuilt control. The regression inserts the Box
+before the Panel and TitleCard (the reported hierarchy order), then switches
+V/H repeatedly and checks that all three row rectangles remain disjoint.

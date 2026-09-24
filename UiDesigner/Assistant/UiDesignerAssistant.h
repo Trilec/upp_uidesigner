@@ -29,6 +29,7 @@ public:
     ValueArray Tools() const;
     Value Execute(const String&, const ValueMap&);
     Value Apply(const String& id); // trusted UI only; absent from Tools/Execute
+    Value ApplyPending(); // explicit human text command; never a model tool
     void Dismiss(const String& id);
     void CancelPending();
     void ShowAffected(const String& id);

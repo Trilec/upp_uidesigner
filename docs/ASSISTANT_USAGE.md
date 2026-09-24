@@ -28,6 +28,19 @@ rejected batch and the limit; that entire batch is not executed. A previously
 prepared proposal remains available for review after a later read-only failure.
 The default remains 16 calls and six provider rounds.
 
+Creation works from a blank design. A prepared proposal must be committed with
+the Apply button, or by typing exactly `apply`, `apply it`, or `apply proposal`
+when only one proposal is pending. These text commands are local human actions;
+the model still cannot apply. With several pending proposals, select one and use
+its Apply button. The status row distinguishes a proposal ready to apply from a
+prose-only response that created nothing.
+
+For a TitleCard dialog, layout guidance includes a complete three-row Grid:
+Fit TitleCard, expanding body Panel, and Fit horizontal action Box with a Fill
+Spacer and Fit OK/Cancel buttons. Composition placement uses optional paired
+`grid_row`/`grid_column` item fields through the normal insertion planner, not
+arbitrary control properties. Invalid or occupied placement is rejected.
+
 Simple dialog requests use the versioned `layout-v2` guidance and its validated
 heading/OK/Cancel composition example. `describe_controls` reads at most four
 relevant registered schemas together. A visual template does not wire Accept or

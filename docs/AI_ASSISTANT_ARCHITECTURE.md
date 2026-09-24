@@ -33,6 +33,12 @@ state rejects the proposal instead of rebasing. Explicit node IDs survive select
 changes. A proposal can apply only once; duplicate clicks return its receipt.
 Theme and Document groups are separate. Old cards do not invoke generic Undo.
 
+The composer also recognizes the exact human commands `apply`, `apply it`, and
+`apply proposal`. These are handled locally, never sent to the model, and apply
+only when exactly one proposal is pending. Zero pending proposals produce an
+explanation; several require explicit selection and the Apply button. This path
+uses the same captured-target and revision checks as the button.
+
 The external standalone MCP host remains independent. Optional attached MCP must
 reuse this registry and its checks; it must not expose the legacy Handle escape
 hatch. Attachment is disabled/unimplemented until its separate checkpoint.

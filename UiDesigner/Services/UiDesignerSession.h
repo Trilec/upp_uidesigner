@@ -15,6 +15,7 @@ namespace Upp {
 struct UiDesignerCompositionItem : Moveable<UiDesignerCompositionItem> {
     String reference, parent_reference, type;
     ValueMap properties;
+    int grid_row = -1, grid_column = -1;
 };
 
 struct UiDesignerEditIntent {

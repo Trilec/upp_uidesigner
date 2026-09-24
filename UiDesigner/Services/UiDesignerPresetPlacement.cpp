@@ -23,7 +23,15 @@ bool UiDesignerSession::BuildComposition(UiDesignerNodeId parent,
             if(q < 0) { error = "Parent reference must precede its children"; return false; }
             target = refs[q];
         }
-        auto plan = drops.PlanAdd(item.type, target);
+        const auto* target_node=prepared.Find(target);
+        if(item.grid_row >= 0 || item.grid_column >= 0) {
+            if(!target_node || target_node->type!="UiGridLayout" || item.grid_row<0 || item.grid_column<0 ||
+               item.grid_row >= (int)target_node->GetProperty("rows",1) ||
+               item.grid_column >= (int)target_node->GetProperty("columns",1)) {
+                error="Composition grid placement requires a Grid parent and an in-range row/column pair"; return false;
+            }
+        }
+        auto plan = drops.PlanAdd(item.type, target, Point(), false, -1, item.grid_row, item.grid_column);
         UiDesignerNodeId id = 0;
         if(!plan.valid || !drops.Execute(plan, &id, &error)) {
             if(error.IsEmpty()) error = plan.reason; return false;

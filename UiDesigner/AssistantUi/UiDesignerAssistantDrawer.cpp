@@ -76,6 +76,13 @@ void UiDesignerAssistantDrawer::Submit() {
     if(turn.active) return;
     String input = TrimBoth(composer.GetTextUtf8()), error;
     if(input.IsEmpty()) return;
+    String command=ToLower(input);
+    if(command=="apply" || command=="apply it" || command=="apply proposal") {
+        Value result=host.ApplyPending();
+        history << "\nYou: " << input << "\nApply: " << AsJSON(result) << "\n";
+        context.SetText(result["ok"]==true ? "Applied. Use Undo to revert." : AsString(result["error"]));
+        composer.SetTextUtf8(""); UpdateProposal(); return;
+    }
     if(!configured || !profile.Validate(error)) { context.SetText(error.IsEmpty() ? "Select Use profile before sending." : error); return; }
     if(input.GetCount() > 16384) { context.SetText("Message too long (16 KiB limit)."); return; }
     if(!host.SameDocument()) { conversation.Clear(); host.CancelPending(); }
@@ -105,7 +112,13 @@ void UiDesignerAssistantDrawer::Tick() {
                 history << "A prepared proposal is still available for review. Nothing was applied automatically.\n"; break;
             }
         }
-        else conversation.Add(AppChatMessage("assistant", turn.text));
+        else {
+            conversation.Add(AppChatMessage("assistant", turn.text));
+            bool pending=false;
+            for(const auto& p : host.Proposals()) pending |= p.status=="pending";
+            context.SetText(pending ? "Proposal ready. Click Apply or type apply to create it on the canvas."
+                                   : "Response complete; no pending proposal. Nothing was changed on the canvas.");
+        }
         while(conversation.GetCount() > 20) conversation.Remove(0);
         was_active = false;
     }

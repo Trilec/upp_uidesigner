@@ -1620,6 +1620,9 @@ void UiDesignerPreviewCanvas::DetachInstance(UiDesignerPreviewInstance& instance
         const int item = grid->FindItem(*child);
         if(item >= 0) {
             grid->RemoveItem(item);
+            for(auto& sibling : instances_)
+                if(sibling.runtime_parent == instance.runtime_parent && sibling.layout_item_index > item)
+                    --sibling.layout_item_index;
             return;
         }
     }
@@ -1627,6 +1630,9 @@ void UiDesignerPreviewCanvas::DetachInstance(UiDesignerPreviewInstance& instance
         const int item = box->FindItem(*child);
         if(item >= 0) {
             box->RemoveItem(item);
+            for(auto& sibling : instances_)
+                if(sibling.runtime_parent == instance.runtime_parent && sibling.layout_item_index > item)
+                    --sibling.layout_item_index;
             return;
         }
     }

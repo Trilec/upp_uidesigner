@@ -54,7 +54,7 @@ GUI_APP_MAIN {
         UiDesignerNodeId id=0; auto plan=session.PlanAddControl(type,parent,Point(),false,-1,row,0);
         Check(plan.valid && session.ExecuteDrop(plan,&id,error),"fixture child insertion"); return id;
     };
-    auto title=add("UiTitleCard",grid,0), panel=add("UiPanel",grid,1), box=add("UiBoxLayout",grid,2);
+    auto box=add("UiBoxLayout",grid,2), panel=add("UiPanel",grid,1), title=add("UiTitleCard",grid,0);
     add("UiButton",box,0); add("UiButton",box,0);
     auto set=[&](UiDesignerNodeId id,const char* key,const Value& value) { session.Select(id); Check(session.CommitProperty(key,value,error),key); };
     set(title,"height_mode","Fit"); set(panel,"height_mode","Expand"); set(box,"height_mode","Fit");
@@ -66,6 +66,12 @@ GUI_APP_MAIN {
     Check(card && card->GetStyle().title_line_length==MEDIUM,"Inspector Medium reaches runtime");
     auto* runtime=dynamic_cast<UiGridLayout*>(preview.FindRuntime(grid)); preview.Layout();
     Check(runtime && runtime->GetCellRect(2,0).GetHeight()<runtime->GetCellRect(1,0).GetHeight(),"Designer Fit child shrinks its row");
+    for(const char* direction : {"V","H","V","H"}) {
+        set(box,"direction",direction); preview.Layout();
+        Rect title_rect=preview.FindRuntime(title)->GetRect(), panel_rect=preview.FindRuntime(panel)->GetRect(), box_rect=preview.FindRuntime(box)->GetRect();
+        Check(title_rect.bottom<=panel_rect.top && panel_rect.bottom<=box_rect.top,
+              "Direction rebuild preserves sibling rows without overlap");
+    }
     set(grid,"height_mode","Fit"); preview.Layout();
     Check(preview.FindRuntime(grid)->GetSize().cy>=card->GetMinSize().cy,"Designer Grid Fit remains measurable");
     auto stack=UiDesignerPreviewSelectionStack(preview.GetGeometrySnapshot(),session.Document(),preview.FindGeometry(title)->rect.CenterPoint());

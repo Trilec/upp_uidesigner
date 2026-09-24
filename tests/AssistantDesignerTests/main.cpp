@@ -14,6 +14,34 @@ GUI_APP_MAIN {
     UiDesignerSession dialog; UiDesignerAssistantHost host(dialog); host.Capture("Designer");
     String initial=Authored(dialog.Document()); ValueMap args; args.Set("id","layout-v2");
     Value skill=host.Execute("retrieve_skill",args);
+    Check(!Ok(host.ApplyPending()),"text Apply explains missing proposal");
+    ValueMap invalid=ParseJSON(AsJSON(skill["result"]["titlecard_dialog_example"]));
+    ValueArray invalid_items=invalid["items"]; ValueMap invalid_heading=invalid_items[1];
+    invalid_heading.Set("grid_row",3); invalid_items.Set(1,invalid_heading); invalid.Set("items",invalid_items);
+    Check(!Ok(host.Execute("prepare_composition",invalid)) && Authored(dialog.Document())==initial,
+          "out-of-range grid placement is rejected without mutation");
+    Value proposal=host.Execute("prepare_composition",skill["result"]["titlecard_dialog_example"]);
+    if(!Ok(proposal)) Cout()<<"TitleCard example validation: "<<AsJSON(proposal)<<'\n';
+    Check(Ok(proposal) && Authored(dialog.Document())==initial,"TitleCard three-row example validates without mutation");
+    Check(Ok(host.ApplyPending()),"explicit human text Apply uses canonical proposal commit");
+    bool heading=false,body=false,actions=false,spacer=false;
+    for(const auto& node:dialog.Document().GetNodes()) {
+        heading|=node.type=="UiTitleCard" && node.GetProperty("grid_row",-1)==0;
+        body|=node.type=="UiPanel" && node.GetProperty("grid_row",-1)==1 && node.GetProperty("height_mode","")=="Expand";
+        actions|=node.type=="UiBoxLayout" && node.GetProperty("grid_row",-1)==2 && node.GetProperty("direction","")=="H";
+        spacer|=node.type=="Spacer" && node.GetProperty("h_sizing","")=="Fill";
+    }
+    Check(heading && body && actions && spacer,"dialog uses requested layout and expanding body/right-aligned actions");
+    Check(!Ok(host.ApplyPending()) && dialog.Undo() && Authored(dialog.Document())==initial,"text Apply cannot repeat and one Undo restores blank");
+    host.Capture("Designer");
+    host.Execute("prepare_composition",skill["result"]["titlecard_dialog_example"]);
+    host.Execute("prepare_composition",skill["result"]["titlecard_dialog_example"]);
+    Check(!Ok(host.ApplyPending()) && Authored(dialog.Document())==initial,"ambiguous text Apply requires explicit proposal selection");
+  }
+  {
+    UiDesignerSession dialog; UiDesignerAssistantHost host(dialog); host.Capture("Designer");
+    String initial=Authored(dialog.Document()); ValueMap args; args.Set("id","layout-v2");
+    Value skill=host.Execute("retrieve_skill",args);
     Check(Ok(skill),"versioned dialog guidance available");
     ValueMap example=skill["result"]["prepare_composition_example"];
     ValueMap invalid=ParseJSON(AsJSON(example)); ValueArray invalid_items=invalid["items"];
