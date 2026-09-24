@@ -14,8 +14,9 @@ reported validation separate. The graph project's own gates are not Designer gat
   AppChat, assistant guidance/host/drawer, tests and documentation.
 - STATUS: implementation and required offline gates complete; live evidence and
   publication details in `ASSISTANT_FIRSTUSE_02_REPORT.md`.
-- PUBLISHED: shared Ui `ed635bc1dcbbd0d23524d1184843995c239c0963`; Designer
-  implementation is the commit containing this entry, followed by its SHA record.
+- PUBLISHED: shared Ui `ed635bc1dcbbd0d23524d1184843995c239c0963`; tested Designer
+  implementation `4623ad0e59a95fa8c29a1937390c1b2307520fd9`. Both pushed,
+  fetched and confirmed contained in origin/main. This follow-up is documentation only.
 - VALIDATION: required Debug/Release Embedded runs, deterministic boundary and
   layout regressions, separate exact-prompt live provider and visible Apply/Undo.
 - NEXT: Curt's visual judgement in the canonical application. Templates are visual;

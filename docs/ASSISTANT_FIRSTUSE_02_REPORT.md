@@ -5,9 +5,11 @@ Shared Ui base: `9f1cf55481db2b5039a9fe3bd66daee91acce726`.
 Both main worktrees were clean at intake; fetched remote histories had no advancement.
 No branches, resets or history rewrites were used. Newer drawer work was preserved.
 Shared Ui fix: `ed635bc1dcbbd0d23524d1184843995c239c0963` (pushed, fetched, contained in origin/main).
-Designer tested source is the implementation commit containing this report; the
-following publication record identifies its SHA. Tests ran on those identical
-source contents before committing, with the shared changes present.
+Designer tested/published implementation: `4623ad0e59a95fa8c29a1937390c1b2307520fd9`.
+It was pushed, fetched, inspected and confirmed contained in origin/main.
+Tests ran on those identical source contents before committing, with the shared
+changes present. This following publication-record commit changes documentation
+only. Both full diffs were reviewed and git diff --check passed before publication.
 
 ## Actual first-use failure
 
