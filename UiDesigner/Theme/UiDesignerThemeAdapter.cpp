@@ -2692,15 +2692,15 @@ public:
             const Value canonical = q >= 0 ? node.theme_overrides.GetValue(q) : p.default_value;
             UiDesignerApplyTitleCardThemeField(style, p.adapter_field_id, ResolveThemeValue(node, overlay, p.id, canonical));
         }
-        if(authored) card->SetCustomStyle(style); else card->ClearCustomStyle();
+        // UiTitleCard's implicit style is Standard; retain the resolved role even
+        // when there are no local overrides.
+        card->SetCustomStyle(style);
     }
     void EmitSetup(String& out, const String& member, const UiDesignerNode& node, const UiDesignerControlSpec& spec) const override
     {
         bool authored = false;
         for(const UiDesignerThemeOverrideSpec& p : spec.theme_overrides)
             authored |= node.theme_overrides.Find(p.id) >= 0;
-        if(!authored)
-            return;
         out << "\tUiTitleCard::Style " << member << "_style = UiTheme::ResolveTitleCard("
             << EmitRoleExpr(AsString(node.GetProperty("role", "Standard"))) << ");\n";
         for(const UiDesignerThemeOverrideSpec& p : spec.theme_overrides) {

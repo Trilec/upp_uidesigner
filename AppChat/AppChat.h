@@ -69,6 +69,9 @@ class AppChatTurn {
     void Launch();
 public:
     AppChatLimits limits;
+    Event<const String&> WhenActivity;
+    int GetRound() const { return round; }
+    int GetCallsUsed() const { return calls; }
     String text, error;
     bool active = false;
     ~AppChatTurn();

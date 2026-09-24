@@ -1,0 +1,4 @@
+description "TitleCard roles/lines and mixed Fit/Expand Grid regression";
+uses CtrlLib, UiDesigner/Services, UiDesigner/Preview, UiDesigner/Theme;
+file main.cpp;
+mainconfig "" = "GUI";

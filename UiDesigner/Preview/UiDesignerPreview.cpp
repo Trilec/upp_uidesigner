@@ -81,6 +81,7 @@ static UiSpan ParseUiSpanChoice(const Value& value)
     const String span = value;
     if(span == "None") return NONE;
     if(span == "Small") return SMALL;
+    if(span == "Medium") return MEDIUM;
     return LARGE;
 }
 

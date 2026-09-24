@@ -22,6 +22,17 @@ The transcript is in memory. Conversations have one active request, bounded
 rounds, calls, input and output. AppChatLimits defines those bounds. No background
 jobs or filesystem/shell tools exist. Provider failures do not retry mutations.
 
+The activity row and transcript show the current round, tool calls and success or
+error results. Tool-limit failures report calls already used, the size of the
+rejected batch and the limit; that entire batch is not executed. A previously
+prepared proposal remains available for review after a later read-only failure.
+The default remains 16 calls and six provider rounds.
+
+Simple dialog requests use the versioned `layout-v2` guidance and its validated
+heading/OK/Cancel composition example. `describe_controls` reads at most four
+relevant registered schemas together. A visual template does not wire Accept or
+Cancel behavior; configure that separately in the Behavior Inspector.
+
 Try these requests on a disposable design:
 
 - “Inspect this design and suggest improvements without changing it.”

@@ -4,6 +4,23 @@ Remote main is authoritative. Sequential coding on main; no feature branch.
 Fetch before work and immediately before publishing. Keep published and locally
 reported validation separate. The graph project's own gates are not Designer gates.
 
+## UID-ASSISTANT-FIRSTUSE-02 and TitleCard/Grid repair
+
+- BASE: Designer `bb50fb84fd295844a29246651ea3b5d9b708069f`; shared Ui
+  `9f1cf55481db2b5039a9fe3bd66daee91acce726`. Newer main work preserved.
+- TASK: repair TitleCard role/line lengths and Grid Fit measurement; reproduce
+  the exact first-use dialog request and repair bounded assistant discovery.
+- TOUCHED: shared Ui Grid/TitleCard, Designer sizing/catalog/preview/export/theme,
+  AppChat, assistant guidance/host/drawer, tests and documentation.
+- STATUS: implementation and required offline gates complete; live evidence and
+  publication details in `ASSISTANT_FIRSTUSE_02_REPORT.md`.
+- PUBLISHED: shared Ui `ed635bc1dcbbd0d23524d1184843995c239c0963`; Designer
+  implementation is the commit containing this entry, followed by its SHA record.
+- VALIDATION: required Debug/Release Embedded runs, deterministic boundary and
+  layout regressions, separate exact-prompt live provider and visible Apply/Undo.
+- NEXT: Curt's visual judgement in the canonical application. Templates are visual;
+  OK/Cancel behavior wiring remains an explicit separate design action.
+
 ## UID-ASSISTANT-01 — embedded assistant checkpoint A
 
 - BASE: Designer `ec6c541d2040cbd1b390339aec1e661844f89980`; reusable Ui

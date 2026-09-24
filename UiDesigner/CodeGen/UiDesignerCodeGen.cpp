@@ -1,6 +1,7 @@
 #include "UiDesignerCodeGen.h"
 #include <UiDesigner/UiDesigner/UiDesignerButtonStyle.h>
 #include <UiDesigner/Theme/UiDesignerThemeAdapter.h>
+#include <UiDesigner/Core/UiDesignerSizing.h>
 
 namespace Upp {
 
@@ -288,6 +289,7 @@ static String EmitUiSpan(const String& value)
 {
     if(value == "None") return "NONE";
     if(value == "Small") return "SMALL";
+    if(value == "Medium") return "MEDIUM";
     return "LARGE";
 }
 
@@ -1072,9 +1074,19 @@ static void AttachBox(UiDesignerChildAttachContext& c)
 
 static void AttachGrid(UiDesignerChildAttachContext& c)
 {
-    c.out << "\t" << c.parent << ".Add(" << c.member << ", "
+    const auto sizing = UiDesignerResolveGridSizing(c.child);
+    c.out << "\t{ int item = " << c.parent << ".AddGrid(" << c.member << ", "
           << (int)c.child.GetProperty("grid_row", 0) << ", "
-          << (int)c.child.GetProperty("grid_column", 0) << ", true);\n";
+          << (int)c.child.GetProperty("grid_column", 0) << ", "
+          << AsString(sizing.scale_x) << ", " << AsString(sizing.scale_y)
+          << ", Size(DPI(" << sizing.fixed.cx << "), DPI(" << sizing.fixed.cy << ")));\n";
+    c.out << "\t  " << c.parent << ".SetItemAlign(item, " << GridAlignExpr(sizing.align_x)
+          << ", " << GridAlignExpr(sizing.align_y) << ");\n";
+    c.out << "\t  " << c.parent << ".SetItemMinSize(item, Size(DPI(" << sizing.min.cx
+          << "), DPI(" << sizing.min.cy << ")));\n";
+    c.out << "\t  " << c.parent << ".SetItemMaxSize(item, Size("
+          << (sizing.max.cx > 0 ? "DPI(" + AsString(sizing.max.cx) + ")" : "INT_MAX") << ", "
+          << (sizing.max.cy > 0 ? "DPI(" + AsString(sizing.max.cy) + ")" : "INT_MAX") << ")); }\n";
 }
 
 static void AttachAbsolute(UiDesignerChildAttachContext& c)

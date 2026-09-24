@@ -5,6 +5,9 @@ UiDesignerAssistantDrawer::UiDesignerAssistantDrawer(UiDesignerSession& s) : hos
         &proposal_detail, &composer, &send, &stop, &collapse, &profile_toggle, &configure, &proposals, &apply, &dismiss, &affected };
     for(Ctrl* c : children) Add(*c);
     transcript.SetReadOnly(); proposal_detail.SetReadOnly();
+    turn.WhenActivity = [=](const String& activity) {
+        context.SetText(activity); history << "Activity: " << activity << "\n";
+    };
     provider.Add("DeepSeek", "DeepSeek"); provider.Add("OpenRouter", "OpenRouter"); provider.SetData("OpenRouter");
     model.Tip("Provider model ID (must support tool calling)");
     model.SetPlaceholder("Model ID (tool-capable)");
@@ -96,7 +99,12 @@ void UiDesignerAssistantDrawer::Tick() {
     turn.Poll([=](const String& name, const ValueMap& args) { return host.Execute(name, args); });
     if(was_active && !turn.active) {
         history << "Assistant: " << turn.text << "\n";
-        if(!turn.error.IsEmpty()) history << turn.error << "\n";
+        if(!turn.error.IsEmpty()) {
+            history << turn.error << "\n"; context.SetText(turn.error); context.Tip(turn.error);
+            for(const auto& proposal : host.Proposals()) if(proposal.status=="pending") {
+                history << "A prepared proposal is still available for review. Nothing was applied automatically.\n"; break;
+            }
+        }
         else conversation.Add(AppChatMessage("assistant", turn.text));
         while(conversation.GetCount() > 20) conversation.Remove(0);
         was_active = false;

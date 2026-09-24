@@ -24,7 +24,35 @@ public:
         r.message=AppChatMessage("assistant","late result"); visible("late result"); return r;
     }
 };
+static ValueMap Batch(std::initializer_list<const char*> names) {
+    ValueArray calls; int i=0;
+    for(const char* name:names) { ValueMap c,f; c.Set("id",AsString(++i)); c.Set("type","function");
+        f.Set("name",name); f.Set("arguments","{}"); c.Set("function",f); calls.Add(c); }
+    ValueMap m=AppChatMessage("assistant",""); m.Set("tool_calls",calls); return m;
+}
 CONSOLE_APP_MAIN {
+    {
+        auto original=std::make_shared<AppChatScriptedProvider>();
+        original->replies.Add(Batch({"inspect_context","retrieve_skill","search_controls","search_controls","list_presets"}));
+        original->replies.Add(Batch({"inspect_hierarchy","describe_control"}));
+        original->replies.Add(Batch({"search_controls","search_controls","search_controls","invalid_UiColumn"}));
+        original->replies.Add(Batch({"describe_control","describe_control","search_controls","search_controls"}));
+        original->replies.Add(Batch({"describe_controls","prepare_composition"}));
+        AppChatTurn trace; int invoked=0; String activity;
+        trace.WhenActivity=[&](const String& line){activity<<line<<'\n';};
+        trace.Start(original,ValueArray(),ValueArray()); TimeStop watch;
+        while(trace.active && watch.Seconds()<3) { trace.Poll([&](const String& name,const ValueMap&)->Value {
+            invoked++; ValueMap result; result.Set("ok",name!="invalid_UiColumn"); return result; }); Sleep(1); }
+        Check(invoked==15 && trace.GetCallsUsed()==15 && trace.GetRound()==5,"replayed live discovery sequence stops before overflowing batch");
+        Check(trace.error.Find("15 tool calls used; 2 more requested; limit 16 (1 remaining)")>=0,"limit error reports used requested limit and remaining");
+        Check(activity.Find("invalid_UiColumn ERROR")>=0 && activity.Find("requested=2")>=0,"trace distinguishes rejected discovery and blocked batch");
+        auto exact=std::make_shared<AppChatScriptedProvider>();
+        for(int i=0;i<4;i++) exact->replies.Add(Batch({"read","read","read","read"}));
+        exact->replies.Add(AppChatMessage("assistant","Complete"));
+        trace.Start(exact,ValueArray(),ValueArray()); watch.Reset(); invoked=0;
+        while(trace.active && watch.Seconds()<3) { trace.Poll([&](const String&,const ValueMap&)->Value {invoked++; return ValueMap();}); Sleep(1); }
+        Check(invoked==16 && trace.error.IsEmpty(),"exactly sixteen calls are permitted");
+    }
     AppChatStream stream;
     String data = Chunk("{\"content\":\"Hello\",\"reasoning_content\":\"private\"}") + Chunk("{}", "\"stop\"") + "data: [DONE]\n\n";
     for(int i = 0; i < data.GetCount(); i++) stream.Feed(data.Mid(i, 1), 4096);

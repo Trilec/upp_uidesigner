@@ -683,6 +683,7 @@ static void AddTitleCardProperties(UiDesignerControlSpec& spec)
     title_line_length.impact = PropertyImpactPaint | PropertyImpactCode;
     title_line_length.choices.Add(PropertyEditorChoice("None", "None"));
     title_line_length.choices.Add(PropertyEditorChoice("Small", "Small"));
+    title_line_length.choices.Add(PropertyEditorChoice("Medium", "Medium (title width)"));
     title_line_length.choices.Add(PropertyEditorChoice("Large", "Large"));
     spec.properties.Add(title_line_length);
     spec.defaults.Set("title_line_length", "Large");
@@ -741,6 +742,7 @@ static void AddTitleCardProperties(UiDesignerControlSpec& spec)
     card_line_length.impact = PropertyImpactPaint | PropertyImpactCode;
     card_line_length.choices.Add(PropertyEditorChoice("None", "None"));
     card_line_length.choices.Add(PropertyEditorChoice("Small", "Small"));
+    card_line_length.choices.Add(PropertyEditorChoice("Medium", "Medium (title width)"));
     card_line_length.choices.Add(PropertyEditorChoice("Large", "Large"));
     spec.properties.Add(card_line_length);
     spec.defaults.Set("card_line_length", "Large");

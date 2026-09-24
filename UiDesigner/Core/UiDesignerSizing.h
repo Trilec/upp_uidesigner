@@ -98,8 +98,8 @@ inline UiDesignerGridSizing UiDesignerResolveGridSizing(const UiDesignerNode& no
     sizing.scale_x = width_mode == "Expand";
     sizing.scale_y = height_mode == "Expand";
     sizing.fixed = Size(
-        max(0, (int)node.GetProperty("fixed_width", 0)),
-        max(0, (int)node.GetProperty("fixed_height", 0)));
+        width_mode == "Fixed" ? max(0, (int)node.GetProperty("fixed_width", 0)) : 0,
+        height_mode == "Fixed" ? max(0, (int)node.GetProperty("fixed_height", 0)) : 0);
     sizing.min = Size(
         max(0, (int)node.GetProperty("min_width", 0)),
         max(0, (int)node.GetProperty("min_height", 0)));

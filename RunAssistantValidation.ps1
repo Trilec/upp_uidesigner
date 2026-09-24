@@ -58,6 +58,7 @@ try {
     if($Scope -eq 'McpAttach') { Record 'MCP attach' 'NOT RUN - optional checkpoint B is not implemented'; throw 'MCP attachment is pending' }
     Test (Build 'AppChatTests' 'AppChatTests' $false)
     Test (Build 'AssistantDesignerTests' 'AssistantDesignerTests' $true)
+    Test (Build 'TitleGridRegressionTest' 'TitleGridRegressionTest' $true)
     foreach($entry in @(@('RegressionTests',$true),@('ThemeDocumentTest',$false),@('ThemeStudioRoleTest',$true),@('ExportedThemeContractTest',$false))) {
         Test (Build $entry[0] $entry[0] $entry[1])
     }

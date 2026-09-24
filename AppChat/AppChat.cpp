@@ -105,9 +105,16 @@ bool AppChatTurn::Start(std::shared_ptr<AppChatProvider> p, const ValueArray& m,
     text.Clear(); error.Clear(); active = true; Launch(); return active;
 }
 void AppChatTurn::Launch() {
-    if(++round > limits.rounds || AsJSON(messages).GetCount() > limits.request_bytes) {
-        error = "Conversation request/round limit exhausted"; active = false; return;
+    if(round >= limits.rounds) {
+        error = Format("Assistant stopped: %d rounds used; 1 more requested; round limit %d. Narrow the request or reuse a prepared proposal.", round, limits.rounds);
+        active = false; return;
     }
+    if(AsJSON(messages).GetCount() > limits.request_bytes) {
+        error = Format("Assistant stopped: conversation exceeds the %d-byte request limit. Start a shorter request.", limits.request_bytes);
+        active = false; return;
+    }
+    ++round;
+    WhenActivity(Format("Round %d/%d: contacting model; %d/%d tool calls used", round, limits.rounds, calls, limits.calls));
     mailbox = std::make_shared<Mailbox>();
     auto box = mailbox; auto p = provider;
     ValueArray m = messages, t = descriptors; AppChatLimits l = limits;
@@ -129,8 +136,12 @@ void AppChatTurn::Poll(const Function<Value(const String&, const ValueMap&)>& ex
     if(!r.error.IsEmpty()) { error = r.error; active = false; return; }
     ValueArray tc;
     if(r.message["tool_calls"].Is<ValueArray>()) tc = r.message["tool_calls"];
+    WhenActivity(Format("Round %d: calls used=%d requested=%d limit=%d", round, calls, tc.GetCount(), limits.calls));
     if(tc.IsEmpty()) { text = AsString(r.message["content"]); active = false; return; }
-    if(calls + tc.GetCount() > limits.calls) { error = "Tool limit exhausted"; active = false; return; }
+    if(calls + tc.GetCount() > limits.calls) {
+        error = Format("Assistant stopped: %d tool calls used; %d more requested; limit %d (%d remaining). This batch was not run. Narrow the request or reuse a prepared proposal.", calls, tc.GetCount(), limits.calls, max(0,limits.calls-calls));
+        active = false; return;
+    }
     Index<String> ids;
     // Validate the entire call envelope before executing any host tool.
     for(const Value& c : tc) {
@@ -150,6 +161,8 @@ void AppChatTurn::Poll(const Function<Value(const String&, const ValueMap&)>& ex
         catch(...) { error = "Host tool failed; no automatic retry"; active = false; return; }
         ValueMap result = AppChatMessage("tool", AsJSON(value));
         result.Set("tool_call_id", c["id"]); messages.Add(result); calls++;
+        WhenActivity(Format("Round %d call %d: %s %s", round, calls,
+            AsString(c["function"]["name"]), value.Is<ValueMap>() && value["ok"] == false ? "ERROR" : "OK"));
     }
     Launch();
 }

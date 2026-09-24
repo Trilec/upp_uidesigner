@@ -11,6 +11,39 @@ static ValueMap Edit(UiDesignerNodeId node, const String& property, const Value&
 static ValueMap Group(const ValueArray& edits) { ValueMap a; a.Set("summary","Test proposal"); a.Set("edits",edits); return a; }
 GUI_APP_MAIN {
   {
+    UiDesignerSession dialog; UiDesignerAssistantHost host(dialog); host.Capture("Designer");
+    String initial=Authored(dialog.Document()); ValueMap args; args.Set("id","layout-v2");
+    Value skill=host.Execute("retrieve_skill",args);
+    Check(Ok(skill),"versioned dialog guidance available");
+    ValueMap example=skill["result"]["prepare_composition_example"];
+    ValueMap invalid=ParseJSON(AsJSON(example)); ValueArray invalid_items=invalid["items"];
+    ValueMap invalid_item=invalid_items[0], invalid_props=invalid_item["properties"];
+    invalid_props.Set("name","dialog"); invalid_item.Set("properties",invalid_props);
+    invalid_items.Set(0,invalid_item); invalid.Set("items",invalid_items);
+    Value rejected=host.Execute("prepare_composition",invalid);
+    Check(!Ok(rejected) && AsString(rejected["error"]).Find("UiBoxLayout.name")>=0 && host.Proposals().IsEmpty(),"identity rejection identifies field without mutation or proposal");
+    ValueArray types; types.Add("UiBoxLayout"); types.Add("UiLabel"); types.Add("UiButton");
+    args.Clear(); args.Set("types",types);
+    Check(Ok(host.Execute("describe_controls",args)),"bounded three-schema dialog discovery");
+    types.Add("UiPanel"); types.Add("UiTitleCard"); args.Set("types",types);
+    Check(!Ok(host.Execute("describe_controls",args)),"schema batch rejects more than four types");
+    Value proposal=host.Execute("prepare_composition",example);
+    Check(Ok(proposal) && Authored(dialog.Document())==initial,"skill example is schema-valid without mutation");
+    auto provider=std::make_shared<AppChatScriptedProvider>(); ValueMap message=AppChatMessage("assistant",""); ValueArray calls;
+    for(int i=0;i<2;i++) { ValueMap call,fn; call.Set("id",AsString(i)); call.Set("type","function"); fn.Set("name","inspect_context"); fn.Set("arguments","{}"); call.Set("function",fn); calls.Add(call); }
+    message.Set("tool_calls",calls); provider->replies.Add(message);
+    AppChatTurn turn; turn.limits.calls=1; turn.Start(provider,ValueArray(),host.Tools()); TimeStop timer;
+    while(turn.active && timer.Seconds()<3) { turn.Poll([&](const String& name,const ValueMap& a){return host.Execute(name,a);}); Sleep(1); }
+    Check(!turn.error.IsEmpty() && host.Proposals()[0].status=="pending","later read-only budget failure preserves valid proposal");
+    int before=dialog.Commands().GetHistoryPosition();
+    Check(Ok(host.Apply(ProposalId(proposal))) && dialog.Commands().GetHistoryPosition()==before+1,"dialog example applies as one command");
+    bool heading=false,ok=false,cancel=false;
+    for(const auto& node:dialog.Document().GetNodes()) { String text=AsString(node.GetProperty("text",""));
+        heading|=node.type=="UiLabel" && !text.IsEmpty(); ok|=node.type=="UiButton" && text=="OK"; cancel|=node.type=="UiButton" && text=="Cancel"; }
+    Check(heading && ok && cancel,"dialog contains heading and both action buttons");
+    Check(dialog.Undo() && Authored(dialog.Document())==initial,"one-step dialog Undo restores exact authored state");
+  }
+  {
     UiDesignerSession session; UiDesignerAssistantHost host(session);
     auto a = session.AddControl("UiButton"), b = session.AddControl("UiButton");
     session.Select(a); host.Capture("Designer");
