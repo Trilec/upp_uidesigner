@@ -91,7 +91,7 @@ static bool IsField(const String& id)
         "selection_badge_ink", "show_drag_handle", "drag_size", "drag_gap",
         "drag_side", "drag_marker", "ink_normal", "ink_hot", "ink_pressed", "ink_disabled"
     };
-    if(State(id, "face") >= 0 || State(id, "frame") >= 0 ||
+    if(State(id, "icon") >= 0 || State(id, "face") >= 0 || State(id, "frame") >= 0 ||
        PopupItemState(id, "face") >= 0 || PopupItemState(id, "frame") >= 0 ||
        PopupItemState(id, "ink") >= 0)
         return true;
@@ -102,6 +102,7 @@ static bool IsField(const String& id)
 
 static Value ValueOf(const UiDropdown::Style& s, const String& id)
 {
+    if(State(id, "icon") >= 0) return s.palette.icon[State(id, "icon")];
     int state = State(id, "face");
     if(state >= 0) return FillRecipe(s.palette.face[state]).ToValue();
     state = State(id, "frame");
@@ -195,6 +196,7 @@ static Value ValueOf(const UiDropdown::Style& s, const String& id)
 
 static void Apply(UiDropdown::Style& s, const String& id, const Value& v)
 {
+    if(State(id, "icon") >= 0) { s.palette.icon[State(id, "icon")] = (Color)v; return; }
     int state = State(id, "face");
     if(state >= 0) { ApplyFill(s.palette.face[state], v); return; }
     state = State(id, "frame");
@@ -296,6 +298,7 @@ static void AddOverrides(UiDesignerControlSpec& spec)
     Add(spec, "frame_enabled", "Enabled", "Frame", PropertyEditorKind::Boolean, s.metrics.frame_enabled, true);
     AddInt(spec, "frame_width", "Width", "Frame", s.metrics.frame_width, 0, 24, true);
     for(int i = 0; i < 4; i++) Add(spec, "frame_" + String(kStates[i]), kLabels[i], "Frame", PropertyEditorKind::Color, s.palette.frame[i]);
+    for(int i = 0; i < 4; i++) Add(spec, "icon_" + String(kStates[i]), kLabels[i], "Icon", PropertyEditorKind::Color, s.palette.icon[i]);
     Add(spec, "ink_normal", "Normal", "Ink", PropertyEditorKind::Color, s.palette.ink[ST_NORMAL]);
     for(int i = 1; i < 4; i++) Add(spec, "ink_" + String(kStates[i]), kLabels[i], "Ink", PropertyEditorKind::Color, s.palette.ink[i]);
     Add(spec, "font_face", "Font face", "Typography", PropertyEditorKind::Text, s.font.GetFaceName(), true).Editor("property.font");
@@ -403,6 +406,7 @@ static Value ResolveFace(const UiDesignerNode& node, const UiDesignerControlSpec
 
 static void Emit(String& out, const String& var, const String& id, const Value& v)
 {
+    if(State(id, "icon") >= 0) { out << "\t" << var << ".palette.icon[" << StateCode(State(id, "icon")) << "] = " << EmitValue(v) << ";\n"; return; }
     int state = State(id, "face");
     if(state >= 0) { out << "\t" << var << ".palette.face[" << StateCode(state) << "] = " << FillCode(v) << ";\n"; return; }
     state = State(id, "frame");

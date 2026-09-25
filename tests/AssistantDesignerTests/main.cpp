@@ -75,6 +75,73 @@ GUI_APP_MAIN {
           "theme design generates hard offset surface shadows");
     Check(session.Theme().GetEffective().GetStyleOverride(button_target,"radius")==0,
           "baseline generates explicit editable adapter geometry");
+    for(const char* type : {"UiTree", "UiTable", "UiBreadcrumbs", "UiSlider", "UiTab", "UiAccordion"}) {
+        const auto* spec = session.Catalog().Find(type);
+        const auto* adapter = UiDesignerGetThemeAdapter(*spec);
+        UiDesignerNode node; node.type = type; node.SetProperty("role", "Accent");
+        node.theme_overrides = session.Theme().GetEffective().GetStyleOverrides(String("Light|control|") + type + "|Accent");
+        String emitted; adapter->EmitSetup(emitted, "sample", node, *spec);
+        Check(!node.theme_overrides.IsEmpty() && !emitted.IsEmpty(), "data/navigation recipes are authored and exportable");
+        if(node.type == "UiTree") {
+            UiTree c; adapter->ApplyPreviewStyle(c,node,*spec,nullptr);
+            Check(c.GetStyle().metrics.radius == 0 && c.GetStyle().metrics.frame_enabled &&
+                  c.GetStyle().palette.face[ST_NORMAL].color != White(), "tree outer surface follows authored palette and geometry");
+        }
+        if(node.type == "UiTable") {
+            UiTable c; adapter->ApplyPreviewStyle(c,node,*spec,nullptr);
+            Check(c.GetStyle().table_bg != White() && c.GetStyle().cell_ink == Color(17,17,17), "table body and text follow authored palette");
+        }
+        if(node.type == "UiBreadcrumbs") {
+            UiBreadcrumbs c; adapter->ApplyPreviewStyle(c,node,*spec,nullptr);
+            Check(c.GetStyle().current_ink == Color(17,17,17), "breadcrumb custom ink survives SetCustomStyle");
+        }
+        if(node.type == "UiSlider") {
+            UiSlider c; adapter->ApplyPreviewStyle(c,node,*spec,nullptr);
+            Check(c.GetStyle().track_palette.ink[ST_NORMAL] == Color(17,17,17) &&
+                  !c.GetStyle().track_metrics.shadow.enabled && !c.GetStyle().thumb_metrics.shadow.enabled,
+                  "slider active track loses preset blue and nested shadows");
+        }
+        if(node.type == "UiAccordion") {
+            UiAccordion c; adapter->ApplyPreviewStyle(c,node,*spec,nullptr);
+            Check(c.GetStyle().header_style.palette.icon[ST_NORMAL] == Color(17,17,17),
+                  "accordion chevron uses authored icon ink");
+        }
+        if(node.type == "UiTab") {
+            UiTab c; adapter->ApplyPreviewStyle(c,node,*spec,nullptr);
+            Check(c.GetStyle().active_frame_color == Color(229,185,0) && c.GetStyle().tab_metrics.frame_enabled &&
+                  c.GetStyle().tab_palette.ink[ST_PRESSED] == Color(17,17,17),
+                  "tab indicator and frame follow explicit recipe");
+        }
+    }
+    {
+        UiProgressBar c; auto s = c.GetStyle();
+        s.track_metrics.radius = s.fill_metrics.radius = 0;
+        s.track_metrics.frame_width = 3; s.track_metrics.frame_enabled = true;
+        s.track_metrics.shadow.enabled = true; s.track_metrics.shadow.mode = SHADOW_HARD;
+        s.track_metrics.shadow.distance = 1; s.track_metrics.shadow.offset_x = s.track_metrics.shadow.offset_y = 5;
+        s.track_metrics.shadow.alpha = 255; s.track_metrics.shadow.color = Black();
+        s.fill_metrics.shadow.enabled = false;
+        s.track_palette.frame[ST_NORMAL] = Black(); s.fill_palette.face[ST_NORMAL] = UiFill::Solid(Yellow());
+        c.SetCustomStyle(s).Set(68,100).Percent(); c.SetRect(0,0,200,40);
+        ImageDraw drawing(200,40); drawing.DrawRect(0,0,200,40,White()); c.Paint(drawing);
+        Image img = drawing;
+        Check(img[36][80] == Black() && img[1][80] == Black(), "progress fill/text preserve hard shadow and upper frame pixels");
+        auto g = c.GetGeometry(Size(200,40));
+        Check(g.fill.bottom <= 31 && g.fill.right < g.content.right, "progress fill uses the inner track bounds");
+    }
+    {
+        UiTable c; auto s = c.GetStyle();
+        s.metrics.radius = 0; s.metrics.frame_width = 3; s.metrics.frame_enabled = true;
+        s.metrics.shadow.enabled = true; s.metrics.shadow.mode = SHADOW_HARD;
+        s.metrics.shadow.distance = 1; s.metrics.shadow.offset_x = s.metrics.shadow.offset_y = 5;
+        s.metrics.shadow.alpha = 255; s.metrics.shadow.color = Black();
+        s.palette.frame[ST_NORMAL] = Black(); s.table_bg = Yellow();
+        c.SetCustomStyle(s); c.SetRect(0,0,200,100); c.Layout();
+        ImageDraw drawing(200,100); drawing.DrawRect(0,0,200,100,White()); c.Paint(drawing);
+        Image img = drawing;
+        Check(img[1][80] == Black() && img[50][1] == Black(), "table content preserves upper and left frame pixels");
+        Check(img[96][80] == Black(), "table content preserves hard shadow pixels");
+    }
     Value button_before=session.Theme().GetEffective().GetStyleOverrides(button_target);
     session.Theme().SetActiveStyleTarget("Light|control|UiAccordion|Accent");
     Check(session.Theme().IsProposalVisible(), "sample selection retains proposed theme");
@@ -90,8 +157,8 @@ GUI_APP_MAIN {
           "refinement preserves unrelated button fields");
     Check(session.Theme().Serialize(false)==original, "refinement stays outside durable theme");
     Check(session.Theme().Commit("palette.light.4", Color(40,120,180), "Adjust proposed accent", error) &&
-          session.Theme().GetEffective().GetStyleOverride(button_target,"frame_normal") == Color(40,120,180),
-          "palette adjustment regenerates owned fields in the candidate");
+          session.Theme().GetEffective().GetStyleOverride(button_target,"frame_normal") == Color(40,60,75),
+          "palette adjustment regenerates role-tinted outlines anchored to the border seed");
     Check(session.Theme().GetEffective().GetStyleOverride("Light|control|UiAccordion|Accent","header_title_color") == Color(98,98,98),
           "palette regeneration preserves the explicit title refinement");
     Check(session.Theme().GetEffective().GetStyleOverride(button_target,"font_size")==16 &&

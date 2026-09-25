@@ -656,7 +656,7 @@ static void AddTabOverrides(UiDesignerControlSpec& spec)
     AddPaletteMetrics(spec, "", "Body", s.palette, s.metrics,
                       false, false, true, true, true, true);
     AddPaletteMetrics(spec, "tab", "Tab", s.tab_palette, s.tab_metrics,
-                      false, false, true, true, true, true);
+                      true, true, true, true, true, true);
 
     Add(spec, "tab_font_face", "Font face", "Tab / Typography",
         PropertyEditorKind::Text, s.tab_font.GetFaceName(), true).Editor("property.font");

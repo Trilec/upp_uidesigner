@@ -720,6 +720,8 @@ void UiDesignerThemeGallery::BindSelectableSamples()
     bind(multi_edit_, "UiMultiEdit", false);
     bind(data_group_, "UiGroupPanel", true);
     bind(list_, "UiList", false);
+    bind(table_, "UiTable", false);
+    bind(breadcrumbs_, "UiBreadcrumbs", false);
     bind(tree_, "UiTree", false);
     bind(navigation_group_, "UiGroupPanel", true);
     bind(tab_, "UiTab", false);

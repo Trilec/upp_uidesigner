@@ -22,6 +22,7 @@ file
     UiDesignerGroupPanelThemeAdapterV3.cpp,
     UiDesignerTabThemeRuntimeAdapter.cpp,
     UiDesignerListThemeAdapter.cpp,
+    UiDesignerDataThemeAdapters.cpp,
     UiDesignerEditThemeAdapter.cpp,
     UiDesignerDropdownThemeAdapter.cpp,
     UiDesignerAccordionThemeAdapter.cpp,

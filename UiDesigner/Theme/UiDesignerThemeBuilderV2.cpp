@@ -81,6 +81,19 @@ static Value StudioPreviewDefaultV2(const UiDesignerPropertySpec& property)
     return property.default_value;
 }
 
+static int DataSampleHeight(const UiTree& tree)
+{
+    const auto& s = tree.GetStyle();
+    return max(DPI(178), UiStyledOuterSizeFromContent(Size(0, s.row_height * 5),
+        s.metrics, s.skin, Rect(0, s.v_padding, 0, s.v_padding)).cy);
+}
+static int TableSampleHeight(const UiTable& table)
+{
+    const auto& s = table.GetStyle();
+    return max(DPI(140), UiStyledOuterSizeFromContent(Size(0, s.header_height + s.row_height * 4),
+        s.metrics, s.skin).cy + DPI(16));
+}
+
 static void PaintThemeSurface(Draw& w, Size size)
 {
     UiPanel::Style style = UiTheme::ResolvePanel(UiRole::Standard);
@@ -143,17 +156,17 @@ void UiDesignerThemeGalleryV2::RebuildColumnPlacement()
 
     auto header_extra = [](UiGroupPanel& group) { return max(0, group.GetBodyRect().top + DPI(6) - DPI(48)); };
     control_columns_[0].Add(buttons_group_).Fixed(DPI(164) + header_extra(buttons_group_));
-    control_columns_[0].Add(data_group_).Fixed(DPI(252) + header_extra(data_group_));
+    control_columns_[0].Add(data_group_).Fixed(DPI(252) + header_extra(data_group_) + DataSampleHeight(tree_) - DPI(178));
     control_columns_[0].Add(rings_group_).Fixed(DPI(170) + header_extra(rings_group_));
 
-    control_columns_[1].Add(numbers_group_).Fixed(DPI(212) + header_extra(numbers_group_));
-    control_columns_[1].Add(inputs_group_).Fixed(DPI(226) + header_extra(inputs_group_));
+    control_columns_[1].Add(numbers_group_).Fixed(DPI(212) + header_extra(numbers_group_) + max(0, progress_.GetMinSize().cy - DPI(20)) + max(0, max(int_edit_.GetMinSize().cy, float_edit_.GetMinSize().cy) - DPI(32)));
+    control_columns_[1].Add(inputs_group_).Fixed(DPI(226) + header_extra(inputs_group_) + max(0, line_edit_.GetMinSize().cy - DPI(32)) + max(0, slider_edit_.GetMinSize().cy - DPI(30)));
     control_columns_[1].Add(choices_group_).Fixed(DPI(158) + header_extra(choices_group_));
 
     // Navigation now starts the third column; the former Feedback group is the
     // dedicated Table sample below it.
     control_columns_[2].Add(navigation_group_).Fixed(DPI(292) + header_extra(navigation_group_) + max(0, accordion_.GetMinSize().cy - DPI(108)));
-    control_columns_[2].Add(feedback_group_).Fixed(DPI(202) + header_extra(feedback_group_));
+    control_columns_[2].Add(feedback_group_).Fixed(DPI(202) + header_extra(feedback_group_) + TableSampleHeight(table_) - DPI(140));
 
 }
 
@@ -441,12 +454,7 @@ void UiDesignerThemeGalleryV2::ApplyThemeStyles()
     ApplySampleThemeV2(multi_edit_, "UiMultiEdit", false);
     ApplySampleThemeV2(slider_edit_.Slider(), "UiSlider", false);
     ApplySampleThemeV2(slider_edit_.Field(), "UiFloatEdit", false);
-    // This composition has no independent catalog recipe. Its two text roles
-    // still preview the selected Control Role and refresh with the current mode.
-    UiBreadcrumbs::Style breadcrumb_style = UiBreadcrumbs::ResolveThemeStyle();
-    breadcrumb_style.text_role = control_role_;
-    breadcrumb_style.current_role = control_role_;
-    breadcrumbs_.SetCustomStyle(breadcrumb_style);
+    ApplySampleThemeV2(breadcrumbs_, "UiBreadcrumbs", false);
     ApplySampleThemeV2(data_group_, "UiGroupPanel", true);
     ApplySampleThemeV2(list_, "UiList", false);
     ApplySampleThemeV2(tree_, "UiTree", false);
@@ -479,34 +487,9 @@ void UiDesignerThemeGalleryV2::ApplyThemeStyles()
     ApplySampleThemeV2(container_scroll_panel_, "UiScrollPanel", true);
     ApplySampleThemeV2(container_scroll_label_, "UiLabel", false);
 
-    // The Table has no editable gallery recipe yet. Start with its complete
-    // current-mode theme (including dark warning/error colours), then project
-    // this sample's Control Role through existing semantic resolvers. Its
-    // surrounding GroupPanel remains on the independent Panel Role.
-    table_.ClearCustomStyle();
-    UiTable::Style table_style = table_.GetStyle();
-    const UiPanel::Style table_surface = UiTheme::ResolvePanel(control_role_);
-    const UiLabel::Style table_text = UiTheme::ResolveLabel(control_role_);
-    const UiList::Style table_selection = UiTheme::ResolveList(control_role_);
-    const UiDropdown::Style table_edge = UiTheme::ResolveDropdown(control_role_);
-    if(table_surface.palette.face[ST_NORMAL].IsSolid())
-        table_style.table_bg = table_surface.palette.face[ST_NORMAL].color;
-    table_style.header_bg = table_surface.palette.face[ST_HOT].IsSolid()
-        ? table_surface.palette.face[ST_HOT].color : table_style.table_bg;
-    table_style.header_hot_bg = table_edge.palette.face[ST_HOT].IsSolid()
-        ? table_edge.palette.face[ST_HOT].color : table_style.header_bg;
-    table_style.row_header_bg = table_style.header_bg;
-    table_style.header_ink = table_style.cell_ink = table_text.palette.ink[ST_NORMAL];
-    table_style.muted_ink = table_text.palette.ink[ST_DISABLED];
-    if(!IsNull(table_selection.selected_face))
-        table_style.selection_bg = table_selection.selected_face;
-    table_style.active_bg = table_style.selection_bg;
-    if(!IsNull(table_edge.palette.frame[ST_PRESSED]))
-        table_style.active_border = table_style.selection_border =
-            table_style.resize_guide = table_edge.palette.frame[ST_PRESSED];
-    table_style.show_column_headers = true;
-    table_style.show_row_headers = true;
-    table_style.row_header_width = DPI(30);
+    ApplySampleThemeV2(table_, "UiTable", false);
+    // Sample chrome: reserve a compact row-number column, independent of recipes.
+    auto table_style = table_.GetStyle(); table_style.row_header_width = DPI(30);
     table_.SetCustomStyle(table_style);
 
     RebuildColumnPlacement();
@@ -527,17 +510,41 @@ void UiDesignerThemeGalleryV2::Layout()
     split_button_.SetRect(split_x, DPI(48),
                           max(0, w - split_x - inset), DPI(32));
 
+    // Measure editor text together with frame/shadow decoration before placing rows.
+    int edit_extra = max(0, max(int_edit_.GetMinSize().cy, float_edit_.GetMinSize().cy) - DPI(32));
+    for(Ctrl* c : {static_cast<Ctrl*>(&int_edit_), static_cast<Ctrl*>(&float_edit_)}) {
+        Rect r = c->GetRect(); r.bottom += edit_extra; c->SetRect(r);
+    }
+    for(Ctrl* c : {static_cast<Ctrl*>(&slider_), static_cast<Ctrl*>(&progress_), static_cast<Ctrl*>(&scroll_bar_)}) {
+        Rect r = c->GetRect(); r.Offset(0, edit_extra); c->SetRect(r);
+    }
+    int line_extra = max(0, line_edit_.GetMinSize().cy - DPI(32));
+    Rect line_rect = line_edit_.GetRect(); line_rect.bottom += line_extra; line_edit_.SetRect(line_rect);
+    Rect multi_rect = multi_edit_.GetRect(); multi_rect.Offset(0, line_extra); multi_edit_.SetRect(multi_rect);
+    Rect compound_rect = slider_edit_.GetRect(); compound_rect.Offset(0, line_extra);
+    compound_rect.bottom += max(0, slider_edit_.GetMinSize().cy - DPI(30)); slider_edit_.SetRect(compound_rect);
+
+    // Preserve room for progress text, frame and its one outer shadow.
+    int extra_progress = max(0, progress_.GetMinSize().cy - DPI(20));
+    Rect progress_rect = progress_.GetRect(); progress_rect.bottom += extra_progress;
+    progress_.SetRect(progress_rect);
+    Rect scroll_rect = scroll_bar_.GetRect(); scroll_rect.Offset(0, extra_progress);
+    scroll_bar_.SetRect(scroll_rect);
+
     // DATA now gives List and Tree half the available width each.
     w = data_group_.GetSize().cx;
     const int data_gap = DPI(8);
     const int data_w = max(DPI(80), (w - inset * 2 - data_gap) / 2);
-    list_.SetRect(inset, DPI(48), data_w, DPI(178));
-    tree_.SetRect(inset + data_w + data_gap, DPI(48), data_w, DPI(178));
+    list_.SetRect(inset, DPI(48), data_w, DataSampleHeight(tree_));
+    tree_.SetRect(inset + data_w + data_gap, DPI(48), data_w, DataSampleHeight(tree_));
 
     // TABLE uses the former Feedback shell as an independent full-width sample.
     w = feedback_group_.GetSize().cx;
     table_.SetRect(inset, DPI(48), max(0, w - inset * 2),
                    max(DPI(120), feedback_group_.GetSize().cy - DPI(62)));
+    const int table_content = max(0, table_.GetSize().cx - DPI(30) - DPI(26));
+    table_.SetColumnWidth(0, table_content / 3).SetColumnWidth(1, table_content / 3)
+          .SetColumnWidth(2, table_content - 2 * (table_content / 3));
     const int ring_space = max(0, rings_group_.GetSize().cx - inset * 3);
     const int ring_side = min(DPI(108), ring_space / 2);
     progress_ring_.SetRect(inset + (ring_space / 2 - ring_side) / 2, DPI(48), ring_side, ring_side);
@@ -550,12 +557,18 @@ void UiDesignerThemeGalleryV2::Layout()
                               &choices_group_, &numbers_group_, &inputs_group_,
                               &feedback_group_, &navigation_group_}) {
         int delta = max(0, group->GetBodyRect().top + DPI(6) - DPI(48));
-        if(!delta) continue;
+        Rect body = group->GetBodyRect();
+        body.Deflate(DPI(6));
         for(Ctrl* child = group->GetFirstChild(); child; child = child->GetNext()) {
             Rect rect = child->GetRect();
             if(rect.top < DPI(46)) continue;
             rect.Offset(0, delta);
-            rect.bottom = min(rect.bottom, max(rect.top, group->GetSize().cy - inset));
+            if(dynamic_cast<UiButton*>(child) || dynamic_cast<UiDropdown*>(child) ||
+               dynamic_cast<UiBreadcrumbs*>(child))
+                rect.bottom = max(rect.bottom, rect.top + child->GetMinSize().cy);
+            rect.left = max(rect.left, body.left);
+            rect.right = max(rect.left, min(rect.right, body.right));
+            rect.bottom = max(rect.top, min(rect.bottom, body.bottom));
             child->SetRect(rect);
         }
     }

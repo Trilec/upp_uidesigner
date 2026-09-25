@@ -9,6 +9,8 @@
 #undef UiDesignerThemeAdapterSupports
 
 namespace Upp {
+const UiDesignerThemeAdapter& UiDesignerTableThemeAdapterInstance();
+const UiDesignerThemeAdapter& UiDesignerBreadcrumbThemeAdapterInstance();
 
 const UiDesignerThemeAdapter& UiDesignerChartRingThemeAdapterInstance();
 const UiDesignerThemeAdapter& UiDesignerDateTimeThemeAdapterInstance();
@@ -29,6 +31,8 @@ bool IsEditRuntimeKind(UiDesignerRuntimeKind kind)
 
 const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(const String& id)
 {
+    if(id == "table") return &UiDesignerTableThemeAdapterInstance();
+    if(id == "breadcrumbs") return &UiDesignerBreadcrumbThemeAdapterInstance();
     if(id == "date_time")
         return &UiDesignerDateTimeThemeAdapterInstance();
     if(id == "chart_ring")
@@ -72,6 +76,8 @@ const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(const String& id)
 
 const UiDesignerThemeAdapter* UiDesignerFindThemeAdapter(UiDesignerRuntimeKind kind)
 {
+    if(kind == UiDesignerRuntimeKind::UiTable) return &UiDesignerTableThemeAdapterInstance();
+    if(kind == UiDesignerRuntimeKind::UiBreadcrumbs) return &UiDesignerBreadcrumbThemeAdapterInstance();
     if(kind == UiDesignerRuntimeKind::UiDateTime)
         return &UiDesignerDateTimeThemeAdapterInstance();
     if(kind == UiDesignerRuntimeKind::UiChartRing)

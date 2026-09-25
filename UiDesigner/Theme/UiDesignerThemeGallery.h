@@ -215,7 +215,7 @@ private:
     UiDesignerThemeSelectable<UiButton> button_;
     UiDesignerThemeSelectable<UiToolButton> tool_button_;
     UiDesignerThemeSelectable<UiSplitButton> split_button_;
-    UiBreadcrumbs breadcrumbs_;
+    UiDesignerThemeSelectable<UiBreadcrumbs> breadcrumbs_;
 
     UiDesignerThemeSelectable<UiGroupPanel> choices_group_;
     UiDesignerThemeSelectable<UiCheckBox> check_;
@@ -238,7 +238,7 @@ private:
     UiDesignerThemeSelectable<UiGroupPanel> data_group_;
     UiDesignerThemeSelectable<UiList> list_;
     UiDesignerThemeSelectable<UiTree> tree_;
-    UiTable table_;
+    UiDesignerThemeSelectable<UiTable> table_;
 
     UiDesignerThemeSelectable<UiGroupPanel> navigation_group_;
     UiDesignerThemeSelectable<UiTab> tab_;

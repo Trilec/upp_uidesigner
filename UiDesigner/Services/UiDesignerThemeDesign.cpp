@@ -1,5 +1,6 @@
 #include "UiDesignerAutomation.h"
 #include "UiDesignerRuntimeTheme.h"
+#include <cmath>
 
 namespace Upp {
 
@@ -29,6 +30,19 @@ static Color MixThemeColor(Color a, Color b, int percent)
     return Color((a.GetR() * (100-percent) + b.GetR() * percent) / 100,
                  (a.GetG() * (100-percent) + b.GetG() * percent) / 100,
                  (a.GetB() * (100-percent) + b.GetB() * percent) / 100);
+}
+
+static double ThemeLuminance(Color color)
+{
+    auto channel = [](int v) { double x = v / 255.0; return x <= 0.04045 ? x / 12.92 : std::pow((x + 0.055) / 1.055, 2.4); };
+    return 0.2126 * channel(color.GetR()) + 0.7152 * channel(color.GetG()) + 0.0722 * channel(color.GetB());
+}
+
+static Color ProgressTextColor(Color foreground, Color fill)
+{
+    double a = ThemeLuminance(foreground), b = ThemeLuminance(fill);
+    if((max(a,b) + 0.05) / (min(a,b) + 0.05) >= 4.5) return foreground;
+    return (b + 0.05) / 0.05 >= 1.05 / (b + 0.05) ? Black() : White();
 }
 
 static bool ValidateDesignStyle(const ValueMap& style, String& error)
@@ -63,6 +77,12 @@ static bool DesignStyleField(const UiDesignerThemeOverrideSpec& f, const ValueMa
 {
     String id = ToLower(f.adapter_field_id), key;
     bool heading = id.Find("title_font") >= 0 && id.Find("subtitle_font") < 0;
+    if(id == "row_height" && style.Find("body_size") >= 0) {
+        value = (int)style["body_size"] + 18; return true;
+    }
+    if(id == "header_height" && style.Find("heading_size") >= 0) {
+        value = (int)style["heading_size"] + 12; return true;
+    }
     if(id.Find("font") >= 0) {
         String prefix = heading ? "heading_" : "body_";
         if(id.EndsWith("font_face")) key = prefix + "font";
@@ -95,17 +115,23 @@ static bool BaselineField(const UiDesignerThemeOverrideSpec& f,
     const Color ink = palette.Get(3), key = palette.Get(role == 3 ? 5 : 4);
     const bool emphasized = role >= 2;
     Color face = emphasized ? MixThemeColor(surface, key, 12) : role == 1 ? paper : surface;
-    Color edge = emphasized ? key : line;
+    // The border seed anchors outlines; a small role tint keeps emphasis without
+    // making a yellow outline disappear against a yellow face or black shadow.
+    Color edge = emphasized ? MixThemeColor(key, line, 75) : line;
     const bool disabled = id.Find("disabled") >= 0;
     const bool selected = id.Find("select") >= 0 || id.Find("pressed") >= 0;
     const bool hot = id.Find("hot") >= 0;
     if(selected) face = MixThemeColor(surface, key, 25);
     else if(hot) face = MixThemeColor(surface, key, 18);
     if(disabled) { face = MixThemeColor(surface, paper, 65); edge = line; }
-    if(id.StartsWith("series.")) return false; // categorical chart colours retain their own semantics
+
     if(f.kind == PropertyEditorKind::Color || PropertyEditorKindName(f.kind) == "FillRecipe") {
         Color color;
-        if(id.Find("shadow") >= 0) color = Color(0, 0, 0);
+        if(id.StartsWith("series.")) {
+            int index = atoi(~id.Mid(7));
+            color = MixThemeColor(key, index % 2 ? ink : surface, 12 + (index % 4) * 12);
+        }
+        else if(id.Find("shadow") >= 0) color = Color(0, 0, 0);
         else if(id.Find("ink") >= 0 || id.Find("text") >= 0 || id.Find("title") >= 0 ||
                 id.Find("copy") >= 0 || id.Find("icon") >= 0 || id.Find("glyph") >= 0) {
             bool muted = disabled || id.Find("subtitle") >= 0 || id.Find("copy") >= 0 ||
@@ -118,7 +144,7 @@ static bool BaselineField(const UiDesignerThemeOverrideSpec& f,
                 id.Find("indicator") >= 0 || id.Find("drag") >= 0 || id.Find("metadata") >= 0)
             color = disabled ? MixThemeColor(key, surface, 60) : key;
         else if(id.Find("frame") >= 0 || id.Find("line") >= 0 || id.Find("separator") >= 0 ||
-                id.Find("tick") >= 0 || id.Find("grip") >= 0) color = edge;
+                id.Find("tick") >= 0 || id.Find("grip") >= 0 || id.Find("border") >= 0 || id.Find("grid") >= 0 || id.Find("guide") >= 0) color = edge;
         else if(id.Find("face") >= 0 || id.Find("bg") >= 0 || id.Find("background") >= 0 ||
                 id.Find("track") >= 0 || id.Find("selection") >= 0 || id.Find("gradient") >= 0)
             color = id.Find("track") >= 0 ? MixThemeColor(surface, key, 15) : face;
@@ -127,6 +153,7 @@ static bool BaselineField(const UiDesignerThemeOverrideSpec& f,
         else { ValueMap fill; fill.Set("schema", 1); fill.Set("mode", "Solid"); fill.Set("solid", color); value = fill; }
         return true;
     }
+    if(id == "frame_enabled" || id.EndsWith("_frame_enabled")) { value = border > 0; return true; }
     if(id == "radius" || id.EndsWith("_radius") || id.EndsWith(".radius")) value = radius;
     else if(id == "frame_width" || id.EndsWith("_frame_width") || id.EndsWith(".frame_width")) value = border;
     else return false;
@@ -175,7 +202,16 @@ bool UiDesignerAutomationService::BuildThemeDesign(const ValueMap& params,
                 bool owned = generated.Find(field.id) >= 0 && generated[field.id] == base.GetStyleOverride(target, field.id);
                 if(field.read_only || field.designer_only || (!replace && !owned && base.HasStyleOverride(target, field.id))) continue;
                 Value value;
-                if(DesignStyleField(field, style, value) || BaselineField(field, result.GetPalette(dark), role, radius, border, value)) {
+                bool thin_track = spec.type_id == "UiSlider" || spec.type_id == "UiScrollBar";
+                bool no_shadow = style.Find("shadow") >= 0 &&
+                    field.adapter_field_id.EndsWith("shadow_enabled") &&
+                    (thin_track || field.adapter_field_id != "shadow_enabled");
+                if(no_shadow) value = false;
+                if(no_shadow || DesignStyleField(field, style, value) || BaselineField(field, result.GetPalette(dark), role, radius, border, value)) {
+                    if((thin_track && field.adapter_field_id == "frame_enabled") ||
+                       (spec.type_id == "UiProgressBar" && field.adapter_field_id == "fill_frame_enabled")) value = false;
+                    if(spec.type_id == "UiProgressBar" && field.adapter_field_id == "ink_normal")
+                        value = ProgressTextColor(result.GetPalette(dark).Get(3), result.GetPalette(dark).Get(role == 3 ? 5 : 4));
                     result.SetStyleOverride(target, field.id, value);
                     ValueMap ownership;
                     int q = result.generated_fields.Find(target);

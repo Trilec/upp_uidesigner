@@ -68,7 +68,7 @@ public:
         Base().AddThemeOverrides(spec);
         for(int i = spec.theme_overrides.GetCount() - 1; i >= 0; --i) {
             const String& id = spec.theme_overrides[i].adapter_field_id;
-            if(id == "visual" || id == "icon_side" || id == "tab_font_face")
+            if(id == "visual" || id == "icon_side")
                 spec.theme_overrides.Remove(i);
         }
         DisambiguateTabThemeIds(spec);

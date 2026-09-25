@@ -4,6 +4,47 @@ Remote main is authoritative. Sequential coding on main; no feature branch.
 Fetch before work and immediately before publishing. Keep published and locally
 reported validation separate. The graph project's own gates are not Designer gates.
 
+## Theme rendering refinement — 2026-09-25
+
+- BASE: Designer `399c8dacf019a09ccdce29b2688d8f381c77c2ad`; shared Ui
+  `d5dc1beb3d36559caca0eb4d15db202b4162b879`. Both clean main branches;
+  fetched before work with no remote advancement.
+- CAUSES: ProgressBar measured its fill/text against the shadow-bearing outer
+  track. Tree omitted surface/font recipes; Table/Breadcrumbs bypassed recipes.
+  Tab text/icons, Accordion header icons and Dropdown indicator icons were missing from their schemas;
+  Slider's active track retained a preset ink behind the legacy thumb alias.
+  Breadcrumbs replaced explicit custom colours in SetCustomStyle. Generated
+  chart series deliberately retained preset blue. Gallery rows used fixed heights
+  and child bounds did not account for the group's styled body. Table painted its
+  viewport across the outer frame; its viewport and scrollbars now use the styled face.
+- FIXES: inner-track progress geometry and clipped percentage painting; explicit
+  data-control recipes with export parity; missing semantic inks exposed; authored
+  Breadcrumb colours preserved; palette-derived chart series; enabled borders,
+  border-seed-anchored role outlines, one outer elevation, measured editor/progress
+  rows and panel-body containment. Manual overrides still win. Table/Breadcrumbs
+  are selectable in the Studio Inspector. Role APIs remain independent of the
+  Designer's authoring policy.
+- LIMIT: the existing Slider dashed setting describes its frame; a dedicated
+  dashed active-track style is not implemented. Assistant guidance says so.
+- VALIDATION: Debug Embedded PASS (`build/Assistant-Debug-20260925-221857`).
+  Release Embedded and canonical launch PASS (`build/Assistant-Release-20260925-222006`).
+  AppChat 23, AssistantDesigner 123, TitleGrid 37, Regression 88, ThemeDocument 35,
+  ThemeStudioRole 1854, ExportedThemeContract 36; zero failures. Standalone
+  ProgressBar 35/0 (`build/ThemeRefine-Progress.log`). Portable schema comparison:
+  all 68 controls match the CLI; updated `build/uidesigner-design-skill.zip`.
+- LIVE: native OpenRouter `deepseek/deepseek-v4-flash` generated two valid review
+  proposals, each using 5 calls in 4 rounds with no errors (limit 16 unchanged).
+  Latest: round 1 inspect_theme + retrieve_skill; round 2 list_fonts +
+  inspect_theme_control; round 3 prepare_theme_design; round 4 final response.
+  Native Keep succeeded; Undo/Redo restored the previous/candidate appearance.
+  Preview left the blank design unchanged. Saved through Save Theme As to
+  `build/Brutalist-refined.theme.json`; original `Brutalist-review.theme.json`
+  remains untouched. Reload verified theme persistence. Light and Dark reviewed.
+- REQUIRED SHARED UI: `8c2a77bbcc412d42c881a7579d0d5a5289d1f851`.
+- EXECUTABLE: `E:\apps\github\upp_uidesigner\build\UiDesigner.exe`,
+  SHA256 `F086B89DD74A7F99164792D676B76402E739287CEDB95B444A4C233BFE078A4D`,
+  review PID `305880`. Built from this change with the shared dependency above.
+
 ## AI Theme proposals and portable JSON design skill — 2026-09-25
 
 - BASE: Designer `6bd8c8479893526be4d664e7f919bafacb5ae53e`; shared Ui

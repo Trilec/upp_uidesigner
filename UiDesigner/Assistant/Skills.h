@@ -100,7 +100,12 @@ radius (0..32), border_width (0..6) and replace_authored. Default replace_author
 preserves existing authored fields; use true only when the user requests restyling
 those fields. It does not erase unsupported recipe fields or local node overrides.
 Generation derives tinted surfaces, state colours, role frames and readable ink
-from those seeds. Chart-series categorical colours are deliberately retained.
+from those seeds. Generated chart series use coordinated seed-derived colours;
+authored series overrides remain protected. Tree, Table and Breadcrumbs have native
+recipes, including surfaces and typography. Query relevant fields for refinements.
+Thin slider/scroll tracks and nested fill/thumb surfaces do not receive automatic
+stacked shadows. frame_dashed is a dashed border, not a dedicated dashed-track style;
+do not promise a dashed active slider track from that field.
 Colour alone does not define a design style. For a complete restyle, also supply
 the optional style object. Use list_fonts once with a relevant family query;
 body_font and heading_font must be installed families. body_size and heading_size

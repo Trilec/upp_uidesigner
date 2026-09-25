@@ -1,4 +1,5 @@
 #include "UiDesignerThemeAdapter.h"
+#include "UiDesignerStyledThemeCommon.h"
 #include <UiDesigner/Catalog/UiDesignerCatalog.h>
 #include <UiDesigner/Core/UiDesignerOverlay.h>
 #include <UiDesigner/UiDesigner/UiDesignerButtonStyle.h>
@@ -1032,6 +1033,10 @@ public:
     void AddThemeOverrides(UiDesignerControlSpec& spec) const override
     {
         const UiTree::Style base = UiTheme::ResolveTree();
+        UiDesignerStyledTheme::AddPaletteMetrics(spec, "", "Surface", base.palette, base.metrics);
+        UiDesignerNormalizedTheme::Add(spec, "font_face", "Font", "Text", PropertyEditorKind::Text, base.font.GetFaceName(), true).Editor("property.font");
+        UiDesignerStyledTheme::AddNumeric(spec, "font_height", "Size", "Text", base.font.GetHeight(), 6, 96, true);
+        UiDesignerNormalizedTheme::Add(spec, "font_bold", "Bold", "Text", PropertyEditorKind::Boolean, base.font.IsBold(), true);
         AddOverride(spec, "row_height", "Row height", "Layout", PropertyEditorKind::Integer,
                     base.row_height, PropertyImpactPaint | PropertyImpactCode,
                     "row_height");
@@ -1121,6 +1126,7 @@ public:
 
     bool HasField(const String& field_id) const override
     {
+        if(UiDesignerStyledTheme::IsPaletteMetricsField("", field_id) || field_id == "font_face" || field_id == "font_height" || field_id == "font_bold") return true;
         static const char *fields[] = {
             "row_height", "indent_px", "glyph_size", "icon_size", "content_gap",
             "item_spacing", "h_padding", "v_padding", "row_radius",
@@ -1136,6 +1142,7 @@ public:
 
     bool FieldAffectsLayout(const String& field_id) const override
     {
+        if(UiDesignerStyledTheme::PaletteMetricsAffectsLayout("", field_id) || field_id.StartsWith("font_")) return true;
         static const char *layout_fields[] = {
             "row_height", "indent_px", "glyph_size", "icon_size", "content_gap",
             "item_spacing", "h_padding", "v_padding", "row_radius",
@@ -1159,7 +1166,11 @@ public:
             const Value canonical = q >= 0 ? node.theme_overrides.GetValue(q)
                                            : property.default_value;
             const Value effective = ResolveThemeValue(node, overlay, property.id, canonical);
-            if(property.id == "row_height") style.row_height = (int)effective;
+            if(UiDesignerStyledTheme::ApplyPaletteMetrics(style.palette, style.metrics, "", property.id, effective)) continue;
+            if(property.id == "font_face") style.font.FaceName(AsString(effective));
+            else if(property.id == "font_height") style.font.Height((int)effective);
+            else if(property.id == "font_bold") style.font.Bold((bool)effective);
+            else if(property.id == "row_height") style.row_height = (int)effective;
             else if(property.id == "indent_px") style.indent_px = (int)effective;
             else if(property.id == "glyph_size") style.glyph_size = (int)effective;
             else if(property.id == "icon_size") style.icon_size = (int)effective;
@@ -1190,6 +1201,10 @@ public:
             else if(property.id == "glyph_hot_color") style.glyph_hot_color = (Color)effective;
             else if(property.id == "glyph_selected_color") style.glyph_selected_color = (Color)effective;
         }
+        if(UiDesignerStyledTheme::IsPaletteMetricsField("", field_id)) return UiDesignerStyledTheme::PaletteMetricsValue(style.palette, style.metrics, "", field_id);
+        if(field_id == "font_face") return style.font.GetFaceName();
+        if(field_id == "font_height") return style.font.GetHeight();
+        if(field_id == "font_bold") return style.font.IsBold();
         if(field_id == "row_height") return style.row_height;
         if(field_id == "indent_px") return style.indent_px;
         if(field_id == "glyph_size") return style.glyph_size;
@@ -1241,7 +1256,11 @@ public:
             const Value canonical = q >= 0 ? node.theme_overrides.GetValue(q)
                                            : property.default_value;
             const Value effective = ResolveThemeValue(node, overlay, property.id, canonical);
-            if(property.id == "row_height") style.row_height = (int)effective;
+            if(UiDesignerStyledTheme::ApplyPaletteMetrics(style.palette, style.metrics, "", property.id, effective)) continue;
+            if(property.id == "font_face") style.font.FaceName(AsString(effective));
+            else if(property.id == "font_height") style.font.Height((int)effective);
+            else if(property.id == "font_bold") style.font.Bold((bool)effective);
+            else if(property.id == "row_height") style.row_height = (int)effective;
             else if(property.id == "indent_px") style.indent_px = (int)effective;
             else if(property.id == "glyph_size") style.glyph_size = (int)effective;
             else if(property.id == "icon_size") style.icon_size = (int)effective;
@@ -1295,7 +1314,11 @@ public:
             if(q < 0)
                 continue;
             const Value value = node.theme_overrides.GetValue(q);
-            if(property.id == "row_height") out << "\t" << style_var << ".row_height = " << (int)value << ";\n";
+            if(UiDesignerStyledTheme::EmitPaletteMetrics(out, style_var + ".palette", style_var + ".metrics", "", property.id, value)) continue;
+            if(property.id == "font_face") out << "\t" << style_var << ".font.FaceName(" << EmitValue(value) << ");\n";
+            else if(property.id == "font_height") out << "\t" << style_var << ".font.Height(" << (int)value << ");\n";
+            else if(property.id == "font_bold") out << "\t" << style_var << ".font.Bold(" << AsString((bool)value) << ");\n";
+            else if(property.id == "row_height") out << "\t" << style_var << ".row_height = " << (int)value << ";\n";
             else if(property.id == "indent_px") out << "\t" << style_var << ".indent_px = " << (int)value << ";\n";
             else if(property.id == "glyph_size") out << "\t" << style_var << ".glyph_size = " << (int)value << ";\n";
             else if(property.id == "icon_size") out << "\t" << style_var << ".icon_size = " << (int)value << ";\n";

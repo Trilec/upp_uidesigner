@@ -1423,6 +1423,11 @@ static void RegisterNative(UiDesignerCatalog& catalog)
             AddEvent(s, "WhenAccept", "Colour accepted", "Runs after colour acceptance.");
             AddEvent(s, "WhenCancel", "Colour cancelled", "Runs when colour editing is cancelled.");
         }
+        if(String(c.type) == "UiTable" || String(c.type) == "UiBreadcrumbs") {
+            s.theme = true;
+            s.theme_adapter_id = String(c.type) == "UiTable" ? "table" : "breadcrumbs";
+            if(const auto* adapter = UiDesignerFindThemeAdapter(s.theme_adapter_id)) adapter->AddThemeOverrides(s);
+        }
         if(String(c.type) == "UiTree" || String(c.type) == "UiList" || String(c.type) == "UiMenu") {
             s.theme_adapter_id = String(c.type) == "UiTree" ? "tree" :
                                  String(c.type) == "UiList" ? "list" : "menu";

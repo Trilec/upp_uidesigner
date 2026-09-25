@@ -103,7 +103,7 @@ static bool IsField(const String& id)
     };
     if(State(id, "face") >= 0 || State(id, "frame") >= 0 ||
        DotState(id, "header_face") >= 0 || DotState(id, "header_frame") >= 0 ||
-       DotState(id, "header_ink") >= 0 || DotState(id, "body_face") >= 0 ||
+       DotState(id, "header_icon") >= 0 || DotState(id, "header_ink") >= 0 || DotState(id, "body_face") >= 0 ||
        DotState(id, "body_frame") >= 0)
         return true;
     for(const char *f : fields)
@@ -113,6 +113,7 @@ static bool IsField(const String& id)
 
 static Value ValueOf(const UiAccordion::Style& s, const String& id)
 {
+    if(DotState(id, "header_icon") >= 0) return s.header_style.palette.icon[DotState(id, "header_icon")];
     int st = State(id, "face");
     if(st >= 0) return FillRecipe(s.palette.face[st]).ToValue();
     st = State(id, "frame");
@@ -211,6 +212,7 @@ static Value ValueOf(const UiAccordion::Style& s, const String& id)
 
 static void Apply(UiAccordion::Style& s, const String& id, const Value& v)
 {
+    if(DotState(id, "header_icon") >= 0) { s.header_style.palette.icon[DotState(id, "header_icon")] = (Color)v; return; }
     int st = State(id, "face");
     if(st >= 0) { ApplyFill(s.palette.face[st], v); return; }
     st = State(id, "frame");
@@ -351,6 +353,7 @@ static void AddOverrides(UiDesignerControlSpec& spec)
     AddInt(spec, "header_frame_width", "Width", "Header/Frame", s.header_style.metrics.frame_width, 0, 24, true);
     AddInt(spec, "header_radius", "Radius", "Header/Frame", s.header_style.metrics.radius, 0, 96);
     for(int i = 0; i < 4; i++) Add(spec, "header_frame." + String(kStates[i]), kLabels[i], "Header/Frame", PropertyEditorKind::Color, s.header_style.palette.frame[i]);
+    for(int i = 0; i < 4; i++) Add(spec, "header_icon." + String(kStates[i]), kLabels[i], "Header/Icon", PropertyEditorKind::Color, s.header_style.palette.icon[i]);
     for(int i = 0; i < 4; i++) Add(spec, "header_ink." + String(kStates[i]), kLabels[i], "Header/Ink", PropertyEditorKind::Color, s.header_style.palette.ink[i]);
     Add(spec, "header_title_color", "Title", "Header/Ink", PropertyEditorKind::Color, s.header_style.title_color);
     Add(spec, "header_subtitle_color", "Subtitle", "Header/Ink", PropertyEditorKind::Color, s.header_style.subtitle_color);
@@ -431,6 +434,7 @@ static Value ResolveFace(const UiDesignerNode& node, const UiDesignerControlSpec
 
 static void Emit(String& out, const String& var, const String& id, const Value& v)
 {
+    if(DotState(id, "header_icon") >= 0) { out << "\t" << var << ".header_style.palette.icon[" << StateCode(DotState(id, "header_icon")) << "] = " << EmitValue(v) << ";\n"; return; }
     int st = State(id, "face");
     if(st >= 0) { out << "\t" << var << ".palette.face[" << StateCode(st) << "] = " << FillCode(v) << ";\n"; return; }
     st = State(id, "frame");
