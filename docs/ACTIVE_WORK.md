@@ -6,6 +6,19 @@ reported validation separate. The graph project's own gates are not Designer gat
 
 ## Assistant conversation UI and reuse reference — 2026-09-25
 
+Follow-up: outside-in design guidance now covers Grid versus wrapping Box,
+expansion, TitleCard's single content slot, spacers and icon/reference limits.
+Added an insertable DialogTemplate and executable Grid/Label example. See
+`ASSISTANT_DESIGN_GUIDANCE.md` for the preset audit and proposed reference inputs.
+The same follow-up repairs scrolled catalogue rows painting over filters and
+places consistent Accent section headings beneath both sidebar icon strips.
+Theme guidance now covers palette/style intent from HTML/CSS and truthfully
+limits executable changes to supported recipes, not global style packs.
+Follow-up validation: Debug/Release passed; AssistantDesigner 80/0, Regression
+88/0, live creation/refinement 26/0; all 13 preset exports compiled. Native
+sidebar headings/scrolling checked; canonical Release left open. Evidence and
+remaining palette/reference limitations are in `ASSISTANT_DESIGN_GUIDANCE.md`.
+
 - BASE: Designer `d95d50462872fa10aa2ae70bdb410ac9fdd60fd1`; shared Ui
   `ed635bc1dcbbd0d23524d1184843995c239c0963` (unchanged).
 - TASK: refine the lower assistant drawer from Curt's mockup and establish a

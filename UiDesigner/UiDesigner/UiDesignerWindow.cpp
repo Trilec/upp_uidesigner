@@ -400,7 +400,7 @@ void UiDesignerWindow::BuildDesigner()
 
     designer_left_.AddSection("Layouts", ICON_DESIGN_LAYOUTS_CATEGORY_48(), layouts_list_)
                   .AddSection("Containers", ICON_DESIGN_TAB_GROUP_48(), containers_list_)
-                  .AddSection("Controls", ICON_DESIGN_WIDGETS_48(), controls_list_)
+                  .AddSection("UI Controls", ICON_DESIGN_WIDGETS_48(), controls_list_)
                   .AddSection("Presets", ICON_DESIGN_DASHBOARD_EDIT_48(), presets_list_)
                   .AddSection("U++ Controls", ICON_EDITOR_CLARIFY_48(), upp_controls_list_);
 

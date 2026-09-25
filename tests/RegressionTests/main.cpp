@@ -53,6 +53,26 @@ static String LegacySiblingOrderJson()
 
 GUI_APP_MAIN
 {
+    {
+        UiDesignerSession fixture;
+        UiDesignerCatalogList list;
+        list.SetCatalog(&fixture.Catalog());list.SetPresets();list.SetRect(0,0,DPI(240),DPI(180));list.Layout();
+        ImageDraw before_draw(list.GetSize());list.Paint(before_draw);Image before=before_draw;
+        list.MouseWheel(Point(DPI(100),DPI(100)),-120,0);
+        ImageDraw after_draw(list.GetSize());list.Paint(after_draw);Image after=after_draw;
+        bool fixed_lane=true,rows_changed=false;
+        for(int y=0;y<DPI(48);y++)
+            fixed_lane &= memcmp(before[y],after[y],before.GetWidth()*sizeof(RGBA))==0;
+        for(int y=DPI(48);y<before.GetHeight();y++)
+            rows_changed |= memcmp(before[y],after[y],before.GetWidth()*sizeof(RGBA))!=0;
+        Check(fixed_lane && rows_changed,"scrolling preset rows changes only the clipped list viewport");
+        String activated;list.WhenActivate=[&](const String& id){activated=id;};
+        list.LeftDouble(Point(DPI(20),DPI(30)),0);
+        Check(activated.IsEmpty(),"filter lane cannot activate scrolled preset rows");
+        list.SetRect(0,0,DPI(240),DPI(800));list.Layout();
+        list.LeftDouble(Point(DPI(20),DPI(52)),0);
+        Check(activated=="preset:"+fixture.Catalog().GetPresets()[0].id,"enlarging catalog clamps stale scroll to show first item");
+    }
     UiDesignerHierarchyView themed_hierarchy;
     UiMultiEdit readonly_viewer;
     readonly_viewer.SetReadOnly();

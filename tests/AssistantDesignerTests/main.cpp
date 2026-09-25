@@ -11,6 +11,37 @@ static ValueMap Edit(UiDesignerNodeId node, const String& property, const Value&
 static ValueMap Group(const ValueArray& edits) { ValueMap a; a.Set("summary","Test proposal"); a.Set("edits",edits); return a; }
 GUI_APP_MAIN {
   {
+    UiDesignerSession session;UiDesignerAssistantHost host(session);host.Capture("Designer");
+    ValueMap query;query.Set("id","layout-v2");Value skill=host.Execute("retrieve_skill",query);
+    Value proposal=host.Execute("prepare_composition",skill["result"]["grid_label_dialog_example"]);
+    String initial=Authored(session.Document());
+    Check(Ok(proposal) && Ok(host.Apply(ProposalId(proposal))),"Grid Label dialog guidance is executable");
+    bool grid=false,label=false,body=false,spacer=false;
+    for(const auto& n:session.Document().GetNodes()) {
+        grid|=n.type=="UiGridLayout" && n.GetProperty("rows",0)==3;
+        label|=n.type=="UiLabel" && n.GetProperty("grid_row",-1)==0 && n.GetProperty("height_mode","")=="Fit";
+        body|=n.type=="UiPanel" && n.GetProperty("grid_row",-1)==1 && n.GetProperty("height_mode","")=="Expand";
+        spacer|=n.type=="Spacer" && n.GetProperty("h_sizing","")=="Fill";
+    }
+    Check(grid&&label&&body&&spacer,"outside-in dialog has Fit heading, expanding body and action spacer");
+    Check(session.Undo() && Authored(session.Document())==initial,"Grid example remains one Undo");
+    host.Capture("Designer");ValueMap preset;preset.Set("summary","Dialog preset");preset.Set("preset",true);
+    preset.Set("type","DialogTemplate");preset.Set("parent",session.Document().GetRootId());
+    proposal=host.Execute("prepare_insert",preset);
+    Check(Ok(proposal) && Ok(host.Apply(ProposalId(proposal))) && session.Document().GetCount()==8,"insertable dialog preset uses ordinary seven-node composition");
+    String error;Check(session.Catalog().ValidateDocument(session.Document(),error) && !session.GenerateCode().IsEmpty() && session.Undo(),"dialog preset validates, generates and undoes");
+    host.Capture("Designer");
+    ValueMap nested=ParseJSON(AsJSON(skill["result"]["titlecard_dialog_example"]));
+    ValueArray items=nested["items"];
+    ValueMap slot,props;slot.Set("ref","header_actions");slot.Set("parent_ref","heading");slot.Set("type","UiBoxLayout");
+    props.Set("direction","H");props.Set("wrap","Flow");props.Set("width_mode","Expand");props.Set("height_mode","Fit");slot.Set("properties",props);items.Add(slot);
+    for(int i=0;i<2;i++){ValueMap button,p;p.Set("text",i?"Export":"Save");button.Set("ref",i?"export":"save");button.Set("parent_ref","header_actions");button.Set("type","UiButton");button.Set("properties",p);items.Add(button);}
+    nested.Set("items",items);proposal=host.Execute("prepare_composition",nested);
+    Check(Ok(proposal) && Ok(host.Apply(ProposalId(proposal))) && session.Undo(),"TitleCard single slot accepts wrapping Box with multiple buttons");
+    host.Capture("Designer");ValueMap direct=items[items.GetCount()-1];direct.Set("parent_ref","heading");items.Set(items.GetCount()-1,direct);nested.Set("items",items);
+    Check(!Ok(host.Execute("prepare_composition",nested)),"TitleCard rejects second direct content child");
+  }
+  {
     AppChatConversationView view;view.SetRect(0,0,500,200);
     String full="A literal & label with a long paragraph. ";for(int i=0;i<6;i++)full<<"More words remain available when folded. ";
     auto& card=view.AddMessage("Assistant",full,"stable-id");

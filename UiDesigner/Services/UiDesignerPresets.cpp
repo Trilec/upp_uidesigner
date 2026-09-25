@@ -75,6 +75,28 @@ private:
     String error_;
 };
 
+static UiDesignerNodeId BuildDialogTemplate(UiDesignerPresetBuilder& b,
+                                           UiDesignerNodeId parent)
+{
+    UiDesignerNodeId grid = b.Add("UiGridLayout", "dialog", parent);
+    b.Size(grid, "Expand", "Expand").P(grid, "rows", 3).P(grid, "columns", 1);
+    UiDesignerNodeId heading = b.Add("UiLabel", "heading", grid);
+    b.Text(heading, "Dialog heading").Size(heading, "Expand", "Fit")
+        .P(heading, "grid_row", 0).P(heading, "grid_column", 0);
+    UiDesignerNodeId body = b.Add("UiPanel", "body", grid);
+    b.Size(body, "Expand", "Expand").P(body, "grid_row", 1).P(body, "grid_column", 0);
+    UiDesignerNodeId actions = b.Add("UiBoxLayout", "actions", grid);
+    b.Box(actions, "H").Size(actions, "Expand", "Fit")
+        .P(actions, "grid_row", 2).P(actions, "grid_column", 0);
+    UiDesignerNodeId spacer = b.Add("Spacer", "push_right", actions);
+    b.P(spacer, "h_sizing", "Fill");
+    UiDesignerNodeId ok = b.Add("UiButton", "ok", actions);
+    b.Text(ok, "OK").Size(ok, "Fit", "Fit");
+    UiDesignerNodeId cancel = b.Add("UiButton", "cancel", actions);
+    b.Text(cancel, "Cancel").Size(cancel, "Fit", "Fit");
+    return grid;
+}
+
 static UiDesignerNodeId BuildHolyGrail(UiDesignerPresetBuilder& b,
                                       UiDesignerNodeId parent)
 {
@@ -317,6 +339,7 @@ bool UiDesignerPresetLibrary::Build(const String& id,
     else if(id == "SplitScreen") fragment_root = BuildSplitScreen(b, parent);
     else if(id == "FPattern") fragment_root = BuildFPattern(b, parent);
     else if(id == "HeaderWithActions") fragment_root = BuildHeaderWithActions(b, parent);
+    else if(id == "DialogTemplate") fragment_root = BuildDialogTemplate(b, parent);
     else if(id == "DesignerWorkbench") fragment_root = BuildWorkbench(b, parent);
     else if(id == "Demo") fragment_root = BuildDemo(b, parent);
     else {

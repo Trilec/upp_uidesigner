@@ -195,6 +195,7 @@ UiDesignerSideColumn::UiDesignerSideColumn()
 
     content_surface_.SetCustomStyle(UiDesignerSurfaceStyle());
     content_surface_.Add(pages_);
+    content_surface_.Add(section_title_);
 
     close_.SetCustomStyle(UiTheme::ResolveToolButton(UiRole::Subtle));
     close_.SetIcon(ICON_DESIGN_LEFT_PANEL_CLOSE_48())
@@ -231,6 +232,7 @@ UiDesignerSideColumn& UiDesignerSideColumn::AddSection(
     const String& title, const Image& icon, Ctrl& content, const String& tip)
 {
     const int section_index = section_buttons_.GetCount();
+    section_titles_.Add(title);
     UiToolButton& button = section_buttons_.Add();
     button.SetCustomStyle(UiTheme::ResolveToolButton(UiRole::Subtle));
     button.SetIcon(icon).SetIconSize(DPI(16), DPI(16))
@@ -260,6 +262,10 @@ UiDesignerSideColumn& UiDesignerSideColumn::ApplyTheme(
     UpdateToolSelection();
     content_surface_.SetCustomStyle(
         UiDesignerSurfaceStyle(UiRole::Subtle, theme));
+    UiLabel::Style title_style = UiTheme::ResolveLabel(UiRole::Accent);
+    title_style.font = SansSerifZ(10);
+    title_style.metrics.use_text_font = false;
+    section_title_.SetCustomStyle(title_style);
     Refresh();
     return *this;
 }
@@ -306,6 +312,8 @@ void UiDesignerSideColumn::Select(int index)
 
 void UiDesignerSideColumn::UpdateToolSelection()
 {
+    if(active_section_ >= 0 && active_section_ < section_titles_.GetCount())
+        section_title_.SetText(section_titles_[active_section_]);
     for(int i = 0; i < section_buttons_.GetCount(); i++)
         section_buttons_[i].SetChecked(i == active_section_)
                               .SetCustomStyle(UiTheme::ResolveToolButton(
@@ -391,9 +399,12 @@ void UiDesignerSideColumn::Layout()
     // Keep the panel's own content lane on the compact 4 px shell rhythm.
     // Catalog rows retain their independent 6 px paint gutter.
     const int content_inset = DPI(4);
-    pages_.SetRect(content_inset, content_inset,
+    section_title_.SetRect(DPI(12), DPI(6),
+                           max(0, content_surface_.GetSize().cx - DPI(24)), DPI(18));
+    const int page_top = DPI(28);
+    pages_.SetRect(content_inset, page_top,
                    max(0, content_surface_.GetSize().cx - content_inset * 2),
-                   max(0, content_surface_.GetSize().cy - content_inset * 2));
+                   max(0, content_surface_.GetSize().cy - page_top - content_inset));
 }
 
 }

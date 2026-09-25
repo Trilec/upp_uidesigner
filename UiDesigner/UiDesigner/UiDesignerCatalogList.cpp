@@ -3,13 +3,15 @@
 
 namespace Upp {
 
+// The fixed filter and scrolling rows share this boundary for paint, input,
+// resize and wheel limits. Scrolled rows must never paint into the filter lane.
+static int CatalogRowsTop() { return DPI(48); }
+
 UiDesignerCatalogList::UiDesignerCatalogList()
 {
     BackPaint();
     Add(filter_edit_);
-    Add(scope_label_);
     filter_edit_.SetPlaceholder("Filter controls...");
-    UpdateScopeLabel();
     filter_edit_.WhenChange = [=] {
         filter_ = AsString(filter_edit_.GetData());
         RebuildMatches();
@@ -20,7 +22,6 @@ UiDesignerCatalogList::UiDesignerCatalogList()
 void UiDesignerCatalogList::SetCatalog(const UiDesignerCatalog *catalog)
 {
     catalog_ = catalog;
-    UpdateScopeLabel();
     RebuildMatches();
 }
 
@@ -28,14 +29,13 @@ void UiDesignerCatalogList::SetCategory(const String& category)
 {
     category_ = category;
     presets_ = false;
-    UpdateScopeLabel();
     RebuildMatches();
 }
 
 void UiDesignerCatalogList::SetPresets(bool on)
 {
     presets_ = on;
-    UpdateScopeLabel();
+    filter_edit_.SetPlaceholder(on ? "Filter presets..." : "Filter controls...");
     RebuildMatches();
 }
 
@@ -44,15 +44,6 @@ void UiDesignerCatalogList::SetFilter(const String& filter)
     filter_ = filter;
     filter_edit_.SetData(filter);
     RebuildMatches();
-}
-
-void UiDesignerCatalogList::UpdateScopeLabel()
-{
-    const String scope = presets_
-        ? "Presets"
-        : (category_.IsEmpty() ? "All controls" : category_);
-    scope_label_.SetText(scope);
-    scope_label_.Tip("Current catalog scope");
 }
 
 void UiDesignerCatalogList::RebuildMatches()
@@ -122,7 +113,7 @@ Image UiDesignerCatalogList::ItemIcon(int index) const
 
 Rect UiDesignerCatalogList::ItemRect(int index) const
 {
-    const int top = DPI(72);
+    const int top = CatalogRowsTop();
     const int row = DPI(42);
     const int inset = DPI(6);
     return RectC(inset, top + index * row - scroll_,
@@ -131,9 +122,9 @@ Rect UiDesignerCatalogList::ItemRect(int index) const
 
 int UiDesignerCatalogList::RowAt(Point p) const
 {
-    if(p.y < DPI(72))
+    if(p.y < CatalogRowsTop() || p.y >= GetSize().cy || p.x < 0 || p.x >= GetSize().cx)
         return -1;
-    const int index = (p.y - DPI(72) + scroll_) / DPI(42);
+    const int index = (p.y - CatalogRowsTop() + scroll_) / DPI(42);
     return index >= 0 && index < Count() ? index : -1;
 }
 
@@ -144,8 +135,8 @@ int UiDesignerCatalogList::GetContentHeight() const
 
 void UiDesignerCatalogList::Layout()
 {
-    filter_edit_.SetRect(DPI(6), DPI(6), max(0, GetSize().cx - DPI(12)), DPI(34));
-    scope_label_.SetRect(DPI(8), DPI(42), max(0, GetSize().cx - DPI(16)), DPI(16));
+    filter_edit_.SetRect(DPI(6), 0, max(0, GetSize().cx - DPI(12)), DPI(34));
+    scroll_ = minmax(scroll_, 0, max(0, GetContentHeight() - max(0, GetSize().cy - CatalogRowsTop())));
 }
 
 void UiDesignerCatalogList::Paint(Draw& w)
@@ -153,9 +144,10 @@ void UiDesignerCatalogList::Paint(Draw& w)
     const UiDesignerThemeSurfacePalette palette =
         UiDesignerResolveThemeSurfacePalette();
     w.DrawRect(GetSize(), palette.paper);
+    w.Clip(0, CatalogRowsTop(), GetSize().cx, max(0, GetSize().cy - CatalogRowsTop()));
     for(int i = 0; i < Count(); i++) {
         Rect r = ItemRect(i);
-        if(r.bottom < DPI(40) || r.top > GetSize().cy)
+        if(r.bottom <= CatalogRowsTop() || r.top >= GetSize().cy)
             continue;
         const bool current = i == selected_;
         Color face = current
@@ -177,8 +169,9 @@ void UiDesignerCatalogList::Paint(Draw& w)
                    palette.divider);
     }
     if(Count() == 0)
-        w.DrawText(DPI(12), DPI(54), "No matching controls", SansSerifZ(10),
+        w.DrawText(DPI(12), CatalogRowsTop() + DPI(8), "No matching controls", SansSerifZ(10),
                    palette.disabled);
+    w.End();
 }
 
 void UiDesignerCatalogList::Activate(int index)
@@ -282,7 +275,7 @@ void UiDesignerCatalogList::CancelMode()
 
 void UiDesignerCatalogList::MouseWheel(Point, int zdelta, dword)
 {
-    const int list_height = max(0, GetSize().cy - DPI(40));
+    const int list_height = max(0, GetSize().cy - CatalogRowsTop());
     const int maximum = max(0, GetContentHeight() - list_height);
     scroll_ = minmax(scroll_ - zdelta / 4, 0, maximum);
     Refresh();

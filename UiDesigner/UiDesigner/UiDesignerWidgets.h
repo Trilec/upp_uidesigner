@@ -87,6 +87,8 @@ private:
     UiToolButton close_;
     UiToolButton expand_;
     Array<UiToolButton> section_buttons_;
+    Vector<String> section_titles_;
+    UiLabel section_title_;
     UiPanel content_surface_;
     UiStack pages_;
 
@@ -150,14 +152,12 @@ private:
     Image ItemIcon(int index) const;
     Rect ItemRect(int index) const;
     void Activate(int index);
-    void UpdateScopeLabel();
     const UiDesignerCatalog *catalog_ = nullptr;
     String category_;
     String filter_;
     bool presets_ = false;
     Vector<int> matches_;
     UiLineEdit filter_edit_;
-    UiLabel scope_label_;
     int hover_ = -1;
     int selected_ = -1;
     int pressed_ = -1;

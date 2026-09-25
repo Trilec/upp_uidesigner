@@ -1567,6 +1567,7 @@ static void RegisterPresets(UiDesignerCatalog& catalog)
     catalog.RegisterPreset({"SplitScreen", "Split Screen", "Two equal working surfaces", "ICON_DESIGN_SPLIT_SCENE_48"});
     catalog.RegisterPreset({"FPattern", "F Pattern", "Reading-led content hierarchy", "ICON_DESIGN_VIEW_STREAM_48"});
     catalog.RegisterPreset({"HeaderWithActions", "Header with Actions", "Page title and compact action cluster", "ICON_DESIGN_TITLE_48"});
+    catalog.RegisterPreset({"DialogTemplate", "Dialog Template", "Fit Label heading, expanding body, right-aligned OK/Cancel; visual template only", "ICON_DESIGN_DESCRIPTION_48"});
     catalog.RegisterPreset({"DesignerWorkbench", "Designer Workbench", "Catalog, preview, inspector, and status shell", "ICON_DESIGN_DASHBOARD_CUSTOMIZE_48"});
 }
 
