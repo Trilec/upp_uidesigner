@@ -11,6 +11,36 @@ static ValueMap Edit(UiDesignerNodeId node, const String& property, const Value&
 static ValueMap Group(const ValueArray& edits) { ValueMap a; a.Set("summary","Test proposal"); a.Set("edits",edits); return a; }
 GUI_APP_MAIN {
   {
+    AppChatConversationView view;view.SetRect(0,0,500,200);
+    String full="A literal & label with a long paragraph. ";for(int i=0;i<6;i++)full<<"More words remain available when folded. ";
+    auto& card=view.AddMessage("Assistant",full,"stable-id");
+    int collapsed=card.MeasureAndArrange(300);card.SetExpanded(true);int expanded=card.MeasureAndArrange(300);
+    Check(expanded>collapsed && card.GetText()==full,"reusable card folds measured text without losing full content");
+    card.AddAction("review","Review",[]{});view.JumpTo("stable-id");
+    Check(view.GetCount()==1,"history navigation retains one authoritative message");
+    view.ClearMessages();Check(view.GetCount()==0,"conversation view clears child controls");
+  }
+  {
+    UiDesignerSession session;UiDesignerAssistantHost host(session);host.Capture("Designer");
+    ValueMap skill_args;skill_args.Set("id","layout-v2");Value skill=host.Execute("retrieve_skill",skill_args);
+    Value proposal=host.Execute("prepare_composition",skill["result"]["prepare_composition_example"]);
+    String id=ProposalId(proposal);Check(host.ProposalState(id)=="Ready","fresh proposal presents Ready");
+    Check(Ok(host.Apply(id)),"refinement fixture applies");
+    Value scope=host.RefinementContext(id);
+    Check(scope["existing_nodes"].Is<ValueArray>() && ((ValueArray)scope["existing_nodes"]).GetCount()==5 && IsNull(scope["draft"]),"applied refinement references actual nodes, not insertion draft");
+    String authored=Authored(session.Document());int history=session.Commands().GetHistoryPosition();
+    host.ClearConversation();
+    Check(host.Proposals().IsEmpty() && Authored(session.Document())==authored && session.Commands().GetHistoryPosition()==history,"clear history retains authored design and Undo ownership");
+    Check(!Ok(host.Apply(id)) && session.Undo(),"cleared proposal cannot replay and normal Undo remains available");
+    host.Capture("Designer");
+    proposal=host.Execute("prepare_composition",skill["result"]["prepare_composition_example"]);
+    id=ProposalId(proposal);host.SupersedePending(id);
+    Check(host.ProposalState(id)=="revised" && !Ok(host.Apply(id)),"superseded pending draft cannot apply");
+    proposal=host.Execute("prepare_composition",skill["result"]["prepare_composition_example"]);
+    id=ProposalId(proposal);session.NewDocument();
+    Check(host.ProposalState(id)=="Needs review" && !Ok(host.Apply(id)),"document switch exposes stale proposal without enabling Apply");
+  }
+  {
     UiDesignerSession dialog; UiDesignerAssistantHost host(dialog); host.Capture("Designer");
     String initial=Authored(dialog.Document()); ValueMap args; args.Set("id","layout-v2");
     Value skill=host.Execute("retrieve_skill",args);

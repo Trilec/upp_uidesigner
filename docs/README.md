@@ -5,6 +5,7 @@ It consumes `upp_Ui` as an external dependency.
 
 ## Packages
 
+- `AppChat` / `AppChatUi` — independent provider runtime and reusable conversation UI; see `REUSABLE_ASSISTANT_UI.md` for the integration guide and standalone example
 - `UiDesigner/Core` — canonical persistent document, legacy import, typed changes and transient preview overrides
 - `UiDesigner/Commands` — atomic writes, rollback, undo/redo and saved checkpoints
 - `UiDesigner/Catalog` — every stable native Ui control, composites, presets and stock U++ controls

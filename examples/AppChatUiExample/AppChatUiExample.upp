@@ -1,0 +1,4 @@
+description "Standalone reusable conversation UI example; no Designer or provider dependency";
+uses CtrlLib, AppChatUi;
+file main.cpp;
+mainconfig "" = "GUI";

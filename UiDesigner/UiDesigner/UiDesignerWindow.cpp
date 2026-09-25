@@ -220,8 +220,7 @@ UiDesignerWindow::UiDesignerWindow() : interaction_overlay_(*this)
     assistant_entry_.SetText("Assistant");
     footer_surface_.Add(assistant_entry_.RightPos(0, 104).VSizePos());
     Add(assistant_); assistant_.Hide();
-    assistant_entry_.WhenAction = [=] { assistant_open_ = !assistant_open_; assistant_.Show(assistant_open_); Layout(); };
-    assistant_.WhenCollapse = [=] { assistant_open_ = false; assistant_.Hide(); Layout(); assistant_entry_.SetFocus(); };
+    assistant_entry_.WhenAction = [=] { assistant_open_ = !assistant_open_; assistant_.Show(assistant_open_); assistant_entry_.SetText(assistant_open_ ? "Collapse" : "Assistant"); Layout(); };
     assistant_.WhenHeight = [=](int h) { assistant_height_ = minmax(h, 240, max(240, GetSize().cy - 250)); Layout(); };
     assistant_.Workspace = [=] { return workspaces_.GetActiveKey(); };
 

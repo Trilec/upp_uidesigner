@@ -2,12 +2,13 @@
 
 Click **Assistant** in the footer. Drag its top edge to resize, or Collapse to
 hide it. The draft, conversation and active request survive hiding. Enter sends;
-Shift+Enter inserts a newline. Stop cancels the request and pending proposals.
+Shift+Enter inserts a newline. Send becomes Stop during a request. Stop cancels
+further work; already prepared proposals remain available for review.
 
 Select DeepSeek or OpenRouter, enter an explicit tool-capable model ID, and enter
 the name of a user environment variable holding that provider's API key:
 `DEEPSEEK_API_KEY` or `OPENROUTER_API_KEY`. Never enter the key in the drawer.
-Click **Use profile**. Sending then shares the displayed captured context with
+Open **Profile** below the composer, then **Save profile**. Sending shares design context with
 the selected service. Browser/Codex subscriptions are not API credentials.
 Restart Designer after changing its inherited environment.
 
@@ -55,8 +56,14 @@ Try these requests on a disposable design:
 - “Suggest a settings dialog using supported presets and properties.”
 - “Inspect the active Theme recipe and propose typography for that recipe.”
 
-Select a proposal in the right-hand proposal panel. Review its exact scope and
-status. **Show affected** selects its captured nodes. **Apply** commits once,
+Proposals appear as cards in the chronological discussion. **History** navigates
+to a proposal without applying it. **Show code** opens read-only Proposal JSON,
+not generated C++. **Refine** lets you request changes to a pending draft or to
+the existing affected controls after Apply. Explicit Label requests use a Label
+heading, rather than the optional TitleCard example.
+
+**Clear all** clears discussion, drafts and proposal records while retaining the
+design and normal Undo. **Select affected** selects captured nodes. **Apply** commits once,
 **Dismiss** prevents application. Apply is unavailable during a request.
 Undo/Redo uses the normal Document or Theme history. A receipt does not offer an
 unsafe “undo this old card” action. Manual edits, Theme edits and document switches

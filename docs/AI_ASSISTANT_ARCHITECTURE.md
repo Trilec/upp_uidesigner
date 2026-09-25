@@ -13,6 +13,9 @@ The packages are:
 - `AppChat`: Core-only messages, provider interface, bounded streaming turn loop,
   cancellation and mailbox projection. Windows HTTPS uses WinHTTP. No Ctrl,
   Designer or AgentFlow dependency. AppChatTests supplies an alternative host.
+- `AppChatUi`: reusable native conversation cards, measured folding, activity
+  disclosure and action placement. Depends on Ui, with no provider or Designer
+  dependency. See `REUSABLE_ASSISTANT_UI.md` and `examples/AppChatUiExample`.
 - `UiDesigner/Assistant`: captured live-session context, compiled versioned skills,
   one allowlisted operation registry, typed validation, immutable proposals and
   receipts. It calls UiDesignerAutomationService and canonical authoring services.

@@ -11,7 +11,7 @@ GUI_APP_MAIN {
     String error;
     if(!profile.Validate(error)) { Cout()<<"NOT RUN: "<<error<<"\n"; SetExitCode(2); return; }
     int checks=0,failed=0;
-    for(int scenario=0;scenario<2;scenario++) {
+    for(int scenario=0;scenario<3;scenario++) {
         UiDesignerSession session;
         String original=Authored(session.Document());
         UiDesignerAssistantHost host(session); host.Capture("Designer");
@@ -21,7 +21,8 @@ GUI_APP_MAIN {
         ValueArray messages; messages.Add(AppChatMessage("system",host.SystemPrompt()));
         const char* prompt=scenario==0
             ? "Create a simple dialog box template with just an OK and cancel perhaps a with a heading that I can use as a template."
-            : "Create a simple dialog box template with just an OK and cancel perhaps with a heading using a title card and an OK and cancel at the bottom.";
+            : scenario==1 ? "Create a simple dialog box template with just an OK and cancel perhaps with a heading using a title card and an OK and cancel at the bottom."
+            : "Create a dialog template with a Label as the heading at the top, an expanding empty body panel, and OK and Cancel at the bottom. Use only a Label for the heading, not a TitleCard.";
         Cout()<<"Scenario "<<scenario+1<<": "<<prompt<<'\n';
         messages.Add(AppChatMessage("user",prompt));
         turn.Start(std::make_shared<AppChatDeepSeekProvider>(profile),messages,host.Tools());
@@ -65,6 +66,30 @@ GUI_APP_MAIN {
                 actions|=node.type=="UiBoxLayout" && node.GetProperty("direction","")=="H" && node.GetProperty("grid_row",-1)==2;
             }
             check(title && grid && panel && actions,"requested TitleCard uses three-row layout and expanding body above bottom actions");
+        }
+        if(scenario==2) {
+            bool title=false,top_label=false;UiDesignerNodeId label_id=0;
+            for(const auto& node:session.Document().GetNodes()) {
+                title|=node.type=="UiTitleCard";
+                if(node.type=="UiLabel") {
+                    const auto* parent=session.Document().Find(node.parent);
+                    top_label=parent && (parent->type=="UiGridLayout" ? node.GetProperty("grid_row",-1)==0 : !parent->children.IsEmpty() && parent->children[0]==node.id);
+                    label_id=node.id;
+                }
+            }
+            check(!title && top_label,"explicit Label is the top heading, with no TitleCard substitution");
+            int count=session.Document().GetNodes().GetCount();String prior=Authored(session.Document());
+            String proposal_id=host.Proposals().Top().id;host.Capture("Designer");ValueArray refinement;
+            refinement.Add(AppChatMessage("system",host.SystemPrompt()));
+            refinement.Add(AppChatMessage("system","Trusted UI refinement reference: "+AsJSON(host.RefinementContext(proposal_id))));
+            refinement.Add(AppChatMessage("user","Change the existing heading label text to Account settings. Keep the same layout and controls; do not insert another dialog."));
+            turn.Start(std::make_shared<AppChatDeepSeekProvider>(profile),refinement,host.Tools());timer.Reset();
+            while(turn.active && timer.Seconds()<180){turn.Poll([&](const String& n,const ValueMap& a){return host.Execute(n,a);});Sleep(10);}
+            if(turn.active)turn.Stop();
+            check(turn.error.IsEmpty() && Authored(session.Document())==prior,"live refinement prepares without mutation");
+            Value result=host.ApplyPending();const auto* label=session.Document().Find(label_id);
+            check(result["ok"]==true && label && label->GetProperty("text","")=="Account settings" && session.Document().GetNodes().GetCount()==count,"live refinement edits existing heading without inserting duplicate controls");
+            check(session.Undo() && Authored(session.Document())==prior,"refinement Undo preserves the original dialog");
         }
         check(applied && session.Undo() && Authored(session.Document())==original,"one-step Undo restores blank authored design");
         if(!turn.error.IsEmpty()) Cout()<<turn.error<<"\n";

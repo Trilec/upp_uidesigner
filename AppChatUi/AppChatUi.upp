@@ -1,0 +1,3 @@
+description "Reusable native conversation presentation; no application authoring authority";
+uses Ui;
+file AppChatUi.h, AppChatUi.cpp;

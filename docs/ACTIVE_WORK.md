@@ -4,6 +4,23 @@ Remote main is authoritative. Sequential coding on main; no feature branch.
 Fetch before work and immediately before publishing. Keep published and locally
 reported validation separate. The graph project's own gates are not Designer gates.
 
+## Assistant conversation UI and reuse reference — 2026-09-25
+
+- BASE: Designer `d95d50462872fa10aa2ae70bdb410ac9fdd60fd1`; shared Ui
+  `ed635bc1dcbbd0d23524d1184843995c239c0963` (unchanged).
+- TASK: refine the lower assistant drawer from Curt's mockup and establish a
+  reusable native conversation component for other applications.
+- IMPLEMENTED: independent `AppChatUi` package, standalone consumer, chronological
+  folded cards, explicit History, Clear all, read-only Show code, per-proposal
+  actions and Refine, bottom profile settings, one Assistant/Collapse toggle.
+- AUTHORITY: AppChatUi owns presentation only. Host owns proposals/validation;
+  document/Theme services retain Apply and Undo. No TitleCard extension needed.
+- GUIDANCE: explicit Label heading takes precedence over TitleCard examples;
+  applied refinements target existing node IDs instead of inserting duplicates.
+- REUSE: `REUSABLE_ASSISTANT_UI.md`; evidence in `ASSISTANT_CONVERSATION_REPORT.md`.
+- VALIDATION: final Debug/Release Embedded PASS; AssistantDesigner 73/0; separate
+  OpenRouter live 26/0; native Apply/refine/Undo checked. Canonical app left open.
+
 ## UID-ASSISTANT-FIRSTUSE-02 and TitleCard/Grid repair
 
 Follow-up: reported horizontal Box collapse reproduced with Box-first Grid child

@@ -30,6 +30,10 @@ public:
     Value Execute(const String&, const ValueMap&);
     Value Apply(const String& id); // trusted UI only; absent from Tools/Execute
     Value ApplyPending(); // explicit human text command; never a model tool
+    void ClearConversation();
+    void SupersedePending(const String& id);
+    String ProposalState(const String& id) const;
+    Value RefinementContext(const String& id) const;
     void Dismiss(const String& id);
     void CancelPending();
     void ShowAffected(const String& id);
