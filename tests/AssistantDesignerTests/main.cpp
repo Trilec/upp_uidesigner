@@ -11,7 +11,37 @@ static ValueMap Edit(UiDesignerNodeId node, const String& property, const Value&
     ValueMap e; e.Set("node",node); e.Set("property",property); e.Set("value",value); e.Set("kind",kind); return e;
 }
 static ValueMap Group(const ValueArray& edits) { ValueMap a; a.Set("summary","Test proposal"); a.Set("edits",edits); return a; }
+template <class T> struct EditBoundsProbe : T {
+    Rect TextBounds() const { return this->GetTextRect(); }
+};
+template <class T> static void CheckNumericBounds() {
+    for(int offset : {0, 5, -5}) for(bool spin : {false, true}) {
+        EditBoundsProbe<T> c;
+        auto s = c.GetStyle();
+        s.metrics.radius = 0; s.metrics.frame_width = 3; s.metrics.frame_enabled = true;
+        s.metrics.content_margin = Rect(2,2,2,2);
+        s.metrics.shadow.enabled = offset != 0; s.metrics.shadow.mode = SHADOW_HARD;
+        s.metrics.shadow.distance = 1; s.metrics.shadow.offset_x = s.metrics.shadow.offset_y = offset;
+        s.metrics.shadow.alpha = 255; s.metrics.shadow.color = Black();
+        s.skin.content_inset = Rect(1,2,3,4);
+        s.palette.frame[ST_NORMAL] = Black(); s.palette.face[ST_NORMAL] = UiFill::Solid(Yellow());
+        c.SetCustomStyle(s); c.ShowSpin(spin); c.SetText("42"); c.SetRect(0,0,220,64); c.Layout();
+        Rect inner = UiStyledInnerRect(RectC(0,0,220,64), s.metrics, s.skin);
+        Check(inner.Contains(c.TextBounds()), "numeric text stays inside decorated content with/without spin and shadows");
+        Rect face = UiStyledFaceRect(RectC(0,0,220,64), s.metrics, s.skin);
+        bool contained = true;
+        for(Ctrl* child=c.GetFirstChild(); child; child=child->GetNext())
+            if(child->IsShown()) contained = contained && face.Contains(child->GetRect());
+        Check(contained, "numeric side controls stay inside decorated face");
+        ImageDraw drawing(220,64); drawing.DrawRect(0,0,220,64,White()); c.Paint(drawing);
+        Image img = drawing;
+        Rect surface = UiStyledSurfaceRect(RectC(0,0,220,64), s.metrics);
+        Check(img[surface.bottom-2][100] == Black(), "numeric text background preserves lower frame pixels");
+    }
+}
 GUI_APP_MAIN {
+  CheckNumericBounds<UiIntEdit>();
+  CheckNumericBounds<UiFloatEdit>();
   {
     UiDesignerSession session;
     const auto* spec = session.Catalog().Find("UiProgressBar");

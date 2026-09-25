@@ -155,7 +155,9 @@ void UiDesignerThemeGalleryV2::RebuildColumnPlacement()
         control_columns_[i].ClearItems();
 
     auto header_extra = [](UiGroupPanel& group) { return max(0, group.GetBodyRect().top + DPI(6) - DPI(48)); };
-    control_columns_[0].Add(buttons_group_).Fixed(DPI(164) + header_extra(buttons_group_));
+    int button_row_height = max(DPI(32), max(button_.GetMinSize().cy,
+                                max(tool_button_.GetMinSize().cy, split_button_.GetMinSize().cy)));
+    control_columns_[0].Add(buttons_group_).Fixed(DPI(176) + header_extra(buttons_group_) + button_row_height - DPI(32));
     control_columns_[0].Add(data_group_).Fixed(DPI(252) + header_extra(data_group_) + DataSampleHeight(tree_) - DPI(178));
     control_columns_[0].Add(rings_group_).Fixed(DPI(170) + header_extra(rings_group_));
 
@@ -506,9 +508,17 @@ void UiDesignerThemeGalleryV2::Layout()
     accordion_.SetRect(accordion_rect);
 
     int w = buttons_group_.GetSize().cx;
-    const int split_x = inset + DPI(150);
-    split_button_.SetRect(split_x, DPI(48),
-                          max(0, w - split_x - inset), DPI(32));
+    const int gap = DPI(10);
+    const int button_w = max(DPI(128), button_.GetMinSize().cx);
+    const int tool_w = max(DPI(44), tool_button_.GetMinSize().cx);
+    const int row_h = max(DPI(32), max(button_.GetMinSize().cy,
+                         max(tool_button_.GetMinSize().cy, split_button_.GetMinSize().cy)));
+    button_.SetRect(inset, DPI(48), button_w, row_h);
+    tool_button_.SetRect(inset + button_w + gap, DPI(48), tool_w, row_h);
+    const int split_x = inset + button_w + tool_w + 2 * gap;
+    split_button_.SetRect(split_x, DPI(48), max(0, w - split_x - inset), row_h);
+    breadcrumbs_.SetRect(inset, DPI(48) + row_h + DPI(12),
+                         max(0, w - 2 * inset), max(DPI(34), breadcrumbs_.GetMinSize().cy));
 
     // Measure editor text together with frame/shadow decoration before placing rows.
     int edit_extra = max(0, max(int_edit_.GetMinSize().cy, float_edit_.GetMinSize().cy) - DPI(32));

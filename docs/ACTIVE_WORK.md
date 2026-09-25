@@ -4,6 +4,36 @@ Remote main is authoritative. Sequential coding on main; no feature branch.
 Fetch before work and immediately before publishing. Keep published and locally
 reported validation separate. The graph project's own gates are not Designer gates.
 
+## Edit bounds and button gallery refinement — 2026-09-26
+
+- BASE: Designer `99c6b6d18bbcda30ef289130a0d010a8c4881953`; shared Ui
+  `8c2a77bbcc412d42c881a7579d0d5a5289d1f851`. Clean main branches and no remote advancement.
+- CAUSE: UiBaseEdit::LayoutSides used raw frame deflation, unlike the ordinary
+  text path. Numeric fields retain side items even with spin buttons hidden, so
+  their text background could cover the lower frame when a shadow was enabled.
+- FIX: side layout now uses the canonical styled face (shadow, resolved frame,
+  skin inset), applying text margins once afterwards. Shared fix applies to all
+  editors with side controls, without changing Theme recipes.
+- PREVIEW: measured button row heights/widths, wider first button, smaller share
+  for the split button, and a 12-pixel logical gap above breadcrumbs. Dropdown
+  group heading shortened to Defaults.
+- REGRESSION: 36 numeric checks cover integer/decimal, spin visible/hidden,
+  no/positive/negative shadow offsets, skin insets, side bounds and lower-frame
+  pixels. Debug Embedded PASS (`build/Assistant-Debug-20260926-115302`), including
+  AssistantDesigner 159/0. Release Embedded and launch PASS
+  (`build/Assistant-Release-20260926-115459`): AppChat 23, AssistantDesigner 159,
+  TitleGrid 37, Regression 88, ThemeDocument 35, ThemeStudioRole 1854,
+  ExportedThemeContract 36; zero failures. Native saved Brutalist Light/Dark
+  inspection confirms intact numeric borders, readable button icons and breadcrumb gap.
+- SHARED DEPENDENCY: `122cca0beab1e765847e4f48e47b6696a341f6ef`.
+  Canonical `build/UiDesigner.exe` SHA256
+  `3C5AD6EC9EF1B9827F876D67EA9FE335E988F8BB73892B6CD65C3C4A44D76CAD`,
+  launched PID `387616`. No live provider call needed for these rendering changes.
+- DESIGN ONLY: proposed Themes tree with project-owned drafts, duplicate/rename/
+  delete, and explicit Add to My Themes for reusable snapshots. Project Save
+  would preserve project themes; Theme Save/Publish and application export remain
+  separate. No multi-theme ownership or deletion behavior implemented in this fix.
+
 ## Theme rendering refinement — 2026-09-25
 
 - BASE: Designer `399c8dacf019a09ccdce29b2688d8f381c77c2ad`; shared Ui

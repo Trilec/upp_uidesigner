@@ -1484,7 +1484,7 @@ void UiDesignerWindow::SyncThemeChoices()
         theme_select_.AddGroupHeader("My themes");
         for(const auto& path : theme_library_) theme_select_.Add(GetFileTitle(path), "file:" + path);
     }
-    theme_select_.AddGroupHeader("Built-in starting points");
+    theme_select_.AddGroupHeader("Defaults");
     for(const char* preset : {"Minimal", "Pill", "Linear", "Solid", "Outline", "Compact", "Layered"})
         theme_select_.Add(preset, "builtin:" + String(preset));
     theme_select_.SetDataSilently(theme.IsProposalVisible() ? "proposal" : "current");
