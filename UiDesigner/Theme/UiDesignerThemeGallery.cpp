@@ -492,7 +492,6 @@ UiDesignerThemeGallery::UiDesignerThemeGallery()
     BuildControlSamples();
     BuildContainerSamples();
     BindSelectableSamples();
-    ApplyThemeStyles();
 }
 
 UiDesignerThemeGallery::~UiDesignerThemeGallery()
@@ -527,12 +526,6 @@ void UiDesignerThemeGallery::BuildPreviewMatrices()
 
 void UiDesignerThemeGallery::BuildControlSamples()
 {
-    controls_reference_label_.SetText("Plain panel hosting the selected control role")
-                             .SetAlign(UiAlign::LEFT, UiAlign::CENTER);
-    controls_reference_button_.SetText("Reference button");
-    controls_reference_panel_.Add(controls_reference_label_);
-    controls_reference_panel_.Add(controls_reference_button_);
-
     buttons_group_.SetTitle("BUTTONS")
                   .SetSubTitle("Button family on the selected panel role");
     button_.SetText("Button");
@@ -588,7 +581,17 @@ void UiDesignerThemeGallery::BuildControlSamples()
     list_.Model().Add(UiModelItem("First", 1));
     list_.Model().Add(UiModelItem("Second", 2));
     tree_.Model().AddChild(tree_.Model().Root(), UiModelItem("Workspace", "workspace"));
-    tree_.Model().AddChild(tree_.Model().Root(), UiModelItem("Assets", "assets"));
+    const UiTreeNodeRef assets = tree_.Model().AddChild(
+        tree_.Model().Root(), UiModelItem("Assets", "assets"));
+    const char *asset_names[] = { "Red", "Green", "Blue" };
+    for(int i = 0; i < 3; ++i) {
+        UiModelItem item(asset_names[i], ToLower(String(asset_names[i])));
+        item.columns.Add().text = i == 1 ? "Off" : "On";
+        tree_.Model().AddChild(assets, item);
+    }
+    Vector<int> tree_columns;
+    tree_columns.Add(DPI(32));
+    tree_.SetColumnWidths(tree_columns).Expand(assets).ShowConnectorLines();
     table_.UseInternalModel();
     table_.Model().SetSize(4, 2);
     data_group_.Add(list_);
@@ -619,7 +622,6 @@ void UiDesignerThemeGallery::BuildControlSamples()
     feedback_group_.Add(feedback_label_);
     feedback_group_.Add(feedback_progress_);
 
-    control_columns_[0].Add(controls_reference_panel_).Fixed(DPI(108));
     control_columns_[0].Add(buttons_group_).Fixed(DPI(164));
     control_columns_[0].Add(choices_group_).Fixed(DPI(178));
 
@@ -698,9 +700,6 @@ void UiDesignerThemeGallery::BindSelectableSamples()
         sample.WhenThemeSelect = [=] { SelectSample(type_id, ptr, panel_sample); };
     };
 
-    bind(controls_reference_panel_, "UiPanel", true);
-    bind(controls_reference_label_, "UiLabel", false);
-    bind(controls_reference_button_, "UiButton", false);
     bind(buttons_group_, "UiGroupPanel", true);
     bind(button_, "UiButton", false);
     bind(tool_button_, "UiToolButton", false);
@@ -845,19 +844,6 @@ String UiDesignerThemeGallery::CurrentStyleTarget(
            "|" + type + "|" + role;
 }
 
-void UiDesignerThemeGallery::SyncSelectedTarget()
-{
-    if(!theme_)
-        return;
-    const String preview_target = selected_type_.IsEmpty()
-        ? String() : ThemeStudioPreviewTarget(selected_type_, selected_panel_sample_);
-    theme_->SetActivePreviewTarget(preview_target);
-    theme_->SetActiveStyleTarget(selected_type_.IsEmpty()
-        ? String()
-        : CurrentStyleTarget(theme_->GetEffective(), selected_type_,
-                             selected_panel_sample_));
-}
-
 void UiDesignerThemeGallery::BuildSelectedPropertyModel(
     PropertyEditorModel& model, const UiDesignerThemeSnapshot& theme) const
 {
@@ -989,119 +975,12 @@ void UiDesignerThemeGallery::BuildSelectedPropertyModel(
     model.StructureChanged();
 }
 
-void UiDesignerThemeGallery::ApplySampleTheme(
-    Ctrl& ctrl, const String& type, bool panel_sample)
-{
-    if(!catalog_ || !theme_)
-        return;
-    const UiDesignerControlSpec *spec = catalog_->Find(type);
-    const UiDesignerThemeAdapter *adapter = spec ? UiDesignerGetThemeAdapter(*spec)
-                                                 : nullptr;
-    if(!spec || !adapter || !adapter->Supports(spec->runtime_kind) ||
-       spec->theme_overrides.IsEmpty())
-        return;
-
-    const UiDesignerThemeSnapshot& effective = theme_->GetEffective();
-    const String role = panel_sample
-        ? ThemeRoleName(PanelRoleAsControlRole(panel_role_))
-        : ThemeRoleName(control_role_);
-    UiDesignerNode base;
-    PopulateSampleNode(base, *spec, role);
-    UiDesignerNode styled = base;
-    const ValueMap authored = effective.GetStyleOverrides(
-        CurrentStyleTarget(effective, type, panel_sample));
-
-    for(const UiDesignerThemeOverrideSpec& property : spec->theme_overrides) {
-        const int q = authored.Find(property.id);
-        const Value value = q >= 0
-            ? authored.GetValue(q)
-            : adapter->ResolveFieldValue(base, *spec,
-                                         property.adapter_field_id, nullptr);
-        styled.theme_overrides.Set(property.id, value);
-    }
-    adapter->ApplyPreviewStyle(ctrl, styled, *spec, nullptr);
-
-    const String preview_target = ThemeStudioPreviewTarget(type, panel_sample);
-    for(const UiDesignerPropertySpec& property : spec->properties) {
-        if(!IsThemeStudioPreviewProperty(property.id))
-            continue;
-        const Value value = effective.GetStudioPreviewValue(
-            preview_target, property.id, ThemeStudioPreviewDefault(property));
-        UiDesignerPreviewFactory::Apply(ctrl, *spec, property.id, value);
-    }
-}
-
-void UiDesignerThemeGallery::ApplyThemeStyles()
-{
-    const UiDesignerThemeSnapshot effective = theme_
-        ? theme_->GetEffective() : UiDesignerThemeSnapshot();
-    UiDesignerApplyGlobalTheme(effective);
-
-    ApplySampleTheme(controls_reference_panel_, "UiPanel", true);
-    ApplySampleTheme(controls_reference_label_, "UiLabel", false);
-    ApplySampleTheme(controls_reference_button_, "UiButton", false);
-    ApplySampleTheme(buttons_group_, "UiGroupPanel", true);
-    ApplySampleTheme(button_, "UiButton", false);
-    ApplySampleTheme(tool_button_, "UiToolButton", false);
-    ApplySampleTheme(split_button_, "UiSplitButton", false);
-    ApplySampleTheme(choices_group_, "UiGroupPanel", true);
-    ApplySampleTheme(check_, "UiCheckBox", false);
-    ApplySampleTheme(radio_, "UiRadioButton", false);
-    ApplySampleTheme(toggle_, "UiToggle", false);
-    ApplySampleTheme(dropdown_, "UiDropdown", false);
-    ApplySampleTheme(numbers_group_, "UiGroupPanel", true);
-    ApplySampleTheme(int_edit_, "UiIntEdit", false);
-    ApplySampleTheme(float_edit_, "UiFloatEdit", false);
-    ApplySampleTheme(slider_, "UiSlider", false);
-    ApplySampleTheme(progress_, "UiProgressBar", false);
-    ApplySampleTheme(scroll_bar_, "UiScrollBar", false);
-    ApplySampleTheme(inputs_group_, "UiGroupPanel", true);
-    ApplySampleTheme(line_edit_, "UiLineEdit", false);
-    ApplySampleTheme(multi_edit_, "UiMultiEdit", false);
-    ApplySampleTheme(data_group_, "UiGroupPanel", true);
-    ApplySampleTheme(list_, "UiList", false);
-    ApplySampleTheme(tree_, "UiTree", false);
-    ApplySampleTheme(navigation_group_, "UiGroupPanel", true);
-    ApplySampleTheme(tab_, "UiTab", false);
-    ApplySampleTheme(accordion_, "UiAccordion", false);
-    ApplySampleTheme(feedback_group_, "UiGroupPanel", true);
-    ApplySampleTheme(feedback_label_, "UiLabel", false);
-    ApplySampleTheme(feedback_progress_, "UiProgressBar", false);
-
-    ApplySampleTheme(container_plain_panel_, "UiPanel", true);
-    ApplySampleTheme(container_plain_label_, "UiLabel", false);
-    ApplySampleTheme(container_controls_panel_, "UiPanel", true);
-    ApplySampleTheme(container_controls_label_, "UiLabel", false);
-    ApplySampleTheme(container_button_, "UiButton", false);
-    ApplySampleTheme(container_check_, "UiCheckBox", false);
-    ApplySampleTheme(container_plain_group_, "UiGroupPanel", true);
-    ApplySampleTheme(container_group_label_, "UiLabel", false);
-    ApplySampleTheme(container_edit_group_, "UiGroupPanel", true);
-    ApplySampleTheme(container_edit_, "UiLineEdit", false);
-    ApplySampleTheme(container_edit_button_, "UiButton", false);
-    ApplySampleTheme(container_numeric_panel_, "UiPanel", true);
-    ApplySampleTheme(container_numeric_label_, "UiLabel", false);
-    ApplySampleTheme(container_slider_, "UiSlider", false);
-    ApplySampleTheme(container_int_, "UiIntEdit", false);
-    ApplySampleTheme(container_choice_group_, "UiGroupPanel", true);
-    ApplySampleTheme(container_dropdown_, "UiDropdown", false);
-    ApplySampleTheme(container_toggle_, "UiToggle", false);
-    ApplySampleTheme(container_scroll_panel_, "UiScrollPanel", true);
-    ApplySampleTheme(container_scroll_label_, "UiLabel", false);
-
-    Layout();
-    Refresh();
-}
-
 void UiDesignerThemeGallery::LayoutControlSamples()
 {
     const int inset = DPI(12);
 
-    int w = controls_reference_panel_.GetSize().cx;
-    controls_reference_label_.SetRect(inset, DPI(10), max(0, w - inset * 2), DPI(28));
-    controls_reference_button_.SetRect(inset, DPI(50), max(DPI(100), w - inset * 2), DPI(32));
 
-    w = buttons_group_.GetSize().cx;
+    int w = buttons_group_.GetSize().cx;
     button_.SetRect(inset, DPI(48), DPI(92), DPI(32));
     tool_button_.SetRect(inset + DPI(100), DPI(48), DPI(42), DPI(32));
     split_button_.SetRect(inset + DPI(150), DPI(48), max(DPI(94), w - DPI(162)), DPI(32));

@@ -472,14 +472,15 @@ void UiDesignerThemeDocument::SetActiveStyleTarget(const String& target)
 {
     if(active_style_target_ == target)
         return;
+    const bool cancelled_preview = preview_active_;
     if(preview_active_) {
         preview_ = value_;
         preview_active_ = false;
     }
     active_style_target_ = target;
-    // Reuse the existing theme projection notification. Session rebuilds the
-    // ThemeModel in response, and the Window already observes this event.
-    WhenPreview();
+    WhenTargetChanged();
+    if(cancelled_preview)
+        WhenPreview();
 }
 
 static void AddThemeChoice(PropertyEditorModel& model, const String& id,

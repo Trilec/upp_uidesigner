@@ -146,6 +146,8 @@ private:
     UiDesignerThemeSwatch dark_[UI_DESIGNER_THEME_PALETTE_SIZE];
 };
 
+// Shared sample construction and binding lifecycle. Concrete galleries supply
+// one target-selection and style-application policy; no legacy fallback runs.
 class UiDesignerThemeGallery : public ParentCtrl {
 public:
     typedef UiDesignerThemeGallery CLASSNAME;
@@ -180,16 +182,15 @@ private:
     void BuildControlSamples();
     void BuildContainerSamples();
     void BindSelectableSamples();
-    void ApplyThemeStyles();
-    void ApplySampleTheme(Ctrl& ctrl, const String& type, bool panel_sample);
+    virtual void ApplyThemeStyles() = 0;
     void LayoutControlSamples();
     void LayoutContainerSamples();
     void SelectSample(const String& type, UiDesignerThemeSelectableBase *sample,
                       bool panel_sample);
-    void SyncSelectedTarget();
+    virtual void SyncSelectedTarget() = 0;
     String CurrentStyleTarget(const UiDesignerThemeSnapshot& theme,
                               const String& type, bool panel_sample) const;
-    void BuildSelectedPropertyModel(PropertyEditorModel& model,
+    virtual void BuildSelectedPropertyModel(PropertyEditorModel& model,
                                     const UiDesignerThemeSnapshot& theme) const;
 
     const UiDesignerCatalog *catalog_ = nullptr;
@@ -209,9 +210,6 @@ private:
     UiBoxLayout control_columns_[3];
     UiBoxLayout container_columns_[3];
 
-    UiDesignerThemeSelectable<UiPanel> controls_reference_panel_;
-    UiDesignerThemeSelectable<UiLabel> controls_reference_label_;
-    UiDesignerThemeSelectable<UiButton> controls_reference_button_;
 
     UiDesignerThemeSelectable<UiGroupPanel> buttons_group_;
     UiDesignerThemeSelectable<UiButton> button_;

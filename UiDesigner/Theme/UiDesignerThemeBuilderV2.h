@@ -25,8 +25,6 @@ public:
 
     UiDesignerThemeGalleryV2();
 
-    void SetCatalog(const UiDesignerCatalog* catalog);
-    void SetThemeDocument(UiDesignerThemeDocument *theme);
     void SetPanelRole(UiRole role);
     void SetControlRole(UiRole role);
     void RefreshTheme();
@@ -47,13 +45,13 @@ private:
     void RebindPanelSamples();
     void SelectPanelSample(const String& type,
                            UiDesignerThemeSelectableBase *sample);
-    void SyncSelectedTargetV2();
+    void SyncSelectedTarget() override;
     String CurrentStyleTargetV2(const UiDesignerThemeSnapshot& theme,
                                 const String& type, bool panel_sample) const;
-    void BuildSelectedPropertyModelV2(PropertyEditorModel& model,
-                                      const UiDesignerThemeSnapshot& theme) const;
+    void BuildSelectedPropertyModel(PropertyEditorModel& model,
+                                   const UiDesignerThemeSnapshot& theme) const override;
     void ApplySampleThemeV2(Ctrl& ctrl, const String& type, bool panel_sample);
-    void ApplyThemeStylesV2();
+    void ApplyThemeStyles() override;
 
     UiRole panel_role_v2_ = UiRole::Standard;
     UiDesignerThemeSelectable<UiGroupPanel> rings_group_;

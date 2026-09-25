@@ -90,6 +90,9 @@ void UiDesignerSession::WireEvents()
         WhenStatus(commands_.IsDirty() ? "Modified" : "Saved");
     };
 
+    theme_.WhenTargetChanged = [=] {
+        theme_.BuildPropertyModel(theme_model_);
+    };
     theme_.WhenPreview = [=] {
         theme_.BuildPropertyModel(theme_model_);
         WhenInspectorChanged();

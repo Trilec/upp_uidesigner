@@ -131,6 +131,20 @@ CONSOLE_APP_MAIN
             history.Get().roles.panel_surface == 3,
             "Theme role assignment redoes");
 
+    int target_events = 0, preview_events = 0;
+    history.WhenTargetChanged << [&] { ++target_events; };
+    history.WhenPreview << [&] { ++preview_events; };
+    history.SetActiveStyleTarget("Light|control|UiButton|Accent");
+    history.SetActiveStyleTarget("Light|control|UiButton|Accent");
+    t.Check(target_events == 1 && preview_events == 0,
+            "Inspector target change is idempotent and is not a theme preview");
+    history.Preview("palette.light.0", Color(3, 4, 5), error);
+    const int before_cancel = preview_events;
+    history.SetActiveStyleTarget("Light|control|UiLineEdit|Accent");
+    t.Check(target_events == 2 && preview_events == before_cancel + 1 &&
+            history.GetEffective().light_palette.Get(0) == history.Get().light_palette.Get(0),
+            "changing targets cancels transient preview and notifies rendered-theme observers once");
+
     PropertyEditorModel model;
     history.BuildPropertyModel(model);
     t.Check(model.Find("palette.light.0") && model.Find("palette.dark.5"),

@@ -156,6 +156,8 @@ public:
     bool Replace(const UiDesignerThemeSnapshot& value, bool mark_saved = true);
 
     Event<> WhenPreview;
+    // Inspector target selection does not change the rendered theme.
+    Event<> WhenTargetChanged;
     Event<>& WhenPreviewChanged = WhenPreview;
     Event<> WhenChanged;
     Event<> WhenHistoryChanged;

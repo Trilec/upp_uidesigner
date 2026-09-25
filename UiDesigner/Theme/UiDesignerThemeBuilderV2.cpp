@@ -133,7 +133,7 @@ UiDesignerThemeGalleryV2::UiDesignerThemeGalleryV2()
     rings_group_.WhenThemeSelect = [=] { SelectPanelSample("UiGroupPanel", &rings_group_); };
     RebuildColumnPlacement();
     RebindPanelSamples();
-    ApplyThemeStylesV2();
+    ApplyThemeStyles();
 }
 
 void UiDesignerThemeGalleryV2::RebuildColumnPlacement()
@@ -141,9 +141,9 @@ void UiDesignerThemeGalleryV2::RebuildColumnPlacement()
     for(int i = 0; i < 3; ++i)
         control_columns_[i].ClearItems();
 
-    control_columns_[0].Add(controls_reference_panel_).Fixed(DPI(108));
     control_columns_[0].Add(buttons_group_).Fixed(DPI(164));
     control_columns_[0].Add(data_group_).Fixed(DPI(252));
+    control_columns_[0].Add(rings_group_).Fixed(DPI(170));
 
     control_columns_[1].Add(numbers_group_).Fixed(DPI(212));
     control_columns_[1].Add(inputs_group_).Fixed(DPI(226));
@@ -153,7 +153,7 @@ void UiDesignerThemeGalleryV2::RebuildColumnPlacement()
     // dedicated Table sample below it.
     control_columns_[2].Add(navigation_group_).Fixed(DPI(292));
     control_columns_[2].Add(feedback_group_).Fixed(DPI(202));
-    control_columns_[2].Add(rings_group_).Fixed(DPI(170));
+
 }
 
 void UiDesignerThemeGalleryV2::RebindPanelSamples()
@@ -165,7 +165,6 @@ void UiDesignerThemeGalleryV2::RebindPanelSamples()
         sample.WhenThemeSelect = [=] { SelectPanelSample(type_id, ptr); };
     };
 
-    bind(controls_reference_panel_, "UiPanel");
     bind(buttons_group_, "UiGroupPanel");
     bind(choices_group_, "UiGroupPanel");
     bind(numbers_group_, "UiGroupPanel");
@@ -182,29 +181,6 @@ void UiDesignerThemeGalleryV2::RebindPanelSamples()
     bind(container_scroll_panel_, "UiScrollPanel");
 }
 
-void UiDesignerThemeGalleryV2::SetCatalog(const UiDesignerCatalog* catalog)
-{
-    UiDesignerThemeGallery::SetCatalog(catalog);
-    // The legacy catalog setter applies legacy panel-role defaults. Finish
-    // with the two universal role axes even when the catalog is rebound later.
-    ApplyThemeStylesV2();
-}
-
-void UiDesignerThemeGalleryV2::SetThemeDocument(
-    UiDesignerThemeDocument *theme)
-{
-    UiDesignerThemeGallery::SetThemeDocument(theme);
-    if(theme_) {
-        theme_->SetPropertyModelProvider(
-            [=](PropertyEditorModel& model,
-                const UiDesignerThemeSnapshot& value) {
-                BuildSelectedPropertyModelV2(model, value);
-            });
-    }
-    SyncSelectedTargetV2();
-    ApplyThemeStylesV2();
-}
-
 void UiDesignerThemeGalleryV2::SetPanelRole(UiRole role)
 {
     if(!UiIsValid(role))
@@ -213,8 +189,8 @@ void UiDesignerThemeGalleryV2::SetPanelRole(UiRole role)
         return;
     panel_role_v2_ = role;
     if(selected_panel_sample_)
-        SyncSelectedTargetV2();
-    ApplyThemeStylesV2();
+        SyncSelectedTarget();
+    ApplyThemeStyles();
 }
 
 void UiDesignerThemeGalleryV2::SetControlRole(UiRole role)
@@ -225,14 +201,14 @@ void UiDesignerThemeGalleryV2::SetControlRole(UiRole role)
         return;
     control_role_ = role;
     if(!selected_panel_sample_)
-        SyncSelectedTargetV2();
-    ApplyThemeStylesV2();
+        SyncSelectedTarget();
+    ApplyThemeStyles();
 }
 
 void UiDesignerThemeGalleryV2::RefreshTheme()
 {
-    SyncSelectedTargetV2();
-    ApplyThemeStylesV2();
+    SyncSelectedTarget();
+    ApplyThemeStyles();
 }
 
 void UiDesignerThemeGalleryV2::SelectPanelSample(
@@ -245,7 +221,7 @@ void UiDesignerThemeGalleryV2::SelectPanelSample(
     selected_panel_sample_ = true;
     if(selected_sample_)
         selected_sample_->SetThemeSelected(true);
-    SyncSelectedTargetV2();
+    SyncSelectedTarget();
     Refresh();
 }
 
@@ -259,7 +235,7 @@ String UiDesignerThemeGalleryV2::CurrentStyleTargetV2(
            "|" + type + "|" + UniversalRoleName(role);
 }
 
-void UiDesignerThemeGalleryV2::SyncSelectedTargetV2()
+void UiDesignerThemeGalleryV2::SyncSelectedTarget()
 {
     if(!theme_)
         return;
@@ -272,11 +248,11 @@ void UiDesignerThemeGalleryV2::SyncSelectedTargetV2()
                                selected_panel_sample_));
 }
 
-void UiDesignerThemeGalleryV2::BuildSelectedPropertyModelV2(
+void UiDesignerThemeGalleryV2::BuildSelectedPropertyModel(
     PropertyEditorModel& model, const UiDesignerThemeSnapshot& theme) const
 {
     if(!selected_panel_sample_) {
-        BuildSelectedPropertyModel(model, theme);
+        UiDesignerThemeGallery::BuildSelectedPropertyModel(model, theme);
         return;
     }
 
@@ -438,15 +414,12 @@ void UiDesignerThemeGalleryV2::ApplySampleThemeV2(
     }
 }
 
-void UiDesignerThemeGalleryV2::ApplyThemeStylesV2()
+void UiDesignerThemeGalleryV2::ApplyThemeStyles()
 {
     const UiDesignerThemeSnapshot effective = theme_
         ? theme_->GetEffective() : UiDesignerThemeSnapshot();
     UiDesignerApplyGlobalTheme(effective);
 
-    ApplySampleThemeV2(controls_reference_panel_, "UiPanel", true);
-    ApplySampleThemeV2(controls_reference_label_, "UiLabel", false);
-    ApplySampleThemeV2(controls_reference_button_, "UiButton", false);
     ApplySampleThemeV2(buttons_group_, "UiGroupPanel", true);
     ApplySampleThemeV2(button_, "UiButton", false);
     ApplySampleThemeV2(tool_button_, "UiToolButton", false);

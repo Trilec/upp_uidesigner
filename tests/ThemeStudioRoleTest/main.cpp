@@ -129,7 +129,7 @@ void Run()
     Collect(gallery, compounds);
     Collect(gallery, breadcrumbs);
     Collect(gallery, tables);
-    Check(panels.GetCount() >= 4 && groups.GetCount() >= 10 && buttons.GetCount() >= 4,
+    Check(panels.GetCount() == 3 && groups.GetCount() >= 10 && buttons.GetCount() == 3,
           "both visible and hidden gallery pages contain representative samples");
     Check(compounds.GetCount() == 1 && breadcrumbs.GetCount() == 1 && tables.GetCount() == 1,
           "compound, breadcrumb and table samples are present");
@@ -138,6 +138,29 @@ void Run()
         return;
 
     UiTable& table = *tables[0];
+    // Rebinding the V2 gallery during shell refresh must never pass through
+    // the legacy panel-role target or publish a fake theme preview change.
+    int selection_events = 0, preview_events = 0;
+    theme.WhenTargetChanged << [&] { ++selection_events; };
+    theme.WhenPreview << [&] { ++preview_events; };
+    const String before_selection = theme.Serialize(false);
+    gallery.SetPanelRole(UiRole::Alert);
+    for(int repeat = 0; repeat < 40; ++repeat) {
+        groups[0]->WhenThemeSelect();
+        const String target = theme.GetActiveStyleTarget();
+        const int events = selection_events;
+        gallery.SetThemeDocument(&theme);
+        Check(theme.GetActiveStyleTarget() == target && selection_events == events,
+              "gallery rebinding retains one canonical panel target without oscillation");
+        buttons[0]->WhenThemeSelect();
+    }
+    Check(preview_events == 0 && selection_events >= 80,
+          "sample selection notifies Inspector without broadcasting theme changes");
+    Check(theme.Serialize(false) == before_selection && !theme.IsDirty(),
+          "repeated sample inspection leaves authored theme and history unchanged");
+    gallery.SetPanelRole(UiRole::Standard);
+    theme.WhenTargetChanged.Clear();
+    theme.WhenPreview.Clear();
     Check(table.Model().GetColumnCount() == 3 && table.Model().GetRowCount() == 4,
           "table contains a populated three-column four-row sample");
     Check(table.Model().GetHeader(UITABLE_COLUMN_AXIS, 0).text == "Item" &&

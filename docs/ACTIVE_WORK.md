@@ -4,6 +4,36 @@ Remote main is authoritative. Sequential coding on main; no feature branch.
 Fetch before work and immediately before publishing. Keep published and locally
 reported validation separate. The graph project's own gates are not Designer gates.
 
+## Theme Studio Inspector hang and legacy audit — 2026-09-25
+
+- BASE: Designer `74a8c15f108ca51f3daa400c99a045c3b6261be3`; shared Ui
+  `68ca57683423e60823e37471865a2ce9be991c7f` (unchanged).
+- REPRODUCED: blank Theme Studio hangs after mixed sample/group selection.
+  Matching-symbol stack confirms recursive legacy/V2 target synchronization
+  through the global shell-theme preview callback.
+- REPAIR: separate Inspector target events from rendered-theme changes; one
+  shared binding lifecycle with concrete target/style/model policies. Preserve
+  genuine transient-preview cancellation and normal Theme history.
+- CLEANUP: remove obsolete gallery target/style implementations, duplicate V2
+  binders and two unreferenced DesignOverlay prototype headers. Retain live
+  shared sample/layout/toolbar code and production interaction overlays.
+- GALLERY: removed reference panel/button; left column is Buttons/Data/Rings.
+  Assets now expands to Red/Green/Blue with a narrow On/Off column.
+- DESIGN: `THEME_WORKFLOW_AND_CLEANUP.md` records audit evidence and a proposed
+  integrated theme library/draft/proposal/save/export workflow. That future UI
+  is not implemented by this repair.
+- VALIDATION: Debug Embedded PASS (`Assistant-Debug-20260925-192339`);
+  Release Embedded/Launch PASS (`Assistant-Release-20260925-192424`).
+  ThemeStudioRole 1854/0; ThemeDocument 33/0; ExportedThemeContract 36/0;
+  AssistantDesigner 80/0; AppChat 23/0; TitleGrid 37/0; Regression 88/0.
+  Additional ThemeBuilderContract 57/0 and ThemeDarkIntegration 21/0 passed.
+- NATIVE: repeated the formerly hanging Button/Accordion/List/ProgressBar/
+  group/Line Edit selection sequence on the final Release: Inspector updates
+  promptly and the process remains responsive. No live provider test was needed
+  or run for this local lifecycle repair. Canonical application left open.
+- EXECUTABLE: `E:\apps\github\upp_uidesigner\build\UiDesigner.exe`, PID `232812`,
+  SHA256 `A24E1FA728439B33A160C1E45337164B45418E8B39C5EC9CE1324C0DCB32E931`.
+
 ## Role default consistency repair — 2026-09-25
 
 - BASE: Designer `94b1f643cc3c7dabbb59cc68fbc79440791ea66e`; shared Ui
