@@ -4,6 +4,32 @@ Remote main is authoritative. Sequential coding on main; no feature branch.
 Fetch before work and immediately before publishing. Keep published and locally
 reported validation separate. The graph project's own gates are not Designer gates.
 
+## Role default consistency repair — 2026-09-25
+
+- BASE: Designer `94b1f643cc3c7dabbb59cc68fbc79440791ea66e`; shared Ui
+  `ed635bc1dcbbd0d23524d1184843995c239c0963`. Remote advancement inspected;
+  both were current and clean before implementation.
+- REPAIR: List/Tree/Toggle role propagation, shared Accordion defaults, Tab
+  role ink/active-frame preservation, Alert ProgressBar track, role colours
+  across presets. Inspector, preview and export use the same resolved defaults.
+- OWNERSHIP: role baseline, then saved Theme recipe, then local override.
+  Existing custom-style APIs, history and save/export ownership are preserved.
+- DETAILS: `ROLE_DEFAULT_REPAIR.md` documents causes, intentional default
+  changes and the separate future global-palette bridge. No AI palette tool
+  or new palette model was introduced in this repair.
+- DEPENDENCY: tested/published shared Ui
+  `68ca57683423e60823e37471865a2ce9be991c7f`; fetched and contained in origin/main.
+- VALIDATION: Debug Embedded plus Broader PASS (`Assistant-Debug-20260925-173142`);
+  Release Embedded plus Launch PASS (`Assistant-Release-20260925-173418`).
+  ThemeStudioRole 1836/0; ExportedThemeContract 36/0; adapter coverage 9177/0.
+  Shared structure 1260/0, Tab paint 21/0, surface 13/0; logs under
+  `build/RoleRepair-*`. Existing document/layout/assistant gates also passed.
+- NATIVE: final canonical gallery checked in Alert, light and dark. No live
+  provider request was made for this control/theme repair. Existing dark button
+  and table contrast merits separate palette tuning; no blanket contrast claim.
+- EXECUTABLE: `E:\apps\github\upp_uidesigner\build\UiDesigner.exe`, PID `24548`,
+  SHA256 `4260D46C3D064F89C34B339CB6C47A1650D3883A93B0A69C34C4B477984E4325`.
+
 ## Assistant conversation UI and reuse reference — 2026-09-25
 
 Follow-up: outside-in design guidance now covers Grid versus wrapping Box,

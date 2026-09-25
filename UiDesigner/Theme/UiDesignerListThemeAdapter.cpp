@@ -8,9 +8,9 @@ using namespace UiDesignerNormalizedTheme;
 static const char *const kListStates[] = { "normal", "hot", "pressed", "disabled" };
 static const char *const kStateLabels[] = { "Normal", "Hot", "Pressed", "Disabled" };
 
-static UiList::Style ListBase()
+static UiList::Style ListBase(UiRole role = UiRole::Standard)
 {
-    return UiTheme::ResolveList();
+    return UiTheme::ResolveList(role);
 }
 
 static bool IsListField(const String& id)
@@ -392,7 +392,7 @@ public:
     Value ResolveFieldValue(const UiDesignerNode& node, const UiDesignerControlSpec& spec,
                             const String& id, const UiDesignerTransientOverlay* overlay) const override
     {
-        UiList::Style style = ListBase();
+        UiList::Style style = ListBase(Role(node.GetProperty("role", "Standard")));
         if(DotState(id, "face") >= 0)
             return ResolveListFace(node, spec, id, overlay, style);
         for(const UiDesignerThemeOverrideSpec& property : spec.theme_overrides) {
@@ -409,7 +409,7 @@ public:
     {
         UiList *list = dynamic_cast<UiList *>(&ctrl);
         if(!list) return;
-        UiList::Style style = ListBase();
+        UiList::Style style = ListBase(Role(node.GetProperty("role", "Standard")));
         bool authored = false;
         for(const UiDesignerThemeOverrideSpec& property : spec.theme_overrides) {
             if(!HasValue(node, overlay, property.id)) continue;
@@ -417,7 +417,7 @@ public:
             ApplyListField(style, property.adapter_field_id,
                            ResolveValue(node, overlay, property.id, AuthoredOrDefault(node, property)));
         }
-        if(authored) list->SetCustomStyle(style); else list->ClearCustomStyle();
+        if(authored || Role(node.GetProperty("role", "Standard")) != UiRole::Standard) list->SetCustomStyle(style); else list->ClearCustomStyle();
     }
 
     void EmitSetup(String& out, const String& member, const UiDesignerNode& node,
@@ -426,9 +426,9 @@ public:
         bool authored = false;
         for(const UiDesignerThemeOverrideSpec& property : spec.theme_overrides)
             authored |= node.theme_overrides.Find(property.id) >= 0;
-        if(!authored) return;
+        if(!authored && Role(node.GetProperty("role", "Standard")) == UiRole::Standard) return;
         const String var = member + "_style";
-        out << "\tUiList::Style " << var << " = UiTheme::ResolveList();\n";
+        out << "\tUiList::Style " << var << " = UiTheme::ResolveList(" << RoleExpr(node.GetProperty("role", "Standard")) << ");\n";
         for(const UiDesignerThemeOverrideSpec& property : spec.theme_overrides) {
             const int q = node.theme_overrides.Find(property.id);
             if(q >= 0) EmitListField(out, var, property.adapter_field_id, node.theme_overrides.GetValue(q));

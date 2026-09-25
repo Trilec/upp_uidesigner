@@ -69,38 +69,9 @@ static String LineStyleCode(UiLineStyle v)
     return v == DASHED ? "DASHED" : v == DOTTED ? "DOTTED" : "SOLID";
 }
 
-static UiAccordion::Style Base()
+static UiAccordion::Style Base(UiRole role = UiRole::Standard)
 {
-    UiAccordion::Style style = UiAccordion::StyleDefault();
-    UiPanel::Style panel = UiTheme::ResolvePanel(UiPanelRole::Surface);
-    style.palette = panel.palette;
-    style.metrics.radius = max(DPI(8), panel.metrics.radius);
-    style.transparent = true;
-    style.metrics.frame_width = 0;
-    style.metrics.frame_enabled = false;
-    style.metrics.face_enabled = false;
-    style.metrics.shadow.enabled = false;
-
-    style.body_style = UiTheme::ResolvePanel(UiPanelRole::Surface);
-    style.body_style.transparent = true;
-    style.body_style.metrics.face_enabled = false;
-    style.body_style.metrics.frame_enabled = false;
-    style.body_style.metrics.frame_width = 0;
-    style.body_style.metrics.radius = 0;
-    style.body_style.metrics.focus_enabled = false;
-    style.body_style.metrics.content_margin = Rect(0, 0, 0, 0);
-    style.body_style.metrics.shadow.enabled = false;
-
-    style.header_style = UiTheme::ResolveTitleCard(UiRole::Accent);
-    style.header_style.metrics.content_margin = Rect(DPI(10), DPI(6), DPI(10), DPI(6));
-    style.header_style.hover_enabled = false;
-    style.header_style.metrics.focus_enabled = false;
-    style.header_style.title_line = false;
-    style.header_style.card_line = true;
-    style.header_style.media_tint_mono = true;
-    style.header_style.title_font = SansSerifZ(11).Bold();
-    style.header_style.subtitle_font = SansSerifZ(8);
-    return style;
+    return UiTheme::ResolveAccordion(role);
 }
 
 static bool IsField(const String& id)
@@ -558,7 +529,7 @@ public:
     Value ResolveFieldValue(const UiDesignerNode& node, const UiDesignerControlSpec& spec,
                             const String& id, const UiDesignerTransientOverlay* overlay) const override
     {
-        UiAccordion::Style style = Base();
+        UiAccordion::Style style = Base(Role(node.GetProperty("role", "Standard")));
         if(State(id, "face") >= 0 || DotState(id, "header_face") >= 0 || DotState(id, "body_face") >= 0)
             return ResolveFace(node, spec, id, overlay, style);
         for(const UiDesignerThemeOverrideSpec& p : spec.theme_overrides) {
@@ -575,7 +546,7 @@ public:
     {
         UiAccordion *accordion = dynamic_cast<UiAccordion *>(&ctrl);
         if(!accordion) return;
-        UiAccordion::Style style = Base();
+        UiAccordion::Style style = Base(Role(node.GetProperty("role", "Standard")));
         bool authored = false;
         for(const UiDesignerThemeOverrideSpec& p : spec.theme_overrides) {
             if(!HasValue(node, overlay, p.id)) continue;
@@ -583,7 +554,7 @@ public:
             Apply(style, p.adapter_field_id,
                   ResolveValue(node, overlay, p.id, AuthoredOrDefault(node, p)));
         }
-        if(authored) accordion->SetCustomStyle(style); else accordion->ClearCustomStyle();
+        if(authored || Role(node.GetProperty("role", "Standard")) != UiRole::Standard) accordion->SetCustomStyle(style); else accordion->ClearCustomStyle();
     }
 
     void EmitSetup(String& out, const String& member, const UiDesignerNode& node,
@@ -592,18 +563,9 @@ public:
         bool authored = false;
         for(const UiDesignerThemeOverrideSpec& p : spec.theme_overrides)
             authored |= node.theme_overrides.Find(p.id) >= 0;
-        if(!authored) return;
+        if(!authored && Role(node.GetProperty("role", "Standard")) == UiRole::Standard) return;
         const String var = member + "_style";
-        out << "\tUiAccordion::Style " << var << " = UiAccordion::StyleDefault();\n";
-        out << "\t{ UiPanel::Style panel = UiTheme::ResolvePanel(UiPanelRole::Surface);\n";
-        out << "\t  " << var << ".palette = panel.palette;\n";
-        out << "\t  " << var << ".metrics.radius = max(DPI(8), panel.metrics.radius);\n";
-        out << "\t  " << var << ".transparent = true;\n";
-        out << "\t  " << var << ".metrics.frame_width = 0; " << var << ".metrics.frame_enabled = false; " << var << ".metrics.face_enabled = false; " << var << ".metrics.shadow.enabled = false;\n";
-        out << "\t  " << var << ".body_style = UiTheme::ResolvePanel(UiPanelRole::Surface);\n";
-        out << "\t  " << var << ".body_style.transparent = true; " << var << ".body_style.metrics.face_enabled = false; " << var << ".body_style.metrics.frame_enabled = false; " << var << ".body_style.metrics.frame_width = 0; " << var << ".body_style.metrics.radius = 0; " << var << ".body_style.metrics.focus_enabled = false; " << var << ".body_style.metrics.content_margin = Rect(0, 0, 0, 0); " << var << ".body_style.metrics.shadow.enabled = false;\n";
-        out << "\t  " << var << ".header_style = UiTheme::ResolveTitleCard(UiRole::Accent);\n";
-        out << "\t  " << var << ".header_style.metrics.content_margin = Rect(DPI(10), DPI(6), DPI(10), DPI(6)); " << var << ".header_style.hover_enabled = false; " << var << ".header_style.metrics.focus_enabled = false; " << var << ".header_style.title_line = false; " << var << ".header_style.card_line = true; " << var << ".header_style.media_tint_mono = true; " << var << ".header_style.title_font = SansSerifZ(11).Bold(); " << var << ".header_style.subtitle_font = SansSerifZ(8); }\n";
+        out << "\tUiAccordion::Style " << var << " = UiTheme::ResolveAccordion(" << RoleExpr(node.GetProperty("role", "Standard")) << ");\n";
         for(const UiDesignerThemeOverrideSpec& p : spec.theme_overrides) {
             const int q = node.theme_overrides.Find(p.id);
             if(q >= 0) Emit(out, var, p.adapter_field_id, node.theme_overrides.GetValue(q));

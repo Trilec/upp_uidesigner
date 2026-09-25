@@ -93,6 +93,26 @@ CONSOLE_APP_MAIN
     Check(AsString(effective.GetProperty("icon_side", "Left")) != "Right",
           "shared runtime resolver excludes studio_preview");
 
+    // Collection roles follow the same saved-recipe/local-override ownership.
+    for(const char* type : {"UiList", "UiTree", "UiAccordion"}) {
+        const UiDesignerControlSpec* role_spec = session.Catalog().Find(type);
+        const String field = String(type) == "UiAccordion" ? "header_subtitle_color" : "selected_face";
+        theme.SetActiveStyleTarget(String("Dark|control|") + type + "|Alert");
+        Check(theme.Commit("studio." + field, recipe_color, "Author role recipe", error),
+              String(type) + " Alert recipe commits");
+        UiDesignerNode node;
+        node.type = type;
+        node.properties = role_spec->defaults;
+        node.SetProperty("role", "Alert");
+        auto resolved = UiDesignerResolveRuntimeThemedNode(node, theme.Get(), *role_spec);
+        Check((Color)resolved.theme_overrides[field] == recipe_color,
+              String(type) + " inherits saved role recipe");
+        node.theme_overrides.Set(field, local_color);
+        const auto locally_resolved = UiDesignerResolveRuntimeThemedNode(node, theme.Get(), *role_spec);
+        Check((Color)locally_resolved.theme_overrides[field] == local_color,
+              String(type) + " local override takes precedence over saved recipe");
+    }
+
     const String temp = AppendFileName(
         GetTempPath(), "uidesigner-exported-theme-" + AsString(Uuid::Create()));
     DeleteFolderDeep(temp);

@@ -1150,7 +1150,7 @@ public:
                             const String& field_id,
                             const UiDesignerTransientOverlay* overlay) const override
     {
-        UiTree::Style style = UiTheme::ResolveTree();
+        UiTree::Style style = UiTheme::ResolveTree(ParseRole(node.GetProperty("role", "Standard")));
         for(const UiDesignerThemeOverrideSpec& property : spec.theme_overrides) {
             const int q = node.theme_overrides.Find(property.id);
             const bool active = q >= 0 || HasThemeValue(node, overlay, property.id);
@@ -1230,7 +1230,7 @@ public:
         UiTree *tree = dynamic_cast<UiTree *>(&ctrl);
         if(!tree)
             return;
-        UiTree::Style style = UiTheme::ResolveTree();
+        UiTree::Style style = UiTheme::ResolveTree(ParseRole(node.GetProperty("role", "Standard")));
         bool authored = false;
         for(const UiDesignerThemeOverrideSpec& property : spec.theme_overrides) {
             const int q = node.theme_overrides.Find(property.id);
@@ -1272,7 +1272,7 @@ public:
             else if(property.id == "glyph_hot_color") style.glyph_hot_color = (Color)effective;
             else if(property.id == "glyph_selected_color") style.glyph_selected_color = (Color)effective;
         }
-        if(authored)
+        if(authored || ParseRole(node.GetProperty("role", "Standard")) != UiRole::Standard)
             tree->SetCustomStyle(style);
         else
             tree->ClearCustomStyle();
@@ -1285,11 +1285,11 @@ public:
         bool authored = false;
         for(const UiDesignerThemeOverrideSpec& property : spec.theme_overrides)
             authored |= node.theme_overrides.Find(property.id) >= 0;
-        if(!authored)
+        if(!authored && ParseRole(node.GetProperty("role", "Standard")) == UiRole::Standard)
             return;
 
         const String style_var = member + "_style";
-        out << "\tUiTree::Style " << style_var << " = UiTheme::ResolveTree();\n";
+        out << "\tUiTree::Style " << style_var << " = UiTheme::ResolveTree(" << EmitRoleExpr(AsString(node.GetProperty("role", "Standard"))) << ");\n";
         for(const UiDesignerThemeOverrideSpec& property : spec.theme_overrides) {
             const int q = node.theme_overrides.Find(property.id);
             if(q < 0)

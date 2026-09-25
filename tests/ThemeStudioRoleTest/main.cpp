@@ -1,5 +1,6 @@
 #include <CtrlLib/CtrlLib.h>
 #include <UiDesigner/Theme/UiDesignerThemeBuilderV2.h>
+#include <UiDesigner/Theme/UiDesignerThemeAdapter.h>
 
 using namespace Upp;
 
@@ -27,6 +28,74 @@ void Collect(Ctrl& root, Vector<T*>& result)
 bool SameFace(const UiFill& a, const UiFill& b)
 {
     return a.IsSolid() == b.IsSolid() && (!a.IsSolid() || a.color == b.color);
+}
+
+void CheckRoleInheritance()
+{
+    UiDesignerCatalog catalog;
+    RegisterUiDesignerBuiltins(catalog);
+    const UiThemeContext previous = UiTheme::GetContext();
+    for(UiThemePreset preset : {UiThemePreset::Minimal, UiThemePreset::Pill,
+        UiThemePreset::Linear, UiThemePreset::Solid, UiThemePreset::Outline,
+        UiThemePreset::Compact, UiThemePreset::Layered})
+    for(UiThemeMode mode : {UiThemeMode::Light, UiThemeMode::Dark}) {
+        UiThemeContext ctx;ctx.preset=preset;ctx.mode=mode;UiTheme::Set(ctx);
+        for(const char* role_name : {"Standard", "Subtle", "Accent", "Alert"}) {
+            UiRole role = String(role_name)=="Alert" ? UiRole::Alert : String(role_name)=="Accent" ? UiRole::Accent : String(role_name)=="Subtle" ? UiRole::Subtle : UiRole::Standard;
+            UiList list;UiTree tree;UiAccordion accordion;
+            for(const char* type : {"UiList", "UiTree", "UiAccordion"}) {
+                const auto* spec=catalog.Find(type);const auto* adapter=spec?UiDesignerGetThemeAdapter(*spec):nullptr;
+                Check(adapter!=nullptr,"role regression has registered adapter");if(!adapter)continue;
+                UiDesignerNode node;node.type=type;node.properties=spec->defaults;node.SetProperty("role",role_name);
+                Ctrl& control=String(type)=="UiList"?static_cast<Ctrl&>(list):String(type)=="UiTree"?static_cast<Ctrl&>(tree):static_cast<Ctrl&>(accordion);
+                const String field=String(type)=="UiAccordion"?"header_subtitle_color":"selected_face";
+                auto actual=[&]()->Color {return String(type)=="UiList"?list.GetStyle().selected_face:String(type)=="UiTree"?tree.GetStyle().selected_face:accordion.GetStyle().header_style.subtitle_color;};
+                adapter->ApplyPreviewStyle(control,node,*spec,nullptr);
+                Color inherited=actual();
+                Color expected=String(type)=="UiAccordion"?UiTheme::ResolveTitleCard(role).subtitle_color:UiTheme::ResolveList(role).selected_face;
+                Check(inherited==expected && adapter->ResolveFieldValue(node,*spec,field,nullptr)==inherited,"role reaches preview and Inspector across presets/modes");
+                String output;adapter->EmitSetup(output,"sample",node,*spec);
+                Check(role==UiRole::Standard || output.Find(String("UiRole::")+role_name)>=0,"role-only export retains requested role without authored override");
+                const Color custom(37,91,143);node.theme_overrides.Set(field,custom);
+                adapter->ApplyPreviewStyle(control,node,*spec,nullptr);
+                Check(actual()==custom && adapter->ResolveFieldValue(node,*spec,field,nullptr)==custom,"explicit field override wins over role defaults");
+                output.Clear();adapter->EmitSetup(output,"sample",node,*spec);
+                Check(output.Find("37, 91, 143")>=0,"export retains explicit field override");
+                node.SetProperty("role", "Alert");
+                adapter->ApplyPreviewStyle(control,node,*spec,nullptr);
+                Check(actual()==custom,"changing role preserves explicit field override");
+                node.theme_overrides.Clear();adapter->ApplyPreviewStyle(control,node,*spec,nullptr);
+                Color alert_default=String(type)=="UiAccordion"?UiTheme::ResolveTitleCard(UiRole::Alert).subtitle_color:UiTheme::ResolveList(UiRole::Alert).selected_face;
+                Check(actual()==alert_default,"reset after role change restores the new role default");
+                node.SetProperty("role", role_name);
+                node.theme_overrides.Clear();adapter->ApplyPreviewStyle(control,node,*spec,nullptr);
+                Check(actual()==inherited,"reset returns to current role default");
+            }
+            if(role==UiRole::Alert) {
+                const auto* toggle_spec = catalog.Find("UiToggle");
+                const auto* toggle_adapter = UiDesignerGetThemeAdapter(*toggle_spec);
+                UiDesignerNode toggle_node;
+                toggle_node.type = "UiToggle";
+                toggle_node.properties = toggle_spec->defaults;
+                toggle_node.SetProperty("role", "Alert");
+                UiToggle toggle;
+                toggle_adapter->ApplyPreviewStyle(toggle, toggle_node, *toggle_spec, nullptr);
+                Color on = toggle.GetStyle().track_palette.face[ST_PRESSED].color;
+                Check(on.GetR()>on.GetB(), "Alert Toggle uses role for its on-state track");
+                String output;
+                toggle_adapter->EmitSetup(output, "toggle", toggle_node, *toggle_spec);
+                Check(output.Find("ResolveToggle(UiRole::Alert)")>=0, "Toggle export retains Alert role");
+                Color track=UiTheme::ResolveProgressBar(role).track_palette.face[ST_NORMAL].color;
+                Check(track.GetR()>track.GetB(),"Alert progress track follows red role family rather than blue slate");
+                for(UiTabVisual visual : {UITAB_CLASSIC,UITAB_UNDERLINE,UITAB_SEGMENTED,UITAB_RAIL,UITAB_DOCUMENT}) {
+                    UiTab::Style tab=UiTheme::ResolveTab(role,visual);
+                    Color ink=tab.tab_palette.ink[ST_PRESSED];
+                    Check(ink.GetR()>ink.GetB() && tab.visual==visual,"Alert tab active ink survives visual-family restoration");
+                }
+            }
+        }
+    }
+    UiTheme::Set(previous);
 }
 
 void Run()
@@ -188,6 +257,7 @@ void Run()
 
 GUI_APP_MAIN
 {
+    CheckRoleInheritance();
     Run();
     Cout() << "THEME_STUDIO_ROLE checks=" << checks << " failed=" << failed << '\n';
     SetExitCode(failed ? 1 : 0);
