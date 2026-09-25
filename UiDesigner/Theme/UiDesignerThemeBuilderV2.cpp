@@ -141,18 +141,19 @@ void UiDesignerThemeGalleryV2::RebuildColumnPlacement()
     for(int i = 0; i < 3; ++i)
         control_columns_[i].ClearItems();
 
-    control_columns_[0].Add(buttons_group_).Fixed(DPI(164));
-    control_columns_[0].Add(data_group_).Fixed(DPI(252));
-    control_columns_[0].Add(rings_group_).Fixed(DPI(170));
+    auto header_extra = [](UiGroupPanel& group) { return max(0, group.GetBodyRect().top + DPI(6) - DPI(48)); };
+    control_columns_[0].Add(buttons_group_).Fixed(DPI(164) + header_extra(buttons_group_));
+    control_columns_[0].Add(data_group_).Fixed(DPI(252) + header_extra(data_group_));
+    control_columns_[0].Add(rings_group_).Fixed(DPI(170) + header_extra(rings_group_));
 
-    control_columns_[1].Add(numbers_group_).Fixed(DPI(212));
-    control_columns_[1].Add(inputs_group_).Fixed(DPI(226));
-    control_columns_[1].Add(choices_group_).Fixed(DPI(158));
+    control_columns_[1].Add(numbers_group_).Fixed(DPI(212) + header_extra(numbers_group_));
+    control_columns_[1].Add(inputs_group_).Fixed(DPI(226) + header_extra(inputs_group_));
+    control_columns_[1].Add(choices_group_).Fixed(DPI(158) + header_extra(choices_group_));
 
     // Navigation now starts the third column; the former Feedback group is the
     // dedicated Table sample below it.
-    control_columns_[2].Add(navigation_group_).Fixed(DPI(292));
-    control_columns_[2].Add(feedback_group_).Fixed(DPI(202));
+    control_columns_[2].Add(navigation_group_).Fixed(DPI(292) + header_extra(navigation_group_) + max(0, accordion_.GetMinSize().cy - DPI(108)));
+    control_columns_[2].Add(feedback_group_).Fixed(DPI(202) + header_extra(feedback_group_));
 
 }
 
@@ -508,6 +509,7 @@ void UiDesignerThemeGalleryV2::ApplyThemeStyles()
     table_style.row_header_width = DPI(30);
     table_.SetCustomStyle(table_style);
 
+    RebuildColumnPlacement();
     Layout();
     Refresh();
 }
@@ -516,6 +518,9 @@ void UiDesignerThemeGalleryV2::Layout()
 {
     UiDesignerThemeGallery::Layout();
     const int inset = DPI(12);
+    Rect accordion_rect = accordion_.GetRect();
+    accordion_rect.bottom = accordion_rect.top + max(DPI(108), accordion_.GetMinSize().cy);
+    accordion_.SetRect(accordion_rect);
 
     int w = buttons_group_.GetSize().cx;
     const int split_x = inset + DPI(150);
@@ -538,10 +543,31 @@ void UiDesignerThemeGalleryV2::Layout()
     progress_ring_.SetRect(inset + (ring_space / 2 - ring_side) / 2, DPI(48), ring_side, ring_side);
     chart_ring_.SetRect(inset * 2 + ring_space / 2 + (ring_space / 2 - ring_side) / 2,
                         DPI(48), ring_side, ring_side);
+
+    // Theme typography changes the header's measured height. Keep sample
+    // controls below that header instead of overlapping larger title fonts.
+    for(UiGroupPanel* group : {&buttons_group_, &data_group_, &rings_group_,
+                              &choices_group_, &numbers_group_, &inputs_group_,
+                              &feedback_group_, &navigation_group_}) {
+        int delta = max(0, group->GetBodyRect().top + DPI(6) - DPI(48));
+        if(!delta) continue;
+        for(Ctrl* child = group->GetFirstChild(); child; child = child->GetNext()) {
+            Rect rect = child->GetRect();
+            if(rect.top < DPI(46)) continue;
+            rect.Offset(0, delta);
+            rect.bottom = min(rect.bottom, max(rect.top, group->GetSize().cy - inset));
+            child->SetRect(rect);
+        }
+    }
 }
 
 void UiDesignerThemeGalleryV2::Paint(Draw& w)
 {
+    if(theme_ && !theme_->GetEffective().generated_fields.IsEmpty()) {
+        const auto& theme = theme_->GetEffective();
+        w.DrawRect(GetSize(), theme.GetPalette(theme.mode == "Dark").Get(0));
+        return;
+    }
     PaintThemeSurface(w, GetSize());
 }
 

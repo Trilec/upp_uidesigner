@@ -8,6 +8,7 @@ struct UiDesignerAssistantProposal {
     uint64 generation = 0, revision = 0;
     String theme_token;
     ValueMap args;
+    UiDesignerThemeSnapshot theme_design;
     Vector<UiDesignerAuthoredEdit> edits;
     Vector<UiDesignerNodeId> affected;
 };

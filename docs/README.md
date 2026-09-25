@@ -27,6 +27,9 @@ in `upp_Ui`, so they are reusable outside UiDesigner.
 
 ## Current design / recovery authorities
 
+- `AI_THEME_PROPOSALS.md` — palette generation, temporary Theme review, refinement and named Theme saving.
+- `PORTABLE_DESIGN_SKILL.md` — native JSON authoring skill and validated examples for external AI hosts.
+
 - `ACTIVE_WORK.md` — compact current recovery checkpoint and release gate.
 - `THEME_WORKFLOW_AND_CLEANUP.md` — Theme Studio hang diagnosis, legacy audit and proposed integrated theme-save workflow.
 - `IMPLEMENTATION_STATUS.md` — broader implemented/pending system status.

@@ -29,6 +29,7 @@ file
     UiDesignerSessionExtensions.cpp,
     UiDesignerAutomation.h,
     UiDesignerAutomation.cpp,
+    UiDesignerThemeDesign.cpp,
     UiDesignerTreeDataAdapter.h,
     UiDesignerTreeDataAdapter.cpp,
     UiDesignerListDataAdapter.h,

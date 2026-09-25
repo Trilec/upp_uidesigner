@@ -1,4 +1,5 @@
 #include "UiDesignerSession.h"
+#include "UiDesignerAutomation.h"
 #include "UiDesignerExport.h"
 #include <UiDesigner/Theme/UiDesignerThemeAdapter.h>
 
@@ -31,6 +32,14 @@ UiDesignerSession::UiDesignerSession()
     theme_.BuildPropertyModel(theme_model_);
     WireEvents();
     NewDocument("blank");
+    theme_file_checkpoint_ = theme_.Serialize(false);
+    theme_.RegeneratePalette = [=](UiDesignerThemeSnapshot& snapshot, String& error) {
+        ValueMap args; args.Set("light", snapshot.light_palette.ToValue()); args.Set("dark", snapshot.dark_palette.ToValue());
+        args.Set("radius", snapshot.radius); args.Set("border_width", snapshot.border_width); args.Set("replace_authored", false);
+        UiDesignerThemeSnapshot generated;
+        if(!UiDesignerAutomationService(*this).BuildThemeDesign(args, snapshot, generated, error)) return false;
+        snapshot = generated; return true;
+    };
 }
 
 void UiDesignerSession::LoadRecentPaths()
@@ -300,6 +309,7 @@ void UiDesignerSession::ApplyPresetDialog()
 
 void UiDesignerSession::NewDocument(const String& preset)
 {
+    theme_.DiscardProposal();
     ++document_generation_;
     commands_.ClearHistory();
     state_.selection.Clear();
@@ -364,8 +374,12 @@ bool UiDesignerSession::Load(const String& path, String& error)
     ++document_generation_;
     commands_.ClearHistory();
     commands_.MarkSaved();
-    if(has_theme)
+    theme_.DiscardProposal();
+    if(has_theme) {
         theme_.Replace(loaded_theme, true);
+        theme_path_.Clear();
+        theme_file_checkpoint_ = theme_.Serialize(false);
+    }
 
     current_path_ = path;
     AddRecentPath(path);

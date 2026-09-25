@@ -41,7 +41,11 @@ expanded Assets with Red/Green/Blue children, connector lines and a narrow On/Of
 column using the existing tree model/rendering API. Container-page panel samples
 remain available for independent panel styling.
 
-## Proposed integrated workflow (not implemented by this repair)
+## Proposed integrated workflow
+
+The later implementation of proposals, palette generation and named files is
+documented in `AI_THEME_PROPOSALS.md`. The remaining items below are a roadmap;
+they are not all implemented.
 
 The main theme dropdown should select a complete theme document, not conflate a
 built-in style preset with the current document's authored customisations.

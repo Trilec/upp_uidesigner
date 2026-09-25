@@ -1,0 +1,614 @@
+[
+    {
+        "type":  "Spacer",
+        "name":  "Spacer / Separator",
+        "category":  "Layouts",
+        "cpp_type":  "",
+        "stock_upp":  false,
+        "semantic_item":  true,
+        "capabilities":  64
+    },
+    {
+        "type":  "UiBoxLayout",
+        "name":  "Box Layout",
+        "category":  "Layouts",
+        "cpp_type":  "UiBoxLayout",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  139
+    },
+    {
+        "type":  "UiGridLayout",
+        "name":  "Grid Layout",
+        "category":  "Layouts",
+        "cpp_type":  "UiGridLayout",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  155
+    },
+    {
+        "type":  "UiAbsoluteLayout",
+        "name":  "Absolute Layout",
+        "category":  "Layouts",
+        "cpp_type":  "UiAbsoluteLayout",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  15
+    },
+    {
+        "type":  "UiSplitter",
+        "name":  "Splitter",
+        "category":  "Layouts",
+        "cpp_type":  "UiSplitter",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  11
+    },
+    {
+        "type":  "UiQuadSplitter",
+        "name":  "Quad Splitter",
+        "category":  "Layouts",
+        "cpp_type":  "UiQuadSplitter",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  11
+    },
+    {
+        "type":  "UiPanel",
+        "name":  "Panel",
+        "category":  "Containers",
+        "cpp_type":  "UiPanel",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  15
+    },
+    {
+        "type":  "UiDirectContentHost",
+        "name":  "Direct Content Host",
+        "category":  "Containers",
+        "cpp_type":  "UiDirectContentHost",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  15
+    },
+    {
+        "type":  "UiGroupPanel",
+        "name":  "Group Panel",
+        "category":  "Containers",
+        "cpp_type":  "UiGroupPanel",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  11
+    },
+    {
+        "type":  "UiStack",
+        "name":  "Stack",
+        "category":  "Containers",
+        "cpp_type":  "UiStack",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  299
+    },
+    {
+        "type":  "UiAccordion",
+        "name":  "Accordion",
+        "category":  "Containers",
+        "cpp_type":  "UiAccordion",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  299
+    },
+    {
+        "type":  "UiScrollPanel",
+        "name":  "Scroll Panel",
+        "category":  "Containers",
+        "cpp_type":  "UiScrollPanel",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  15
+    },
+    {
+        "type":  "UiTab",
+        "name":  "Tab",
+        "category":  "Containers",
+        "cpp_type":  "UiTab",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  299
+    },
+    {
+        "type":  "UiTitleCard",
+        "name":  "Title Card",
+        "category":  "Containers",
+        "cpp_type":  "UiTitleCard",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  271
+    },
+    {
+        "type":  "UiLabel",
+        "name":  "Label",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiLabel",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  1
+    },
+    {
+        "type":  "UiCheckBox",
+        "name":  "Check Box",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiCheckBox",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UiRadioButton",
+        "name":  "Radio Button",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiRadioButton",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UiToggle",
+        "name":  "Toggle",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiToggle",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UiButton",
+        "name":  "Button",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiButton",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UiToolButton",
+        "name":  "Tool Button",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiToolButton",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UiSplitButton",
+        "name":  "Split Button",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiSplitButton",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UiLineEdit",
+        "name":  "Line Edit",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiLineEdit",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UiIntEdit",
+        "name":  "Integer Edit",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiIntEdit",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UiFloatEdit",
+        "name":  "Float Edit",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiFloatEdit",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UiPasswordEdit",
+        "name":  "Password Edit",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiPasswordEdit",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UiMultiEdit",
+        "name":  "Multi Edit",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiMultiEdit",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UiMaskEdit",
+        "name":  "Mask Edit",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiMaskEdit",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UiProgressBar",
+        "name":  "Progress Bar",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiProgressBar",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  1
+    },
+    {
+        "type":  "UiSlider",
+        "name":  "Slider",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiSlider",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UiBreadcrumbs",
+        "name":  "Breadcrumbs",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiBreadcrumbs",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  1
+    },
+    {
+        "type":  "UiSliderEdit",
+        "name":  "Slider Edit",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiSliderEdit",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UiScrollBar",
+        "name":  "Scroll Bar",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiScrollBar",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  1
+    },
+    {
+        "type":  "UiTable",
+        "name":  "Table",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiTable",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  1
+    },
+    {
+        "type":  "UiDoc",
+        "name":  "Document",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiDoc",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  1
+    },
+    {
+        "type":  "UiTree",
+        "name":  "Tree",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiTree",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  1
+    },
+    {
+        "type":  "UiList",
+        "name":  "List",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiList",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  1
+    },
+    {
+        "type":  "UiBezierCurveEditor",
+        "name":  "Bezier Curve Editor",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiBezierCurveEditor",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UiBezierCurveField",
+        "name":  "Bezier Curve Field",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiBezierCurveField",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UiDropdown",
+        "name":  "Dropdown",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiDropdown",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UiMenu",
+        "name":  "Menu",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiMenu",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  1
+    },
+    {
+        "type":  "UiColorPicker",
+        "name":  "Color Picker",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiColorPicker",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UppLabel",
+        "name":  "U++ Label",
+        "category":  "U++ Controls",
+        "cpp_type":  "Label",
+        "stock_upp":  true,
+        "semantic_item":  false,
+        "capabilities":  1
+    },
+    {
+        "type":  "UppButton",
+        "name":  "U++ Button",
+        "category":  "U++ Controls",
+        "cpp_type":  "Button",
+        "stock_upp":  true,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UppOption",
+        "name":  "U++ Option",
+        "category":  "U++ Controls",
+        "cpp_type":  "Option",
+        "stock_upp":  true,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UppEditString",
+        "name":  "U++ EditString",
+        "category":  "U++ Controls",
+        "cpp_type":  "EditString",
+        "stock_upp":  true,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UppEditInt",
+        "name":  "U++ EditInt",
+        "category":  "U++ Controls",
+        "cpp_type":  "EditInt",
+        "stock_upp":  true,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UppEditDouble",
+        "name":  "U++ EditDouble",
+        "category":  "U++ Controls",
+        "cpp_type":  "EditDouble",
+        "stock_upp":  true,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UppLineEdit",
+        "name":  "U++ LineEdit",
+        "category":  "U++ Controls",
+        "cpp_type":  "LineEdit",
+        "stock_upp":  true,
+        "semantic_item":  false,
+        "capabilities":  1
+    },
+    {
+        "type":  "UppDropList",
+        "name":  "U++ DropList",
+        "category":  "U++ Controls",
+        "cpp_type":  "DropList",
+        "stock_upp":  true,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UppArrayCtrl",
+        "name":  "U++ ArrayCtrl",
+        "category":  "U++ Controls",
+        "cpp_type":  "ArrayCtrl",
+        "stock_upp":  true,
+        "semantic_item":  false,
+        "capabilities":  1
+    },
+    {
+        "type":  "UppTreeCtrl",
+        "name":  "U++ TreeCtrl",
+        "category":  "U++ Controls",
+        "cpp_type":  "TreeCtrl",
+        "stock_upp":  true,
+        "semantic_item":  false,
+        "capabilities":  1
+    },
+    {
+        "type":  "UppTabCtrl",
+        "name":  "U++ TabCtrl",
+        "category":  "U++ Controls",
+        "cpp_type":  "TabCtrl",
+        "stock_upp":  true,
+        "semantic_item":  false,
+        "capabilities":  15
+    },
+    {
+        "type":  "UppProgressIndicator",
+        "name":  "U++ Progress",
+        "category":  "U++ Controls",
+        "cpp_type":  "ProgressIndicator",
+        "stock_upp":  true,
+        "semantic_item":  false,
+        "capabilities":  1
+    },
+    {
+        "type":  "UppSliderCtrl",
+        "name":  "U++ Slider",
+        "category":  "U++ Controls",
+        "cpp_type":  "SliderCtrl",
+        "stock_upp":  true,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UppColorPusher",
+        "name":  "U++ Color Pusher",
+        "category":  "U++ Controls",
+        "cpp_type":  "ColorPusher",
+        "stock_upp":  true,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UppParentCtrl",
+        "name":  "U++ ParentCtrl",
+        "category":  "U++ Controls",
+        "cpp_type":  "ParentCtrl",
+        "stock_upp":  true,
+        "semantic_item":  false,
+        "capabilities":  15
+    },
+    {
+        "type":  "UppStaticRect",
+        "name":  "U++ StaticRect",
+        "category":  "U++ Controls",
+        "cpp_type":  "StaticRect",
+        "stock_upp":  true,
+        "semantic_item":  false,
+        "capabilities":  15
+    },
+    {
+        "type":  "UppSplitter",
+        "name":  "U++ Splitter",
+        "category":  "U++ Controls",
+        "cpp_type":  "Splitter",
+        "stock_upp":  true,
+        "semantic_item":  false,
+        "capabilities":  15
+    },
+    {
+        "type":  "UppHScrollBar",
+        "name":  "U++ Horizontal ScrollBar",
+        "category":  "U++ Controls",
+        "cpp_type":  "HScrollBar",
+        "stock_upp":  true,
+        "semantic_item":  false,
+        "capabilities":  1
+    },
+    {
+        "type":  "UppVScrollBar",
+        "name":  "U++ Vertical ScrollBar",
+        "category":  "U++ Controls",
+        "cpp_type":  "VScrollBar",
+        "stock_upp":  true,
+        "semantic_item":  false,
+        "capabilities":  1
+    },
+    {
+        "type":  "UiTabPage",
+        "name":  "Tab Page",
+        "category":  "Internal",
+        "cpp_type":  "",
+        "stock_upp":  false,
+        "semantic_item":  true,
+        "capabilities":  64
+    },
+    {
+        "type":  "UiAccordionSection",
+        "name":  "Accordion Section",
+        "category":  "Internal",
+        "cpp_type":  "",
+        "stock_upp":  false,
+        "semantic_item":  true,
+        "capabilities":  64
+    },
+    {
+        "type":  "UiDateTime",
+        "name":  "Date / Time",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiDateTime",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UiProgressRing",
+        "name":  "Progress Ring",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiProgressRing",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  1
+    },
+    {
+        "type":  "UiChartRing",
+        "name":  "Chart Ring",
+        "category":  "Ui Controls",
+        "cpp_type":  "UiChartRing",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  1
+    },
+    {
+        "type":  "UiRangeSlider",
+        "name":  "Range Slider",
+        "category":  "Advanced",
+        "cpp_type":  "UiRangeSlider",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UiRangeSliderEdit",
+        "name":  "Range Slider Edit",
+        "category":  "Advanced",
+        "cpp_type":  "UiRangeSliderEdit",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  257
+    },
+    {
+        "type":  "UiNodeGraph",
+        "name":  "Node Graph",
+        "category":  "Advanced",
+        "cpp_type":  "UiNodeGraph",
+        "stock_upp":  false,
+        "semantic_item":  false,
+        "capabilities":  1
+    }
+]

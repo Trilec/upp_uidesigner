@@ -1,4 +1,6 @@
 #include <UiDesigner/AssistantUi/UiDesignerAssistantDrawer.h>
+#include <UiDesigner/Theme/UiDesignerThemeBuilderV2.h>
+#include <UiDesigner/Theme/UiDesignerThemeAdapter.h>
 using namespace Upp;
 static int checks = 0, failed = 0;
 static void Check(bool ok, const char* name) { checks++; if(!ok) { failed++; Cout() << "FAIL " << name << "\n"; } }
@@ -10,6 +12,109 @@ static ValueMap Edit(UiDesignerNodeId node, const String& property, const Value&
 }
 static ValueMap Group(const ValueArray& edits) { ValueMap a; a.Set("summary","Test proposal"); a.Set("edits",edits); return a; }
 GUI_APP_MAIN {
+  {
+    UiDesignerSession session;
+    const auto* spec = session.Catalog().Find("UiProgressBar");
+    const auto* adapter = UiDesignerGetThemeAdapter(*spec);
+    UiDesignerNode node; node.type = "UiProgressBar"; node.theme_overrides.Set("ink_normal", Color(12,34,56));
+    UiProgressBar progress; adapter->ApplyPreviewStyle(progress,node,*spec,nullptr);
+    String code; adapter->EmitSetup(code,"progress",node,*spec);
+    Check(progress.GetStyle().fill_palette.ink[ST_NORMAL] == Color(12,34,56) &&
+          progress.GetStyle().filled_text == Color(12,34,56) &&
+          adapter->ResolveFieldValue(node,*spec,"ink_normal",nullptr) == Color(12,34,56) &&
+          code.Find("fill_palette.ink[ST_NORMAL]") >= 0,
+          "progress ink alias agrees across preview, inspection and export");
+  }
+  {
+    UiDesignerSession session; UiDesignerAssistantHost host(session); host.Capture("theme");
+    ValueMap edit = ParseJSON(R"json({"summary":"Solid yellow surface","target":"Light|control|UiButton|Accent","fields":{"face_normal":{"schema":1,"mode":"Solid","solid":"#FFD43B"}}})json");
+    Value proposal = host.Execute("prepare_theme",edit);
+    Check(Ok(proposal) && Ok(host.Apply(ProposalId(proposal))), "solid fill refinement uses typed colour decoding");
+    ValueMap fields = edit["fields"], fill = fields["face_normal"];
+    fill.Set("mode","Unknown"); fields.Set("face_normal",fill); edit.Set("fields",fields);
+    host.Capture("theme");
+    Check(!Ok(host.Execute("prepare_theme",edit)), "unsupported fill mode is rejected before proposal");
+  }
+  {
+    UiDesignerSession session; UiDesignerAssistantHost host(session); host.Capture("theme");
+    String original = session.Theme().Serialize(false), document = Authored(session.Document()), error;
+    uint64 revision = session.Theme().GetRevision();
+    Check(Ok(host.Execute("inspect_theme", ValueMap())), "palette inspection needs no invented recipe target");
+    ValueMap lookup; lookup.Set("type", "Accordion"); lookup.Set("query", "title");
+    Value discovered = host.Execute("inspect_theme_control", lookup);
+    Check(Ok(discovered) && discovered["result"]["type"] == "UiAccordion" &&
+          ((ValueArray)discovered["result"]["fields"]).GetCount() > 0,
+          "friendly control name resolves bounded theme fields and exact targets");
+    ValueMap design = ParseJSON(R"json({"summary":"Yellow brutalist baseline","light":["#F5F2E8","#FFFFFF","#292929","#111111","#E5B900","#BF263C"],"dark":["#151515","#222222","#777777","#F4F4F4","#F7D540","#FF7788"],"radius":0,"border_width":2,"replace_authored":false})json");
+    ValueMap style;
+    style.Set("body_size",16.0); style.Set("heading_size",22.0);
+    style.Set("body_bold",false); style.Set("heading_bold",true);
+    style.Set("shadow","Hard"); style.Set("shadow_offset",4.0); style.Set("shadow_alpha",255);
+    style.Set("line_width",3); design.Set("style",style);
+    Value proposal = host.Execute("prepare_theme_design", design);
+    Check(Ok(proposal), "whole theme preparation accepts bounded palette contract");
+    try {
+        UiDesignerThemeGalleryV2 gallery;
+        gallery.SetCatalog(&session.Catalog());
+        gallery.SetThemeDocument(&session.Theme());
+        gallery.SetRect(0,0,1100,850); gallery.Layout(); gallery.RefreshTheme();
+        Check(true, "complete gallery consumes generated recipes");
+    } catch(const ValueTypeError& e) {
+        Cout() << "Gallery value error: " << e << '\n';
+        Check(false, "complete gallery consumes generated recipes");
+    } catch(...) { Check(false, "complete gallery consumes generated recipes"); }
+    Check(session.Theme().HasProposal() && session.Theme().IsProposalVisible(), "theme proposal is previewed");
+    Check(session.Theme().Serialize(false)==original && session.Theme().GetRevision()==revision && !session.Theme().CanUndo() && Authored(session.Document())==document,
+          "preview changes neither durable Theme, Document nor undo history");
+    String button_target="Light|control|UiButton|Accent";
+    Check(session.Theme().GetEffective().GetStyleOverride(button_target,"font_size")==16 &&
+          session.Theme().GetEffective().GetStyleOverride("Light|panel|UiGroupPanel|Accent","title_font_height")==22,
+          "theme design distinguishes body and heading typography");
+    Check(session.Theme().GetEffective().GetStyleOverride(button_target,"shadow_mode")=="Hard" &&
+          session.Theme().GetEffective().GetStyleOverride(button_target,"shadow_offset_x")==4,
+          "theme design generates hard offset surface shadows");
+    Check(session.Theme().GetEffective().GetStyleOverride(button_target,"radius")==0,
+          "baseline generates explicit editable adapter geometry");
+    Value button_before=session.Theme().GetEffective().GetStyleOverrides(button_target);
+    session.Theme().SetActiveStyleTarget("Light|control|UiAccordion|Accent");
+    Check(session.Theme().IsProposalVisible(), "sample selection retains proposed theme");
+    session.Theme().ShowProposal(false);
+    Check(session.Theme().GetEffective().ToValue()==session.Theme().Get().ToValue(), "Compare shows original without discarding candidate");
+    session.Theme().ShowProposal(true);
+    host.Capture("theme");
+    ValueMap refine; refine.Set("summary","Lighter accordion title"); refine.Set("target","Light|control|UiAccordion|Accent");
+    ValueMap fields; fields.Set("header_title_color","#626262"); refine.Set("fields",fields);
+    Value refined=host.Execute("prepare_theme",refine);
+    Check(Ok(refined), "targeted recipe refines the pending theme");
+    Check(session.Theme().GetEffective().GetStyleOverrides(button_target)==button_before,
+          "refinement preserves unrelated button fields");
+    Check(session.Theme().Serialize(false)==original, "refinement stays outside durable theme");
+    Check(session.Theme().Commit("palette.light.4", Color(40,120,180), "Adjust proposed accent", error) &&
+          session.Theme().GetEffective().GetStyleOverride(button_target,"frame_normal") == Color(40,120,180),
+          "palette adjustment regenerates owned fields in the candidate");
+    Check(session.Theme().GetEffective().GetStyleOverride("Light|control|UiAccordion|Accent","header_title_color") == Color(98,98,98),
+          "palette regeneration preserves the explicit title refinement");
+    Check(session.Theme().GetEffective().GetStyleOverride(button_target,"font_size")==16 &&
+          session.Theme().GetEffective().GetStyleOverride(button_target,"shadow_offset_x")==4,
+          "palette refinement retains generated typography and elevation");
+    Check(!Ok(host.Execute("describe_control",ValueMap() )) && session.Theme().HasProposal(),
+          "later read failure retains a valid proposal");
+    Check(Ok(host.Apply(ProposalId(refined))), "human Keep accepts the candidate");
+    Check(session.Theme().GetRevision()==revision+1 && !session.Theme().HasProposal(), "Keep makes one Theme history change");
+    String kept=session.Theme().Serialize(false);
+    SaveFile(AppendFileName(GetFileFolder(GetExeFilePath()), "yellow-theme-example.theme.json"), kept);
+    Check(session.Theme().Undo() && session.Theme().Serialize(false)==original && session.Theme().Redo() && session.Theme().Serialize(false)==kept,
+          "one-step Theme Undo/Redo restores exact snapshots");
+    String file=AppendFileName(GetTempPath(),"uidesigner-theme-test-"+AsString(Uuid::Create())+".json");
+    Check(session.SaveThemeFile(file,error) && !session.IsThemeFileDirty() && session.Theme().IsDirty(),
+          "standalone Save does not mark the project Theme checkpoint saved");
+    UiDesignerSession loaded;
+    Check(loaded.LoadThemeFile(file,error) && loaded.Theme().Serialize(false)==kept, "saved theme reloads identically");
+    FileDelete(file);
+    host.Capture("theme");
+    design.Set("light",ValueArray());
+    Check(!Ok(host.Execute("prepare_theme_design",design)) && !session.Theme().HasProposal(), "invalid palette cannot stage partial theme");
+  }
   {
     UiDesignerSession session;UiDesignerAssistantHost host(session);host.Capture("Designer");
     ValueMap query;query.Set("id","layout-v2");Value skill=host.Execute("retrieve_skill",query);

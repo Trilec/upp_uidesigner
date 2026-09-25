@@ -4,6 +4,57 @@ Remote main is authoritative. Sequential coding on main; no feature branch.
 Fetch before work and immediately before publishing. Keep published and locally
 reported validation separate. The graph project's own gates are not Designer gates.
 
+## AI Theme proposals and portable JSON design skill — 2026-09-25
+
+- BASE: Designer `6bd8c8479893526be4d664e7f919bafacb5ae53e`; shared Ui
+  `68ca57683423e60823e37471865a2ce9be991c7f`. Main preserved; remote refresh
+  showed no advancement before publication.
+- IMPLEMENTED: Light/Dark six-seed generation into explicit recipes for four
+  roles; optional installed body/heading fonts, size/bold hierarchy, hard outer
+  shadows and line widths. Manual overrides remain authoritative. Proposal preview,
+  Compare, targeted refinement, human Keep, Theme Undo, named Save/Load and a
+  grouped dropdown distinguish temporary proposals from saved themes.
+- DIAGNOSED: Slider/ScrollBar FillRecipe aliases collided with generic ink;
+  ProgressBar ink alias targeted track instead of fill. Apply/inspect/export now
+  agree. Native preview exposed transparent source-over failing to cut out hard
+  shadow interiors; shared Ui now applies the existing cutout mask explicitly.
+  Gallery children respect measured group headers when fonts become larger.
+- LIVE: OpenRouter `deepseek/deepseek-v4-flash` generated typography/shadows and
+  a palette in 5 calls/3 rounds, then refined only the requested Accordion title
+  in 4 calls/4 rounds. `ThemeLive4.stdout.log`: 10 checks, 0 failures, including
+  no durable mutation, trusted Keep and one-step Undo. Earlier failures are retained:
+  refinement discovery, gallery alias exception, and rejecting integral JSON
+  numbers represented as floating point; each drove a concrete repair.
+- SKILL: `skills/uidesigner-design` uses the existing schema-4 document JSON;
+  three complete examples, 68 exported control schemas, layout/role guidance and
+  portable validation. All examples pass portable + canonical validation;
+  simple dialog generates and compiles as a standalone native package.
+  `build/uidesigner-design-skill.zip` is the portable distribution.
+- LIMITS: no embedded reference-image attachment, generated textures or decorative
+  outline typography; no persistent Use-for-Designer preference, crash-recovery
+  drafts or dedicated role-swatch matrix. Solid fill refinements are supported;
+  other structured fill modes are not yet exposed to assistant edits. Designer
+  chrome still follows its preset; recipes affect samples and document preview.
+- FINAL OFFLINE: Debug `Assistant-Debug-20260925-210740` and Release/Launch
+  `Assistant-Release-20260925-210817` PASS. AssistantDesigner 107/0;
+  ThemeDocument 35/0; ThemeStudioRole 1854/0; ExportedThemeContract 36/0;
+  AppChat 23/0; TitleGrid 37/0; Regression 88/0. Shared drawing tests:
+  3 suites/0 failures, surface-cache 16/0 including shadow pixels.
+- DEPENDENCY: shared Ui tested/published `d5dc1beb3d36559caca0eb4d15db202b4162b879`;
+  fetched and confirmed equal to origin/main.
+- EXECUTABLE: `E:\apps\github\upp_uidesigner\build\UiDesigner.exe`, PID `353648`,
+  SHA256 `69E4E6CF8976E89E408F7D8F3862660BC65482141ED79DEC98AED032812BACC2`.
+- NATIVE: live proposal rendered; Compare restored the original, Keep committed,
+  one Undo restored the original, Redo restored the proposal, Save Theme As created
+  `build/Brutalist-review.theme.json`. Restart and My themes reload passed on the
+  final binary. Light/Dark reviewed; saved Light theme left open.
+- VISUAL LIMITATIONS: Table composition and Tree background/frame still include
+  inherited preset styling; categorical ring colours stay separate. Dark progress
+  ink on bright fill needs contrast-policy refinement. This is working authoring
+  infrastructure and an editable starting point, not final visual parity with the
+  reference art or complete palette coverage. The gallery still uses fixed sample
+  control heights; extreme body fonts can clip even though headers are measured.
+
 ## Theme Studio Inspector hang and legacy audit — 2026-09-25
 
 - BASE: Designer `74a8c15f108ca51f3daa400c99a045c3b6261be3`; shared Ui

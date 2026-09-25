@@ -99,6 +99,11 @@ public:
                         int index, int grid_row, int grid_column,
                         UiDesignerNodeId *created, String& error);
     const Vector<String>& GetRecentPaths() const { return recent_paths_; }
+    bool SaveThemeFile(const String& path, String& error);
+    bool LoadThemeFile(const String& path, String& error);
+    const String& GetThemePath() const { return theme_path_; }
+    bool IsThemeFileDirty() const { return theme_.Serialize(false) != theme_file_checkpoint_; }
+    void DetachThemeFile() { theme_path_.Clear(); theme_file_checkpoint_.Clear(); }
 
     UiDesignerNodeId AddControl(const String& type_id,
                                 UiDesignerNodeId parent = 0);
@@ -189,6 +194,7 @@ private:
     PropertyEditorModel theme_model_;
 
     String current_path_;
+    String theme_path_, theme_file_checkpoint_;
     Vector<String> recent_paths_;
     uint64 editor_generation_ = 0;
     String active_behavior_event_;

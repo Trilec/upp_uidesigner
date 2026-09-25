@@ -28,6 +28,9 @@ public:
     Value CancelPreview();
     Value ValidateDocument() const;
     Value GetTheme() const;
+    // Pure preparation; the assistant owns review and Theme owns commit/history.
+    bool BuildThemeDesign(const ValueMap& params, const UiDesignerThemeSnapshot& base,
+                          UiDesignerThemeSnapshot& result, String& error) const;
     Value PreviewThemeProperty(const ValueMap& params);
     Value CommitThemeProperty(const ValueMap& params);
     Value CancelThemePreview();

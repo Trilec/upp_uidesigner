@@ -56,6 +56,12 @@ private:
     void LoadDocument();
     void LoadTheme();
     void SaveThemeAs();
+    void SaveTheme(bool save_as = false);
+    void SyncThemeChoices();
+    void SelectThemeChoice(const String& choice);
+    void RegisterThemePath(const String& path);
+    bool ConfirmThemeSwitch();
+    Vector<String> theme_library_;
     void ResetThemeCustomizations();
     void ExportProject(UiDesignerExportProfile profile);
 

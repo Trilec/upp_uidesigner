@@ -10,6 +10,54 @@ GUI_APP_MAIN {
     profile.model=AsString(saved["model"]); profile.credential_env=AsString(saved["credential_env"]);
     String error;
     if(!profile.Validate(error)) { Cout()<<"NOT RUN: "<<error<<"\n"; SetExitCode(2); return; }
+    if(FindIndex(CommandLine(), String("theme")) >= 0) {
+        int checks=0,failed=0;
+        auto check=[&](bool ok,const char* label){ ++checks; if(!ok) ++failed; Cout()<<(ok?"PASS ":"FAIL ")<<label<<'\n'; };
+        UiDesignerSession session; UiDesignerAssistantHost host(session);
+        String original=session.Theme().Serialize(false), document=Authored(session.Document());
+        for(int step=0;step<2;++step) {
+            host.Capture("theme");
+            ValueArray messages; messages.Add(AppChatMessage("system",host.SystemPrompt()));
+            messages.Add(AppChatMessage("user", step==0
+                ? "Create a yellow brutalist theme for all controls in light and dark. Use an installed font, stronger bold headings than body text, square corners, strong outlines and hard offset black shadows. Propose it in Theme Studio so I can review it."
+                : "Nice, keep that theme but change only the Light Accent Accordion header title to a lighter grey #626262. Keep every other field unchanged."));
+            AppChatTurn turn; turn.WhenActivity=[](const String& event){Cout()<<event<<'\n';};
+            turn.Start(std::make_shared<AppChatDeepSeekProvider>(profile),messages,host.Tools());
+            TimeStop timer;
+            while(turn.active && timer.Seconds()<180) {
+                turn.Poll([&](const String& name,const ValueMap& args){
+                    Value result=host.Execute(name,args);
+                    Cout()<<"tool="<<name<<" ok="<<(result["ok"]==true);
+                    if(result["ok"]!=true) Cout()<<" error="<<AsString(result["error"]);
+                    Cout()<<'\n'; return result;
+                });
+                Sleep(10);
+            }
+            if(turn.active) turn.Stop();
+            check(turn.error.IsEmpty(),"live theme turn completed within bounded execution");
+            check(session.Theme().HasProposal(),"live theme candidate exists");
+            check(session.Theme().Serialize(false)==original && Authored(session.Document())==document,
+                  "live preview has no durable Theme or Document mutation");
+            if(step == 0) {
+                const auto& theme = session.Theme().GetEffective();
+                check(theme.HasStyleOverride("Light|control|UiButton|Standard","font_face") &&
+                      theme.GetStyleOverride("Light|panel|UiGroupPanel|Standard","title_font_bold") == true &&
+                      theme.GetStyleOverride("Light|control|UiButton|Standard","shadow_mode") == "Hard" &&
+                      theme.GetStyleOverride("Light|control|UiButton|Standard","shadow_enabled") == true,
+                      "live design includes typography and hard shadows, beyond palette changes");
+            }
+            if(!turn.error.IsEmpty()) Cout()<<turn.error<<'\n';
+            if(!session.Theme().HasProposal()) break;
+        }
+        check(session.Theme().GetEffective().GetStyleOverride("Light|control|UiAccordion|Accent","header_title_color")==Color(98,98,98),
+              "live refinement reaches exact requested recipe field");
+        Value result=host.ApplyPending();
+        check(result["ok"]==true && session.Theme().CanUndo(),"trusted test approval keeps proposed Theme");
+        check(session.Theme().Undo() && session.Theme().Serialize(false)==original,"one Theme Undo restores initial snapshot");
+        Cout()<<"Provider="<<profile.provider<<" Model="<<profile.model<<'\n';
+        Cout()<<"AssistantThemeLiveTest checks="<<checks<<" failed="<<failed<<'\n';
+        SetExitCode(failed?1:0); return;
+    }
     int checks=0,failed=0;
     for(int scenario=0;scenario<3;scenario++) {
         UiDesignerSession session;

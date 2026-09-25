@@ -86,18 +86,52 @@ Roles are semantic: Standard for everyday controls, Subtle for secondary emphasi
 Accent for primary emphasis, Alert for warning/destructive emphasis. Panel/surface
 roles are a separate domain; inspect each control's role choices instead of
 assuming the panel and control role enums are interchangeable.
-Use describe_control(s) theme_fields and inspect_theme before prepare_theme.
-Recipe targets explicitly identify Light/Dark, panel/control, control type and
+For a targeted refinement use inspect_theme_control with type (e.g. Accordion) and query (e.g. title). It returns exact recipe targets and a bounded field schema; then inspect_theme for that target and prepare_theme. No layout/preset discovery is needed.
+Example: Light|control|UiAccordion|Accent with fields {"header_title_color":"#626262"}. Recipe targets explicitly identify Light/Dark, panel/control, control type and
 role. Supported assistant recipe role keys are Standard, Subtle, Accent, Alert;
 do not invent unsupported targets. One recipe is not a whole-system restyle.
 Local active overrides win over recipes; reset inherits. Do not scatter local
 overrides for a system-wide style or erase authored customizations without scope.
-The current tools prepare individual durable recipes, not a global palette-token
-mutation or atomic multi-recipe style pack. Propose a palette in discussion, then
-bounded representative recipes; explain the remaining scope. Applying one recipe
-changes the Theme revision and can stale other pending proposals, so inspect and
-re-prepare against current state rather than promising Apply-all. Studio sample
-roles are preview only; palette metadata alone does not restyle every control.
+Use inspect_theme with target empty to read the current palette and proposal state.
+prepare_theme_design builds a complete explicit baseline for supported adapter fields
+across Light/Dark and all four roles. Supply exactly six hex colours per appearance
+in this order: background, surface, border, foreground, accent, alert. Also supply
+radius (0..32), border_width (0..6) and replace_authored. Default replace_authored=false
+preserves existing authored fields; use true only when the user requests restyling
+those fields. It does not erase unsupported recipe fields or local node overrides.
+Generation derives tinted surfaces, state colours, role frames and readable ink
+from those seeds. Chart-series categorical colours are deliberately retained.
+Colour alone does not define a design style. For a complete restyle, also supply
+the optional style object. Use list_fonts once with a relevant family query;
+body_font and heading_font must be installed families. body_size and heading_size
+are native font heights (6..48), body_bold and heading_bold are independent.
+Use a readable body and a stronger heading hierarchy, not oversized text everywhere.
+style.shadow is None or Hard; shadow_offset (0..12) and shadow_alpha (0..255)
+control the supported outer shadows. line_width (0..6) controls supported rules.
+For example style {"body_size":16,"heading_size":22,"body_bold":false,
+"heading_bold":true,"shadow":"Hard","shadow_offset":4,"shadow_alpha":255,
+"line_width":3}, radius 0 and border_width 3 gives a square, strongly outlined
+starting point. Choose fonts separately from installed families; do not invent one.
+Grey/concrete brutalism can use neutral surfaces with sparse yellow emphasis;
+expressive neubrutalism can use a yellow background, saturated blocks, black rules
+and hard offset shadows. Follow the user's reference rather than assuming yellow.
+The baseline uses role-tinted surfaces. Exact solid blocks need explicit supported
+surface recipe refinements: a FillRecipe field accepts {"schema":1,"mode":"Solid",
+"solid":"#FFD43B"}. Other fill modes are not supported by this assistant tool.
+Different colours for individual sections may require
+different assigned roles or local overrides. Texture and decorative outlined type
+are not automatically generated. Explain unsupported details instead of claiming
+an exact image match. Review Light/Dark, all roles, focus and disabled states.
+This is an explicit editable recipe proposal, not a new runtime palette resolver.
+The Theme Studio shows Proposal — unsaved. Only human Keep/Apply commits it, as one
+Theme Undo step. Do not claim it is kept or saved. Compare restores the original
+preview; Discard removes the candidate. Save Theme is a separate human action.
+For a refinement such as lighter Accordion title, inspect that control's theme_fields
+and the exact recipe; call prepare_theme for only the requested fields. When a
+proposal is visible this refines that candidate and retains all other recipes.
+Do not regenerate the whole baseline for a one-field refinement. Explain which
+appearance and role you changed. If the user asks for both, make each scope explicit.
+Never claim measured contrast without calculating it; subjective choices need preview.
 Keep Theme changes separate from document structure and normal document Undo.
 )skill"},
  {"typography-v1", "Font replacement", "Use list_fonts to find an installed family. Inspect theme_fields; font_face and nested *_font_face fields are separate adapter fields. prepare_font changes only those mapped fields, preserving height, bold and italic. Use local scope with explicit node IDs, or recipe scope with an explicit recipe target. Unsupported targets must be reported; no universal font property exists."},

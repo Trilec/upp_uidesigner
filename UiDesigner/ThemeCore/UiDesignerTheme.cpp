@@ -2,12 +2,63 @@
 
 namespace Upp {
 
+bool UiDesignerThemeDocument::StageProposal(const String& id,
+    const UiDesignerThemeSnapshot& value, uint64 expected_revision, String& error)
+{
+    if(id.IsEmpty() || expected_revision != revision_) {
+        error = "Theme changed; prepare a fresh proposal"; return false;
+    }
+    UiDesignerThemeSnapshot previous = proposal_;
+    String previous_id = proposal_id_;
+    uint64 previous_revision = proposal_revision_;
+    bool previous_visible = proposal_visible_, previous_preview = preview_active_;
+    proposal_ = value; proposal_id_ = id; proposal_revision_ = revision_;
+    proposal_visible_ = true; preview_active_ = false;
+    try { WhenPreview(); }
+    catch(...) {
+        proposal_ = previous; proposal_id_ = previous_id; proposal_revision_ = previous_revision;
+        proposal_visible_ = previous_visible; preview_active_ = previous_preview;
+        // Restore observers when possible, but never lose the previous candidate
+        // or let a second rendering error hide the original staging failure.
+        try { WhenPreview(); } catch(...) {}
+        error = "The theme preview could not be rendered; the previous theme is retained";
+        return false;
+    }
+    error.Clear(); return true;
+}
+
+bool UiDesignerThemeDocument::KeepProposal(const String& id, String& error)
+{
+    if(id != proposal_id_ || id.IsEmpty() || proposal_revision_ != revision_) {
+        error = "Proposal is missing or stale; prepare again"; return false;
+    }
+    UiDesignerThemeSnapshot after = proposal_;
+    proposal_id_.Clear(); proposal_visible_ = false;
+    bool kept = CommitSnapshot(after, "Keep proposed theme", error);
+    if(!kept) { proposal_id_ = id; proposal_visible_ = true; }
+    if(kept) WhenPreview();
+    return kept;
+}
+
+void UiDesignerThemeDocument::DiscardProposal(const String& id)
+{
+    if(!HasProposal() || (!id.IsEmpty() && id != proposal_id_)) return;
+    proposal_id_.Clear(); proposal_visible_ = false; preview_active_ = false;
+    WhenPreview();
+}
+
+void UiDesignerThemeDocument::ShowProposal(bool show)
+{
+    proposal_visible_ = show && HasProposal() && proposal_revision_ == revision_;
+    preview_active_ = false; WhenPreview();
+}
+
 bool UiDesignerThemeDocument::CommitRecipe(const String& target, const ValueMap& fields, String& error)
 {
     if(target.IsEmpty() || fields.IsEmpty() || fields.GetCount() > 256) {
         error = "Expected an explicit recipe and 1..256 fields"; return false;
     }
-    UiDesignerThemeSnapshot after = value_;
+    UiDesignerThemeSnapshot after = GetEffective();
     for(int i = 0; i < fields.GetCount(); ++i)
         after.SetStyleOverride(target, AsString(fields.GetKey(i)), fields.GetValue(i));
     return CommitSnapshot(after, "Assistant: edit Theme recipe", error);
@@ -267,6 +318,11 @@ void UiDesignerThemeSnapshot::SetStyleOverride(const String& target,
     ValueMap values = GetStyleOverrides(target);
     values.Set(field, value);
     style_overrides.Set(target, values);
+    int q = generated_fields.Find(target);
+    if(q >= 0) {
+        ValueMap generated = generated_fields.GetValue(q);
+        generated.RemoveKey(field); generated_fields.Set(target, generated);
+    }
 }
 
 bool UiDesignerThemeSnapshot::RemoveStyleOverride(const String& target,
@@ -349,6 +405,7 @@ ValueMap UiDesignerThemeSnapshot::ToValue() const
     out.Set("palettes", palettes);
     out.Set("roles", roles.ToValue());
     out.Set("styles", EncodeThemeStyleValue(style_overrides));
+    out.Set("generated", EncodeThemeStyleValue(generated_fields));
     out.Set("studio_preview", EncodeThemeStyleValue(studio_preview));
     out.Set("spacing", spacing);
     out.Set("radius", radius);
@@ -423,6 +480,14 @@ bool UiDesignerThemeSnapshot::FromValue(const Value& value, String& error)
         style_overrides = map;
     }
 
+    if(in.Find("generated") >= 0) {
+        Value generated = DecodeThemeStyleValue(in["generated"]);
+        if(!generated.Is<ValueMap>()) { error = "Generated fields must be an object"; return false; }
+        ValueMap generated_map = generated;
+        for(int i = 0; i < generated_map.GetCount(); ++i)
+            if(!generated_map.GetValue(i).Is<ValueMap>()) { error = "Generated target must be an object"; return false; }
+        generated_fields = generated_map;
+    }
     if(in.Find("studio_preview") >= 0) {
         Value preview = DecodeThemeStyleValue(
             UiDesignerMapValue(in, "studio_preview", ValueMap()));
@@ -768,7 +833,7 @@ bool UiDesignerThemeDocument::SetProperty(
 bool UiDesignerThemeDocument::Preview(
     const String& property, const Value& value, String& error)
 {
-    preview_ = preview_active_ ? preview_ : value_;
+    preview_ = GetEffective();
     if(!SetProperty(preview_, property, value, error))
         return false;
     preview_active_ = true;
@@ -785,8 +850,21 @@ void UiDesignerThemeDocument::TruncateRedo()
 }
 
 bool UiDesignerThemeDocument::CommitSnapshot(
-    const UiDesignerThemeSnapshot& after, const String& label, String& error)
+    const UiDesignerThemeSnapshot& input, const String& label, String& error)
 {
+    UiDesignerThemeSnapshot after = input;
+    const auto& previous = proposal_visible_ ? proposal_ : value_;
+    if(RegeneratePalette && !after.generated_fields.IsEmpty() &&
+       (after.light_palette.ToValue() != previous.light_palette.ToValue() ||
+        after.dark_palette.ToValue() != previous.dark_palette.ToValue() ||
+        after.radius != previous.radius || after.border_width != previous.border_width))
+        if(!RegeneratePalette(after, error)) return false;
+    if(proposal_visible_) {
+        if(proposal_revision_ != revision_) { error = "Proposal is stale"; return false; }
+        proposal_ = after; preview_active_ = false; WhenPreview(); error.Clear(); return true;
+    }
+    // A durable edit while comparing the original invalidates the candidate view.
+    proposal_visible_ = false;
     if(after.ToValue() == value_.ToValue()) {
         preview_ = value_;
         preview_active_ = false;
@@ -815,7 +893,7 @@ bool UiDesignerThemeDocument::Commit(
     const String& property, const Value& value,
     const String& label, String& error)
 {
-    UiDesignerThemeSnapshot after = value_;
+    UiDesignerThemeSnapshot after = GetEffective();
     if(!SetProperty(after, property, value, error))
         return false;
     return CommitSnapshot(after,
@@ -827,7 +905,7 @@ bool UiDesignerThemeDocument::CommitPalette(
     bool dark, const UiDesignerThemePalette& palette,
     const String& label, String& error)
 {
-    UiDesignerThemeSnapshot after = value_;
+    UiDesignerThemeSnapshot after = GetEffective();
     after.GetPalette(dark) = palette;
     after.SyncLegacyAccent();
     return CommitSnapshot(after,
@@ -854,7 +932,7 @@ bool UiDesignerThemeDocument::Reset(
             error = "Select a Theme Studio sample first";
             return false;
         }
-        UiDesignerThemeSnapshot after = value_;
+        UiDesignerThemeSnapshot after = GetEffective();
         after.RemoveStyleOverride(active_style_target_, property.Mid(7));
         return CommitSnapshot(after, "Reset " + property.Mid(7), error);
     }
@@ -863,7 +941,7 @@ bool UiDesignerThemeDocument::Reset(
             error = "Select a Theme Studio sample first";
             return false;
         }
-        UiDesignerThemeSnapshot after = value_;
+        UiDesignerThemeSnapshot after = GetEffective();
         after.RemoveStudioPreviewValue(active_preview_target_, property.Mid(8));
         return CommitSnapshot(after, "Reset preview " + property.Mid(8), error);
     }
@@ -874,6 +952,7 @@ bool UiDesignerThemeDocument::Reset(
 
 bool UiDesignerThemeDocument::Undo()
 {
+    if(HasProposal()) return false; // Keep or discard before durable history navigation.
     if(!CanUndo())
         return false;
     value_ = history_[position_ - 1].before;
@@ -888,6 +967,7 @@ bool UiDesignerThemeDocument::Undo()
 
 bool UiDesignerThemeDocument::Redo()
 {
+    if(HasProposal()) return false;
     if(!CanRedo())
         return false;
     value_ = history_[position_].after;
@@ -903,6 +983,7 @@ bool UiDesignerThemeDocument::Redo()
 bool UiDesignerThemeDocument::Replace(
     const UiDesignerThemeSnapshot& value, bool mark_saved)
 {
+    proposal_id_.Clear(); proposal_visible_ = false;
     value_ = value;
     value_.SyncLegacyAccent();
     preview_ = value_;
@@ -967,6 +1048,7 @@ bool UiDesignerThemeDocument::Deserialize(
     UiDesignerThemeSnapshot loaded;
     if(!loaded.FromValue(UiDesignerMapValue(root, "theme", ValueMap()), error))
         return false;
+    proposal_id_.Clear(); proposal_visible_ = false;
     value_ = loaded;
     preview_ = loaded;
     preview_active_ = false;

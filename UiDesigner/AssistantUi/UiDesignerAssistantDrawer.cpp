@@ -12,7 +12,7 @@ UiDesignerAssistantDrawer::UiDesignerAssistantDrawer(UiDesignerSession& s):sessi
     context.SetText("Ask for a design. Review a proposal before applying.");
     send.WhenAction=[=]{if(turn.active)Stop();else Submit();};composer.WhenSend=[=]{Submit();};
     profile_button.WhenAction=[=]{Configure();};clear.WhenAction=[=]{ClearConversation();};
-    undo.WhenAction=[=]{if(!turn.active){session.Undo();context.SetText("Document Undo. Refine prepares a new proposal.");SyncProposals();}};
+    undo.WhenAction=[=]{if(!turn.active){if(Workspace && Workspace()=="theme") session.Theme().Undo(); else session.Undo();context.SetText("Undo requested in the current workspace. Keep/discard a theme proposal before Undo.");SyncProposals();}};
     clear_reference.WhenAction=[=]{refinement_id.Clear();Layout();};
     history.WhenSelectData=[=](const Value& id){transcript.JumpTo(AsString(id));};
     turn.WhenActivity=[=](const String& line){context.SetText(line);activity<<line<<'\n';if(active_message>=0)transcript.At(active_message).SetActivity(activity);};
@@ -80,7 +80,7 @@ void UiDesignerAssistantDrawer::Submit(){
     String command=ToLower(input);
     if(command=="apply"||command=="apply it"||command=="apply proposal"){
         Value result=host.ApplyPending();transcript.AddMessage("You",input);
-        transcript.AddMessage("Assistant",result["ok"]==true?String("Applied. Use Document Undo to revert."):AsString(result["error"]));
+        transcript.AddMessage("Assistant",result["ok"]==true?AsString(result["result"]):AsString(result["error"]));
         composer.SetTextUtf8("");SyncProposals();transcript.Arrange(true);return;
     }
     if(!configured||!profile.Validate(error)){context.SetText(error.IsEmpty()?"Choose a profile below before sending.":error);return;}
@@ -114,13 +114,16 @@ void UiDesignerAssistantDrawer::Tick(){
         for(int i=proposal_count;i<host.Proposals().GetCount();i++){
             const auto& p=host.Proposals()[i];String id=p.id;
             auto& row=transcript.AddMessage("Proposal",p.summary,id);
-            row.AddAction("apply","Apply",[=]{if(turn.active)return;Value r=host.Apply(id);context.SetText(r["ok"]==true?String("Applied. Use Document Undo to revert."):AsString(r["error"]));SyncProposals();}).SetCustomStyle(UiTheme::ResolveButton(UiRole::Accent));
+            row.AddAction("apply",p.kind == "prepare_theme_design" ? "Keep theme" : "Apply",[=]{if(turn.active)return;Value r=host.Apply(id);context.SetText(r["ok"]==true?AsString(r["result"]):AsString(r["error"]));SyncProposals();}).SetCustomStyle(UiTheme::ResolveButton(UiRole::Accent));
+            if(p.kind == "prepare_theme_design") row.AddAction("compare","Compare",[=]{
+                if(session.Theme().GetProposalId() == id) session.Theme().ShowProposal(!session.Theme().IsProposalVisible());
+            });
             row.AddAction("code","Show code",[=]{ShowCode(id);});row.AddAction("refine","Refine",[=]{Refine(id);});
             row.AddAction("dismiss","Dismiss",[=]{host.Dismiss(id);SyncProposals();});row.AddAction("affected","Select affected",[=]{host.ShowAffected(id);});
         }
         proposal_count=host.Proposals().GetCount();changed=true;
     }
-    SyncProposals();send.SetText(turn.active?"Stop":"Send");profile_button.Enable(!turn.active);undo.Enable(!turn.active&&session.Commands().CanUndo());
+    SyncProposals();send.SetText(turn.active?"Stop":"Send");profile_button.Enable(!turn.active);undo.Enable(!turn.active&&(Workspace && Workspace()=="theme" ? session.Theme().CanUndo() : session.Commands().CanUndo()));
     if(changed)transcript.Arrange(true);
 }
 void UiDesignerAssistantDrawer::SyncProposals(){

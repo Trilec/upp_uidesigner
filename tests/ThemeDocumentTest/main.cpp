@@ -145,6 +145,16 @@ CONSOLE_APP_MAIN
             history.GetEffective().light_palette.Get(0) == history.Get().light_palette.Get(0),
             "changing targets cancels transient preview and notifies rendered-theme observers once");
 
+    UiDesignerThemeDocument guarded;
+    UiDesignerThemeSnapshot candidate = guarded.Get(); candidate.radius = 3;
+    t.Check(guarded.StageProposal("first", candidate, guarded.GetRevision(), error), "candidate stages before renderer failure");
+    guarded.WhenPreview << [] { throw Exc("test renderer failure"); };
+    candidate.radius = 7;
+    t.Check(!guarded.StageProposal("second", candidate, guarded.GetRevision(), error) &&
+            guarded.GetProposalId() == "first" && guarded.GetEffective().radius == 3 &&
+            !guarded.CanUndo() && error.Find("could not be rendered") >= 0,
+            "renderer failure restores prior proposal without durable history");
+
     PropertyEditorModel model;
     history.BuildPropertyModel(model);
     t.Check(model.Find("palette.light.0") && model.Find("palette.dark.5"),

@@ -17,6 +17,11 @@ static Value JsonValue(const Value& value) {
     return value;
 }
 static Value FieldInput(PropertyEditorKind kind, const Value& value) {
+    if(PropertyEditorKindName(kind) == "FillRecipe" && value.Is<ValueMap>()) {
+        ValueMap fill = value;
+        if(fill.Find("solid") >= 0) fill.Set("solid", FieldInput(PropertyEditorKind::Color, fill["solid"]));
+        return fill;
+    }
     if(kind != PropertyEditorKind::Color || !value.Is<String>()) return value;
     String text=value;
     if(text.GetCount()!=7 || text[0]!='#') return value;
@@ -42,9 +47,11 @@ static const Operation operations[] = {
  {"list_presets", "Supported composition presets", "{}", "[]"},
  {"list_fonts", "Installed font families matching query", "{\"query\":{\"type\":\"string\"}}", "[\"query\"]"},
  {"retrieve_skill", "Retrieve one versioned skill by ID; empty ID returns index", "{\"id\":{\"type\":\"string\"}}", "[\"id\"]"},
- {"inspect_theme", "One explicit recipe and Studio-only target", "{\"target\":{\"type\":\"string\"}}", "[\"target\"]"},
+ {"inspect_theme_control", "Find a control's exact theme targets and relevant editable fields. Accepts catalogue type or display name; query e.g. title, text, frame", R"json({"type":{"type":"string"},"query":{"type":"string"}})json", "[\"type\",\"query\"]"},
+ {"inspect_theme", "Current palette and proposal state; optional target inspects one exact recipe", "{\"target\":{\"type\":\"string\"}}", "[]"},
  {"prepare_edits", "Prepare one atomic Document group; style uses registered theme field IDs", "{\"summary\":{\"type\":\"string\"},\"edits\":{\"type\":\"array\",\"maxItems\":256,\"items\":{\"type\":\"object\",\"properties\":{\"node\":{\"type\":\"integer\"},\"property\":{\"type\":\"string\"},\"kind\":{\"type\":\"string\",\"enum\":[\"configuration\",\"style\",\"reset\",\"enable\"]},\"value\":{}},\"required\":[\"node\",\"property\",\"kind\",\"value\"],\"additionalProperties\":false}}}", "[\"summary\",\"edits\"]"},
  {"prepare_insert", "Propose a registered control or preset at explicit parent; no replacement", "{\"summary\":{\"type\":\"string\"},\"type\":{\"type\":\"string\"},\"parent\":{\"type\":\"integer\"},\"preset\":{\"type\":\"boolean\"}}", "[\"summary\",\"type\",\"parent\",\"preset\"]"},
+ {"prepare_theme_design", "Propose a complete Light/Dark role baseline in Theme Studio; no durable mutation until human Keep", R"json({"summary":{"type":"string"},"light":{"type":"array","minItems":6,"maxItems":6,"items":{"type":"string"}},"dark":{"type":"array","minItems":6,"maxItems":6,"items":{"type":"string"}},"radius":{"type":"integer","minimum":0,"maximum":32},"border_width":{"type":"integer","minimum":0,"maximum":6},"replace_authored":{"type":"boolean"},"style":{"type":"object","additionalProperties":false,"properties":{"body_font":{"type":"string"},"heading_font":{"type":"string"},"body_size":{"type":"integer","minimum":6,"maximum":48},"heading_size":{"type":"integer","minimum":6,"maximum":48},"body_bold":{"type":"boolean"},"heading_bold":{"type":"boolean"},"shadow":{"type":"string","enum":["None","Hard"]},"shadow_offset":{"type":"integer","minimum":0,"maximum":12},"shadow_alpha":{"type":"integer","minimum":0,"maximum":255},"line_width":{"type":"integer","minimum":0,"maximum":6}}}})json", "[\"summary\",\"light\",\"dark\",\"radius\",\"border_width\",\"replace_authored\"]"},
  {"prepare_theme", "Prepare a separate Theme recipe group using registered fields", "{\"summary\":{\"type\":\"string\"},\"target\":{\"type\":\"string\"},\"fields\":{\"type\":\"object\"}}", "[\"summary\",\"target\",\"fields\"]"},
  {"prepare_font", "Replace mapped font families only; scope local or recipe", "{\"summary\":{\"type\":\"string\"},\"family\":{\"type\":\"string\"},\"scope\":{\"type\":\"string\",\"enum\":[\"local\",\"recipe\"]},\"nodes\":{\"type\":\"array\",\"items\":{\"type\":\"integer\"},\"maxItems\":32},\"target\":{\"type\":\"string\"}}", "[\"summary\",\"family\",\"scope\",\"nodes\",\"target\"]"},
  {"prepare_composition", "Prepare a registered subtree; symbolic parent references precede children; empty parent_ref uses explicit parent", "{\"summary\":{\"type\":\"string\"},\"parent\":{\"type\":\"integer\"},\"items\":{\"type\":\"array\",\"maxItems\":64,\"items\":{\"type\":\"object\",\"properties\":{\"ref\":{\"type\":\"string\"},\"parent_ref\":{\"type\":\"string\"},\"grid_row\":{\"type\":\"integer\",\"minimum\":0},\"grid_column\":{\"type\":\"integer\",\"minimum\":0},\"type\":{\"type\":\"string\"},\"properties\":{\"type\":\"object\"}},\"required\":[\"ref\",\"parent_ref\",\"type\",\"properties\"],\"additionalProperties\":false}}}", "[\"summary\",\"parent\",\"items\"]"},
@@ -134,6 +141,11 @@ template<class T> static bool FieldValue(const T& spec, const Value& v, String& 
     }
     else if(k == "Boolean") { if(v.Is<bool>()) return true; }
     else if(k == "Color") { if(v.Is<Color>() && !IsNull(v)) return true; }
+    else if(k == "FillRecipe" && v.Is<ValueMap>()) {
+        ValueMap fill = v;
+        if(fill.GetCount() == 3 && fill["schema"] == 1 && fill["mode"] == "Solid" &&
+           fill["solid"].Is<Color>() && !IsNull(fill["solid"])) return true;
+    }
     else if(k == "Choice") {
         for(const auto& c : spec.choices) if(c.value == v) return true;
     }
@@ -246,6 +258,8 @@ Value UiDesignerAssistantHost::Prepare(const String& name, const ValueMap& args)
         auto plan = session.PlanAddControl(type, parent);
         if(!plan.valid) return Result(false, plan.reason);
         p.affected.Add(parent);
+    } else if(name == "prepare_theme_design") {
+        if(!automation.BuildThemeDesign(args, session.Theme().GetEffective(), p.theme_design, error)) return Result(false, error);
     } else if(name == "prepare_theme") {
         auto* spec = RecipeSpec(session.Catalog(), AsString(args["target"]));
         if(!spec) return Result(false, "Invalid recipe target");
@@ -254,6 +268,14 @@ Value UiDesignerAssistantHost::Prepare(const String& name, const ValueMap& args)
         for(int i = 0; i < fields.GetCount(); ++i) {
             auto* f = spec->FindThemeOverride(AsString(fields.GetKey(i)));
             if(!f || !FieldValue(*f, FieldInput(f->kind,fields.GetValue(i)), error)) return Result(false, error.IsEmpty() ? "Unmapped recipe field" : error);
+        }
+        if(session.Theme().HasProposal() && session.Theme().IsProposalVisible()) {
+            p.kind = "prepare_theme_design";
+            p.theme_design = session.Theme().GetEffective();
+            for(int i = 0; i < fields.GetCount(); ++i) {
+                auto* f = spec->FindThemeOverride(AsString(fields.GetKey(i)));
+                p.theme_design.SetStyleOverride(AsString(args["target"]), f->id, FieldInput(f->kind, fields.GetValue(i)));
+            }
         }
     } else if(name == "prepare_font") {
         String family = AsString(args["family"]); bool installed = false;
@@ -280,6 +302,12 @@ Value UiDesignerAssistantHost::Prepare(const String& name, const ValueMap& args)
     }
     ValueMap info; info.Set("id", p.id); info.Set("summary", p.summary); info.Set("status", "pending human Apply");
     info.Set("scope", p.args); info.Set("affected_count", p.affected.GetCount());
+    if(p.kind == "prepare_theme_design") {
+        String prior = session.Theme().GetProposalId();
+        if(!session.Theme().StageProposal(p.id, p.theme_design, session.Theme().GetRevision(), error)) return Result(false, error);
+        if(!prior.IsEmpty()) SupersedePending(prior);
+        info.Set("preview", "Theme Studio proposal only; human Keep creates one Theme Undo entry");
+    }
     proposals.Add(pick(p)); return Result(true, info);
 }
 Value UiDesignerAssistantHost::Execute(const String& name, const ValueMap& args) {
@@ -339,9 +367,27 @@ Value UiDesignerAssistantHost::ExecuteOperation(const String& name, const ValueM
             ValueMap m; m.Set("id", s.id); m.Set("title", s.title); index.Add(m);
         } return args["id"] == "" ? Result(true, index) : Result(false, "Unknown skill");
     }
+    if(name == "inspect_theme_control") {
+        const UiDesignerControlSpec* found = nullptr;
+        String type = ToLower(AsString(args["type"])), query = ToLower(AsString(args["query"]));
+        for(const auto& spec : session.Catalog().GetControls())
+            if(ToLower(spec.type_id) == type || ToLower(spec.display_name) == type) { found = &spec; break; }
+        if(!found) return Result(false, "Unknown control; use search_controls once to obtain its type");
+        ValueMap request; request.Set("type", found->type_id);
+        Value described = automation.GetControlSpec(request);
+        ValueMap result; result.Set("type", found->type_id);
+        ValueArray fields, targets;
+        for(const Value& field : (ValueArray)described["result"]["theme_fields"])
+            if(fields.GetCount() < 32 && (query.IsEmpty() || ToLower(AsString(field["id"])).Find(query) >= 0 || ToLower(AsString(field["label"])).Find(query) >= 0)) fields.Add(field);
+        for(const char* appearance : {"Light", "Dark"}) for(const char* role : {"Standard", "Subtle", "Accent", "Alert"})
+            targets.Add(String(appearance)+"|"+(UiDesignerUsesPanelThemeDomain(*found)?"panel":"control")+"|"+found->type_id+"|"+role);
+        result.Set("targets", targets); result.Set("fields", fields);
+        result.Set("guidance", "Use an exact target and returned field ID with prepare_theme. Colours accept #RRGGBB. This refines a visible pending proposal without keeping it.");
+        return Result(true, result);
+    }
     if(name == "inspect_theme") {
-        ValueMap m; m.Set("recipe", session.Theme().Get().GetStyleOverrides(AsString(args["target"])));
-        m.Set("studio_preview_target", session.Theme().GetActivePreviewTarget()); return Result(true, m);
+        ValueMap m; m.Set("recipe", session.Theme().GetEffective().GetStyleOverrides(AsString(args["target"])));
+        m.Set("studio_preview_target", session.Theme().GetActivePreviewTarget()); ValueMap overview = session.Theme().GetEffective().ToValue(); overview.RemoveKey("styles"); overview.RemoveKey("generated"); overview.RemoveKey("studio_preview"); m.Set("theme", overview); m.Set("proposal_id", session.Theme().GetProposalId()); return Result(true, m);
     }
     if(name == "inspect_hierarchy") {
         ValueArray a; int offset = max(0, (int)args["offset"]), i = 0;
@@ -387,10 +433,13 @@ Value UiDesignerAssistantHost::Apply(const String& id) {
             if((bool)p.args["preset"]) ok = session.InsertPreset(AsString(p.args["type"]), (int64)p.args["parent"], -1, &created, error);
             else { auto plan = session.PlanAddControl(AsString(p.args["type"]), (int64)p.args["parent"]); ok = session.ExecuteDrop(plan, &created, error); }
             if(ok) p.affected.Add(created);
+        } else if(p.kind == "prepare_theme_design") {
+            ok = session.Theme().KeepProposal(p.id, error);
         } else if(p.kind == "prepare_theme") {
             auto* spec=RecipeSpec(session.Catalog(),AsString(p.args["target"]));
             ValueMap fields=p.args["fields"];
-            bool valid=spec!=nullptr;
+            bool valid=spec!=nullptr && !session.Theme().HasProposal();
+            if(session.Theme().HasProposal()) error="Review the current whole-theme proposal before applying an older recipe";
             for(int i=0;valid && i<fields.GetCount();i++) {
                 auto* f=spec->FindThemeOverride(AsString(fields.GetKey(i)));
                 if(!f) {valid=false; break;}
@@ -401,14 +450,14 @@ Value UiDesignerAssistantHost::Apply(const String& id) {
             if(valid) ok = session.Theme().CommitRecipe(AsString(p.args["target"]), fields, error);
         }
         p.status = ok ? "applied" : "failed";
-        p.receipt = ok ? "Committed once. Use normal " + String(p.kind == "prepare_theme" ? "Theme" : "Document") + " Undo history." : error;
+        p.receipt = ok ? "Committed once. Use normal " + String(p.kind.StartsWith("prepare_theme") ? "Theme" : "Document") + " Undo history." : error;
         return Result(ok, p.receipt);
     }
     return Result(false, "Unknown proposal");
 }
-void UiDesignerAssistantHost::Dismiss(const String& id) { for(auto& p : proposals) if(p.id == id && p.status == "pending") p.status = "dismissed"; }
-void UiDesignerAssistantHost::CancelPending() { for(auto& p : proposals) if(p.status == "pending") p.status = "cancelled"; }
-void UiDesignerAssistantHost::ClearConversation() { proposals.Clear(); captured.Clear(); }
+void UiDesignerAssistantHost::Dismiss(const String& id) { session.Theme().DiscardProposal(id); for(auto& p : proposals) if(p.id == id && p.status == "pending") p.status = "dismissed"; }
+void UiDesignerAssistantHost::CancelPending() { session.Theme().DiscardProposal(); for(auto& p : proposals) if(p.status == "pending") p.status = "cancelled"; }
+void UiDesignerAssistantHost::ClearConversation() { session.Theme().DiscardProposal(); proposals.Clear(); captured.Clear(); }
 void UiDesignerAssistantHost::SupersedePending(const String& id) { for(auto& p:proposals) if(p.id==id && p.status=="pending") p.status="revised"; }
 String UiDesignerAssistantHost::ProposalState(const String& id) const {
     for(const auto& p : proposals) if(p.id==id) {
