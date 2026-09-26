@@ -19,6 +19,11 @@ function Record([string]$name,[string]$status) {
 }
 function Build([string]$package,[string]$name,[bool]$gui) {
     $exe = Join-Path $output ($name + '.exe')
+    if($package -eq 'UiDesigner/UiDesigner') {
+        $bin = Join-Path $root 'bin'
+        New-Item -ItemType Directory -Path $bin -Force | Out-Null
+        $exe = Join-Path $bin 'UiDesigner.exe'
+    }
     $log = Join-Path $evidence ($name + '.build.log')
     $flags = if($Configuration -eq 'Release') {'-br'} else {'-b'}
     $arguments = @('github',$package,'CLANGx64',$flags)
@@ -26,6 +31,12 @@ function Build([string]$package,[string]$name,[bool]$gui) {
     $arguments += $exe
     & $umk @arguments *> $log
     if($LASTEXITCODE -ne 0 -or !(Test-Path $exe)) { Record $name 'FAIL build'; Get-Content $log -Tail 70; throw "Build failed: $package" }
+    if($package -eq 'UiDesigner/UiDesigner') {
+        $symbols = [IO.Path]::ChangeExtension($exe, '.pdb')
+        if(Test-Path -LiteralPath $symbols) {
+            Move-Item -LiteralPath $symbols -Destination (Join-Path $output 'UiDesigner.pdb') -Force
+        }
+    }
     Record ($name + ' build') 'PASS'
     return $exe
 }

@@ -15,6 +15,8 @@ namespace Upp {
 struct UiDesignerCompositionItem : Moveable<UiDesignerCompositionItem> {
     String reference, parent_reference, type;
     ValueMap properties;
+    bool has_list_items = false;
+    Vector<String> list_items;
     int grid_row = -1, grid_column = -1;
 };
 

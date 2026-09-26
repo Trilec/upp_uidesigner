@@ -255,11 +255,13 @@ private:
 };
 
 UiBaseEdit::Style UiDesignerReadOnlyEditStyle();
+void ShowUiDesignerHelp();
 
 class UiDesignerCodeView : public ParentCtrl {
 public:
     typedef UiDesignerCodeView CLASSNAME;
     UiDesignerCodeView();
+    Event<> WhenBuild;
     void RefreshTheme();
     void SetCode(const String& code);
     String GetCode() const;
@@ -269,6 +271,7 @@ private:
     void ShowFullscreen();
     UiToolButton copy_;
     UiToolButton fullscreen_;
+    UiButton build_;
     UiMultiEdit edit_;
 };
 

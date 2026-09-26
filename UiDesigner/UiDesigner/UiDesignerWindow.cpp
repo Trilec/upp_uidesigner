@@ -1,3 +1,4 @@
+#include "UiDesignerBuildDialog.h"
 #include "UiDesignerWindow.h"
 #include "UiDesignerVersion.h"
 #include <Ui/UiIcons.h>
@@ -334,12 +335,8 @@ void UiDesignerWindow::BuildHeader()
 
     help_.SetCustomStyle(UiTheme::ResolveToolButton(UiRole::Accent));
     help_.SetIcon(ICON_DESIGN_HELP_48()).SetIconSize(DPI(16), DPI(16));
-    help_.WhenAction = [=] {
-        PromptOK("UiDesigner greenfield architecture\n"
-                 "Core, commands, catalog, semantic layout items, preview, "
-                 "theme, behavior bindings, code generation, CLI and MCP "
-                 "share one command/property pipeline.");
-    };
+    help_.Tip("Help: Designer, Theme Studio, Assistant and building");
+    help_.WhenAction = [] { ShowUiDesignerHelp(); };
 
     exit_.SetCustomStyle(UiTheme::ResolveToolButton(UiRole::Alert));
     exit_.SetIcon(ICON_DESIGN_MODE_OFF_ON_48()).SetIconSize(DPI(16), DPI(16));
@@ -362,6 +359,7 @@ void UiDesignerWindow::BuildHeader()
 
 void UiDesignerWindow::BuildDesigner()
 {
+    code_.WhenBuild = [=] { UiDesignerBuildDialog dialog(session_); dialog.Run(); };
     designer_page_.Add(designer_left_);
     designer_page_.Add(designer_center_);
     designer_page_.Add(designer_right_);

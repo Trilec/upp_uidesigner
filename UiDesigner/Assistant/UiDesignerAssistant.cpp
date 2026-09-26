@@ -54,7 +54,7 @@ static const Operation operations[] = {
  {"prepare_theme_design", "Propose a complete Light/Dark role baseline in Theme Studio; no durable mutation until human Keep", R"json({"summary":{"type":"string"},"light":{"type":"array","minItems":6,"maxItems":6,"items":{"type":"string"}},"dark":{"type":"array","minItems":6,"maxItems":6,"items":{"type":"string"}},"radius":{"type":"integer","minimum":0,"maximum":32},"border_width":{"type":"integer","minimum":0,"maximum":6},"replace_authored":{"type":"boolean"},"style":{"type":"object","additionalProperties":false,"properties":{"body_font":{"type":"string"},"heading_font":{"type":"string"},"body_size":{"type":"integer","minimum":6,"maximum":48},"heading_size":{"type":"integer","minimum":6,"maximum":48},"body_bold":{"type":"boolean"},"heading_bold":{"type":"boolean"},"shadow":{"type":"string","enum":["None","Hard"]},"shadow_offset":{"type":"integer","minimum":0,"maximum":12},"shadow_alpha":{"type":"integer","minimum":0,"maximum":255},"line_width":{"type":"integer","minimum":0,"maximum":6}}}})json", "[\"summary\",\"light\",\"dark\",\"radius\",\"border_width\",\"replace_authored\"]"},
  {"prepare_theme", "Prepare a separate Theme recipe group using registered fields", "{\"summary\":{\"type\":\"string\"},\"target\":{\"type\":\"string\"},\"fields\":{\"type\":\"object\"}}", "[\"summary\",\"target\",\"fields\"]"},
  {"prepare_font", "Replace mapped font families only; scope local or recipe", "{\"summary\":{\"type\":\"string\"},\"family\":{\"type\":\"string\"},\"scope\":{\"type\":\"string\",\"enum\":[\"local\",\"recipe\"]},\"nodes\":{\"type\":\"array\",\"items\":{\"type\":\"integer\"},\"maxItems\":32},\"target\":{\"type\":\"string\"}}", "[\"summary\",\"family\",\"scope\",\"nodes\",\"target\"]"},
- {"prepare_composition", "Prepare a registered subtree; symbolic parent references precede children; empty parent_ref uses explicit parent", "{\"summary\":{\"type\":\"string\"},\"parent\":{\"type\":\"integer\"},\"items\":{\"type\":\"array\",\"maxItems\":64,\"items\":{\"type\":\"object\",\"properties\":{\"ref\":{\"type\":\"string\"},\"parent_ref\":{\"type\":\"string\"},\"grid_row\":{\"type\":\"integer\",\"minimum\":0},\"grid_column\":{\"type\":\"integer\",\"minimum\":0},\"type\":{\"type\":\"string\"},\"properties\":{\"type\":\"object\"}},\"required\":[\"ref\",\"parent_ref\",\"type\",\"properties\"],\"additionalProperties\":false}}}", "[\"summary\",\"parent\",\"items\"]"},
+ {"prepare_composition", "Prepare a registered subtree; symbolic parent references precede children; empty parent_ref uses explicit parent", "{\"summary\":{\"type\":\"string\"},\"parent\":{\"type\":\"integer\"},\"items\":{\"type\":\"array\",\"maxItems\":64,\"items\":{\"type\":\"object\",\"properties\":{\"ref\":{\"type\":\"string\"},\"parent_ref\":{\"type\":\"string\"},\"grid_row\":{\"type\":\"integer\",\"minimum\":0},\"grid_column\":{\"type\":\"integer\",\"minimum\":0},\"type\":{\"type\":\"string\"},\"list_items\":{\"type\":\"array\",\"maxItems\":128,\"items\":{\"type\":\"string\",\"maxLength\":4096}},\"properties\":{\"type\":\"object\"}},\"required\":[\"ref\",\"parent_ref\",\"type\",\"properties\"],\"additionalProperties\":false}}}", "[\"summary\",\"parent\",\"items\"]"},
  {"proposal_status", "Inspect proposal status and receipt", "{\"id\":{\"type\":\"string\"}}", "[\"id\"]"}
 };
 static bool Shape(const Value& v, const Value& schema) {
@@ -125,6 +125,9 @@ String UiDesignerAssistantHost::SystemPrompt() const {
         "Separate Theme and Document apply groups. No shell, files, save or export tools exist. "
         "For dialog/layout requests retrieve layout-v2 first: it includes a schema-valid simple dialog example. "
         "Then describe_controls for only its relevant types and prepare one proposal. Presets are optional, not a required lookup; avoid broad/repeated searches or invented types. For icons or reference material retrieve design-v1; there is no image attachment or HTML rendering tool. "
+        "Common registered types are UiGridLayout, UiBoxLayout, UiPanel, UiLabel, UiButton, UiLineEdit, UiList and UiSlider. Use the spacer type in the layout-v2 example. There is no UiDialog or UiTextEdit: the captured Window root is the dialog. Batch relevant schemas in describe_controls (at most four types per call). "
+        "Composition properties contain only authorable configuration fields in those schemas. The symbolic ref names each item; do not add a name property. Theme override fields such as font_bold are not composition properties. For each reported validation error, fix all listed fields together before retrying. "
+        "For a new UiList, populate requested rows with list_items (array of strings beside properties); do not leave default First/Second sample rows. "
         "Stop discovery once a valid proposal exists. The execution-budget message gives the current call and round allowances. "
         "Captured context already supplies root and selection; do not rediscover unchanged context. "
         "For palette, role, visual style or HTML/CSS color requests retrieve theme-v1; distinguish palette discussion from supported recipe edits. Other skills: typography-v1, data-v1, design-v1. "
@@ -202,27 +205,35 @@ static const UiDesignerControlSpec* RecipeSpec(const UiDesignerCatalog& catalog,
 bool UiDesignerAssistantHost::Composition(const ValueMap& args, UiDesignerDocument& prepared,
     Vector<UiDesignerNodeId>& created, String& error) const {
     Vector<UiDesignerCompositionItem> items;
+    Vector<String> errors;
     for(const Value& v : (ValueArray)args["items"]) {
         auto& item = items.Add(); item.reference = AsString(v["ref"]); item.parent_reference = AsString(v["parent_ref"]);
         item.type = AsString(v["type"]); item.properties = v["properties"];
         ValueMap fields=v;
+        item.has_list_items = fields.Find("list_items") >= 0;
+        if(item.has_list_items) for(const Value& text : (ValueArray)fields["list_items"])
+            item.list_items.Add(AsString(text));
         item.grid_row=fields.Find("grid_row")>=0 ? (int)fields["grid_row"] : -1;
         item.grid_column=fields.Find("grid_column")>=0 ? (int)fields["grid_column"] : -1;
         const auto* spec = session.Catalog().Find(item.type);
         if(!spec || !spec->preview || !spec->codegen) {
-            error = item.reference + " (" + item.type + "): control lacks registered Preview/export support. "
-                "Replace this item with a supported type from the schemas already retrieved, or remove it; preserve the remaining layout.";
-            return false;
+            errors.Add(item.reference + " (" + item.type + "): control lacks registered Preview/export support. "
+                "Replace this item with a supported type from the schemas already retrieved, or remove it; preserve the remaining layout.");
+            continue;
         }
         for(int i = 0; i < item.properties.GetCount(); i++) {
             const auto* p = spec->FindProperty(AsString(item.properties.GetKey(i)));
             if(p) item.properties.Set(item.properties.GetKey(i),FieldInput(p->kind,item.properties.GetValue(i)));
-            if(!p || p->read_only || p->designer_only || (!(IsNull(item.properties.GetValue(i)) && p->preserve_null) && !FieldValue(*p, item.properties.GetValue(i), error))) {
-                if(error.IsEmpty()) error = "Field is unknown, read-only or Designer-only; omit it and use the layout-v2 example";
-                error = item.type + "." + AsString(item.properties.GetKey(i)) + ": " + error;
-                return false;
+            String issue;
+            if(!p || p->read_only || p->designer_only || (!(IsNull(item.properties.GetValue(i)) && p->preserve_null) && !FieldValue(*p, item.properties.GetValue(i), issue))) {
+                if(issue.IsEmpty()) issue = "Field is unknown, read-only or Designer-only; omit it and use the layout-v2 example";
+                errors.Add(item.reference + " " + item.type + "." + AsString(item.properties.GetKey(i)) + ": " + issue);
             }
         }
+    }
+    if(!errors.IsEmpty()) {
+        error = "Correct all invalid composition fields together:\n" + Join(errors, "\n");
+        return false;
     }
     if(!session.BuildComposition((int64)args["parent"], items, prepared, created, error)) return false;
     UiDesignerCodeGenerator generator(session.Catalog());

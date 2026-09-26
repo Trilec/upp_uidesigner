@@ -1,4 +1,5 @@
 #include "UiDesignerSession.h"
+#include "UiDesignerListDataAdapter.h"
 
 namespace Upp {
 
@@ -24,6 +25,9 @@ bool UiDesignerSession::BuildComposition(UiDesignerNodeId parent,
             target = refs[q];
         }
         const auto* target_node=prepared.Find(target);
+        if(item.has_list_items && (item.type != "UiList" || item.list_items.GetCount() > 128)) {
+            error = "list_items supports UiList only, with at most 128 text rows"; return false;
+        }
         if(item.grid_row >= 0 || item.grid_column >= 0) {
             if(!target_node || target_node->type!="UiGridLayout" || item.grid_row<0 || item.grid_column<0 ||
                item.grid_row >= (int)target_node->GetProperty("rows",1) ||
@@ -37,6 +41,19 @@ bool UiDesignerSession::BuildComposition(UiDesignerNodeId parent,
             if(error.IsEmpty()) error = plan.reason; return false;
         }
         refs.Add(item.reference, id); created.Add(id);
+        if(item.has_list_items) {
+            ValueMap data; data.Set("items", ValueArray());
+            for(const String& text : item.list_items) {
+                if(text.GetCount() > 4096) { error = "List row text exceeds 4096 characters"; return false; }
+                ValueMap row; row.Set("text", text);
+                if(!UiDesignerListDataAdapter::AppendItem(data, row)) {
+                    error = "Invalid list row"; return false;
+                }
+            }
+            if(!prepared.SetData(id, "root", data, UiDesignerImpactControlState | UiDesignerImpactCode)) {
+                error = "Cannot set authored list data"; return false;
+            }
+        }
         for(int i = 0; i < item.properties.GetCount(); i++) {
             String key = AsString(item.properties.GetKey(i));
             const auto* spec = catalog_.Find(item.type);

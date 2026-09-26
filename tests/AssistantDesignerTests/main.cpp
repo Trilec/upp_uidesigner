@@ -42,6 +42,28 @@ template <class T> static void CheckNumericBounds() {
 GUI_APP_MAIN {
   {
     UiDesignerSession s; UiDesignerAssistantHost host(s); host.Capture("Designer");
+    String before=Authored(s.Document());
+    ValueMap item,args; ValueArray rows,items;
+    rows.Add("Albums"); rows.Add("Artists");
+    item.Set("ref","navigation"); item.Set("parent_ref",""); item.Set("type","UiList");
+    item.Set("properties",ValueMap()); item.Set("list_items",rows); items.Add(item);
+    args.Set("parent",s.Document().GetRootId()); args.Set("summary","Authored list"); args.Set("items",items);
+    auto proposal=host.Execute("prepare_composition",args);
+    Check(Ok(proposal) && Authored(s.Document())==before,"list composition prepares without mutation");
+    Check(Ok(host.Apply(ProposalId(proposal))),"list composition applies through one command");
+    Check(AsString(UiDesignerSerialize(s.Document(),false)).Find("Albums")>=0,"list contents survive canonical document serialization");
+    UiDesignerCodeGenerator generator(s.Catalog());
+    auto generated=generator.Generate(s.Document(),"ListDesign");
+    Check(generated.source.Find("Albums")>=0 && generated.source.Find("Artists")>=0,"list contents reach generated code");
+    Check(s.Undo() && Authored(s.Document())==before,"one Undo removes list and its authored data");
+    host.Capture("Designer"); item.Set("type","UiButton"); items.Set(0,item); args.Set("items",items);
+    Check(!Ok(host.Execute("prepare_composition",args)),"list data rejected on unrelated controls");
+    item.Set("type","UiList"); while(rows.GetCount()<129) rows.Add("Row");
+    item.Set("list_items",rows); items.Set(0,item); args.Set("items",items);
+    Check(!Ok(host.Execute("prepare_composition",args)) && Authored(s.Document())==before,"list row budget enforced without mutation");
+  }
+  {
+    UiDesignerSession s; UiDesignerAssistantHost host(s); host.Capture("Designer");
     ValueMap item,props,args; ValueArray items;
     item.Set("ref","body"); item.Set("type","UiPanel"); item.Set("parent_ref","");
     props.Set("fixed_width",240); item.Set("properties",props); items.Add(item);
@@ -54,6 +76,16 @@ GUI_APP_MAIN {
     item.Set("type","UnsupportedControl"); items.Set(0,item); args.Set("items",items);
     auto rejected=host.Execute("prepare_composition",args);
     Check(AsString(rejected["error"]).Find("UnsupportedControl")>=0,"rejected composition identifies the exact unsupported control");
+    String before=Authored(s.Document()); int pending=host.Proposals().GetCount();
+    item.Set("type","UiLabel"); props.Clear();
+    props.Set("name","heading"); props.Set("font_bold",true); props.Set("font_height",20);
+    item.Set("properties",props); items.Set(0,item); args.Set("items",items);
+    rejected=host.Execute("prepare_composition",args);
+    String issues=AsString(rejected["error"]);
+    Check(!Ok(rejected) && issues.Find("UiLabel.name")>=0 && issues.Find("UiLabel.font_bold")>=0 && issues.Find("UiLabel.font_height")>=0,
+          "all invalid composition fields reported in one retry, matching live music-library failure");
+    Check(Authored(s.Document())==before && host.Proposals().GetCount()==pending,
+          "aggregate validation preserves document and prior pending proposals");
   }
   {
     UiDesignerSession s; String error;

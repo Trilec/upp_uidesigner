@@ -50,7 +50,7 @@ github.var     U++ assembly definition
 The local assembly is `github.var`. From the repository root:
 
 ```bat
-E:\upp-18468\umk.exe github "UiDesigner/UiDesigner" CLANGx64 -br +GUI E:\apps\github\upp_uidesigner\build\UiDesigner.exe
+E:\upp-18468\umk.exe github "UiDesigner/UiDesigner" CLANGx64 -br +GUI E:\apps\github\upp_uidesigner\bin\UiDesigner.exe
 ```
 
 The application compiles entirely from this repository's `UiDesigner` sources plus the declared external dependencies; nothing is compiled from the old `upp_Ui\Utilities\UiDesigner` package.

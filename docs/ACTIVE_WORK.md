@@ -6,6 +6,35 @@ reported validation separate. The graph project's own gates are not Designer gat
 
 ## Native Theme Studio tree — 2026-09-26
 
+### Quick guide and pending build/design validation — 2026-09-27
+
+- Help now opens a selectable, read-only rich-text guide with six topics: start
+  here, Designer/layouts, Theme Studio, Assistant, export/build and troubleshooting.
+  Each topic has a title and four short sections, including practical examples. It documents proposal versus
+  Apply/Keep, project versus theme-file saving, role inheritance, flexible layouts,
+  provider setup and the current image/HTML limitations.
+- Uses the native RichTextView with resolved theme ink/paper. UiDoc currently has
+  no read-only interaction guards, so using it for help is deferred rather than
+  adding a Designer-specific input workaround. Follow-up for the shared control:
+  implement and test a full read-only contract before using UiDoc as a viewer.
+- First visual check found double-applied document scaling; corrected to the
+  viewer's standard QTF zoom, approximately 16 px body text at normal scaling.
+  Final Release build and visual inspection of readable text and dark dialog
+  background completed on 2026-09-27.
+- v2.0.1 is now built to `bin/UiDesigner.exe`; both validation runners target it.
+  Settings migrate once from `build` into the user's `UiDesigner` configuration
+  folder. Compiler caches now use `build/cache`; Debug symbols stay in `build`.
+  Cleanup removed 547 obsolete top-level outputs/directories (3,336,602,090 bytes),
+  retaining saved themes/project/settings, the two live examples, current test
+  executables and the latest Debug/Release evidence. Local deletion manifest:
+  `build/cleanup-20260927.json`. `bin` contains only the current executable.
+- This checkpoint also includes code-view Close/Escape and Build setup;
+  aggregate composition diagnostics; bounded initial UiList rows. Debug and Release
+  Embedded validation passed before the help addition (AssistantDesignerTests 200).
+  Live OpenRouter varied tests passed 21 checks without presets: account dialog
+  3 calls/3 rounds, music library 6 calls/6 rounds including repairs. Both generated
+  packages compile. Native Build/Run and final library visual checks remain pending.
+
 ### Assistant contrast, toolbar ownership and rejected preparations
 
 - Shared UiBaseEdit no longer substitutes OS `SColorFace` for read-only paper:

@@ -60,7 +60,8 @@ GUI_APP_MAIN {
     }
     int checks=0,failed=0;
     bool app_shell=FindIndex(CommandLine(),String("app-shell"))>=0;
-    for(int scenario=app_shell?3:0;scenario<(app_shell?4:3);scenario++) {
+    bool varied=FindIndex(CommandLine(),String("varied"))>=0;
+    for(int scenario=varied?4:app_shell?3:0;scenario<(varied?6:app_shell?4:3);scenario++) {
         UiDesignerSession session;
         String original=Authored(session.Document());
         UiDesignerAssistantHost host(session); host.Capture("Designer");
@@ -68,7 +69,11 @@ GUI_APP_MAIN {
         AppChatTurn turn;
         turn.WhenActivity = [](const String& event) { Cout()<<event<<'\n'; };
         ValueArray messages; messages.Add(AppChatMessage("system",host.SystemPrompt()));
-        const char* prompt=scenario==3
+        const char* prompt=scenario==4
+            ? "Design a simple account dialog from scratch. Do not inspect or use presets. Use a Label heading saying Account, a Name label and text entry, and right-aligned OK and Cancel buttons at the bottom. Use native flexible layouts and fit the current window. Prepare one complete proposal; do not apply it."
+            : scenario==5
+            ? "Design a compact music library interface from scratch for the current window. Do not inspect or use presets. Include a Library heading, a search text entry, a left list containing Albums and Artists, a main list containing three track titles, and a footer with Play and Stop buttons and a volume slider. Use flexible layouts with an expanding content area. Choose a restrained arrangement yourself; prepare one complete proposal without applying it."
+            : scenario==3
             ? "Create a simple app interface similar to a codec style of application."
             : scenario==0
             ? "Create a simple dialog box template with just an OK and cancel perhaps a with a heading that I can use as a template."
@@ -77,10 +82,11 @@ GUI_APP_MAIN {
         Cout()<<"Scenario "<<scenario+1<<": "<<prompt<<'\n';
         messages.Add(AppChatMessage("user",prompt));
         turn.Start(std::make_shared<AppChatDeepSeekProvider>(profile),messages,host.Tools());
-        TimeStop timer; Index<String> called;
+        TimeStop timer; Index<String> called; bool used_preset=false;
         while(turn.active && timer.Seconds()<180) {
             turn.Poll([&](const String& name,const ValueMap& args) -> Value {
                 called.FindAdd(name); Value result=host.Execute(name,args);
+                used_preset |= name=="prepare_insert" && args["preset"]==true;
                 // Diagnostics contain tool/schema identifiers and validation errors only.
                 if(name=="describe_control") Cout()<<"Schema: "<<AsString(args["type"])<<'\n';
                 if(result["ok"]==false) Cout()<<"Validation: "<<AsString(result["error"])<<'\n';
@@ -93,6 +99,8 @@ GUI_APP_MAIN {
         check(turn.error.IsEmpty(),"real provider completed bounded tool turn");
         check(called.Find("list_presets")>=0 || called.Find("describe_control")>=0 || called.Find("describe_controls")>=0,"live relevant capability discovery");
         check(host.Proposals().GetCount()>0,"live validated proposal");
+        if(varied) check(called.Find("list_presets")<0 && !used_preset,
+                         "original design without preset discovery or reuse");
         check(session.Commands().GetHistoryPosition()==history && Authored(session.Document())==original,"live model cannot apply");
         // Trusted test-driver approval, separate from the model's allowlisted tools.
         // The visible drawer Apply/Undo check is performed separately.
@@ -107,13 +115,46 @@ GUI_APP_MAIN {
             heading|=(node.type=="UiLabel" && !text.IsEmpty()) || (node.type=="UiTitleCard" && !AsString(node.GetProperty("title","")).IsEmpty());
             ok|=node.type=="UiButton" && text=="ok"; cancel|=node.type=="UiButton" && text=="cancel";
         }
-        if(scenario==3) {
+        if(scenario==3 || scenario==5) {
             bool layout=false;
             for(const auto& node:session.Document().GetNodes())
                 layout |= node.type=="UiGridLayout" || node.type=="UiBoxLayout";
             check(layout && session.Document().GetNodes().GetCount()>4,"app interface has a composed layout and visible controls");
         }
         else check(heading && ok && cancel,"exact prompt yields heading plus OK/Cancel visual template");
+        if(varied) {
+            int lists=0; bool entry=false,slider=false,play=false,stop=false;
+            for(const auto& node:session.Document().GetNodes()) {
+                lists += node.type=="UiList";
+                entry |= node.type=="UiLineEdit";
+                slider |= node.type=="UiSlider";
+                play |= node.type=="UiButton" && ToLower(AsString(node.GetProperty("text","")))=="play";
+                stop |= node.type=="UiButton" && ToLower(AsString(node.GetProperty("text","")))=="stop";
+            }
+            check(entry && (scenario==4 || (lists>=2 && slider && play && stop)),
+                  "requested input and complex interface controls are present");
+            if(scenario==5) {
+                bool categories=false,tracks=false;
+                for(const auto& node:session.Document().GetNodes()) if(node.type=="UiList") {
+                    ValueMap data=node.GetData("root",ValueMap());
+                    ValueArray rows=data["items"];
+                    String contents=AsJSON(rows);
+                    categories |= contents.Find("Albums")>=0 && contents.Find("Artists")>=0;
+                    tracks |= rows.GetCount()==3 && contents.Find("\"First\"")<0 && contents.Find("\"Second\"")<0;
+                }
+                check(categories && tracks,"requested categories and three actual track titles replace sample list rows");
+            }
+            if(applied) {
+                UiDesignerExportRequest request;
+                request.generation.package_name = scenario==4 ? "LiveAccount" : "LiveLibrary";
+                request.generation.class_name = request.generation.package_name + "Window";
+                request.destination = AppendFileName(AppendFileName(GetExeFolder(), "ai-designs"), request.generation.package_name);
+                UiDesignerExportService service(session.Catalog());
+                auto exported=service.Execute(session.Document(),session.Theme(),request);
+                check(exported.success,"actual live proposal exports complete C++ package");
+                Cout()<<"Export: "<<request.destination<<" "<<exported.diagnostic<<'\n';
+            }
+        }
         if(scenario==1) {
             bool title=false,grid=false,panel=false,actions=false;
             for(const auto& node:session.Document().GetNodes()) {

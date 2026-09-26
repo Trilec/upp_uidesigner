@@ -71,7 +71,9 @@ $exportedTheme = Join-Path $OutputRoot 'UiDesignerExportedThemeContractTest.exe'
 $splitterCatalog = Join-Path $OutputRoot 'UiDesignerUiSplitterCatalogTest.exe'
 $cli = Join-Path $OutputRoot 'uidesigner_cli.exe'
 $mcp = Join-Path $OutputRoot 'uidesigner_mcp.exe'
-$app = Join-Path $OutputRoot 'UiDesigner.exe'
+$bin = Join-Path $PSScriptRoot 'bin'
+New-Item -ItemType Directory -Path $bin -Force | Out-Null
+$app = Join-Path $bin 'UiDesigner.exe'
 
 Build-Package 'Utilities/PropertyEditorCoreProbe' $probe
 Build-Package 'Utilities/PropertyEditorTests' $propertyTests $true

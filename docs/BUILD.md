@@ -18,7 +18,11 @@ powershell -ExecutionPolicy Bypass -File RunSupervisorValidation.ps1
 ```
 
 Optional parameters select the `umk` path, assembly, configuration and output folder.
-The canonical default output folder is `E:\apps\github\upp_uidesigner\build`; every executable is written directly at that root, without Debug or Release subdirectories.
+The current application is `E:\apps\github\upp_uidesigner\bin\UiDesigner.exe`.
+Overwrite that executable for future application builds. Test executables, compiler
+caches and validation logs belong in `build`, never in `bin`. Application settings
+use U++'s home-directory configuration (`UiDesigner`); the first launch migrates
+existing preferences from `build` without overwriting current settings.
 
 The runner performs:
 
@@ -84,7 +88,7 @@ E:\upp-18468\umk.exe github "ThemeDarkIntegrationTest" CLANGx64 -br "E:\apps\git
 E:\upp-18468\umk.exe github "ThemeBuilderContractTest" CLANGx64 -br "E:\apps\github\upp_uidesigner\build\UiDesignerThemeBuilderContractTest.exe"
 E:\upp-18468\umk.exe github "UiDesigner/CLI" CLANGx64 -br "E:\apps\github\upp_uidesigner\build\uidesigner_cli.exe"
 E:\upp-18468\umk.exe github "UiDesigner/MCP" CLANGx64 -br "E:\apps\github\upp_uidesigner\build\uidesigner_mcp.exe"
-E:\upp-18468\umk.exe github "UiDesigner/UiDesigner" CLANGx64 -br +GUI "E:\apps\github\upp_uidesigner\build\UiDesigner.exe"
+E:\upp-18468\umk.exe github "UiDesigner/UiDesigner" CLANGx64 -br +GUI "E:\apps\github\upp_uidesigner\bin\UiDesigner.exe"
 ```
 
 ## Generated package proof
@@ -98,7 +102,7 @@ Generated source fixtures stay in their temporary test directories; generated ex
 
 ## Final interactive audit
 
-After the automated gate passes, leave the newly built `build\UiDesigner.exe` running and verify at minimum:
+After the automated gate passes, leave the newly built `bin\UiDesigner.exe` running and verify at minimum:
 
 - project icon and compact Designer header are correct;
 - no title/card divider is reintroduced under `Designer`;
