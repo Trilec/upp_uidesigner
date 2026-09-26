@@ -40,6 +40,45 @@ template <class T> static void CheckNumericBounds() {
     }
 }
 GUI_APP_MAIN {
+  {
+    UiDesignerSession s; String error;
+    Check(s.GetProjectThemeCount()==1 && !s.IsProjectThemeWorkspaceDirty(), "new project has one clean theme");
+    Check(s.Theme().Commit("radius", 13, "Draft A", error), "edit first draft");
+    auto a=s.Theme().Get(); uint64 before=s.Theme().GetRevision();
+    Check(s.AddProjectTheme("Second", a, error) && s.GetProjectThemeCount()==2 && s.GetActiveProjectTheme()==1,
+          "duplicate becomes independent active project theme");
+    Check(s.Theme().GetRevision()>before && !s.Theme().CanUndo(), "draft switch invalidates captured revisions and copy starts own history");
+    Check(s.Theme().Commit("radius", 21, "Draft B", error) && s.SelectProjectTheme(0,error) && s.Theme().Get().radius==13,
+          "switch retains separate draft values");
+    Check(s.Theme().Undo() && s.Theme().Get().radius!=13 && s.Theme().Redo() && s.Theme().Get().radius==13,
+          "first draft retains its undo and redo across switches");
+    Check(s.SelectProjectTheme(1,error) && s.Theme().Undo() && s.Theme().Get().radius==13 && s.Theme().Redo() && s.Theme().Get().radius==21,
+          "second draft retains independent undo and redo");
+    Check(s.RenameProjectTheme(0,"Original",error) && !s.RenameProjectTheme(0," ",error), "theme rename validates names");
+    Check(s.Theme().StageProposal("guard",a,s.Theme().GetRevision(),error), "stage proposal for workspace guard");
+    Check(!s.SelectProjectTheme(0,error) && !s.RemoveProjectTheme(0,error) && !s.AddProjectTheme("Blocked",a,error) && s.Theme().HasProposal(),
+          "workspace changes preserve pending proposals");
+    s.Theme().DiscardProposal();
+    String file=AppendFileName(GetTempPath(),"uidesigner-workspace-"+AsString(Uuid::Create())+".json");
+    Check(s.Save(file,error) && !s.IsProjectThemeWorkspaceDirty(), "project save checkpoints every draft");
+    UiDesignerSession loaded;
+    Check(loaded.Load(file,error) && loaded.GetProjectThemeCount()==2 && loaded.GetActiveProjectTheme()==1 &&
+          loaded.GetProjectThemeName(0)=="Original" && loaded.Theme().Get().radius==21, "project restores names selection and all themes");
+    Check(loaded.SelectProjectTheme(0,error) && loaded.Theme().Get().radius==13, "inactive saved draft restores independently");
+    ValueMap bad=ParseJSON(LoadFile(file)); ValueMap ws=bad["theme_workspace"]; ws.Set("active",99); bad.Set("theme_workspace",ws);
+    SaveFile(file,AsJSON(bad)); String unchanged=loaded.Theme().Serialize(false);
+    Check(!loaded.Load(file,error) && loaded.GetProjectThemeCount()==2 && loaded.Theme().Serialize(false)==unchanged,
+          "malformed workspace load is atomic");
+    bad.RemoveKey("theme_workspace"); SaveFile(file,AsJSON(bad));
+    Check(loaded.Load(file,error) && loaded.GetProjectThemeCount()==1 && loaded.Theme().Get().radius==21,
+          "legacy single-theme projects remain loadable");
+    Check(s.RemoveProjectTheme(1,error) && s.GetActiveProjectTheme()==0 && s.Theme().Get().radius==13 && !s.RemoveProjectTheme(0,error),
+          "delete active draft switches safely and retains at least one theme");
+    s.NewDocument();
+    Check(s.GetProjectThemeCount()==1 && !s.IsProjectThemeWorkspaceDirty() && !s.Theme().CanUndo(),
+          "new project starts a clean draft without previous project history");
+    FileDelete(file);
+  }
   CheckNumericBounds<UiIntEdit>();
   CheckNumericBounds<UiFloatEdit>();
   {

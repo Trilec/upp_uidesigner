@@ -30,6 +30,7 @@ file
     UiDesignerAutomation.h,
     UiDesignerAutomation.cpp,
     UiDesignerThemeDesign.cpp,
+    UiDesignerProjectThemes.cpp,
     UiDesignerTreeDataAdapter.h,
     UiDesignerTreeDataAdapter.cpp,
     UiDesignerListDataAdapter.h,

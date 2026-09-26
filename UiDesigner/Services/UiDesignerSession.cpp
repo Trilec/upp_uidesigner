@@ -310,6 +310,7 @@ void UiDesignerSession::ApplyPresetDialog()
 void UiDesignerSession::NewDocument(const String& preset)
 {
     theme_.DiscardProposal();
+    ResetProjectThemes();
     ++document_generation_;
     commands_.ClearHistory();
     state_.selection.Clear();
@@ -351,6 +352,8 @@ bool UiDesignerSession::Load(const String& path, String& error)
     UiDesignerDocument loaded;
     UiDesignerThemeSnapshot loaded_theme;
     bool has_theme = false;
+    Array<ProjectTheme> loaded_themes;
+    int loaded_active = 0;
 
     if((String)UiDesignerMapValue(root, "format", "") == "upp-ui-designer-project") {
         if(!UiDesignerDocumentFromValue(UiDesignerMapValue(root, "document", ValueMap()),
@@ -365,6 +368,11 @@ bool UiDesignerSession::Load(const String& path, String& error)
     else if(!UiDesignerDocumentFromValue(parsed, loaded, error))
         return false;
 
+    if(root.Find("theme_workspace") >= 0) {
+        if(!ParseProjectThemes(root["theme_workspace"], loaded_themes, loaded_active, error)) return false;
+        loaded_theme = loaded_themes[loaded_active].document.Get();
+        has_theme = true;
+    }
     catalog_.ApplySizingDefaults(loaded);
 
     if(!commands_.ReplaceDocument(loaded, "Load document")) {
@@ -380,6 +388,12 @@ bool UiDesignerSession::Load(const String& path, String& error)
         theme_path_.Clear();
         theme_file_checkpoint_ = theme_.Serialize(false);
     }
+    ResetProjectThemes();
+    if(!loaded_themes.IsEmpty()) {
+        project_themes_ = pick(loaded_themes);
+        active_project_theme_ = loaded_active;
+    }
+    WhenProjectThemesChanged();
 
     current_path_ = path;
     AddRecentPath(path);
@@ -403,6 +417,7 @@ bool UiDesignerSession::Save(const String& path, String& error)
     project.Set("schema", 2);
     project.Set("document", UiDesignerDocumentToValue(document_));
     project.Set("theme", theme_.Get().ToValue());
+    project.Set("theme_workspace", SerializeProjectThemes());
     if(!SaveFile(path, AsJSON(project, true))) {
         error = "Unable to save " + path;
         return false;
@@ -411,6 +426,9 @@ bool UiDesignerSession::Save(const String& path, String& error)
     AddRecentPath(path);
     commands_.MarkSaved();
     theme_.MarkSaved();
+    for(auto& entry : project_themes_) entry.document.MarkSaved();
+    project_themes_dirty_ = false;
+    WhenProjectThemesChanged();
     WhenStatus("Saved " + GetFileName(path));
     error.Clear();
     return true;

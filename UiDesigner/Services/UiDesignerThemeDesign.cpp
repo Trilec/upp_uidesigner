@@ -20,8 +20,14 @@ bool UiDesignerSession::SaveThemeFile(const String& path, String& error)
 bool UiDesignerSession::LoadThemeFile(const String& path, String& error)
 {
     if(theme_.HasProposal()) { error = "Keep or discard the proposed theme before loading another"; return false; }
-    if(!theme_.ImportTheme(LoadFile(path), error)) return false;
-    theme_path_ = path; theme_file_checkpoint_ = theme_.Serialize(false);
+    UiDesignerThemeDocument imported;
+    if(!imported.Deserialize(LoadFile(path), error)) return false;
+    UiDesignerThemeSnapshot snapshot = imported.Get();
+    if(theme_.RegeneratePalette && !snapshot.generated_fields.IsEmpty())
+        if(!theme_.RegeneratePalette(snapshot, error)) return false;
+    if(!AddProjectTheme(GetFileTitle(path), snapshot, error)) return false;
+    // Library entries are sources. The new project copy is saved explicitly.
+    DetachThemeFile();
     return true;
 }
 

@@ -624,7 +624,9 @@ void UiDesignerWindow::BuildTheme()
     theme_gallery_column_.Add(theme_gallery_pill_);
     theme_gallery_column_.Add(gallery_scroll_);
 
+    BuildThemeLibrary();
     theme_right_.RightColumn()
+                .AddSection("Themes", ICON_DESIGN_WIDGETS_48(), theme_library_panel_)
                 .AddSection("Inspector", ICON_DESIGN_TUNE_48(), theme_inspector_)
                 .AddSection("Code", ICON_DESIGN_CODE_BLOCKS_48(), theme_code_);
     ApplyUiDesignerPropertyEditorStyle(theme_inspector_);
@@ -1283,12 +1285,15 @@ void UiDesignerWindow::ConnectServices()
     };
     session_.Theme().WhenChanged << [=] {
         ApplyThemeToShell(); RefreshThemeInspector(); RefreshCode();
+        PostCallback([=] { RefreshThemeLibrary(); });
         RequestDiagnosticsRefresh();
     };
     session_.Theme().WhenPreviewChanged << [=] {
         if(session_.Theme().IsProposalVisible() && workspaces_.GetActiveKey() != "theme") ShowTheme();
         else ApplyThemeToShell();
     };
+    session_.WhenProjectThemesChanged << [=] { PostCallback([=] { RefreshThemeLibrary(); SyncThemeChoices(); }); };
+    session_.Theme().WhenTargetChanged << [=] { theme_right_.SetActiveSection(1); };
 
     designer_left_.WhenWidthChanged = [=] { Layout(); };
     designer_right_.WhenWidthChanged = [=] { Layout(); };
@@ -1467,6 +1472,12 @@ void UiDesignerWindow::SaveDocument(bool save_as)
 void UiDesignerWindow::RegisterThemePath(const String& path)
 {
     if(FindIndex(theme_library_, path) < 0) theme_library_.Add(path);
+    SaveThemeLibraryIndex();
+    RefreshThemeLibrary();
+}
+
+void UiDesignerWindow::SaveThemeLibraryIndex()
+{
     ValueArray paths; for(const auto& file : theme_library_) paths.Add(file);
     if(!SaveFile(ConfigFile("uidesigner-theme-library.json"), AsJSON(paths)))
         RefreshStatus("Theme file saved, but the library index could not be saved.");
@@ -1476,12 +1487,12 @@ void UiDesignerWindow::SyncThemeChoices()
 {
     auto& theme = session_.Theme();
     theme_select_.Clear();
-    String label = session_.GetThemePath().IsEmpty() ? String("Untitled") : GetFileTitle(session_.GetThemePath());
-    label << (session_.IsThemeFileDirty() ? " *" : "") << " · " << theme.Get().preset;
+    String label = session_.GetProjectThemeName(session_.GetActiveProjectTheme());
+    label << (session_.IsProjectThemeWorkspaceDirty() ? " *" : "") << " · " << theme.Get().preset;
     theme_select_.Add(label, "current");
     if(theme.HasProposal()) theme_select_.Add("Proposal — unsaved", "proposal");
     if(!theme_library_.IsEmpty()) {
-        theme_select_.AddGroupHeader("My themes");
+        theme_select_.AddGroupHeader("My Themes");
         for(const auto& path : theme_library_) theme_select_.Add(GetFileTitle(path), "file:" + path);
     }
     theme_select_.AddGroupHeader("Defaults");
@@ -1490,31 +1501,19 @@ void UiDesignerWindow::SyncThemeChoices()
     theme_select_.SetDataSilently(theme.IsProposalVisible() ? "proposal" : "current");
 }
 
-bool UiDesignerWindow::ConfirmThemeSwitch()
-{
-    if(session_.Theme().HasProposal()) {
-        RefreshStatus("Keep or discard the proposal first; use Compare to view the original."); return false;
-    }
-    if(!session_.IsThemeFileDirty()) return true;
-    int choice = PromptYesNoCancel("Save the current Theme to a theme file before switching?");
-    if(choice < 0) return false;
-    if(choice == 1) { SaveTheme(); return !session_.IsThemeFileDirty(); }
-    return true;
-}
-
 void UiDesignerWindow::SelectThemeChoice(const String& choice)
 {
     auto& theme = session_.Theme();
     if(choice == "proposal" || choice == "current") { theme.ShowProposal(choice == "proposal"); return; }
-    if(!ConfirmThemeSwitch()) { SyncThemeChoices(); return; }
+    if(theme.HasProposal()) { RefreshStatus("Keep or discard the proposal before switching themes"); SyncThemeChoices(); return; }
     String error;
     if(choice.StartsWith("file:")) {
         if(!session_.LoadThemeFile(choice.Mid(5), error)) Exclamation(error);
     }
     else if(choice.StartsWith("builtin:")) {
         UiDesignerThemeDocument fresh;
-        if(fresh.Commit("preset", choice.Mid(8), "Base preset", error) &&
-           theme.ImportTheme(fresh.Serialize(), error)) session_.DetachThemeFile();
+        if(fresh.Commit("preset", choice.Mid(8), "Base preset", error))
+            session_.AddProjectTheme(choice.Mid(8) + " copy", fresh.Get(), error);
         if(!error.IsEmpty()) Exclamation(error);
     }
     SyncThemeChoices();
@@ -1540,10 +1539,9 @@ void UiDesignerWindow::LoadTheme()
 {
     FileSel fs; fs.Type("Theme JSON", "*.json");
     if(!fs.ExecuteOpen("Load Theme")) return;
-    if(!ConfirmThemeSwitch()) return;
     String error;
     if(!session_.LoadThemeFile(~fs, error)) Exclamation(error);
-    else { RegisterThemePath(~fs); RefreshStatus("Theme loaded. Theme Undo restores its previous contents."); }
+    else { RegisterThemePath(~fs); RefreshStatus("Theme loaded as a project copy. The source file is unchanged."); }
     SyncThemeChoices();
 }
 
@@ -2182,6 +2180,18 @@ void UiDesignerWindow::Layout()
     const int theme_gallery_w = max(0, theme_page_.GetSize().cx - theme_right_w - gap);
     Put(theme_gallery_column_, 0, 0, theme_gallery_w, theme_page_.GetSize().cy);
     Put(theme_right_, theme_gallery_w + gap, 0, theme_right_w, theme_page_.GetSize().cy);
+    {
+        Size ts = theme_library_panel_.GetSize();
+        int bw = max(0, (ts.cx - DPI(8)) / 2);
+        theme_tree_.SetRect(0, 0, ts.cx, max(0, ts.cy - DPI(150)));
+        int y = max(0, ts.cy - DPI(144));
+        theme_new_.SetRect(0,y,bw,DPI(30)); theme_duplicate_.SetRect(bw+DPI(8),y,bw,DPI(30));
+        y += DPI(36);
+        theme_rename_.SetRect(0,y,bw,DPI(30)); theme_delete_.SetRect(bw+DPI(8),y,bw,DPI(30));
+        y += DPI(36);
+        theme_use_.SetRect(0,y,bw,DPI(30)); theme_publish_.SetRect(bw+DPI(8),y,bw,DPI(30));
+        theme_library_hint_.SetRect(0,y+DPI(36),ts.cx,DPI(30));
+    }
     Put(theme_gallery_pill_, 0, 0, theme_gallery_column_.GetSize().cx, pill_h);
     Put(gallery_scroll_, 0, pill_h + gap, theme_gallery_column_.GetSize().cx,
         max(0, theme_gallery_column_.GetSize().cy - pill_h - gap));
@@ -2209,7 +2219,7 @@ void UiDesignerWindow::Layout()
 
 void UiDesignerWindow::Close()
 {
-    if((session_.Commands().IsDirty() || session_.Theme().IsDirty() || session_.Theme().HasProposal()) &&
+    if((session_.Commands().IsDirty() || session_.IsProjectThemeWorkspaceDirty() || session_.Theme().HasProposal()) &&
        !PromptYesNo("The UiDesigner project or theme has unsaved changes. Close anyway?"))
         return;
     assistant_.Stop();

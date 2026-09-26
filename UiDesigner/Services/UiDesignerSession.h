@@ -104,6 +104,15 @@ public:
     const String& GetThemePath() const { return theme_path_; }
     bool IsThemeFileDirty() const { return theme_.Serialize(false) != theme_file_checkpoint_; }
     void DetachThemeFile() { theme_path_.Clear(); theme_file_checkpoint_.Clear(); }
+    int GetProjectThemeCount() const { return project_themes_.GetCount(); }
+    int GetActiveProjectTheme() const { return active_project_theme_; }
+    String GetProjectThemeName(int index) const { return project_themes_[index].name; }
+    bool SelectProjectTheme(int index, String& error);
+    bool AddProjectTheme(const String& name, const UiDesignerThemeSnapshot& value, String& error);
+    bool RenameProjectTheme(int index, const String& name, String& error);
+    bool RemoveProjectTheme(int index, String& error);
+    bool IsProjectThemeWorkspaceDirty() const;
+    Event<> WhenProjectThemesChanged;
 
     UiDesignerNodeId AddControl(const String& type_id,
                                 UiDesignerNodeId parent = 0);
@@ -157,6 +166,17 @@ public:
     Event<String> WhenStatus;
 
 private:
+    struct ProjectTheme {
+        String name, path, checkpoint;
+        UiDesignerThemeDocument document;
+    };
+    Array<ProjectTheme> project_themes_;
+    int active_project_theme_ = 0;
+    bool project_themes_dirty_ = false;
+    void ResetProjectThemes();
+    ValueMap SerializeProjectThemes() const;
+    bool ParseProjectThemes(const Value& value, Array<ProjectTheme>& entries,
+                            int& active, String& error) const;
     void WireEvents();
     void ApplyPresetBlank();
     void ApplyPresetThreePane();

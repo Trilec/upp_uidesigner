@@ -165,6 +165,9 @@ public:
     String Serialize(bool pretty = true) const;
     bool Deserialize(const String& json, String& error);
     bool Replace(const UiDesignerThemeSnapshot& value, bool mark_saved = true);
+    // Switch project drafts without moving observers or losing either draft's undo.
+    // Session owns selection and emits notifications after completing the switch.
+    void SwapDraftState(UiDesignerThemeDocument& other);
 
     Event<> WhenPreview;
     Function<bool(UiDesignerThemeSnapshot&, String&)> RegeneratePalette;

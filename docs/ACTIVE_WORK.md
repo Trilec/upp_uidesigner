@@ -4,6 +4,37 @@ Remote main is authoritative. Sequential coding on main; no feature branch.
 Fetch before work and immediately before publishing. Keep published and locally
 reported validation separate. The graph project's own gates are not Designer gates.
 
+## Native Theme Studio tree — 2026-09-26
+
+- Requested native implementation, replacing further mock-up work. Theme Studio's
+  right column now has Themes, Inspector and Code. The Themes tree separates
+  Project themes, My Themes and Defaults; select a gallery sample to open Inspector.
+- Project drafts support New, Duplicate, Rename and confirmed Delete (at least
+  one remains). Each draft keeps its own existing Theme undo history while switching.
+  The active Theme document and its observers remain stable; revision increases
+  invalidate stale assistant captures. Pending proposals block draft switches.
+- Save Project retains all draft snapshots, names and active selection in optional
+  `theme_workspace` schema 1. The existing top-level `theme` remains the active
+  snapshot for compatibility. Old single-theme projects load as one draft. Invalid
+  workspaces are rejected before changing the current document.
+- My Themes and Defaults are sources: Use as copy creates a project draft.
+  Add to My Themes uses Save Theme As; Remove from list only removes the local
+  index entry, never the theme file. Application export still uses the active theme;
+  standalone Theme JSON contains only that theme, not the project draft collection.
+- No arbitrary groups or drag/drop reordering in this first version. Theme file
+  deletion is intentionally separate from library-list maintenance.
+- Debug and Release Embedded validation PASS: `build/Assistant-Debug-20260926-133149`
+  and `build/Assistant-Release-20260926-133234`. AssistantDesignerTests 176 checks;
+  ThemeStudioRoleTest 1854, ThemeDocumentTest 35, export contract 36, title/grid 37,
+  AppChat 23 and RegressionTests all passed. An earlier Debug link attempt hit the
+  still-closing disposable executable; the complete rerun passed after closure.
+- Native review: Duplicate naming, source selection and Use as copy verified in
+  the released executable; Brutalist source regeneration retains generated role
+  colours. Saved review project: `build/Theme-tree-review.uidesign.json.uidesign`.
+- Canonical `build/UiDesigner.exe` left open, PID 414708; SHA256
+  `B1E07E98E8B1DC0A7E5D07000E2A8AF44F1A45384F993D4129F32DB21303293B`.
+  No live provider run was needed or claimed for this workspace change.
+
 ## Edit bounds and button gallery refinement — 2026-09-26
 
 - BASE: Designer `99c6b6d18bbcda30ef289130a0d010a8c4881953`; shared Ui

@@ -1,6 +1,17 @@
 #include "UiDesignerTheme.h"
 
 namespace Upp {
+void UiDesignerThemeDocument::SwapDraftState(UiDesignerThemeDocument& other)
+{
+    ASSERT(!HasProposal() && !other.HasProposal());
+    preview_active_ = other.preview_active_ = false;
+    Swap(value_, other.value_);
+    Swap(history_, other.history_);
+    Swap(position_, other.position_);
+    Swap(saved_position_, other.saved_position_);
+    ++revision_;
+    ++other.revision_;
+}
 
 bool UiDesignerThemeDocument::StageProposal(const String& id,
     const UiDesignerThemeSnapshot& value, uint64 expected_revision, String& error)

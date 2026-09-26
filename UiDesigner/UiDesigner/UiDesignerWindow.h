@@ -60,8 +60,18 @@ private:
     void SyncThemeChoices();
     void SelectThemeChoice(const String& choice);
     void RegisterThemePath(const String& path);
-    bool ConfirmThemeSwitch();
     Vector<String> theme_library_;
+    void BuildThemeLibrary();
+    void RefreshThemeLibrary();
+    void ThemeLibraryAction(const String& action);
+    void SaveThemeLibraryIndex();
+    UiPanel theme_library_panel_;
+    UiTree theme_tree_;
+    UiButton theme_new_, theme_duplicate_, theme_rename_, theme_delete_, theme_use_, theme_publish_;
+    UiLabel theme_library_hint_;
+    VectorMap<int, String> theme_tree_keys_;
+    bool syncing_theme_tree_ = false;
+    String selected_theme_tree_key_;
     void ResetThemeCustomizations();
     void ExportProject(UiDesignerExportProfile profile);
 
