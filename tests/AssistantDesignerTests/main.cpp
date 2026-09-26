@@ -41,6 +41,21 @@ template <class T> static void CheckNumericBounds() {
 }
 GUI_APP_MAIN {
   {
+    UiDesignerSession s; UiDesignerAssistantHost host(s); host.Capture("Designer");
+    ValueMap item,props,args; ValueArray items;
+    item.Set("ref","body"); item.Set("type","UiPanel"); item.Set("parent_ref","");
+    props.Set("fixed_width",240); item.Set("properties",props); items.Add(item);
+    args.Set("parent",s.Document().GetRootId()); args.Set("summary","Sizing validation"); args.Set("items",items);
+    Check(Ok(host.Execute("prepare_composition",args)),"working-range editor accepts schema-valid integer sizing");
+    props.Set("fixed_width",240.5); item.Set("properties",props); items.Set(0,item); args.Set("items",items);
+    Check(!Ok(host.Execute("prepare_composition",args)),"working-range editor still rejects fractional integers");
+    props.Set("fixed_width",10001); item.Set("properties",props); items.Set(0,item); args.Set("items",items);
+    Check(!Ok(host.Execute("prepare_composition",args)),"working-range editor still enforces registered bounds");
+    item.Set("type","UnsupportedControl"); items.Set(0,item); args.Set("items",items);
+    auto rejected=host.Execute("prepare_composition",args);
+    Check(AsString(rejected["error"]).Find("UnsupportedControl")>=0,"rejected composition identifies the exact unsupported control");
+  }
+  {
     UiDesignerSession s; String error;
     s.Theme().SetViewingMode("Dark");
     Check(s.Theme().Get().accent==s.Theme().Get().dark_palette.Get(s.Theme().Get().roles.control_accent),

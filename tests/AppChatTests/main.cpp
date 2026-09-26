@@ -10,7 +10,7 @@ public:
     bool correlated = false;
     AppChatReply Complete(const ValueArray& messages, const ValueArray& tools, const AppChatLimits& limits,
         std::atomic<bool>& cancel, const Function<void(String)>& visible) override {
-        if(position == 1) correlated = messages.GetCount() == 3 && messages[2]["role"] == "tool" && messages[2]["tool_call_id"] == "call-1";
+        if(position == 1) correlated = messages.GetCount() == 4 && messages[2]["role"] == "tool" && messages[2]["tool_call_id"] == "call-1" && messages[3]["role"] == "system";
         return AppChatScriptedProvider::Complete(messages,tools,limits,cancel,visible);
     }
 };
@@ -32,13 +32,34 @@ static ValueMap Batch(std::initializer_list<const char*> names) {
 }
 CONSOLE_APP_MAIN {
     {
+        auto provider=std::make_shared<AppChatScriptedProvider>();
+        for(int i=0;i<5;i++) provider->replies.Add(Batch({"read"}));
+        auto final=Batch({"prepare_composition"}); final.Set("content","One valid proposal is ready.");
+        provider->replies.Add(final);
+        AppChatTurn turn; turn.limits.rounds=6; String activity;
+        turn.WhenActivity=[&](const String& line){activity<<line<<'\n';};
+        turn.Start(provider,ValueArray(),ValueArray()); TimeStop timer;
+        while(turn.active && timer.Seconds()<3) {
+            turn.Poll([](const String& name,const ValueMap&)->Value {
+                ValueMap result; result.Set("ok",name!="prepare_composition");
+                if(name=="prepare_composition") result.Set("error","Unknown control type: UiColumn");
+                return result;
+            }); Sleep(1);
+        }
+        Check(turn.GetRound()==6 && turn.GetCallsUsed()==6 && !turn.error.IsEmpty(),"rejected final-round preparation stays bounded");
+        Check(turn.CompletionNotice(0).Find("No changes were prepared")>=0 &&
+              turn.CompletionNotice(0).Find("Unknown control type")>=0,"completion contradicts unsupported model readiness with actual rejection");
+        Check(activity.Find("prepare_composition ERROR: Unknown control type")>=0,"activity includes actionable host rejection");
+        Check(turn.CompletionNotice(1).Find("1 proposal(s) ready")>=0,"later limit failure still exposes an existing valid proposal");
+    }
+    {
         auto original=std::make_shared<AppChatScriptedProvider>();
         original->replies.Add(Batch({"inspect_context","retrieve_skill","search_controls","search_controls","list_presets"}));
         original->replies.Add(Batch({"inspect_hierarchy","describe_control"}));
         original->replies.Add(Batch({"search_controls","search_controls","search_controls","invalid_UiColumn"}));
         original->replies.Add(Batch({"describe_control","describe_control","search_controls","search_controls"}));
         original->replies.Add(Batch({"describe_controls","prepare_composition"}));
-        AppChatTurn trace; int invoked=0; String activity;
+        AppChatTurn trace; trace.limits.calls=16; int invoked=0; String activity;
         trace.WhenActivity=[&](const String& line){activity<<line<<'\n';};
         trace.Start(original,ValueArray(),ValueArray()); TimeStop watch;
         while(trace.active && watch.Seconds()<3) { trace.Poll([&](const String& name,const ValueMap&)->Value {
@@ -52,6 +73,14 @@ CONSOLE_APP_MAIN {
         trace.Start(exact,ValueArray(),ValueArray()); watch.Reset(); invoked=0;
         while(trace.active && watch.Seconds()<3) { trace.Poll([&](const String&,const ValueMap&)->Value {invoked++; return ValueMap();}); Sleep(1); }
         Check(invoked==16 && trace.error.IsEmpty(),"exactly sixteen calls are permitted");
+        trace.limits=AppChatLimits();
+        auto boundary=std::make_shared<AppChatScriptedProvider>();
+        for(int i=0;i<4;++i) boundary->replies.Add(Batch({"read","read","read","read","read","read"}));
+        boundary->replies.Add(Batch({"read"}));
+        trace.Start(boundary,ValueArray(),ValueArray()); watch.Reset(); invoked=0;
+        while(trace.active && watch.Seconds()<3) { trace.Poll([&](const String&,const ValueMap&)->Value {++invoked;return ValueMap();});Sleep(1); }
+        Check(trace.limits.rounds==8 && invoked==24 && trace.error.Find("24 tool calls used; 1 more requested; limit 24")>=0,
+              "default recovery allowance permits twenty-four calls and rejects the next batch");
     }
     AppChatStream stream;
     String data = Chunk("{\"content\":\"Hello\",\"reasoning_content\":\"private\"}") + Chunk("{}", "\"stop\"") + "data: [DONE]\n\n";

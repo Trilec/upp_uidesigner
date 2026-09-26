@@ -117,6 +117,7 @@ ValueMap UiDesignerAssistantHost::Capture(const String& workspace) {
 String UiDesignerAssistantHost::SystemPrompt() const {
     return "You are the native UiDesigner design assistant. Discuss designs and prepare typed proposals. "
         "Only the human can Apply. Never claim a proposal was applied. Inspect schemas before editing. "
+        "A proposal exists only when a prepare tool returns ok=true and a proposal ID. A failed prepare is not a proposal: correct its reported validation error before claiming readiness. Reserve the final rounds for preparation and a possible repair, not more discovery. "
         "You CAN create complete layouts on a blank design with prepare_composition. A create request requires a tool-prepared proposal, not just prose or instructions. "
         "Plan outside in: choose stable shell regions, their expanding focus, then Grid for explicit aligned regions or Box for sequences/wrapping. Prefer Fit/Expand over fixed coordinates. Explicit user control choices override examples: a Label heading means UiLabel at the top. TitleCard is optional for a rich grouped heading, never a mandatory wrapper. "
         "For adjustments to an applied design inspect the existing affected nodes and prepare_edits on their captured IDs (text, registered icon fields, etc), not another inserted copy. Never claim unsupported type replacement is an edit. "
@@ -124,7 +125,7 @@ String UiDesignerAssistantHost::SystemPrompt() const {
         "Separate Theme and Document apply groups. No shell, files, save or export tools exist. "
         "For dialog/layout requests retrieve layout-v2 first: it includes a schema-valid simple dialog example. "
         "Then describe_controls for only its relevant types and prepare one proposal. Presets are optional, not a required lookup; avoid broad/repeated searches or invented types. For icons or reference material retrieve design-v1; there is no image attachment or HTML rendering tool. "
-        "The turn has at most 16 tool calls and 6 provider rounds; stop discovery once a valid proposal exists. "
+        "Stop discovery once a valid proposal exists. The execution-budget message gives the current call and round allowances. "
         "Captured context already supplies root and selection; do not rediscover unchanged context. "
         "For palette, role, visual style or HTML/CSS color requests retrieve theme-v1; distinguish palette discussion from supported recipe edits. Other skills: typography-v1, data-v1, design-v1. "
         "Color fields use #RRGGBB strings. Report unsupported features. Do not expose private reasoning. Captured context: " + AsJSON(captured);
@@ -132,6 +133,7 @@ String UiDesignerAssistantHost::SystemPrompt() const {
 template<class T> static bool FieldValue(const T& spec, const Value& v, String& error) {
     if(spec.read_only || spec.designer_only) { error = "Field is not authorable"; return false; }
     String k = PropertyEditorKindName(spec.kind);
+    if(spec.custom_editor == "property.numeric-int-working-range") k = "NumericInt";
     if(spec.custom_editor == "property.font" && v.Is<String>()) {
         for(int i = 0; i < Font::GetFaceCount(); i++) if(Font::GetFaceName(i) == (String)v) return true;
         error = "Requested font family is not installed"; return false;
@@ -207,7 +209,11 @@ bool UiDesignerAssistantHost::Composition(const ValueMap& args, UiDesignerDocume
         item.grid_row=fields.Find("grid_row")>=0 ? (int)fields["grid_row"] : -1;
         item.grid_column=fields.Find("grid_column")>=0 ? (int)fields["grid_column"] : -1;
         const auto* spec = session.Catalog().Find(item.type);
-        if(!spec || !spec->preview || !spec->codegen) { error = "Control lacks registered Preview/export support"; return false; }
+        if(!spec || !spec->preview || !spec->codegen) {
+            error = item.reference + " (" + item.type + "): control lacks registered Preview/export support. "
+                "Replace this item with a supported type from the schemas already retrieved, or remove it; preserve the remaining layout.";
+            return false;
+        }
         for(int i = 0; i < item.properties.GetCount(); i++) {
             const auto* p = spec->FindProperty(AsString(item.properties.GetKey(i)));
             if(p) item.properties.Set(item.properties.GetKey(i),FieldInput(p->kind,item.properties.GetValue(i)));

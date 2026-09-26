@@ -10,7 +10,9 @@ class AppChatMessageCard : public UiPanel {
     UiMultiEdit activity_view;
     Array<UiButton> actions;
     Vector<String> action_ids;
+    Vector<UiRole> action_roles;
     String text, activity;
+    UiRole status_role=UiRole::Standard;
     bool expanded=false, activity_open=false;
     int measured_width=-1, text_height=20, line_height=20;
 public:
@@ -21,9 +23,10 @@ public:
     void SetText(const String& value);
     const String& GetText() const {return text;}
     void SetStatus(const String& value){status.SetText(value);}
+    void SetStatusRole(UiRole role){status_role=role;status.SetCustomStyle(UiTheme::ResolveLabel(role));}
     void SetActivity(const String& value);
     void SetExpanded(bool value){expanded=value;}
-    UiButton& AddAction(const String& id,const String& label,Event<> callback);
+    UiButton& AddAction(const String& id,const String& label,Event<> callback,UiRole role=UiRole::Standard);
     void SetActionState(const String& id,bool visible,bool enabled=true);
     int MeasureAndArrange(int width);
     void RefreshTheme();

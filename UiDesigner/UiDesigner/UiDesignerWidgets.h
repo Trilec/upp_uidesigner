@@ -80,7 +80,7 @@ private:
     void UpdateToolSelection();
     int GetToolRowHeight(int width) const;
 
-    UiGridLayout tool_grid_;
+    UiPanel toolbar_surface_;
     UiPanel tool_panel_;
     UiBoxLayout tool_layout_;
     UiBoxLayout action_layout_;

@@ -10,8 +10,8 @@ AppChatMessageCard::AppChatMessageCard() {
 void AppChatMessageCard::SetMessage(const String& role,const String& value){heading.SetText(role);SetText(value);}
 void AppChatMessageCard::SetText(const String& value){if(text!=value){text=value;measured_width=-1;}}
 void AppChatMessageCard::SetActivity(const String& value){if(activity!=value){activity=value;activity_view.SetTextUtf8(value);}}
-UiButton& AppChatMessageCard::AddAction(const String& id,const String& label,Event<> callback) {
-    action_ids.Add(id);auto& button=actions.Add();Add(button);button.SetText(label);button.WhenAction=callback;return button;
+UiButton& AppChatMessageCard::AddAction(const String& id,const String& label,Event<> callback,UiRole role) {
+    action_ids.Add(id);action_roles.Add(role);auto& button=actions.Add();Add(button);button.SetText(label);button.WhenAction=callback;button.SetCustomStyle(UiTheme::ResolveButton(role));return button;
 }
 void AppChatMessageCard::SetActionState(const String& id,bool visible,bool enabled) {
     int i=FindIndex(action_ids,id);if(i>=0){actions[i].Show(visible);actions[i].Enable(enabled);}
@@ -52,7 +52,9 @@ int AppChatMessageCard::MeasureAndArrange(int width) {
 void AppChatMessageCard::RefreshTheme() {
     SetCustomStyle(UiTheme::ResolvePanel(UiPanelRole::Surface));
     disclosure.SetCustomStyle(UiTheme::ResolveButton(UiRole::Subtle));activity_button.SetCustomStyle(UiTheme::ResolveButton(UiRole::Subtle));
+    for(int i=0;i<actions.GetCount();++i) actions[i].SetCustomStyle(UiTheme::ResolveButton(action_roles[i]));
     body.ClearCustomStyle();heading.ClearCustomStyle();status.ClearCustomStyle();measured_width=-1;Refresh();
+    status.SetCustomStyle(UiTheme::ResolveLabel(status_role));
 }
 AppChatConversationView::AppChatConversationView(){SetScrollMode(UIPANELSCROLL_VERTICAL);}
 AppChatMessageCard& AppChatConversationView::AddMessage(const String& role,const String& text,const String& reference) {

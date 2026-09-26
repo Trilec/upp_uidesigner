@@ -135,7 +135,8 @@ Value UiDesignerAutomationService::GetControlSpec(const ValueMap& params) const
         item.Set("label", property.label);
         item.Set("group", property.group);
         item.Set("help", property.help);
-        item.Set("kind", PropertyEditorKindName(property.kind));
+        item.Set("kind", property.custom_editor == "property.numeric-int-working-range"
+            ? String("NumericInt") : PropertyEditorKindName(property.kind));
         item.Set("domain", PropertyEditorDomainName(property.domain));
         item.Set("impact", PropertyEditorImpactName(property.impact));
         item.Set("default", property.default_value);

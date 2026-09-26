@@ -157,28 +157,8 @@ void UiDesignerPillBar::Layout()
 
 UiDesignerSideColumn::UiDesignerSideColumn()
 {
-    tool_grid_.SetGridSize(2, 1)
-              .SetMinCellSize(Size(DPI(10), DPI(10)))
-              .SetGap(DPI(0))
-              .SetInset(DPI(0));
-
-    UiPanel::Style tool_style = UiTheme::ResolvePanel(UiRole::Subtle);
-    tool_style.metrics.face_enabled = true;
-    tool_style.palette.face[ST_NORMAL] = UiFill::Solid(Color(243, 243, 243));
-    tool_style.metrics.frame_enabled = true;
-    for(int i = 0; i < 4; i++)
-        tool_style.palette.frame[i] = Color(216, 216, 216);
-    tool_style.metrics.frame_width = DPI(1);
-    tool_style.metrics.radius = DPI(15);
-    tool_style.metrics.shadow.enabled = true;
-    tool_style.metrics.shadow.distance = DPI(9);
-    tool_style.metrics.shadow.offset_x = DPI(0);
-    tool_style.metrics.shadow.offset_y = DPI(0);
-    tool_style.metrics.shadow.alpha = 40;
-    tool_style.metrics.shadow.color = Black();
-    tool_style.metrics.shadow.mode = SHADOW_CURVE;
-    tool_style.metrics.shadow.curve = ShadowSoft();
-    tool_panel_.SetCustomStyle(tool_style).SetInset(DPI(4));
+    toolbar_surface_.SetCustomStyle(UiDesignerReferencePillStyle());
+    tool_panel_.SetCustomStyle(UiDesignerLayoutSurfaceStyle());
 
     tool_layout_.SetDirection(UiDirection::H)
                 .SetGap(DPI(4), DPI(4))
@@ -190,8 +170,8 @@ UiDesignerSideColumn::UiDesignerSideColumn()
                   .SetInset(DPI(0))
                   .SetWrap(UiBoxWrap::None);
     tool_panel_.Add(tool_layout_);
-    tool_grid_.Add(tool_panel_, 0, 0, true, true);
-    tool_grid_.Add(action_layout_, 0, 1, false, true, Size(DPI(52), DPI(0)));
+    toolbar_surface_.Add(tool_panel_);
+    toolbar_surface_.Add(action_layout_);
 
     content_surface_.SetCustomStyle(UiDesignerSurfaceStyle());
     content_surface_.Add(pages_);
@@ -216,7 +196,7 @@ UiDesignerSideColumn::UiDesignerSideColumn()
     action_layout_.Add(expand_).Fixed(DPI(24)).MinCross(DPI(24));
     action_layout_.Add(close_).Fixed(DPI(24)).MinCross(DPI(24));
 
-    Add(tool_grid_);
+    Add(toolbar_surface_);
     Add(content_surface_);
 }
 
@@ -254,6 +234,7 @@ UiDesignerSideColumn& UiDesignerSideColumn::ApplyTheme(
 {
     UiPanel::Style tool_style = UiDesignerLayoutSurfaceStyle();
     tool_panel_.SetCustomStyle(tool_style);
+    toolbar_surface_.SetCustomStyle(UiDesignerReferencePillStyle(theme));
     close_.SetCustomStyle(UiTheme::ResolveToolButton(UiRole::Subtle));
     expand_.SetCustomStyle(UiTheme::ResolveToolButton(UiRole::Subtle));
     UpdateToolSelection();
@@ -319,7 +300,7 @@ void UiDesignerSideColumn::UpdateToolSelection()
 int UiDesignerSideColumn::GetToolRowHeight(int width) const
 {
     const int action_width = DPI(52);
-    const int panel_width = max(DPI(32), width - action_width);
+    const int panel_width = max(DPI(32), width - action_width - DPI(24));
     const int content_width = max(DPI(1), panel_width - DPI(24));
     return max(UiDesignerStyleMetrics::SideToolbarHeight(),
                tool_layout_.MeasureHeightForWidth(content_width) + DPI(8));
@@ -349,29 +330,31 @@ void UiDesignerSideColumn::Layout()
     const int w = GetSize().cx;
     const int h = GetSize().cy;
     if(width_ == PANE_CLOSED) {
-        tool_grid_.SetRect(0, 0, w, UiDesignerStyleMetrics::SideToolbarHeight());
+        toolbar_surface_.SetRect(0, 0, w, UiDesignerStyleMetrics::SideToolbarHeight());
         tool_panel_.Show();
         action_layout_.Show();
         content_surface_.Hide();
     }
     else {
         const int pill_h = GetToolRowHeight(w);
-        tool_grid_.SetRect(0, 0, w, pill_h);
+        toolbar_surface_.SetRect(0, 0, w, pill_h);
         PutCtrl(content_surface_, 0, pill_h, w, max(0, h - pill_h));
         content_surface_.Show();
     }
 
     const int toolbar_h = width_ == PANE_CLOSED
         ? UiDesignerStyleMetrics::SideToolbarHeight() : GetToolRowHeight(w);
-    const int action_w = min(DPI(52), max(0, w));
-    const int panel_w = max(0, w - action_w);
+    const int inset = width_ == PANE_CLOSED ? 0 : DPI(12);
+    const int inner_w = max(0, w - 2 * inset);
+    const int action_w = min(DPI(52), inner_w);
+    const int panel_w = max(0, inner_w - action_w);
     if(right_) {
-        action_layout_.SetRect(0, 0, action_w, toolbar_h);
-        tool_panel_.SetRect(action_w, 0, panel_w, toolbar_h);
+        action_layout_.SetRect(inset, 0, action_w, toolbar_h);
+        tool_panel_.SetRect(inset + action_w, 0, panel_w, toolbar_h);
     }
     else {
-        tool_panel_.SetRect(0, 0, panel_w, toolbar_h);
-        action_layout_.SetRect(panel_w, 0, action_w, toolbar_h);
+        tool_panel_.SetRect(inset, 0, panel_w, toolbar_h);
+        action_layout_.SetRect(inset + panel_w, 0, action_w, toolbar_h);
     }
 
     const Size panel_size = tool_panel_.GetSize();

@@ -15,24 +15,6 @@ static void Put(Ctrl& c, int x, int y, int cx, int cy)
     c.SetRect(x, y, max(0, cx), max(0, cy));
 }
 
-static UiPanel::Style UiDesignerReferencePillStyle(
-    const UiDesignerThemeSnapshot& theme = UiDesignerThemeSnapshot())
-{
-    UiPanel::Style style = UiDesignerSurfaceStyle(UiRole::Subtle, theme);
-    style.metrics.frame_enabled = true;
-    style.metrics.frame_width = DPI(1);
-    style.metrics.radius = DPI(15);
-    style.metrics.shadow.enabled = true;
-    style.metrics.shadow.distance = DPI(9);
-    style.metrics.shadow.offset_x = DPI(0);
-    style.metrics.shadow.offset_y = DPI(0);
-    style.metrics.shadow.alpha = 40;
-    style.metrics.shadow.color = Black();
-    style.metrics.shadow.mode = SHADOW_CURVE;
-    style.metrics.shadow.curve = ShadowSoft();
-    return style;
-}
-
 static UiPanel::Style UiDesignerFooterStyle(
     const UiDesignerThemeSnapshot& theme = UiDesignerThemeSnapshot())
 {

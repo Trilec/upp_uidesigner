@@ -59,7 +59,8 @@ GUI_APP_MAIN {
         SetExitCode(failed?1:0); return;
     }
     int checks=0,failed=0;
-    for(int scenario=0;scenario<3;scenario++) {
+    bool app_shell=FindIndex(CommandLine(),String("app-shell"))>=0;
+    for(int scenario=app_shell?3:0;scenario<(app_shell?4:3);scenario++) {
         UiDesignerSession session;
         String original=Authored(session.Document());
         UiDesignerAssistantHost host(session); host.Capture("Designer");
@@ -67,7 +68,9 @@ GUI_APP_MAIN {
         AppChatTurn turn;
         turn.WhenActivity = [](const String& event) { Cout()<<event<<'\n'; };
         ValueArray messages; messages.Add(AppChatMessage("system",host.SystemPrompt()));
-        const char* prompt=scenario==0
+        const char* prompt=scenario==3
+            ? "Create a simple app interface similar to a codec style of application."
+            : scenario==0
             ? "Create a simple dialog box template with just an OK and cancel perhaps a with a heading that I can use as a template."
             : scenario==1 ? "Create a simple dialog box template with just an OK and cancel perhaps with a heading using a title card and an OK and cancel at the bottom."
             : "Create a dialog template with a Label as the heading at the top, an expanding empty body panel, and OK and Cancel at the bottom. Use only a Label for the heading, not a TitleCard.";
@@ -104,7 +107,13 @@ GUI_APP_MAIN {
             heading|=(node.type=="UiLabel" && !text.IsEmpty()) || (node.type=="UiTitleCard" && !AsString(node.GetProperty("title","")).IsEmpty());
             ok|=node.type=="UiButton" && text=="ok"; cancel|=node.type=="UiButton" && text=="cancel";
         }
-        check(heading && ok && cancel,"exact prompt yields heading plus OK/Cancel visual template");
+        if(scenario==3) {
+            bool layout=false;
+            for(const auto& node:session.Document().GetNodes())
+                layout |= node.type=="UiGridLayout" || node.type=="UiBoxLayout";
+            check(layout && session.Document().GetNodes().GetCount()>4,"app interface has a composed layout and visible controls");
+        }
+        else check(heading && ok && cancel,"exact prompt yields heading plus OK/Cancel visual template");
         if(scenario==1) {
             bool title=false,grid=false,panel=false,actions=false;
             for(const auto& node:session.Document().GetNodes()) {

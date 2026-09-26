@@ -9,7 +9,7 @@ namespace Upp {
 struct AppChatLimits {
     // SSE repeats provider metadata for each token; this bounds wire bytes,
     // while tokens and request_bytes separately bound generated text/continuation.
-    int rounds = 6, calls = 16, output_bytes = 2097152;
+    int rounds = 8, calls = 24, output_bytes = 2097152;
     int request_bytes = 524288, timeout_ms = 60000, tokens = 4096;
 };
 struct AppChatProfile {
@@ -72,7 +72,8 @@ public:
     Event<const String&> WhenActivity;
     int GetRound() const { return round; }
     int GetCallsUsed() const { return calls; }
-    String text, error;
+    String text, error, last_tool_error;
+    String CompletionNotice(int ready_proposals) const;
     bool active = false;
     ~AppChatTurn();
     bool Start(std::shared_ptr<AppChatProvider>, const ValueArray&, const ValueArray&);

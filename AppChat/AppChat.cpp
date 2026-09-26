@@ -102,7 +102,7 @@ bool AppChatTurn::Start(std::shared_ptr<AppChatProvider> p, const ValueArray& m,
         worker.join();
     }
     provider = p; messages = m; descriptors = t; round = calls = 0;
-    text.Clear(); error.Clear(); active = true; Launch(); return active;
+    text.Clear(); error.Clear(); last_tool_error.Clear(); active = true; Launch(); return active;
 }
 void AppChatTurn::Launch() {
     if(round >= limits.rounds) {
@@ -118,6 +118,11 @@ void AppChatTurn::Launch() {
     mailbox = std::make_shared<Mailbox>();
     auto box = mailbox; auto p = provider;
     ValueArray m = messages, t = descriptors; AppChatLimits l = limits;
+    m.Add(AppChatMessage("system", Format("Execution budget: response %d of %d; %d tool calls remain. ",
+        round, limits.rounds, max(0, limits.calls-calls)) +
+        (round >= limits.rounds-2
+            ? "Finish the requested work using information already gathered. Repair the specific rejected arguments rather than restarting discovery. Never claim a prepared result unless its tool succeeded."
+            : "Batch relevant schema requests; reserve later responses for execution and a possible validation repair.")));
     worker = std::thread([box, p, m, t, l]() {
         try {
             box->reply = p->Complete(m, t, l, box->cancel, [box](String s) {
@@ -161,9 +166,28 @@ void AppChatTurn::Poll(const Function<Value(const String&, const ValueMap&)>& ex
         catch(...) { error = "Host tool failed; no automatic retry"; active = false; return; }
         ValueMap result = AppChatMessage("tool", AsJSON(value));
         result.Set("tool_call_id", c["id"]); messages.Add(result); calls++;
+        bool failed = value.Is<ValueMap>() && value["ok"] == false;
+        String detail;
+        if(failed) {
+            detail = AsString(value["error"]);
+            detail.Replace("\n", " "); detail.Replace("\r", " ");
+            detail = detail.Left(320);
+            last_tool_error = AsString(c["function"]["name"]) + ": " + detail;
+        }
         WhenActivity(Format("Round %d call %d: %s %s", round, calls,
-            AsString(c["function"]["name"]), value.Is<ValueMap>() && value["ok"] == false ? "ERROR" : "OK"));
+            AsString(c["function"]["name"]), failed ? "ERROR" : "OK") +
+            (failed ? ": " + detail : String()));
     }
     Launch();
+}
+String AppChatTurn::CompletionNotice(int ready_proposals) const
+{
+    String notice = ready_proposals > 0
+        ? Format("%d proposal(s) ready. Use Apply on the proposal card; nothing was applied automatically.", ready_proposals)
+        : "No changes were prepared. There is no proposal to Apply; the design is unchanged.";
+    if(!error.IsEmpty()) notice << "\n" << error;
+    if(ready_proposals == 0 && !last_tool_error.IsEmpty())
+        notice << "\nLast tool rejection: " << last_tool_error;
+    return notice;
 }
 }

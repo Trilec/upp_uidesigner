@@ -6,6 +6,63 @@ reported validation separate. The graph project's own gates are not Designer gat
 
 ## Native Theme Studio tree — 2026-09-26
 
+### Assistant contrast, toolbar ownership and rejected preparations
+
+- Shared UiBaseEdit no longer substitutes OS `SColorFace` for read-only paper:
+  resolved/custom face and ink remain paired. Shared UiLabel alignment setters
+  retain theme inheritance instead of snapshotting the entire style. Explicit
+  custom styles remain supported. Editor scrollbars resolve shared Ui track/thumb
+  colours while retaining the native line/pixel scroll model. UiReleaseSmoke:
+  73 checks, zero failures, including read-only wheel scrolling.
+- Side-column action and section icons now share one outer panel styled through
+  the same 15px rounded helper as the centre toolbar. Inner hosts remain unframed.
+- AppChatUi action roles refresh with appearance changes. Completed replies lead
+  with application-verified proposal availability; failed preparation cannot
+  masquerade as an Apply-ready result. Activity shows bounded host error details.
+  Existing pending proposals remain available after later read-only/limit failures.
+  Replies also expose Apply beside Activity for one ready proposal, Review proposals
+  for multiple candidates, or an Alert status and Retry with fix after failure.
+  Retry reuses the request, rejection and a bounded candidate payload; it starts a
+  fresh bounded attempt and never applies automatically.
+- Live app-shell diagnosis found invented fields/types and a genuine validator
+  mismatch: the numeric working-range inspector editor was advertised as Custom
+  and rejected valid fixed sizes. Its external schema and assistant validator now
+  identify integer values, preserving registered bounds and integral checks.
+  Unsupported composition types now identify their item reference/type. Each
+  provider response receives remaining budget guidance. Following the user's request
+  for recovery headroom, defaults are 8 rounds/24 calls with boundary regression
+  coverage; the earlier successful live run below used the original 6/16 bounds.
+- Exact live prompt: `Create a simple app interface similar to a codec style of application.`
+  First run failed at 6 rounds/10 calls; the next exposed repeated rejected valid
+  fixed sizes. After repair, OpenRouter `deepseek/deepseek-v4-flash` passed 7/7:
+  validated layout, no mutation before Apply, one committed Apply, one-step Undo.
+  Successful trace: 5 rounds/9 calls, including one recovered UiComboBox schema
+  rejection. Evidence: `build/AssistantContrast-live-sizing.log`. This is a visual
+  application mock-up, not a wired coding agent application.
+  A subsequent native attempt exhausted 6 rounds on invented UiLabel/UiSlider
+  fields and correctly showed no proposal plus the exact rejection. Provider
+  reliability is not guaranteed by one successful live run; the explicit recovery
+  workflow addresses this remaining variability.
+- Deterministic tests cover final-round rejection reporting, retained proposal
+  availability, working-range sizes and bounds, unsupported type identification,
+  read-only paper and label alignment across Light/Dark. Required shared Ui:
+  `3fd9ef0`.
+- Final complete Debug/Release Embedded gates PASS:
+  `build/Assistant-Debug-20260926-171745` and
+  `build/Assistant-Release-20260926-171822`. AppChatTests 28,
+  AssistantDesignerTests 191, title/grid 37, Regression 88, ThemeDocument 35,
+  ThemeStudioRole 1854 and export contract 36, all zero failures.
+- Final native exact-prompt run completed in 4 rounds/5 calls with no rejection.
+  Clicking Apply created the layout and an applied receipt; one drawer Undo
+  restored the blank document. Activity scrolled through the trace with dark
+  track/thumb colours. Both sidebar toolbar frames contain their action icons.
+  The Retry with fix button is implemented; this successful final native run did
+  not exercise that button. Earlier native failure reporting and deterministic
+  rejection/retained-proposal checks are recorded above.
+- Canonical `build/UiDesigner.exe` remains open, PID 415840; SHA256
+  `3C7FE78659A6D1F2028372E7DE12B8ADF61F9F0FA73448980E7C62BF56598687`.
+  The test design was undone; the assistant retains its test discussion/receipt.
+
 ### Theme switching and surface ownership repair
 
 - Light/Dark toolbar choice is a viewing preference: it follows the Studio across

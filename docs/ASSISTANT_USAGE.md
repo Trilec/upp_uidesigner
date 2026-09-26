@@ -27,7 +27,10 @@ The activity row and transcript show the current round, tool calls and success o
 error results. Tool-limit failures report calls already used, the size of the
 rejected batch and the limit; that entire batch is not executed. A previously
 prepared proposal remains available for review after a later read-only failure.
-The default remains 16 calls and six provider rounds.
+The default is 24 calls and eight provider rounds, including room for validation
+repairs. Activity shows the remaining budget. A failed reply offers Retry with fix;
+this starts another bounded attempt without applying changes. A ready reply exposes
+Apply beside Activity as well as on its Proposal card.
 
 Creation works from a blank design. A prepared proposal must be committed with
 the Apply button, or by typing exactly `apply`, `apply it`, or `apply proposal`

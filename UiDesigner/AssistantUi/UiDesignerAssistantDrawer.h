@@ -24,6 +24,7 @@ class UiDesignerAssistantDrawer : public UiPanel {
     AppChatProfile profile;
     ValueArray conversation;
     String refinement_id,submitted_refinement,history_signature,activity;
+    String submitted_request,rejected_candidate,retry_context;
     bool was_active=false,configured=false;
     int active_message=-1,proposal_count=0,drag_y=0,initial_height=0;
     void Submit();
@@ -32,6 +33,7 @@ class UiDesignerAssistantDrawer : public UiPanel {
     void Configure();
     void ShowCode(const String& id);
     void Refine(const String& id);
+    void ApplyProposal(const String& id);
 public:
     explicit UiDesignerAssistantDrawer(UiDesignerSession&);
     ~UiDesignerAssistantDrawer();
