@@ -23,8 +23,8 @@ void UiDesignerWindow::BuildThemeLibrary()
             String error;
             if(!session_.SelectProjectTheme(atoi(~selected_theme_tree_key_.Mid(8)), error)) RefreshStatus(error);
         }
-        // Rebuild after the selection callback returns, not inside UiTree's dispatch.
-        PostCallback([=] { RefreshThemeLibrary(); });
+        // Selection alone must not rebuild the model or reset keyboard traversal.
+        RefreshThemeLibraryActions();
     };
     RefreshThemeLibrary();
 }
@@ -37,7 +37,13 @@ void UiDesignerWindow::RefreshThemeLibrary()
     auto project = model.AddChild(model.Root(), UiModelItem("Project themes"));
     auto library = model.AddChild(model.Root(), UiModelItem("My Themes"));
     auto defaults = model.AddChild(model.Root(), UiModelItem("Defaults"));
+    theme_tree_keys_.Add(project.id, "group:project");
+    theme_tree_keys_.Add(library.id, "group:library");
+    theme_tree_keys_.Add(defaults.id, "group:defaults");
     UiTreeNodeRef selected;
+    if(selected_theme_tree_key_ == "group:project") selected = project;
+    if(selected_theme_tree_key_ == "group:library") selected = library;
+    if(selected_theme_tree_key_ == "group:defaults") selected = defaults;
     auto add = [&](UiTreeNodeRef parent, const String& label, const String& key) {
         auto node = model.AddChild(parent, UiModelItem(label, key));
         theme_tree_keys_.Add(node.id, key);
@@ -52,15 +58,23 @@ void UiDesignerWindow::RefreshThemeLibrary()
         add(defaults, preset, "builtin:" + String(preset));
     theme_tree_.Expand(project).Expand(library).Expand(defaults);
     if(selected.IsValid()) theme_tree_.SetCursor(selected).SelectNode(selected);
+    syncing_theme_tree_ = false;
+    RefreshThemeLibraryActions();
+}
+
+void UiDesignerWindow::RefreshThemeLibraryActions()
+{
     bool draft = selected_theme_tree_key_.StartsWith("project:");
     bool file = selected_theme_tree_key_.StartsWith("file:");
     bool ready = !session_.Theme().HasProposal();
     theme_new_.Enable(ready); theme_duplicate_.Enable(ready && draft);
     theme_rename_.Enable(ready && draft); theme_delete_.Enable(ready && (file || (draft && session_.GetProjectThemeCount()>1)));
     theme_delete_.SetText(file ? "Remove from list" : "Delete");
-    theme_use_.Enable(ready && !draft && !selected_theme_tree_key_.IsEmpty());
+    theme_use_.Enable(ready && (file || selected_theme_tree_key_.StartsWith("builtin:")));
     theme_publish_.Enable(ready && draft);
-    syncing_theme_tree_ = false;
+    theme_library_hint_.SetText(file || selected_theme_tree_key_.StartsWith("builtin:")
+        ? "Use as copy to edit this source theme."
+        : "Save Project keeps all theme drafts.");
 }
 
 void UiDesignerWindow::ThemeLibraryAction(const String& action)

@@ -41,6 +41,40 @@ template <class T> static void CheckNumericBounds() {
 }
 GUI_APP_MAIN {
   {
+    StyledMetrics metrics; metrics.radius=6;
+    ImageDraw draw(80,30); draw.DrawRect(0,0,80,30,White());
+    UiPaintFocusShape(draw, RectC(0,0,80,30), metrics, ST_NORMAL,
+                      Color(65,167,248), 2, 0, 180, 0, 2);
+    Image image=draw;
+    RGBA pixel=image[2][40];
+    Check(pixel.r < pixel.g && pixel.g <= pixel.b,
+          "translucent blue focus stays blue on white rather than overflowing green");
+    Check(image[0][40]==White() && image[15][0]==White() && image[15][79]==White(),
+          "inset focus ring stays within row edges");
+    UiDesignerSession session; UiDesignerThemeGalleryV2 gallery;
+    int selected=0; gallery.WhenSampleSelected=[&] { ++selected; };
+    gallery.SetCatalog(&session.Catalog()); gallery.SetThemeDocument(&session.Theme());
+    String error; session.Theme().Commit("mode","Dark","Appearance",error);
+    gallery.RefreshTheme();
+    Check(selected==0,"appearance refresh does not report an explicit sample selection");
+    UiTree tree; tree.SetRootVisible(false); tree.SetRect(0,0,300,400);
+    Vector<UiTreeNodeRef> order;
+    for(const char* group : {"Project themes", "My Themes", "Defaults"}) {
+        auto parent=tree.Model().AddChild(tree.Model().Root(),UiModelItem(group));
+        order.Add(parent);
+        order.Add(tree.Model().AddChild(parent,UiModelItem("First")));
+        order.Add(tree.Model().AddChild(parent,UiModelItem("Second")));
+        tree.Expand(parent);
+    }
+    tree.SetCursor(order[0]).SelectNode(order[0]); tree.Layout();
+    bool navigation=true;
+    for(int i=1;i<order.GetCount();++i) { tree.Key(K_DOWN,1); navigation &= tree.GetCursor().id==order[i].id; }
+    tree.Key(K_DOWN,1); navigation &= tree.GetCursor().id==order.Top().id;
+    for(int i=order.GetCount()-2;i>=0;--i) { tree.Key(K_UP,1); navigation &= tree.GetCursor().id==order[i].id; }
+    tree.Key(K_UP,1); navigation &= tree.GetCursor().id==order[0].id;
+    Check(navigation,"tree arrows traverse category parents and children and stop at both ends");
+  }
+  {
     UiDesignerSession s; String error;
     Check(s.GetProjectThemeCount()==1 && !s.IsProjectThemeWorkspaceDirty(), "new project has one clean theme");
     Check(s.Theme().Commit("radius", 13, "Draft A", error), "edit first draft");

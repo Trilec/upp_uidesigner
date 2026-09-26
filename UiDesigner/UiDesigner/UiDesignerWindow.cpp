@@ -1293,7 +1293,10 @@ void UiDesignerWindow::ConnectServices()
         else ApplyThemeToShell();
     };
     session_.WhenProjectThemesChanged << [=] { PostCallback([=] { RefreshThemeLibrary(); SyncThemeChoices(); }); };
-    session_.Theme().WhenTargetChanged << [=] { theme_right_.SetActiveSection(1); };
+    theme_gallery_.WhenSampleSelected << [=] { theme_right_.SetActiveSection(1); };
+    theme_right_.WhenSectionChanged << [=](int index) {
+        if(index == 0) theme_tree_.SetFocus();
+    };
 
     designer_left_.WhenWidthChanged = [=] { Layout(); };
     designer_right_.WhenWidthChanged = [=] { Layout(); };

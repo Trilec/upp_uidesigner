@@ -6,6 +6,33 @@ reported validation separate. The graph project's own gates are not Designer gat
 
 ## Native Theme Studio tree — 2026-09-26
 
+### Navigation and focus repair
+
+- Category rows now have stable selection keys. Ordinary selection updates action
+  buttons without rebuilding the tree, so Up/Down can traverse category boundaries.
+- Only explicit gallery sample selection opens Inspector; refreshing appearance or
+  switching a draft no longer changes the active sidebar section.
+- Shared Ui focus painting now applies opacity through Painter, avoiding invalid
+  premultiplied colour values. Tree rings draw inside their rows using row radius;
+  explicit stroke widths reserve their full stroke inside the image.
+- Focus remains a per-control style (`focus_color`, `focus_alpha`, `focus_margin`),
+  not a new global role. Existing authored overrides are retained.
+- My Themes/Defaults remain sources with explicit Use as copy, now explained by
+  the selection hint. Selecting a source alone does not alter the active draft.
+- Regression coverage checks translucent blue pixels, focus containment,
+  appearance refresh without a sample-selection event, and category traversal
+  including first/last row boundaries. Debug and Release Embedded gates PASS:
+  `build/Assistant-Debug-20260926-151253` and
+  `build/Assistant-Release-20260926-151326`; AssistantDesignerTests 180/0.
+- Native verification: arrows crossed Project themes/My Themes/Defaults;
+  Light/Dark retained Themes and its category selection; clicking Themes restored
+  tree keyboard focus. Light and dark rings were blue and contained in the row.
+- Current canonical executable SHA256
+  `58A1601B09D7972349A827055F6843DA56481450EDC9B9B9047E5529D4A1B3A3`,
+  PID 414644. Shared control repairs belong in upp_Ui; Designer changes address
+  application event/selection ownership, not replacement control navigation.
+  Required shared Ui repair: `174cf8a`.
+
 - Requested native implementation, replacing further mock-up work. Theme Studio's
   right column now has Themes, Inspector and Code. The Themes tree separates
   Project themes, My Themes and Defaults; select a gallery sample to open Inspector.

@@ -63,6 +63,7 @@ private:
     Vector<String> theme_library_;
     void BuildThemeLibrary();
     void RefreshThemeLibrary();
+    void RefreshThemeLibraryActions();
     void ThemeLibraryAction(const String& action);
     void SaveThemeLibraryIndex();
     UiPanel theme_library_panel_;

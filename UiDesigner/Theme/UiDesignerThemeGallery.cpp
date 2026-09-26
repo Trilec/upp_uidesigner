@@ -832,6 +832,7 @@ void UiDesignerThemeGallery::SelectSample(
     if(selected_sample_)
         selected_sample_->SetThemeSelected(true);
     SyncSelectedTarget();
+    WhenSampleSelected();
     Refresh();
 }
 

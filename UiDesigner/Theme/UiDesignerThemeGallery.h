@@ -166,6 +166,7 @@ public:
     UiPanelRole GetPanelRole() const { return panel_role_; }
     UiRole GetControlRole() const { return control_role_; }
     String GetSelectedType() const { return selected_type_; }
+    Event<> WhenSampleSelected;
 
     void SetFilter(const String& filter)
     {

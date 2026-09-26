@@ -238,6 +238,7 @@ void UiDesignerThemeGalleryV2::SelectPanelSample(
     if(selected_sample_)
         selected_sample_->SetThemeSelected(true);
     SyncSelectedTarget();
+    WhenSampleSelected();
     Refresh();
 }
 
