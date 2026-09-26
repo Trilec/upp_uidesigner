@@ -724,10 +724,7 @@ void UiDesignerThemeToolbarV2::Layout()
 
 void UiDesignerThemeToolbarV2::Paint(Draw& w)
 {
-    PaintThemeSurface(w, GetSize());
-    const UiLabel::Style label = UiTheme::ResolveLabel(UiRole::Subtle);
-    w.DrawLine(0, GetSize().cy - 1, GetSize().cx, GetSize().cy - 1,
-               DPI(1), label.palette.ink[ST_DISABLED]);
+    // This toolbar is a layout surface, not a second framed panel.
 }
 
 }

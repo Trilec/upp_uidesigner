@@ -6,6 +6,48 @@ reported validation separate. The graph project's own gates are not Designer gat
 
 ## Native Theme Studio tree — 2026-09-26
 
+### Theme switching and surface ownership repair
+
+- Light/Dark toolbar choice is a viewing preference: it follows the Studio across
+  draft/source switches and authored Undo/Redo without adding a history entry.
+  The schema's existing mode field remains compatible; active accent projection
+  is synchronized with the chosen appearance.
+- Selecting Defaults or My Themes now activates an editable project copy; revisits
+  reuse that source's draft within the session. Explicit New source copy creates
+  another draft. Default names are plain names, and the top selector no longer
+  repeats the preset after the draft name.
+- Hidden Theme Code no longer serializes/highlights the full recipe on each edit.
+  Hidden Designer output no longer regenerates during Theme Studio changes; opening
+  the code pane/Designer refreshes it. Light/Dark no longer applies the whole theme
+  twice. Diagnostics includes synchronous theme-apply duration and count.
+- Shell pages, side-column tool/content hosts, gallery hosts and the palette toolbar
+  are layout surfaces without duplicate frames/backgrounds. Designer columns have
+  an explicit 4px gap. Header/workspace/drawer/footer already reserve disjoint rows;
+  the assistant is not painted over the workspace.
+- Shared UiTable paints its viewport background with the table's rounded shape.
+  Shared UiScrollPanel now clips scrolling content through an owned viewport host,
+  preventing children from painting into the surrounding frame or scrollbar lanes.
+- Native Dark-mode review exposed a shared Tree/List/Table cache invalidation gap:
+  a theme revision cleared prepared item renderers, but unchanged models did not
+  rebuild them before paint. Empty invalidated pools now prepare visible items on
+  the first paint of the new style; subsequent paints reuse the pools. Shared Ui
+  release smoke includes six Light/Dark theme-only cache checks (66 total, all pass).
+- Regression checks cover mode/history independence, source draft reuse, table
+  corner pixels and scrolling viewport bounds. Required shared Ui: `a3bf3ed`.
+- Complete Debug and Release Embedded gates PASS:
+  `build/Assistant-Debug-20260926-155827` and
+  `build/Assistant-Release-20260926-155925`. AssistantDesignerTests 187,
+  AppChat 23, title/grid 37, Regression 88, ThemeDocument 35,
+  ThemeStudioRole 1854 and export contract 36 checks passed in both configurations.
+- Native review: single-click Dark, Defaults/Pill tree activation, Minimal dropdown
+  activation and saved Brutalist source activation retained Dark and visible rows.
+  No long stall occurred in this sequence; this does not establish a worst-case
+  latency bound. Assistant expand/collapse reserved separate workspace/drawer rows.
+  Table backgrounds respected rounded corners in the Minimal/Pill previews.
+- Canonical `build/UiDesigner.exe` left open in Theme Studio, PID 287320; SHA256
+  `C90637DFD92FD9848970D3FE37F618A998D16540E589A6BFF8E8B71931CD3879`.
+  Review-created drafts are unsaved in this disposable application session.
+
 ### Navigation and focus repair
 
 - Category rows now have stable selection keys. Ordinary selection updates action
@@ -17,8 +59,8 @@ reported validation separate. The graph project's own gates are not Designer gat
   explicit stroke widths reserve their full stroke inside the image.
 - Focus remains a per-control style (`focus_color`, `focus_alpha`, `focus_margin`),
   not a new global role. Existing authored overrides are retained.
-- My Themes/Defaults remain sources with explicit Use as copy, now explained by
-  the selection hint. Selecting a source alone does not alter the active draft.
+- At this earlier navigation milestone My Themes/Defaults required Use as copy;
+  the switching repair above supersedes that interaction with direct activation.
 - Regression coverage checks translucent blue pixels, focus containment,
   appearance refresh without a sample-selection event, and category traversal
   including first/last row boundaries. Debug and Release Embedded gates PASS:
@@ -27,7 +69,7 @@ reported validation separate. The graph project's own gates are not Designer gat
 - Native verification: arrows crossed Project themes/My Themes/Defaults;
   Light/Dark retained Themes and its category selection; clicking Themes restored
   tree keyboard focus. Light and dark rings were blue and contained in the row.
-- Current canonical executable SHA256
+- Previous milestone executable SHA256
   `58A1601B09D7972349A827055F6843DA56481450EDC9B9B9047E5529D4A1B3A3`,
   PID 414644. Shared control repairs belong in upp_Ui; Designer changes address
   application event/selection ownership, not replacement control navigation.

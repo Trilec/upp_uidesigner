@@ -1,14 +1,27 @@
 #include "UiDesignerTheme.h"
 
 namespace Upp {
+void UiDesignerThemeDocument::SetViewingMode(const String& mode)
+{
+    if(mode != "Light" && mode != "Dark" && mode != "System") return;
+    viewing_mode_ = mode;
+    value_.mode = preview_.mode = proposal_.mode = mode;
+    value_.SyncLegacyAccent(); preview_.SyncLegacyAccent(); proposal_.SyncLegacyAccent();
+    WhenPreview();
+}
+
 void UiDesignerThemeDocument::SwapDraftState(UiDesignerThemeDocument& other)
 {
     ASSERT(!HasProposal() && !other.HasProposal());
+    String mode = value_.mode;
     preview_active_ = other.preview_active_ = false;
     Swap(value_, other.value_);
     Swap(history_, other.history_);
     Swap(position_, other.position_);
     Swap(saved_position_, other.saved_position_);
+    viewing_mode_ = mode;
+    value_.mode = mode;
+    value_.SyncLegacyAccent();
     ++revision_;
     ++other.revision_;
 }
@@ -24,6 +37,10 @@ bool UiDesignerThemeDocument::StageProposal(const String& id,
     uint64 previous_revision = proposal_revision_;
     bool previous_visible = proposal_visible_, previous_preview = preview_active_;
     proposal_ = value; proposal_id_ = id; proposal_revision_ = revision_;
+    if(!viewing_mode_.IsEmpty()) {
+        proposal_.mode = viewing_mode_;
+        proposal_.SyncLegacyAccent();
+    }
     proposal_visible_ = true; preview_active_ = false;
     try { WhenPreview(); }
     catch(...) {
@@ -60,7 +77,9 @@ void UiDesignerThemeDocument::DiscardProposal(const String& id)
 
 void UiDesignerThemeDocument::ShowProposal(bool show)
 {
-    proposal_visible_ = show && HasProposal() && proposal_revision_ == revision_;
+    bool visible = show && HasProposal() && proposal_revision_ == revision_;
+    if(visible == proposal_visible_ && !preview_active_) return;
+    proposal_visible_ = visible;
     preview_active_ = false; WhenPreview();
 }
 
@@ -864,6 +883,8 @@ bool UiDesignerThemeDocument::CommitSnapshot(
     const UiDesignerThemeSnapshot& input, const String& label, String& error)
 {
     UiDesignerThemeSnapshot after = input;
+    if(!viewing_mode_.IsEmpty()) after.mode = viewing_mode_;
+    after.SyncLegacyAccent();
     const auto& previous = proposal_visible_ ? proposal_ : value_;
     if(RegeneratePalette && !after.generated_fields.IsEmpty() &&
        (after.light_palette.ToValue() != previous.light_palette.ToValue() ||
@@ -907,6 +928,10 @@ bool UiDesignerThemeDocument::Commit(
     UiDesignerThemeSnapshot after = GetEffective();
     if(!SetProperty(after, property, value, error))
         return false;
+    if(property == "mode" && !viewing_mode_.IsEmpty()) {
+        SetViewingMode(after.mode);
+        return true;
+    }
     return CommitSnapshot(after,
                           label.IsEmpty() ? "Set " + property : label,
                           error);
@@ -967,6 +992,8 @@ bool UiDesignerThemeDocument::Undo()
     if(!CanUndo())
         return false;
     value_ = history_[position_ - 1].before;
+    if(!viewing_mode_.IsEmpty()) value_.mode = viewing_mode_;
+    value_.SyncLegacyAccent();
     preview_ = value_;
     preview_active_ = false;
     position_--;
@@ -982,6 +1009,8 @@ bool UiDesignerThemeDocument::Redo()
     if(!CanRedo())
         return false;
     value_ = history_[position_].after;
+    if(!viewing_mode_.IsEmpty()) value_.mode = viewing_mode_;
+    value_.SyncLegacyAccent();
     preview_ = value_;
     preview_active_ = false;
     position_++;
@@ -996,6 +1025,7 @@ bool UiDesignerThemeDocument::Replace(
 {
     proposal_id_.Clear(); proposal_visible_ = false;
     value_ = value;
+    if(!viewing_mode_.IsEmpty()) value_.mode = viewing_mode_;
     value_.SyncLegacyAccent();
     preview_ = value_;
     preview_active_ = false;

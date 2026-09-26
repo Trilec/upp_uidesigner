@@ -71,6 +71,15 @@ inline UiPanel::Style UiDesignerSurfaceStyle(
     return style;
 }
 
+inline UiPanel::Style UiDesignerLayoutSurfaceStyle()
+{
+    UiPanel::Style style = UiTheme::ResolvePanel(UiRole::Standard);
+    style.metrics.face_enabled = false;
+    style.metrics.frame_enabled = false;
+    style.metrics.shadow.enabled = false;
+    return style;
+}
+
 inline UiPanel::Style UiDesignerPillStyle(
     UiRole role = UiRole::Subtle,
     const UiDesignerThemeSnapshot& theme = UiDesignerThemeSnapshot())

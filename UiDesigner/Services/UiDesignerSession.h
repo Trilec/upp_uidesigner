@@ -109,6 +109,7 @@ public:
     String GetProjectThemeName(int index) const { return project_themes_[index].name; }
     bool SelectProjectTheme(int index, String& error);
     bool AddProjectTheme(const String& name, const UiDesignerThemeSnapshot& value, String& error);
+    bool ActivateThemeSource(const String& source, String& error);
     bool RenameProjectTheme(int index, const String& name, String& error);
     bool RemoveProjectTheme(int index, String& error);
     bool IsProjectThemeWorkspaceDirty() const;
@@ -167,7 +168,7 @@ public:
 
 private:
     struct ProjectTheme {
-        String name, path, checkpoint;
+        String name, path, checkpoint, source;
         UiDesignerThemeDocument document;
     };
     Array<ProjectTheme> project_themes_;

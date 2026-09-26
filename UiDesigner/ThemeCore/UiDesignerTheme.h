@@ -168,6 +168,8 @@ public:
     // Switch project drafts without moving observers or losing either draft's undo.
     // Session owns selection and emits notifications after completing the switch.
     void SwapDraftState(UiDesignerThemeDocument& other);
+    // Studio appearance is a viewing preference, independent of draft history.
+    void SetViewingMode(const String& mode);
 
     Event<> WhenPreview;
     Function<bool(UiDesignerThemeSnapshot&, String&)> RegeneratePalette;
@@ -188,6 +190,7 @@ private:
     void TruncateRedo();
 
     UiDesignerThemeSnapshot value_;
+    String viewing_mode_;
     UiDesignerThemeSnapshot proposal_;
     String proposal_id_;
     uint64 proposal_revision_ = 0;

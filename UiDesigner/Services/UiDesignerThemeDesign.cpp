@@ -25,7 +25,9 @@ bool UiDesignerSession::LoadThemeFile(const String& path, String& error)
     UiDesignerThemeSnapshot snapshot = imported.Get();
     if(theme_.RegeneratePalette && !snapshot.generated_fields.IsEmpty())
         if(!theme_.RegeneratePalette(snapshot, error)) return false;
-    if(!AddProjectTheme(GetFileTitle(path), snapshot, error)) return false;
+    String name = GetFileTitle(path);
+    if(name.EndsWith(".theme")) name.Trim(name.GetCount() - 6);
+    if(!AddProjectTheme(name, snapshot, error)) return false;
     // Library entries are sources. The new project copy is saved explicitly.
     DetachThemeFile();
     return true;

@@ -12,7 +12,7 @@ void UiDesignerWindow::BuildThemeLibrary()
     };
     wire(theme_new_, "New", "new"); wire(theme_duplicate_, "Duplicate", "duplicate");
     wire(theme_rename_, "Rename", "rename"); wire(theme_delete_, "Delete", "delete");
-    wire(theme_use_, "Use as copy", "use"); wire(theme_publish_, "Add to My Themes", "publish");
+    wire(theme_use_, "New source copy", "use"); wire(theme_publish_, "Add to My Themes", "publish");
     theme_library_panel_.Add(theme_library_hint_);
     theme_library_hint_.SetText("Save Project keeps all theme drafts.");
     theme_tree_.WhenSelection = [=] {
@@ -22,6 +22,10 @@ void UiDesignerWindow::BuildThemeLibrary()
         if(selected_theme_tree_key_.StartsWith("project:")) {
             String error;
             if(!session_.SelectProjectTheme(atoi(~selected_theme_tree_key_.Mid(8)), error)) RefreshStatus(error);
+        }
+        else if(selected_theme_tree_key_.StartsWith("file:") || selected_theme_tree_key_.StartsWith("builtin:")) {
+            String error;
+            if(!session_.ActivateThemeSource(selected_theme_tree_key_, error)) RefreshStatus(error);
         }
         // Selection alone must not rebuild the model or reset keyboard traversal.
         RefreshThemeLibraryActions();
@@ -73,7 +77,7 @@ void UiDesignerWindow::RefreshThemeLibraryActions()
     theme_use_.Enable(ready && (file || selected_theme_tree_key_.StartsWith("builtin:")));
     theme_publish_.Enable(ready && draft);
     theme_library_hint_.SetText(file || selected_theme_tree_key_.StartsWith("builtin:")
-        ? "Use as copy to edit this source theme."
+        ? "Editing a project copy; source is unchanged."
         : "Save Project keeps all theme drafts.");
 }
 

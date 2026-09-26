@@ -1266,7 +1266,7 @@ void UiDesignerWindow::ConnectServices()
     };
     session_.WhenInspectorChanged = [=] { RefreshInspector(); };
     session_.WhenBehaviorChanged = [=] { RefreshBehavior(); };
-    session_.WhenCodeChanged = [=] { RefreshCode(); };
+    session_.WhenCodeChanged = [=] { if(workspaces_.GetActiveKey() == "designer") RefreshCode(); };
     session_.WhenStatus = [=](const String& text) { RefreshStatus(text); };
 
     // UiDesignerSession owns document -> model/projection synchronization.
@@ -1284,7 +1284,7 @@ void UiDesignerWindow::ConnectServices()
         RequestDiagnosticsRefresh();
     };
     session_.Theme().WhenChanged << [=] {
-        ApplyThemeToShell(); RefreshThemeInspector(); RefreshCode();
+        ApplyThemeToShell(); RefreshThemeInspector();
         PostCallback([=] { RefreshThemeLibrary(); });
         RequestDiagnosticsRefresh();
     };
@@ -1296,6 +1296,7 @@ void UiDesignerWindow::ConnectServices()
     theme_gallery_.WhenSampleSelected << [=] { theme_right_.SetActiveSection(1); };
     theme_right_.WhenSectionChanged << [=](int index) {
         if(index == 0) theme_tree_.SetFocus();
+        if(index == 2) theme_code_.SetCode(session_.Theme().Serialize(true));
     };
 
     designer_left_.WhenWidthChanged = [=] { Layout(); };
@@ -1305,6 +1306,7 @@ void UiDesignerWindow::ConnectServices()
 
 void UiDesignerWindow::ApplyThemeToShell()
 {
+    int started = msecs();
     const UiDesignerThemeSnapshot& theme = session_.Theme().GetEffective();
     SyncThemeChoices();
     UiDesignerApplyGlobalTheme(theme);
@@ -1326,11 +1328,12 @@ void UiDesignerWindow::ApplyThemeToShell()
     designer_left_.ApplyTheme(theme);
     designer_right_.ApplyTheme(theme);
     theme_right_.ApplyTheme(theme);
-    designer_page_.SetCustomStyle(UiDesignerSurfaceStyle(UiRole::Standard, theme));
-    theme_page_.SetCustomStyle(UiDesignerSurfaceStyle(UiRole::Standard, theme));
-    designer_center_.SetCustomStyle(UiDesignerSurfaceStyle(UiRole::Standard, theme));
-    theme_gallery_column_.SetCustomStyle(UiDesignerSurfaceStyle(UiRole::Standard, theme));
-    gallery_surface_.SetCustomStyle(UiDesignerSurfaceStyle(UiRole::Standard, theme));
+    designer_page_.SetCustomStyle(UiDesignerLayoutSurfaceStyle());
+    theme_page_.SetCustomStyle(UiDesignerLayoutSurfaceStyle());
+    designer_center_.SetCustomStyle(UiDesignerLayoutSurfaceStyle());
+    theme_gallery_column_.SetCustomStyle(UiDesignerLayoutSurfaceStyle());
+    gallery_surface_.SetCustomStyle(UiDesignerLayoutSurfaceStyle());
+    theme_library_panel_.SetCustomStyle(UiDesignerLayoutSurfaceStyle());
     // PropertyEditor::System resolves from the active Ui theme. Rebuild the
     // Designer palettes after applying that theme so Light/Dark and preset
     // changes cannot leave stale light-only rows behind. Keep one explicit
@@ -1356,6 +1359,8 @@ void UiDesignerWindow::ApplyThemeToShell()
     preview_canvas_.SetAccent(theme.accent);
     theme_gallery_.SetThemeDocument(&session_.Theme());
     RefreshLayout(); Refresh();
+    theme_apply_ms_ = msecs(started);
+    ++theme_apply_count_;
 }
 
 void UiDesignerWindow::ShowDesigner()
@@ -1364,6 +1369,7 @@ void UiDesignerWindow::ShowDesigner()
     session_.State().active_workspace = "designer";
     designer_mode_.SetChecked(true); theme_mode_.SetChecked(false);
     ApplyThemeToShell();
+    RefreshCode();
     RefreshStatus("Designer workspace");
 }
 
@@ -1380,10 +1386,7 @@ void UiDesignerWindow::ShowTheme()
 void UiDesignerWindow::ToggleDarkMode()
 {
     const String next = session_.Theme().GetEffective().mode == "Dark" ? "Light" : "Dark";
-    String error;
-    session_.Theme().Commit("mode", next, "Toggle dark mode", error);
-    ApplyThemeToShell();
-    RefreshThemeInspector();
+    session_.Theme().SetViewingMode(next);
 }
 
 void UiDesignerWindow::ActivateToolbox(const String& id)
@@ -1491,7 +1494,7 @@ void UiDesignerWindow::SyncThemeChoices()
     auto& theme = session_.Theme();
     theme_select_.Clear();
     String label = session_.GetProjectThemeName(session_.GetActiveProjectTheme());
-    label << (session_.IsProjectThemeWorkspaceDirty() ? " *" : "") << " · " << theme.Get().preset;
+    label << (session_.IsProjectThemeWorkspaceDirty() ? " *" : "");
     theme_select_.Add(label, "current");
     if(theme.HasProposal()) theme_select_.Add("Proposal — unsaved", "proposal");
     if(!theme_library_.IsEmpty()) {
@@ -1510,15 +1513,8 @@ void UiDesignerWindow::SelectThemeChoice(const String& choice)
     if(choice == "proposal" || choice == "current") { theme.ShowProposal(choice == "proposal"); return; }
     if(theme.HasProposal()) { RefreshStatus("Keep or discard the proposal before switching themes"); SyncThemeChoices(); return; }
     String error;
-    if(choice.StartsWith("file:")) {
-        if(!session_.LoadThemeFile(choice.Mid(5), error)) Exclamation(error);
-    }
-    else if(choice.StartsWith("builtin:")) {
-        UiDesignerThemeDocument fresh;
-        if(fresh.Commit("preset", choice.Mid(8), "Base preset", error))
-            session_.AddProjectTheme(choice.Mid(8) + " copy", fresh.Get(), error);
-        if(!error.IsEmpty()) Exclamation(error);
-    }
+    selected_theme_tree_key_ = choice;
+    if(!session_.ActivateThemeSource(choice, error)) Exclamation(error);
     SyncThemeChoices();
 }
 
@@ -1876,7 +1872,8 @@ void UiDesignerWindow::RefreshThemeInspector()
 {
     theme_inspector_.SetModel(&session_.ThemeModel());
     theme_inspector_.Refresh();
-    theme_code_.SetCode(session_.Theme().Serialize(true));
+    if(theme_right_.GetActiveSection() == 2)
+        theme_code_.SetCode(session_.Theme().Serialize(true));
 }
 
 void UiDesignerWindow::RefreshCode()
@@ -1924,6 +1921,8 @@ void UiDesignerWindow::RefreshDiagnostics()
     out << "  deferred batches: " << stats.deferred_batches << "\n\n";
     out << "  timing: " << (preview_canvas_.IsDetailedTimingEnabled() ? "enabled" : "disabled") << "\n";
     out << "  capture: " << (preview_canvas_.IsCapturePaused() ? "paused" : "running") << "\n\n";
+    out << "THEME REFRESH\n  last synchronous apply: " << theme_apply_ms_ << " ms\n";
+    out << "  apply count: " << theme_apply_count_ << "\n\n";
     out << "LATEST RESIZE\n";
     const UiDesignerResizeHistory& history = preview_canvas_.GetResizeHistory();
     if(!history.IsEmpty()) {
@@ -2168,10 +2167,10 @@ void UiDesignerWindow::Layout()
     // Side columns own their fixed width. The center must use only the
     // remaining page rectangle; inventing a minimum here previously pushed
     // the right column beyond the page and let preview chrome overlap it.
-    const int center_w = max(0, designer_page_.GetSize().cx - left_w - right_w);
+    const int center_w = max(0, designer_page_.GetSize().cx - left_w - right_w - gap * 2);
     Put(designer_left_, 0, 0, left_w, inner_h);
-    Put(designer_center_, left_w, 0, center_w, inner_h);
-    Put(designer_right_, left_w + center_w, 0, right_w, inner_h);
+    Put(designer_center_, left_w + gap, 0, center_w, inner_h);
+    Put(designer_right_, left_w + gap + center_w + gap, 0, right_w, inner_h);
 
     const int pill_h = UiDesignerStyleMetrics::DesignerToolbarHeight();
     const int pill_w = min(designer_center_.GetSize().cx, DPI(340));

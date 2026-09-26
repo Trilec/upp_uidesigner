@@ -1,6 +1,24 @@
 #include "UiDesignerSession.h"
 
 namespace Upp {
+bool UiDesignerSession::ActivateThemeSource(const String& source, String& error)
+{
+    if(theme_.HasProposal()) { error = "Keep or discard the proposal before switching themes"; return false; }
+    for(int i = 0; i < project_themes_.GetCount(); ++i)
+        if(project_themes_[i].source == source) return SelectProjectTheme(i, error);
+    if(source.StartsWith("file:")) {
+        if(!LoadThemeFile(source.Mid(5), error)) return false;
+    }
+    else if(source.StartsWith("builtin:")) {
+        UiDesignerThemeDocument fresh;
+        if(!fresh.Commit("preset", source.Mid(8), "Starting point", error) ||
+           !AddProjectTheme(source.Mid(8), fresh.Get(), error)) return false;
+    }
+    else { error = "Unknown theme source"; return false; }
+    project_themes_[active_project_theme_].source = source;
+    return true;
+}
+
 void UiDesignerSession::ResetProjectThemes()
 {
     project_themes_.Clear();

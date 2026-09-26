@@ -206,6 +206,8 @@ private:
         UiDesignerExportProfile::CompleteCppPackage;
     bool selection_details_refresh_posted_ = false;
     bool diagnostics_refresh_posted_ = false;
+    int theme_apply_ms_ = 0;
+    int theme_apply_count_ = 0;
     bool diagnostics_capture_paused_ = false;
     String active_catalog_drag_type_;
     bool catalog_drag_active_ = false;

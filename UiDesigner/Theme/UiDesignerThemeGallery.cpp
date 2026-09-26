@@ -359,11 +359,7 @@ void UiDesignerThemeToolbar::ToggleAppearance()
     if(!theme_ || syncing_)
         return;
     const String next = theme_->GetEffective().mode == "Dark" ? "Light" : "Dark";
-    String error;
-    if(!theme_->Commit("mode", next, "Theme Builder " + next + " preview", error)) {
-        WhenStatus(error);
-        return;
-    }
+    theme_->SetViewingMode(next);
     SyncFromTheme();
     WhenStatus(next + " theme preview");
 }
@@ -480,9 +476,7 @@ void UiDesignerThemeToolbar::Layout()
 
 void UiDesignerThemeToolbar::Paint(Draw& w)
 {
-    w.DrawRect(GetSize(), SColorPaper());
-    w.DrawLine(0, GetSize().cy - 1, GetSize().cx, GetSize().cy - 1,
-               DPI(1), SColorShadow());
+    // Layout-only toolbar; its owner supplies the workspace background.
 }
 
 UiDesignerThemeGallery::UiDesignerThemeGallery()

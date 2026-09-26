@@ -41,6 +41,35 @@ template <class T> static void CheckNumericBounds() {
 }
 GUI_APP_MAIN {
   {
+    UiDesignerSession s; String error;
+    s.Theme().SetViewingMode("Dark");
+    Check(s.Theme().Get().accent==s.Theme().Get().dark_palette.Get(s.Theme().Get().roles.control_accent),
+          "viewing mode updates legacy accent projection");
+    Check(!s.Theme().IsDirty() && !s.Theme().CanUndo(), "viewing appearance is not an authored theme edit");
+    Check(s.ActivateThemeSource("builtin:Pill",error) && s.Theme().GetEffective().mode=="Dark" &&
+          s.GetProjectThemeName(s.GetActiveProjectTheme())=="Pill", "default activation preserves dark viewing mode and simple name");
+    s.Theme().Commit("radius",17,"Authored radius",error);
+    Check(s.ActivateThemeSource("builtin:Minimal",error) && s.ActivateThemeSource("builtin:Pill",error) &&
+          s.GetProjectThemeCount()==3 && s.Theme().Get().radius==17, "revisiting a source restores its draft without duplicate copies");
+    Check(s.Theme().Undo() && s.Theme().GetEffective().mode=="Dark", "draft undo preserves current viewing appearance");
+    UiTable table; table.SetRect(0,0,160,100);
+    auto style=table.GetStyle(); style.metrics.radius=18; style.metrics.shadow.enabled=false;
+    style.metrics.frame_width=1; style.table_bg=Blue();
+    style.show_row_headers=false; style.show_column_headers=false;
+    table.SetCustomStyle(style); table.Layout();
+    ImageDraw draw(160,100); draw.DrawRect(0,0,160,100,Magenta()); table.Paint(draw);
+    Image image=draw;
+    Check(image[2][2]!=Blue() && image[40][80]==Blue(), "table viewport colour respects rounded corners");
+    UiScrollPanel scroll; UiLabel tall; scroll.SetRect(0,0,180,100);
+    auto scroll_style=scroll.GetStyle(); scroll_style.metrics.content_margin=Rect(8,8,8,8);
+    scroll.SetCustomStyle(scroll_style); scroll.Content().Add(tall); tall.SetRect(0,0,120,400);
+    scroll.Layout(); scroll.SetScrollPos(Point(0,80));
+    const Ctrl* clip=scroll.Content().GetParent();
+    Check(clip && clip!=&scroll && clip->GetRect()==scroll.GetViewportRect() &&
+          scroll.Content().GetRect().top==-scroll.GetScrollPos().y,
+          "scrolling content remains clipped to the decorated viewport while moving");
+  }
+  {
     StyledMetrics metrics; metrics.radius=6;
     ImageDraw draw(80,30); draw.DrawRect(0,0,80,30,White());
     UiPaintFocusShape(draw, RectC(0,0,80,30), metrics, ST_NORMAL,
