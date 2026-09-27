@@ -47,6 +47,8 @@ public:
     virtual ~UiDesignerThemeSelectableBase() {}
     virtual void SetThemeSelected(bool selected) = 0;
     Event<> WhenThemeSelect;
+    Event<Color> WhenThemeColorDrop;
+    bool theme_drop_to_children = false;
 };
 
 template <class T>
@@ -69,6 +71,27 @@ public:
     {
         WhenThemeSelect();
         T::LeftDown(p, keyflags);
+    }
+
+    void DragAndDrop(Point p, PasteClip& clip) override
+    {
+        Point child_point = p;
+        if(theme_drop_to_children && this->ChildFromPoint(child_point))
+            return; // Let the actual sample inside a group receive the drop.
+        AcceptText(clip);
+        if(!clip.IsAccepted())
+            return;
+        clip.SetAction(DND_COPY);
+        if(clip.IsPaste()) {
+            Color color;
+            int alpha = 255;
+            if(UiColorPicker::ParseColorText(TrimBoth(GetString(clip)), color, alpha)) {
+                WhenThemeSelect();
+                WhenThemeColorDrop(color);
+            }
+            else
+                clip.Reject();
+        }
     }
 
     virtual void Paint(Draw& w) override
@@ -183,6 +206,7 @@ private:
     void BuildControlSamples();
     void BuildContainerSamples();
     void BindSelectableSamples();
+    void ChooseDroppedColorField(Color color);
     virtual void ApplyThemeStyles() = 0;
     void LayoutControlSamples();
     void LayoutContainerSamples();

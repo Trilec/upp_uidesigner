@@ -127,7 +127,7 @@ static Value ThemeStudioPreviewDefault(const UiDesignerPropertySpec& property)
 UiDesignerThemeSwatch::UiDesignerThemeSwatch()
 {
     WantFocus();
-    Tip("Theme palette colour — click to edit the six-colour palette, drag to a colour property");
+    Tip("Theme palette colour — click to edit; drag to an Inspector colour or preview control");
 }
 
 UiDesignerThemeSwatch& UiDesignerThemeSwatch::SetColor(Color color)
@@ -135,7 +135,7 @@ UiDesignerThemeSwatch& UiDesignerThemeSwatch::SetColor(Color color)
     if(color_ == color)
         return *this;
     color_ = color;
-    Tip(HexText() + " — click to edit palette; drag to a colour property; Ctrl+C copies hex");
+    Tip(HexText() + " — click to edit; drag to an Inspector colour/fill or preview control; Ctrl+C copies hex");
     Refresh();
     return *this;
 }
@@ -171,11 +171,13 @@ void UiDesignerThemeSwatch::LeftDown(Point, dword)
 {
     dragging_ = false;
     SetFocus();
+    SetCapture();
 }
 
-void UiDesignerThemeSwatch::LeftUp(Point, dword)
+void UiDesignerThemeSwatch::LeftUp(Point p, dword)
 {
-    if(!dragging_)
+    ReleaseCapture();
+    if(!dragging_ && Rect(GetSize()).Contains(p))
         WhenAction();
     dragging_ = false;
 }
@@ -183,6 +185,7 @@ void UiDesignerThemeSwatch::LeftUp(Point, dword)
 void UiDesignerThemeSwatch::LeftDrag(Point, dword)
 {
     dragging_ = true;
+    ReleaseCapture();
     VectorMap<String, ClipData> payload;
     Append(payload, HexText());
     DoDragAndDrop(payload, Image(), DND_COPY);
@@ -691,7 +694,9 @@ void UiDesignerThemeGallery::BindSelectableSamples()
                           const char *type, bool panel_sample) {
         UiDesignerThemeSelectableBase *ptr = &sample;
         const String type_id = type;
+        sample.theme_drop_to_children = panel_sample;
         sample.WhenThemeSelect = [=] { SelectSample(type_id, ptr, panel_sample); };
+        sample.WhenThemeColorDrop = [=](Color color) { ChooseDroppedColorField(color); };
     };
 
     bind(buttons_group_, "UiGroupPanel", true);
@@ -828,6 +833,63 @@ void UiDesignerThemeGallery::SelectSample(
     SyncSelectedTarget();
     WhenSampleSelected();
     Refresh();
+}
+
+void UiDesignerThemeGallery::ChooseDroppedColorField(Color color)
+{
+    if(!theme_)
+        return;
+    const String target = theme_->GetActiveStyleTarget();
+    Ptr<UiDesignerThemeGallery> self = this;
+    // Finish the native drag session before opening a menu. Keep the target
+    // captured so a later selection cannot redirect the edit to another role.
+    PostCallback([self, target, color] {
+        if(!self || !self->theme_ || self->theme_->GetActiveStyleTarget() != target)
+            return;
+        PropertyEditorModel model;
+        self->BuildSelectedPropertyModel(model, self->theme_->GetEffective());
+        Index<String> groups;
+        for(int i = 0; i < model.GetCount(); ++i) {
+            const auto& item = model[i];
+            if((item.kind == PropertyEditorKind::Color ||
+                item.kind == PropertyEditorKind::FillRecipe) && item.visible &&
+               item.enabled && !item.read_only && item.id.StartsWith("studio."))
+                groups.FindAdd(item.group);
+        }
+        MenuBar::Execute([&](Bar& menu) {
+            for(const String& group : groups)
+                menu.Sub(group, [&, group](Bar& fields) {
+                    for(int i = 0; i < model.GetCount(); ++i) {
+                        const auto& item = model[i];
+                        if(item.group != group ||
+                           (item.kind != PropertyEditorKind::Color &&
+                            item.kind != PropertyEditorKind::FillRecipe) ||
+                           !item.visible || !item.enabled || item.read_only ||
+                           !item.id.StartsWith("studio."))
+                            continue;
+                        const String field = item.id.Mid(7);
+                        Value dropped = color;
+                        String label = item.label;
+                        if(item.kind == PropertyEditorKind::FillRecipe) {
+                            ValueMap recipe;
+                            recipe.Set("mode", "Solid");
+                            recipe.Set("solid", color);
+                            dropped = recipe;
+                            label << " (solid fill)";
+                        }
+                        fields.Add(label, [self, target, field, dropped] {
+                            if(!self || !self->theme_ ||
+                               self->theme_->GetActiveStyleTarget() != target)
+                                return;
+                            String error;
+                            if(!self->theme_->Commit("studio." + field, dropped,
+                                                    "Drop palette colour", error))
+                                Exclamation(error);
+                        });
+                    }
+                });
+        });
+    });
 }
 
 String UiDesignerThemeGallery::CurrentStyleTarget(

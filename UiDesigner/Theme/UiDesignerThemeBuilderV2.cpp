@@ -142,6 +142,10 @@ UiDesignerThemeGalleryV2::UiDesignerThemeGalleryV2()
     chart_ring_.AddSegment(45, "Ready").AddSegment(30, "Active").AddSegment(25, "Queued");
     chart_ring_.SetCenterText("Segments");
     progress_ring_.WhenThemeSelect = [=] { SelectSample("UiProgressRing", &progress_ring_, false); };
+    progress_ring_.WhenThemeColorDrop = [=](Color c) { ChooseDroppedColorField(c); };
+    chart_ring_.WhenThemeColorDrop = [=](Color c) { ChooseDroppedColorField(c); };
+    rings_group_.WhenThemeColorDrop = [=](Color c) { ChooseDroppedColorField(c); };
+    rings_group_.theme_drop_to_children = true;
     chart_ring_.WhenThemeSelect = [=] { SelectSample("UiChartRing", &chart_ring_, false); };
     rings_group_.WhenThemeSelect = [=] { SelectPanelSample("UiGroupPanel", &rings_group_); };
     RebuildColumnPlacement();

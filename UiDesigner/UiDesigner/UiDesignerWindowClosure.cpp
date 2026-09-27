@@ -98,7 +98,9 @@ UiDesignerWindowClosureHook::UiDesignerWindowClosureHook(UiDesignerWindow& owner
             ApplyBrandChrome();
             safe->version_.SetCustomStyle(UiTheme::ResolveLabel(UiRole::Accent))
                           .ClearIcon();
-            safe->header_layout_.Layout();
+            // Final brand/dropdown recipes can change preferred height.
+            // Remeasure the owning header before positioning its children.
+            safe->Layout();
             safe->Refresh();
         };
 

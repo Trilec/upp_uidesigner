@@ -135,7 +135,7 @@ int UiDesignerCatalogList::GetContentHeight() const
 
 void UiDesignerCatalogList::Layout()
 {
-    filter_edit_.SetRect(DPI(6), 0, max(0, GetSize().cx - DPI(12)), DPI(34));
+    filter_edit_.SetRect(DPI(6), DPI(4), max(0, GetSize().cx - DPI(12)), DPI(34));
     scroll_ = minmax(scroll_, 0, max(0, GetContentHeight() - max(0, GetSize().cy - CatalogRowsTop())));
 }
 
@@ -172,6 +172,7 @@ void UiDesignerCatalogList::Paint(Draw& w)
         w.DrawText(DPI(12), CatalogRowsTop() + DPI(8), "No matching controls", SansSerifZ(10),
                    palette.disabled);
     w.End();
+    DrawFrame(w, GetSize(), palette.divider);
 }
 
 void UiDesignerCatalogList::Activate(int index)
