@@ -18,6 +18,7 @@ public:
     const UiDesignerExportResult& GetResult() const { return result_; }
 
     virtual void Layout() override;
+    void Paint(Draw& draw) override;
 
 private:
     void BuildControls();

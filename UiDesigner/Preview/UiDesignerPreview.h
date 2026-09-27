@@ -328,6 +328,11 @@ public:
     uint64 GetInstanceGeneration(UiDesignerNodeId node) const;
     Rect GetNodeRect(UiDesignerNodeId node) const;
     UiDesignerNodeId HitNode(Point p) const;
+    bool ScrollAt(Point p, int zdelta, dword keyflags);
+    bool BeginScrollBarInteraction(Point p, dword keyflags);
+    Event<> WhenViewChanged;
+    bool IsScrollInteractionActive() const { return scroll_interaction_active_; }
+    virtual ~UiDesignerPreviewCanvas();
     const UiDesignerGeometrySnapshot& GetGeometrySnapshot() const { return geometry_; }
     const UiDesignerGeometryRecord* FindGeometry(UiDesignerNodeId node) const { return geometry_.Find(node); }
     int GetLiveInstanceCount() const { return instances_.GetCount(); }
@@ -352,6 +357,8 @@ public:
     virtual void Paint(Draw& w) override;
 
 private:
+    bool laying_out_ = false;
+    UiScrollPanel* FindScrollPanelAt(Point p);
     int FindInstance(UiDesignerNodeId node) const;
     void DestroyInstances();
     void DetachInstance(UiDesignerPreviewInstance& instance);
@@ -396,6 +403,11 @@ private:
     UiDesignerThemeSnapshot runtime_theme_;
     Size transient_virtual_size_;
     Color accent_ = Color(37, 99, 235);
+    TimeCallback scroll_view_update_;
+    TimeCallback scroll_interaction_watch_;
+    Ptr<UiScrollBar> active_scrollbar_;
+    bool scroll_interaction_active_ = false;
+    void PollScrollInteraction();
 };
 
 }

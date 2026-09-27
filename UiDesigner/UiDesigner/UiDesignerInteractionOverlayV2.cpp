@@ -6,6 +6,7 @@ namespace Upp {
 UiDesignerInteractionOverlayV2::UiDesignerInteractionOverlayV2(UiDesignerWindow& owner)
     : UiDesignerInteractionOverlay(owner), owner_v2_(&owner)
 {
+    owner.preview_canvas_.WhenViewChanged = [this] { cycle_valid_ = false; Refresh(); };
 }
 
 bool UiDesignerInteractionOverlayV2::IsRootResizePoint(Point p) const
@@ -92,6 +93,10 @@ void UiDesignerInteractionOverlayV2::ArmMove(Point p, UiDesignerNodeId selected)
 
 void UiDesignerInteractionOverlayV2::LeftDown(Point p, dword keyflags)
 {
+    if(owner_v2_ && owner_v2_->preview_canvas_.BeginScrollBarInteraction(CanvasPoint(p), keyflags)) {
+        cycle_valid_ = false;
+        return;
+    }
     if(IsRootResizePoint(p)) {
         cycle_valid_ = false;
         delegating_base_ = true;
@@ -104,6 +109,17 @@ void UiDesignerInteractionOverlayV2::LeftDown(Point p, dword keyflags)
     if(selected)
         ArmMove(p, selected);
     SetFocus();
+}
+
+void UiDesignerInteractionOverlayV2::MouseWheel(Point p, int zdelta, dword keyflags)
+{
+    if(owner_v2_ && !moving_ && !move_armed_ &&
+       owner_v2_->preview_canvas_.ScrollAt(CanvasPoint(p), zdelta, keyflags)) {
+        cycle_valid_ = false;
+        Refresh();
+        return;
+    }
+    UiDesignerInteractionOverlay::MouseWheel(p, zdelta, keyflags);
 }
 
 void UiDesignerInteractionOverlayV2::BeginMove(Point p)

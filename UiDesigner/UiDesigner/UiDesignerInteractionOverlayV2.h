@@ -21,6 +21,7 @@ public:
     virtual void LeftDrag(Point p, dword keyflags) override;
     virtual void MouseMove(Point p, dword keyflags) override;
     virtual void LeftUp(Point p, dword keyflags) override;
+    virtual void MouseWheel(Point p, int zdelta, dword keyflags) override;
     virtual Image CursorImage(Point p, dword keyflags) override;
     virtual bool Key(dword key, int count) override;
     virtual void CancelMode() override;

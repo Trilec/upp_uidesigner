@@ -18,7 +18,7 @@ struct UiDesignerStyleMetrics {
 
     static int HeaderHeight()          { return DPI(63); }
     static int FooterHeight()          { return DPI(27); }
-    static int RailWidth()             { return DPI(56); }
+    static int RailWidth()             { return DPI(76); }
     // The left catalog column retains the reference shell profile.
     static int PanelNormalWidth()      { return DPI(PanelNormalPixels); }
     static int PanelMediumWidth()      { return DPI(PanelMediumPixels); }

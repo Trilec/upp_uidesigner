@@ -81,5 +81,21 @@ GUI_APP_MAIN {
     Check(code.Find(".AddGrid(")>=0 && code.Find("MEDIUM")>=0,"Export emits Grid item sizing and Medium lines");
     session.AttachProjection(nullptr);
   }
+  {
+    UiDesignerSession session; String error; UiDesignerNodeId inserted = 0;
+    session.NewDocument("blank");
+    Check(session.InsertPreset("HolyGrail", session.Document().GetRootId(), -1, &inserted, error),
+          "Holy Grail preset inserts");
+    String code = session.GenerateCode();
+    Check(code.Find(".HSizePos(DPI(8), DPI(8)).VSizePos(DPI(8), DPI(8))") >= 0,
+          "Panel export anchors both Expand axes with its content inset");
+    UiPanel panel; UiBoxLayout column;
+    panel.Add(column.HSizePos(DPI(8), DPI(8)).VSizePos(DPI(8), DPI(8)));
+    for(Size size : {Size(320,180), Size(640,480)}) {
+        panel.SetRect(Rect(size)); panel.Layout();
+        Check(column.GetRect() == Rect(size).Deflated(DPI(8)),
+              "Generated panel anchors follow parent resize");
+    }
+  }
   Cout()<<"TitleGridRegressionTest checks="<<checks<<" failed="<<failed<<'\n'; SetExitCode(failed?1:0);
 }

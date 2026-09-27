@@ -43,6 +43,8 @@ struct UiDesignerDropRegion : Moveable<UiDesignerDropRegion> {
 struct UiDesignerGeometryRecord : Moveable<UiDesignerGeometryRecord> {
     UiDesignerNodeId node = 0, parent = 0;
     Rect rect, body;
+    Rect clip;
+    bool clipped = false;
     int depth = 0, order = 0, inset = 0, gap = 0;
     bool selectable = false, drop_target = false;
     UiDesignerCueKind cue_kind = UiDesignerCueKind::None;
@@ -69,6 +71,12 @@ class UiDesignerGeometrySnapshotBuilder {
 public:
     void Add(UiDesignerGeometryRecord record) { records_.Add(pick(record)); }
     void AddRegion(UiDesignerDropRegion region) { drop_regions_.Add(pick(region)); }
+    void ClipRegions(UiDesignerNodeId owner, const Rect& clip) {
+        for(auto& region : drop_regions_) if(region.owner == owner) {
+            region.rect &= clip;
+            region.visual_rect &= clip;
+        }
+    }
     UiDesignerGeometrySnapshot Publish() {
         UiDesignerGeometrySnapshot result;
         result.records_ = pick(records_);

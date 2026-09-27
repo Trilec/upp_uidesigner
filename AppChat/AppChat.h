@@ -9,8 +9,8 @@ namespace Upp {
 struct AppChatLimits {
     // SSE repeats provider metadata for each token; this bounds wire bytes,
     // while tokens and request_bytes separately bound generated text/continuation.
-    int rounds = 8, calls = 24, output_bytes = 2097152;
-    int request_bytes = 524288, timeout_ms = 60000, tokens = 4096;
+    int rounds = 12, calls = 40, output_bytes = 8388608;
+    int request_bytes = 524288, timeout_ms = 120000, tokens = 16384;
 };
 struct AppChatProfile {
     String provider = "DeepSeek", endpoint, model, credential_env;

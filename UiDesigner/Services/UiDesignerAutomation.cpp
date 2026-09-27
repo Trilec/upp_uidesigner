@@ -139,7 +139,8 @@ Value UiDesignerAutomationService::GetControlSpec(const ValueMap& params) const
             ? String("NumericInt") : PropertyEditorKindName(property.kind));
         item.Set("domain", PropertyEditorDomainName(property.domain));
         item.Set("impact", PropertyEditorImpactName(property.impact));
-        item.Set("default", property.default_value);
+        const int default_index=spec->defaults.Find(property.id);
+        item.Set("default", default_index>=0 ? spec->defaults.GetValue(default_index) : property.default_value);
         item.Set("minimum", property.minimum);
         item.Set("maximum", property.maximum);
         item.Set("step", property.step);
@@ -187,6 +188,10 @@ Value UiDesignerAutomationService::GetControlSpec(const ValueMap& params) const
     result.Set("data_capability", (int)spec->data_capability);
     result.Set("data_property", spec->data_property_id);
     result.Set("data_defaults", spec->data_defaults);
+    ValueMap recommended_size;
+    recommended_size.Set("cx",spec->default_size.cx);
+    recommended_size.Set("cy",spec->default_size.cy);
+    result.Set("recommended_size",recommended_size);
     ValueArray fields;
     for(const auto& f : spec->theme_overrides) {
         ValueMap m; m.Set("id", f.id); m.Set("adapter_field", f.adapter_field_id);

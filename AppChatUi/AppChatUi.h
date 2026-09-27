@@ -11,7 +11,7 @@ class AppChatMessageCard : public UiPanel {
     Array<UiButton> actions;
     Vector<String> action_ids;
     Vector<UiRole> action_roles;
-    String text, activity;
+    String text, activity, speaker, status_text;
     UiRole status_role=UiRole::Standard;
     bool expanded=false, activity_open=false;
     int measured_width=-1, text_height=20, line_height=20;
@@ -22,7 +22,8 @@ public:
     void SetMessage(const String& role,const String& text);
     void SetText(const String& value);
     const String& GetText() const {return text;}
-    void SetStatus(const String& value){status.SetText(value);}
+    void SetStatus(const String& value){status_text=value;status.SetText(value);}
+    String ExportText() const;
     void SetStatusRole(UiRole role){status_role=role;status.SetCustomStyle(UiTheme::ResolveLabel(role));}
     void SetActivity(const String& value);
     void SetExpanded(bool value){expanded=value;}
@@ -40,6 +41,7 @@ public:
     int GetCount() const{return cards.GetCount();}
     AppChatMessageCard& At(int i){return cards[i];}
     void ClearMessages();
+    String ExportText() const;
     void Arrange(bool latest=false);
     void JumpTo(const String& reference);
     void FoldMessages();

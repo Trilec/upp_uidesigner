@@ -1,0 +1,1967 @@
+{
+  "items": [
+    {
+      "parent_ref": "",
+      "properties": {
+        "columns": 1,
+        "gap": 8,
+        "height_mode": "Expand",
+        "inset": 12,
+        "rows": 3,
+        "width_mode": "Expand"
+      },
+      "ref": "shell",
+      "type": "UiGridLayout"
+    },
+    {
+      "grid_column": 0,
+      "grid_row": 0,
+      "parent_ref": "shell",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Ui Control Gallery",
+        "width_mode": "Expand"
+      },
+      "ref": "heading",
+      "type": "UiLabel"
+    },
+    {
+      "grid_column": 0,
+      "grid_row": 1,
+      "parent_ref": "shell",
+      "properties": {
+        "height_mode": "Expand",
+        "inset": 4,
+        "width_mode": "Expand"
+      },
+      "ref": "body",
+      "type": "UiScrollPanel"
+    },
+    {
+      "parent_ref": "body",
+      "properties": {
+        "cell_align_x": "Left",
+        "cell_align_y": "Top",
+        "columns": 4,
+        "gap": 10,
+        "height_mode": "Fit",
+        "inset": 4,
+        "rows": 11,
+        "width_mode": "Expand"
+      },
+      "ref": "tiles",
+      "type": "UiGridLayout"
+    },
+    {
+      "grid_column": 0,
+      "grid_row": 2,
+      "parent_ref": "shell",
+      "properties": {
+        "direction": "H",
+        "gap": 8,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "actions",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "actions",
+      "properties": {
+        "h_sizing": "Fill"
+      },
+      "ref": "act_gap",
+      "type": "Spacer"
+    },
+    {
+      "parent_ref": "actions",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "OK",
+        "width_mode": "Fit"
+      },
+      "ref": "ok",
+      "type": "UiButton"
+    },
+    {
+      "parent_ref": "actions",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Cancel",
+        "width_mode": "Fit"
+      },
+      "ref": "cancel",
+      "type": "UiButton"
+    },
+    {
+      "grid_column": 0,
+      "grid_row": 0,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c1",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c1",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiLabel",
+        "width_mode": "Expand"
+      },
+      "ref": "c1l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c1",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Plain text label example",
+        "width_mode": "Expand"
+      },
+      "ref": "c1w",
+      "type": "UiLabel"
+    },
+    {
+      "grid_column": 1,
+      "grid_row": 0,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c2",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c2",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiButton",
+        "width_mode": "Expand"
+      },
+      "ref": "c2l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c2",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Button",
+        "width_mode": "Fit"
+      },
+      "ref": "c2w",
+      "type": "UiButton"
+    },
+    {
+      "grid_column": 2,
+      "grid_row": 0,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c3",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c3",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiToolButton",
+        "width_mode": "Expand"
+      },
+      "ref": "c3l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c3",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Tool",
+        "tooltip": "Tool button example",
+        "width_mode": "Fit"
+      },
+      "ref": "c3w",
+      "type": "UiToolButton"
+    },
+    {
+      "grid_column": 3,
+      "grid_row": 0,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c4",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c4",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiSplitButton",
+        "width_mode": "Expand"
+      },
+      "ref": "c4l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c4",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Split",
+        "width_mode": "Fit"
+      },
+      "ref": "c4w",
+      "type": "UiSplitButton"
+    },
+    {
+      "grid_column": 0,
+      "grid_row": 1,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c5",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c5",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiToggle",
+        "width_mode": "Expand"
+      },
+      "ref": "c5l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c5",
+      "properties": {
+        "checked": true,
+        "height_mode": "Fit",
+        "width_mode": "Fit"
+      },
+      "ref": "c5w",
+      "type": "UiToggle"
+    },
+    {
+      "grid_column": 1,
+      "grid_row": 1,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c6",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c6",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiCheckBox",
+        "width_mode": "Expand"
+      },
+      "ref": "c6l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c6",
+      "properties": {
+        "checked": true,
+        "height_mode": "Fit",
+        "text": "Enable option",
+        "width_mode": "Fit"
+      },
+      "ref": "c6w",
+      "type": "UiCheckBox"
+    },
+    {
+      "grid_column": 2,
+      "grid_row": 1,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c7",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c7",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiRadioButton",
+        "width_mode": "Expand"
+      },
+      "ref": "c7l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c7",
+      "properties": {
+        "checked": true,
+        "height_mode": "Fit",
+        "text": "Select option",
+        "width_mode": "Fit"
+      },
+      "ref": "c7w",
+      "type": "UiRadioButton"
+    },
+    {
+      "grid_column": 3,
+      "grid_row": 1,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c8",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c8",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiLineEdit",
+        "width_mode": "Expand"
+      },
+      "ref": "c8l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c8",
+      "properties": {
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c8w",
+      "type": "UiLineEdit"
+    },
+    {
+      "grid_column": 0,
+      "grid_row": 2,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c9",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c9",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiMultiEdit",
+        "width_mode": "Expand"
+      },
+      "ref": "c9l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c9",
+      "properties": {
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c9w",
+      "type": "UiMultiEdit"
+    },
+    {
+      "grid_column": 1,
+      "grid_row": 2,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c10",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c10",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiIntEdit",
+        "width_mode": "Expand"
+      },
+      "ref": "c10l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c10",
+      "properties": {
+        "height_mode": "Fit",
+        "width_mode": "Fit"
+      },
+      "ref": "c10w",
+      "type": "UiIntEdit"
+    },
+    {
+      "grid_column": 2,
+      "grid_row": 2,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c11",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c11",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiFloatEdit",
+        "width_mode": "Expand"
+      },
+      "ref": "c11l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c11",
+      "properties": {
+        "height_mode": "Fit",
+        "width_mode": "Fit"
+      },
+      "ref": "c11w",
+      "type": "UiFloatEdit"
+    },
+    {
+      "grid_column": 3,
+      "grid_row": 2,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c12",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c12",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiPasswordEdit",
+        "width_mode": "Expand"
+      },
+      "ref": "c12l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c12",
+      "properties": {
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c12w",
+      "type": "UiPasswordEdit"
+    },
+    {
+      "grid_column": 0,
+      "grid_row": 3,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c13",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c13",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiMaskEdit",
+        "width_mode": "Expand"
+      },
+      "ref": "c13l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c13",
+      "properties": {
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c13w",
+      "type": "UiMaskEdit"
+    },
+    {
+      "grid_column": 1,
+      "grid_row": 3,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c14",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c14",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiDropdown",
+        "width_mode": "Expand"
+      },
+      "ref": "c14l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c14",
+      "properties": {
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c14w",
+      "type": "UiDropdown"
+    },
+    {
+      "grid_column": 2,
+      "grid_row": 3,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c15",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c15",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiDateTime",
+        "width_mode": "Expand"
+      },
+      "ref": "c15l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c15",
+      "properties": {
+        "height_mode": "Fit",
+        "mode": "DateTime",
+        "width_mode": "Expand"
+      },
+      "ref": "c15w",
+      "type": "UiDateTime"
+    },
+    {
+      "grid_column": 3,
+      "grid_row": 3,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c16",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c16",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiColorPicker",
+        "width_mode": "Expand"
+      },
+      "ref": "c16l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c16",
+      "properties": {
+        "color": "#3A84FF",
+        "fixed_height": 240,
+        "fixed_width": 320,
+        "height_mode": "Fixed",
+        "page_mode": "color",
+        "width_mode": "Fixed"
+      },
+      "ref": "c16w",
+      "type": "UiColorPicker"
+    },
+    {
+      "grid_column": 0,
+      "grid_row": 4,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c17",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c17",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiSlider",
+        "width_mode": "Expand"
+      },
+      "ref": "c17l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c17",
+      "properties": {
+        "height_mode": "Fit",
+        "value": 40,
+        "width_mode": "Expand"
+      },
+      "ref": "c17w",
+      "type": "UiSlider"
+    },
+    {
+      "grid_column": 1,
+      "grid_row": 4,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c18",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c18",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiSliderEdit",
+        "width_mode": "Expand"
+      },
+      "ref": "c18l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c18",
+      "properties": {
+        "height_mode": "Fit",
+        "value": 35,
+        "width_mode": "Expand"
+      },
+      "ref": "c18w",
+      "type": "UiSliderEdit"
+    },
+    {
+      "grid_column": 2,
+      "grid_row": 4,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c19",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c19",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiRangeSlider",
+        "width_mode": "Expand"
+      },
+      "ref": "c19l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c19",
+      "properties": {
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c19w",
+      "type": "UiRangeSlider"
+    },
+    {
+      "grid_column": 3,
+      "grid_row": 4,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c20",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c20",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiRangeSliderEdit",
+        "width_mode": "Expand"
+      },
+      "ref": "c20l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c20",
+      "properties": {
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c20w",
+      "type": "UiRangeSliderEdit"
+    },
+    {
+      "grid_column": 0,
+      "grid_row": 5,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c21",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c21",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiProgressBar",
+        "width_mode": "Expand"
+      },
+      "ref": "c21l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c21",
+      "properties": {
+        "height_mode": "Fit",
+        "value": 65,
+        "width_mode": "Expand"
+      },
+      "ref": "c21w",
+      "type": "UiProgressBar"
+    },
+    {
+      "grid_column": 1,
+      "grid_row": 5,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c22",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c22",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiScrollBar",
+        "width_mode": "Expand"
+      },
+      "ref": "c22l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c22",
+      "properties": {
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c22w",
+      "type": "UiScrollBar"
+    },
+    {
+      "grid_column": 2,
+      "grid_row": 5,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c23",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c23",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiProgressRing",
+        "width_mode": "Expand"
+      },
+      "ref": "c23l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c23",
+      "properties": {
+        "center_text": "70%",
+        "height_mode": "Fit",
+        "value": 70,
+        "width_mode": "Fit"
+      },
+      "ref": "c23w",
+      "type": "UiProgressRing"
+    },
+    {
+      "grid_column": 3,
+      "grid_row": 5,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c24",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c24",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiChartRing",
+        "width_mode": "Expand"
+      },
+      "ref": "c24l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c24",
+      "properties": {
+        "center_text": "Total",
+        "height_mode": "Fit",
+        "width_mode": "Fit"
+      },
+      "ref": "c24w",
+      "type": "UiChartRing"
+    },
+    {
+      "grid_column": 0,
+      "grid_row": 6,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c25",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c25",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiList",
+        "width_mode": "Expand"
+      },
+      "ref": "c25l",
+      "type": "UiLabel"
+    },
+    {
+      "list_items": [
+        "First row",
+        "Second row",
+        "Third row",
+        "Fourth row"
+      ],
+      "parent_ref": "c25",
+      "properties": {
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c25w",
+      "type": "UiList"
+    },
+    {
+      "grid_column": 1,
+      "grid_row": 6,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c26",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c26",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiTree",
+        "width_mode": "Expand"
+      },
+      "ref": "c26l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c26",
+      "properties": {
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c26w",
+      "type": "UiTree"
+    },
+    {
+      "grid_column": 2,
+      "grid_row": 6,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c27",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c27",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiTable",
+        "width_mode": "Expand"
+      },
+      "ref": "c27l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c27",
+      "properties": {
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c27w",
+      "type": "UiTable"
+    },
+    {
+      "grid_column": 3,
+      "grid_row": 6,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c28",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c28",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiMenu",
+        "width_mode": "Expand"
+      },
+      "ref": "c28l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c28",
+      "properties": {
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c28w",
+      "type": "UiMenu"
+    },
+    {
+      "grid_column": 0,
+      "grid_row": 7,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c29",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c29",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiBreadcrumbs",
+        "width_mode": "Expand"
+      },
+      "ref": "c29l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c29",
+      "properties": {
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c29w",
+      "type": "UiBreadcrumbs"
+    },
+    {
+      "grid_column": 1,
+      "grid_row": 7,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c30",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c30",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiDoc",
+        "width_mode": "Expand"
+      },
+      "ref": "c30l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c30",
+      "properties": {
+        "height_mode": "Fit",
+        "value": "Document sample text",
+        "width_mode": "Expand"
+      },
+      "ref": "c30w",
+      "type": "UiDoc"
+    },
+    {
+      "grid_column": 2,
+      "grid_row": 7,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c31",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c31",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiBezierCurveField",
+        "width_mode": "Expand"
+      },
+      "ref": "c31l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c31",
+      "properties": {
+        "fixed_height": 100,
+        "height_mode": "Fixed",
+        "width_mode": "Expand"
+      },
+      "ref": "c31w",
+      "type": "UiBezierCurveField"
+    },
+    {
+      "grid_column": 3,
+      "grid_row": 7,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c32",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c32",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiBezierCurveEditor",
+        "width_mode": "Expand"
+      },
+      "ref": "c32l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c32",
+      "properties": {
+        "fixed_height": 160,
+        "height_mode": "Fixed",
+        "width_mode": "Expand"
+      },
+      "ref": "c32w",
+      "type": "UiBezierCurveEditor"
+    },
+    {
+      "grid_column": 0,
+      "grid_row": 8,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c33",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c33",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiNodeGraph",
+        "width_mode": "Expand"
+      },
+      "ref": "c33l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c33",
+      "properties": {
+        "fixed_height": 220,
+        "height_mode": "Fixed",
+        "width_mode": "Expand"
+      },
+      "ref": "c33w",
+      "type": "UiNodeGraph"
+    },
+    {
+      "grid_column": 1,
+      "grid_row": 8,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c34",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c34",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiTab (+ UiTabPage)",
+        "width_mode": "Expand"
+      },
+      "ref": "c34l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c34",
+      "properties": {
+        "fixed_height": 200,
+        "height_mode": "Fixed",
+        "visual": "Underline",
+        "width_mode": "Expand"
+      },
+      "ref": "c34w",
+      "type": "UiTab"
+    },
+    {
+      "parent_ref": "c34w",
+      "properties": {
+        "key": "gallery_general",
+        "title": "General"
+      },
+      "ref": "pg1",
+      "type": "UiTabPage"
+    },
+    {
+      "parent_ref": "pg1",
+      "properties": {
+        "direction": "V",
+        "gap": 6,
+        "height_mode": "Fit",
+        "inset": 6,
+        "width_mode": "Expand"
+      },
+      "ref": "pg1c",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "pg1c",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "General page content",
+        "width_mode": "Expand"
+      },
+      "ref": "pg1t",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "pg1c",
+      "properties": {
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "pg1b",
+      "type": "UiLineEdit"
+    },
+    {
+      "parent_ref": "c34w",
+      "properties": {
+        "key": "gallery_advanced",
+        "title": "Advanced"
+      },
+      "ref": "pg2",
+      "type": "UiTabPage"
+    },
+    {
+      "parent_ref": "pg2",
+      "properties": {
+        "direction": "V",
+        "gap": 6,
+        "height_mode": "Fit",
+        "inset": 6,
+        "width_mode": "Expand"
+      },
+      "ref": "pg2c",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "pg2c",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Advanced page content",
+        "width_mode": "Expand"
+      },
+      "ref": "pg2t",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "pg2c",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Advanced option",
+        "width_mode": "Fit"
+      },
+      "ref": "pg2b",
+      "type": "UiCheckBox"
+    },
+    {
+      "grid_column": 2,
+      "grid_row": 8,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c35",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c35",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiAccordion (+ Section)",
+        "width_mode": "Expand"
+      },
+      "ref": "c35l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c35",
+      "properties": {
+        "fixed_height": 240,
+        "height_mode": "Fixed",
+        "show_chevron": true,
+        "width_mode": "Expand"
+      },
+      "ref": "c35w",
+      "type": "UiAccordion"
+    },
+    {
+      "parent_ref": "c35w",
+      "properties": {
+        "copy": "Summary of the section.",
+        "key": "gallery_overview",
+        "open": true,
+        "title": "Overview"
+      },
+      "ref": "sec1",
+      "type": "UiAccordionSection"
+    },
+    {
+      "parent_ref": "sec1",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "inset": 6,
+        "width_mode": "Expand"
+      },
+      "ref": "sec1c",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "sec1c",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Overview body content",
+        "width_mode": "Expand"
+      },
+      "ref": "sec1t",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c35w",
+      "properties": {
+        "copy": "More detail here.",
+        "key": "gallery_details",
+        "open": false,
+        "title": "Details"
+      },
+      "ref": "sec2",
+      "type": "UiAccordionSection"
+    },
+    {
+      "parent_ref": "sec2",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "inset": 6,
+        "width_mode": "Expand"
+      },
+      "ref": "sec2c",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "sec2c",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Details body content",
+        "width_mode": "Expand"
+      },
+      "ref": "sec2t",
+      "type": "UiLabel"
+    },
+    {
+      "grid_column": 3,
+      "grid_row": 8,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c36",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c36",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiTitleCard",
+        "width_mode": "Expand"
+      },
+      "ref": "c36l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c36",
+      "properties": {
+        "copy": "Grouped heading with supporting copy.",
+        "height_mode": "Fit",
+        "subtitle": "Subtitle",
+        "title": "Title Card",
+        "width_mode": "Expand"
+      },
+      "ref": "c36w",
+      "type": "UiTitleCard"
+    },
+    {
+      "parent_ref": "c36w",
+      "properties": {
+        "direction": "H",
+        "gap": 6,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c36b",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c36b",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Action",
+        "width_mode": "Fit"
+      },
+      "ref": "c36b1",
+      "type": "UiButton"
+    },
+    {
+      "parent_ref": "c36b",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "More",
+        "width_mode": "Fit"
+      },
+      "ref": "c36b2",
+      "type": "UiButton"
+    },
+    {
+      "grid_column": 0,
+      "grid_row": 9,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c37",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c37",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiPanel",
+        "width_mode": "Expand"
+      },
+      "ref": "c37l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c37",
+      "properties": {
+        "fixed_height": 90,
+        "height_mode": "Fixed",
+        "role": "Subtle",
+        "width_mode": "Expand"
+      },
+      "ref": "c37w",
+      "type": "UiPanel"
+    },
+    {
+      "parent_ref": "c37w",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Panel surface",
+        "width_mode": "Fit"
+      },
+      "ref": "c37c",
+      "type": "UiLabel"
+    },
+    {
+      "grid_column": 1,
+      "grid_row": 9,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c38",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c38",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiGroupPanel",
+        "width_mode": "Expand"
+      },
+      "ref": "c38l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c38",
+      "properties": {
+        "fixed_height": 130,
+        "height_mode": "Fixed",
+        "subtitle": "Supporting information",
+        "title": "Group",
+        "width_mode": "Expand"
+      },
+      "ref": "c38w",
+      "type": "UiGroupPanel"
+    },
+    {
+      "parent_ref": "c38w",
+      "properties": {
+        "direction": "V",
+        "gap": 6,
+        "height_mode": "Fit",
+        "inset": 6,
+        "width_mode": "Expand"
+      },
+      "ref": "c38c",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c38c",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Grouped field",
+        "width_mode": "Fit"
+      },
+      "ref": "c38c1",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c38c",
+      "properties": {
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c38c2",
+      "type": "UiLineEdit"
+    },
+    {
+      "grid_column": 2,
+      "grid_row": 9,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c39",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c39",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiStack",
+        "width_mode": "Expand"
+      },
+      "ref": "c39l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c39",
+      "properties": {
+        "fixed_height": 120,
+        "height_mode": "Fixed",
+        "width_mode": "Expand"
+      },
+      "ref": "c39w",
+      "type": "UiStack"
+    },
+    {
+      "parent_ref": "c39w",
+      "properties": {
+        "direction": "V",
+        "fixed_height": 110,
+        "gap": 4,
+        "height_mode": "Fixed",
+        "inset": 6,
+        "width_mode": "Expand"
+      },
+      "ref": "c39a",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c39a",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Stack layer A",
+        "width_mode": "Expand"
+      },
+      "ref": "c39a1",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c39a",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Second line of layer A",
+        "width_mode": "Expand"
+      },
+      "ref": "c39a2",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c39w",
+      "properties": {
+        "direction": "V",
+        "fixed_height": 110,
+        "gap": 4,
+        "height_mode": "Fixed",
+        "inset": 6,
+        "width_mode": "Expand"
+      },
+      "ref": "c39b",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c39b",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Stack layer B",
+        "width_mode": "Expand"
+      },
+      "ref": "c39b1",
+      "type": "UiLabel"
+    },
+    {
+      "grid_column": 3,
+      "grid_row": 9,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c40",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c40",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiSplitter",
+        "width_mode": "Expand"
+      },
+      "ref": "c40l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c40",
+      "properties": {
+        "fixed_height": 130,
+        "height_mode": "Fixed",
+        "width_mode": "Expand"
+      },
+      "ref": "c40w",
+      "type": "UiSplitter"
+    },
+    {
+      "parent_ref": "c40w",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Expand",
+        "inset": 6,
+        "width_mode": "Fit"
+      },
+      "ref": "c40a",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c40a",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Left pane",
+        "width_mode": "Fit"
+      },
+      "ref": "c40a1",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c40w",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Expand",
+        "inset": 6,
+        "width_mode": "Fit"
+      },
+      "ref": "c40b",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c40b",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Right pane",
+        "width_mode": "Fit"
+      },
+      "ref": "c40b1",
+      "type": "UiLabel"
+    },
+    {
+      "grid_column": 0,
+      "grid_row": 10,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c41",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c41",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiQuadSplitter",
+        "width_mode": "Expand"
+      },
+      "ref": "c41l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c41",
+      "properties": {
+        "fixed_height": 160,
+        "height_mode": "Fixed",
+        "width_mode": "Expand"
+      },
+      "ref": "c41w",
+      "type": "UiQuadSplitter"
+    },
+    {
+      "parent_ref": "c41w",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Quad 1",
+        "width_mode": "Fit"
+      },
+      "ref": "q1",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c41w",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Quad 2",
+        "width_mode": "Fit"
+      },
+      "ref": "q2",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c41w",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Quad 3",
+        "width_mode": "Fit"
+      },
+      "ref": "q3",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c41w",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Quad 4",
+        "width_mode": "Fit"
+      },
+      "ref": "q4",
+      "type": "UiLabel"
+    },
+    {
+      "grid_column": 1,
+      "grid_row": 10,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c42",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c42",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiAbsoluteLayout",
+        "width_mode": "Expand"
+      },
+      "ref": "c42l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c42",
+      "properties": {
+        "fixed_height": 120,
+        "height_mode": "Fixed",
+        "width_mode": "Expand"
+      },
+      "ref": "c42w",
+      "type": "UiAbsoluteLayout"
+    },
+    {
+      "parent_ref": "c42w",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Absolute child",
+        "width_mode": "Fit"
+      },
+      "ref": "c42w1",
+      "type": "UiLabel"
+    },
+    {
+      "grid_column": 2,
+      "grid_row": 10,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c43",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c43",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiDirectContentHost",
+        "width_mode": "Expand"
+      },
+      "ref": "c43l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c43",
+      "properties": {
+        "fixed_height": 90,
+        "height_mode": "Fixed",
+        "width_mode": "Expand"
+      },
+      "ref": "c43w",
+      "type": "UiDirectContentHost"
+    },
+    {
+      "parent_ref": "c43w",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Hosted content",
+        "width_mode": "Fit"
+      },
+      "ref": "c43c",
+      "type": "UiLabel"
+    },
+    {
+      "grid_column": 3,
+      "grid_row": 10,
+      "parent_ref": "tiles",
+      "properties": {
+        "direction": "V",
+        "gap": 4,
+        "height_mode": "Fit",
+        "width_mode": "Expand"
+      },
+      "ref": "c44",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c44",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "UiBoxLayout (Flow)",
+        "width_mode": "Expand"
+      },
+      "ref": "c44l",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c44",
+      "properties": {
+        "direction": "H",
+        "gap": 6,
+        "height_mode": "Fit",
+        "width_mode": "Expand",
+        "wrap": "Flow"
+      },
+      "ref": "c44w",
+      "type": "UiBoxLayout"
+    },
+    {
+      "parent_ref": "c44w",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Flow item",
+        "width_mode": "Fit"
+      },
+      "ref": "c44w1",
+      "type": "UiLabel"
+    },
+    {
+      "parent_ref": "c44w",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Wrap",
+        "width_mode": "Fit"
+      },
+      "ref": "c44w2",
+      "type": "UiButton"
+    },
+    {
+      "parent_ref": "c44w",
+      "properties": {
+        "height_mode": "Fit",
+        "text": "Next slot",
+        "width_mode": "Fit"
+      },
+      "ref": "c44w3",
+      "type": "UiLabel"
+    }
+  ],
+  "parent": 1,
+  "summary": "Dialog \"Ui Control Gallery\": Label heading, scrollable 4-column grid body with one labelled example of every registered Ui control (including advanced, layouts and containers), right-aligned OK/Cancel. Custom-typed value fields (DateTime datetime_value, RangeSlider value, RangeSliderEdit value, ChartRing segments) stay at schema defaults because the composition property channel rejects structured values."
+}

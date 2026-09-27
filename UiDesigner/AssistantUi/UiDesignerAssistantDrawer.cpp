@@ -1,13 +1,19 @@
 #include "UiDesignerAssistantDrawer.h"
 namespace Upp {
 UiDesignerAssistantDrawer::UiDesignerAssistantDrawer(UiDesignerSession& s):session(s),host(s) {
-    Ctrl* controls[]={&heading,&context,&reference,&history,&transcript,&composer,&send,&profile_button,&clear,&undo,&clear_reference};
+    Ctrl* controls[]={&heading,&context,&reference,&history,&transcript,&composer,&send,&profile_button,&clear,&undo,&clear_reference,&copy_log};
     for(auto* c:controls)Add(*c);
     heading.SetText("Assistant  |  History");
     history.Tip("Proposal history: jump to its reply; selecting does not apply.");
     composer.SetPlaceholder("Describe a design or adjustment. Enter sends; Shift+Enter adds a line.");
     send.SetText("Send");clear.SetText("Clear all");undo.SetText("Undo");clear_reference.SetText("Cancel refinement");
     clear.Tip("Clear discussion and proposals. Keep the design and Undo history.");
+    copy_log.SetText("Copy log");copy_log.Tip("Copy all replies, activity and proposal JSON, including folded messages.");
+    copy_log.WhenAction=[=]{
+        String log=transcript.ExportText();
+        for(const auto& p:host.Proposals())log<<"Proposal "<<p.id<<" ["<<host.ProposalState(p.id)<<"]\n"<<AsJSON(p.args,true)<<"\n\n";
+        WriteClipboardText(log);context.SetText("Discussion, activity and proposals copied.");
+    };
     undo.Tip("Undo the latest Document change, not the selected history item.");
     context.SetText("Ask for a design. Review a proposal before applying.");
     send.WhenAction=[=]{if(turn.active)Stop();else Submit();};composer.WhenSend=[=]{Submit();};
@@ -133,12 +139,12 @@ void UiDesignerAssistantDrawer::Tick(){
                 reply.AddAction("unavailable","No proposal to apply",Event<>(),failed?UiRole::Alert:UiRole::Subtle).Disable();
                 if(failed) {
                     String original=submitted_request, candidate=rejected_candidate;
-                    String reason=turn.last_tool_error.IsEmpty()?turn.error:turn.last_tool_error;
+                    String reason=turn.error.IsEmpty()?turn.last_tool_error:turn.error;
                     reply.AddAction("retry","Retry with fix",[=]{
                         if(turn.active)return;
                         retry_context=candidate;
                         composer.SetTextUtf8(original+"\n\nThe previous attempt failed: "+reason+
-                            "\nPrepare a corrected proposal. Fix the reported invalid field/type; omit unsupported decoration, keep the requested layout, and use only returned schema fields. Do not apply automatically.");
+                            "\nPrepare the complete requested design, not an empty shell or single container. Use compact configuration schemas; retrieve each type once and omit theme discovery unless styling is requested. Fix reported invalid fields using returned schemas. If limits prevent completion, explicitly list the missing work rather than presenting a partial shell as finished. Do not apply automatically.");
                         Submit();
                     },UiRole::Accent);
                 }
@@ -191,7 +197,7 @@ void UiDesignerAssistantDrawer::SyncProposals(){
 }
 void UiDesignerAssistantDrawer::RefreshTheme(){
     SetCustomStyle(UiTheme::ResolvePanel(UiPanelRole::Surface));send.SetCustomStyle(UiTheme::ResolveButton(UiRole::Accent));
-    for(auto* b:{&clear,&undo,&profile_button,&clear_reference})b->SetCustomStyle(UiTheme::ResolveButton(UiRole::Subtle));
+    for(auto* b:{&clear,&undo,&profile_button,&clear_reference,&copy_log})b->SetCustomStyle(UiTheme::ResolveButton(UiRole::Subtle));
     transcript.RefreshTheme();Refresh();
 }
 void UiDesignerAssistantDrawer::Paint(Draw& w){UiPanel::Paint(w);w.DrawRect(0,0,GetSize().cx,2,SColorShadow());}
@@ -200,7 +206,7 @@ void UiDesignerAssistantDrawer::MouseMove(Point,dword){if(HasCapture())WhenHeigh
 void UiDesignerAssistantDrawer::LeftUp(Point,dword){if(HasCapture())ReleaseCapture();}
 void UiDesignerAssistantDrawer::Layout(){
     int w=GetSize().cx,h=GetSize().cy;
-    heading.SetRect(12,8,186,28);history.SetRect(200,8,max(40,w-386),28);clear.SetRect(max(0,w-100),8,88,28);undo.SetRect(max(0,w-172),8,66,28);
+    heading.SetRect(12,8,186,28);history.SetRect(200,8,max(40,w-480),28);copy_log.SetRect(max(0,w-266),8,88,28);clear.SetRect(max(0,w-100),8,88,28);undo.SetRect(max(0,w-172),8,66,28);
     int bottom=max(80,h-98),ref_h=refinement_id.IsEmpty()?0:26;
     transcript.SetRect(8,42,max(0,w-16),max(20,bottom-48-ref_h));reference.Show(ref_h);clear_reference.Show(ref_h);
     reference.SetRect(12,bottom-ref_h,max(0,w-165),24);clear_reference.SetRect(max(0,w-150),bottom-ref_h,138,24);

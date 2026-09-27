@@ -1,6 +1,7 @@
 #include <UiDesigner/AssistantUi/UiDesignerAssistantDrawer.h>
 #include <UiDesigner/Theme/UiDesignerThemeBuilderV2.h>
 #include <UiDesigner/Theme/UiDesignerThemeAdapter.h>
+#include <UiDesigner/Preview/UiDesignerPreview.h>
 using namespace Upp;
 static int checks = 0, failed = 0;
 static void Check(bool ok, const char* name) { checks++; if(!ok) { failed++; Cout() << "FAIL " << name << "\n"; } }
@@ -40,6 +41,170 @@ template <class T> static void CheckNumericBounds() {
     }
 }
 GUI_APP_MAIN {
+  {
+    UiDateTime date;
+    Image circle = UiGetCachedAACircleImage(Size(21,21), Black());
+    Check(circle[10][10].a > 240 && circle[0][0].a == 0 && circle[20][20].a == 0,
+          "cached circle is centered with transparent corners");
+    Check(circle[10][3].a == circle[10][17].a && circle[3][10].a == circle[17][10].a,
+          "cached circle has symmetric coverage");
+    bool picker_found=false;
+    const int indicator=UiTheme::ResolveDropdown().indicator_size;
+    for(Ctrl* child=date.GetFirstChild();child;child=child->GetNext())
+        if(auto* picker=dynamic_cast<UiButton*>(child)) {
+            picker_found=true;
+            Check(picker->GetText().IsEmpty() && picker->GetIconSize().cx==indicator &&
+                  picker->GetIconSize().cy < indicator,
+                  "DateTime uses dropdown-sized icon rather than font caret");
+        }
+    Check(picker_found,"DateTime picker button exists");
+    UiSplitButton split;
+    Check(split.GetSplitIconSize()==DPI(12),"split default caret matches dropdown baseline");
+    for(auto preset:{UiThemePreset::Minimal,UiThemePreset::Pill,UiThemePreset::Linear,UiThemePreset::Solid})
+      for(auto direction:{UiDirection::H,UiDirection::V}) {
+        UiThemeContext context;context.preset=preset;
+        auto style=UiTheme::ResolveSlider(context);
+        style.thumb_size=Size(40,40);
+        UiRangeSlider range(direction);range.SetCustomStyle(style);
+        UiSlider slider;slider.SetDirection(direction).SetCustomStyle(style);slider.ExpandTrack(true);
+        Size extent=direction==UiDirection::H?Size(160,48):Size(48,160);
+        range.SetRect(Rect(extent));slider.SetRect(Rect(extent));
+        for(Rect track:{range.GetTrackRect(),slider.GetTrackGeometry()}) {
+            int first=direction==UiDirection::H?track.left:track.top;
+            int last=direction==UiDirection::H?track.right:track.bottom;
+            Check(first>=20 && last+20<=160,"slider endpoints reserve full custom thumb in both orientations");
+        }
+      }
+  }
+  {
+    UiList list;
+    list.Model().Add("One"); list.Model().Add("Two");
+    const int two = list.GetMinSize().cy;
+    list.Model().Add("Three"); list.Model().Add("Four");
+    Check(list.GetMinSize().cy > two, "list Fit height follows row count");
+    list.Model().Clear(); list.Model().Add("One"); list.Model().Add("Two");
+    Check(list.GetMinSize().cy == two, "list Fit shrinks after removing rows");
+    UiThemeContext theme;
+    theme.preset = UiThemePreset::Minimal;
+    for(auto mode : {UiThemeMode::Light, UiThemeMode::Dark}) {
+        theme.mode = mode;
+        auto selected = UiTheme::ResolveTree(theme, UiRole::Standard);
+        Check(selected.selected_face == Color(29,78,216) && selected.selected_ink == White(),
+              "minimal tree selection has strong blue and white contrast in both modes");
+    }
+  }
+  {
+    // Exact successful proposal from the user's failed 179-node gallery.
+    Value fixture=ParseJSON(LoadFile(AppendFileName(GetFileFolder(__FILE__),"gallery-proposal.json")));
+    Check(fixture.Is<ValueMap>(),"load live gallery regression fixture");
+    if(fixture.Is<ValueMap>()) {
+      UiDesignerSession s;s.SetVirtualSize(Size(1120,760));
+      UiDesignerAssistantHost host(s);host.Capture("Designer");
+      ValueMap args=fixture;args.Set("parent",s.Document().GetRootId());
+      auto proposal=host.Execute("prepare_composition",args);
+      if(!Ok(proposal))Cout()<<AsJSON(proposal)<<'\n';
+      Check(Ok(proposal) && Ok(host.Apply(ProposalId(proposal))),"replay exact live gallery proposal");
+      for(const auto& node:s.Document().GetNodes())if(node.type=="UiTab" || node.type=="UiAccordion")
+          Check(node.children.GetCount()==2,"explicit semantic children replace seeded examples");
+      UiDesignerPreviewCanvas canvas;canvas.SetRect(0,0,1200,850);
+      canvas.SetCatalog(&s.Catalog());canvas.SetDocument(&s.Document());canvas.RebuildDocument();canvas.Layout();
+      UiScrollPanel* scroll=nullptr;Ctrl* content=nullptr;
+      for(const auto& node:s.Document().GetNodes()) if(node.type=="UiScrollPanel" && !node.children.IsEmpty()) {
+          scroll=dynamic_cast<UiScrollPanel*>(canvas.FindRuntime(node.id));
+          content=canvas.FindRuntime(node.children[0]);break;
+      }
+      Check(scroll && content && content->GetParent()==&scroll->Content(),"scroll adapter parents gallery inside actual content host");
+      if(scroll && content) {
+          scroll->Layout();content->Layout();
+          Cout()<<"Gallery viewport "<<scroll->GetSize()<<" content "<<scroll->GetContentSize()<<" grid "<<content->GetSize()<<'\n';
+          Check(scroll->GetContentSize().cy>scroll->GetSize().cy,"gallery has a scrollable vertical extent");
+          Check(content->GetSize().cx>=scroll->GetSize().cx-40,"gallery fills viewport width");
+          Check(content->GetSize()==scroll->GetContentSize(),"scroll content keeps SizePos through preview layout");
+          scroll->SetScrollPos(Point(0,100));Check(scroll->GetScrollPos().y>0,"gallery scroll position advances");
+          const auto before_scroll = scroll->GetScrollPos();
+          Point wheel_point = scroll->GetScreenRect().TopLeft() - canvas.GetScreenRect().TopLeft() + Point(25,25);
+          Check(canvas.ScrollAt(wheel_point,-120,0) && scroll->GetScrollPos().y>before_scroll.y,
+                "editable preview routes wheel to scroll panel");
+          bool tested_clip = false;
+          for(const auto& node:s.Document().GetNodes()) {
+              const auto* record=canvas.FindGeometry(node.id);
+              if(record && record->clipped && !record->clip.Contains(record->rect.CenterPoint())) {
+                  Check(canvas.HitNode(record->rect.CenterPoint())!=node.id,
+                        "scrolled-out controls cannot steal selection outside viewport");
+                  tested_clip = true; break;
+              }
+          }
+          Check(tested_clip,"scroll gallery includes clipped geometry");
+          Vector<Rect> tiles;
+          for(Ctrl* child=content->GetFirstChild();child;child=child->GetNext())tiles.Add(child->GetRect());
+          bool overlap=false;
+          for(int i=0;i<tiles.GetCount();i++)for(int j=i+1;j<tiles.GetCount();j++)
+              overlap=overlap || !(tiles[i]&tiles[j]).IsEmpty();
+          Check(tiles.GetCount()==44 && !overlap,"all gallery tiles have distinct non-overlapping allocations");
+      }
+      UiDesignerCodeGenerator gen(s.Catalog());auto generated=gen.Generate(s.Document(),"UiControlGallery");
+      Check(generated.IsValid() && generated.source.Find(".Content().Add(")>=0,"generated gallery uses scroll content host");
+      SaveFile(AppendFileName(GetFileFolder(GetExeFilePath()),"gallery-repaired.uidesign.json"),UiDesignerSerialize(s.Document(),true));
+      SaveFile(AppendFileName(GetFileFolder(GetExeFilePath()),"gallery-repaired.cpp"),generated.source);
+      String output=AppendFileName(GetFileFolder(GetExeFilePath()),"gallery-regression/UiControlGallery");RealizeDirectory(output);
+      for(const auto& file:generated.files) {
+          String path=AppendFileName(output,file.relative_path);RealizePath(path);SaveFile(path,file.content);
+      }
+      Vector<UiDesignerNodeId> sizing_nodes;
+      for(const auto& node:s.Document().GetNodes())
+          if(node.type=="UiList" || node.type=="UiButton" || node.type=="UiTree") sizing_nodes.Add(node.id);
+      for(auto id:sizing_nodes) {
+          auto* node=s.Document().Find(id);
+          node->SetProperty("height_mode","Fit");
+          canvas.ApplyProperty(id,"height_mode","Fit");
+          const int authored_min=node->GetProperty("min_height",0);
+          canvas.ApplyTransient(id,UiDesignerTransientValueKind::NormalProperty,"min_height",400);
+          Check(canvas.FindRuntime(id)->GetSize().cy>=400 && (int)node->GetProperty("min_height",0)==authored_min,
+                "minimum height previews before inspector commit");
+          node->SetProperty("min_height",360);
+          canvas.ApplyProperty(id,"min_height",360);
+          Cout()<<node->type<<" minimum360 actual="<<canvas.FindRuntime(id)->GetSize().cy<<'\n';
+          Check(canvas.FindRuntime(id)->GetSize().cy>=360,"live minimum height applies to collection and button controls");
+          Ctrl* runtime=canvas.FindRuntime(id);
+          Check(runtime->GetRect().bottom<=runtime->GetParent()->GetSize().cy,
+                "resized Fit control remains inside its gallery cell");
+      }
+    }
+  }
+  {
+    AppChatConversationView log;
+    auto& card=log.AddMessage("Assistant","Full reply\nincluding folded text");
+    card.SetStatus("Failed");card.SetActivity("prepare_composition ERROR: bad field");card.SetExpanded(false);
+    String exported=log.ExportText();
+    Check(exported.Find("including folded text")>=0 && exported.Find("Status: Failed")>=0 && exported.Find("bad field")>=0,
+          "copy log includes folded content, status and activity");
+    log.ClearMessages();Check(log.ExportText().IsEmpty(),"clear discussion clears export");
+    UiDesignerSession session;UiDesignerAssistantHost host(session);host.Capture("Designer");
+    ValueMap q;q.Set("query","");auto catalogue=host.Execute("search_controls",q);
+    ValueArray replies;int count=0;
+    for(const Value& item:(ValueArray)catalogue["result"]) {
+        if(item["stock_upp"]==true)continue;
+        ValueMap query;query.Set("type",item["type"]);
+        Value spec=host.Execute("describe_control",query);
+        Check(Ok(spec) && IsNull(spec["result"]["theme_fields"]),"default discovery excludes unrelated theme fields");
+        replies.Add(AppChatMessage("tool",AsJSON(spec)));++count;
+    }
+    int bytes=AsJSON(replies).GetCount();
+    Cout()<<"Compact Ui discovery: "<<count<<" types, "<<bytes<<" request bytes\n";
+    Check(count>40 && bytes<350000,"entire Ui catalogue leaves request room for composition and continuation");
+    ValueMap query;query.Set("type","UiButton");query.Set("include_theme",true);
+    Check(host.Execute("describe_control",query)["result"]["theme_fields"].Is<ValueArray>(),"explicit styling discovery remains available");
+    ValueArray items;ValueMap root,props;
+    root.Set("ref","gallery");root.Set("parent_ref","");root.Set("type","UiBoxLayout");root.Set("properties",props);items.Add(root);
+    for(int i=0;i<100;i++) {
+        ValueMap item;item.Set("ref","item"+AsString(i));item.Set("parent_ref","gallery");item.Set("type","UiLabel");item.Set("properties",props);items.Add(item);
+    }
+    ValueMap composition;composition.Set("summary","Large composition");composition.Set("parent",session.Document().GetRootId());composition.Set("items",items);
+    String before=Authored(session.Document());auto result=host.Execute("prepare_composition",composition);
+    if(!Ok(result))Cout()<<AsJSON(result)<<'\n';
+    Check(Ok(result) && Authored(session.Document())==before,"large composition prepares atomically without live mutation");
+    Check(Ok(host.Apply(ProposalId(result))) && session.Undo() && Authored(session.Document())==before,"large composition applies and undoes as one group");
+  }
   {
     UiDesignerSession s; UiDesignerAssistantHost host(s); host.Capture("Designer");
     String before=Authored(s.Document());
@@ -492,7 +657,7 @@ GUI_APP_MAIN {
     Check(initial == Authored(session.Document()),"discussion/inspection has no mutation");
     ValueMap query; query.Set("query","button"); Check(Ok(host.Execute("search_controls",query)),"catalog search");
     ValueMap skill; skill.Set("id","typography-v1"); Check(Ok(host.Execute("retrieve_skill",skill)),"embedded skill arbitrary cwd");
-    ValueMap type; type.Set("type","UiButton"); auto spec = host.Execute("describe_control",type);
+    ValueMap type; type.Set("type","UiButton");type.Set("include_theme",true); auto spec = host.Execute("describe_control",type);
     Check(Ok(spec) && spec["result"]["theme_fields"].Is<ValueArray>(),"actual theme field schema");
     Check(ParseJSON(AsJSON(spec)).Is<ValueMap>(),"catalog including typed Color defaults serializes to provider JSON");
     ValueMap inspect; ValueArray inspected; inspected.Add(a); inspect.Set("nodes",inspected);

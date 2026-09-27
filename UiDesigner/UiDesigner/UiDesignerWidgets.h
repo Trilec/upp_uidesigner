@@ -84,6 +84,7 @@ private:
     UiPanel tool_panel_;
     UiBoxLayout tool_layout_;
     UiBoxLayout action_layout_;
+    StaticRect action_separator_;
     UiToolButton close_;
     UiToolButton expand_;
     Array<UiToolButton> section_buttons_;
@@ -93,6 +94,7 @@ private:
     UiStack pages_;
 
     UiDesignerPaneWidth width_ = PANE_NORMAL;
+    UiDesignerPaneWidth expanded_width_ = PANE_NORMAL;
     int active_section_ = 0;
     bool right_ = false;
 };

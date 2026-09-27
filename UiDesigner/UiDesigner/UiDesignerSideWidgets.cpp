@@ -172,6 +172,8 @@ UiDesignerSideColumn::UiDesignerSideColumn()
     tool_panel_.Add(tool_layout_);
     toolbar_surface_.Add(tool_panel_);
     toolbar_surface_.Add(action_layout_);
+    toolbar_surface_.Add(action_separator_);
+    action_separator_.Color(SColorShadow());
 
     content_surface_.SetCustomStyle(UiDesignerSurfaceStyle());
     content_surface_.Add(pages_);
@@ -183,7 +185,9 @@ UiDesignerSideColumn::UiDesignerSideColumn()
           .SetContentInset(DPI(4))
           .SetAlign(UiAlign::CENTER, UiAlign::CENTER);
     close_.Tip("Collapse panel");
-    close_.WhenAction = [=] { Close(); };
+    close_.WhenAction = [=] {
+        SetPaneWidth(width_ == PANE_CLOSED ? expanded_width_ : PANE_CLOSED);
+    };
 
     expand_.SetCustomStyle(UiTheme::ResolveToolButton(UiRole::Subtle));
     expand_.SetIcon(ICON_DESIGN_UNFOLD_MORE_48())
@@ -203,6 +207,10 @@ UiDesignerSideColumn::UiDesignerSideColumn()
 UiDesignerSideColumn& UiDesignerSideColumn::RightColumn(bool on)
 {
     right_ = on;
+    while(action_layout_.GetItemCount())
+        action_layout_.RemoveItem(0);
+    action_layout_.Add(on ? close_ : expand_).Fixed(DPI(24)).MinCross(DPI(24));
+    action_layout_.Add(on ? expand_ : close_).Fixed(DPI(24)).MinCross(DPI(24));
     close_.SetIcon(on ? ICON_DESIGN_RIGHT_PANEL_CLOSE_48()
                       : ICON_DESIGN_LEFT_PANEL_CLOSE_48());
     return *this;
@@ -235,6 +243,7 @@ UiDesignerSideColumn& UiDesignerSideColumn::ApplyTheme(
     UiPanel::Style tool_style = UiDesignerLayoutSurfaceStyle();
     tool_panel_.SetCustomStyle(tool_style);
     toolbar_surface_.SetCustomStyle(UiDesignerReferencePillStyle(theme));
+    action_separator_.Color(SColorShadow());
     close_.SetCustomStyle(UiTheme::ResolveToolButton(UiRole::Subtle));
     expand_.SetCustomStyle(UiTheme::ResolveToolButton(UiRole::Subtle));
     UpdateToolSelection();
@@ -252,6 +261,8 @@ void UiDesignerSideColumn::SetPaneWidth(UiDesignerPaneWidth width)
     if(width_ == width)
         return;
     width_ = width;
+    if(width_ != PANE_CLOSED)
+        expanded_width_ = width_;
     Layout();
     WhenWidthChanged();
 }
@@ -280,7 +291,7 @@ void UiDesignerSideColumn::Select(int index)
     active_section_ = index;
     pages_.SetActivePage(index);
     if(width_ == PANE_CLOSED)
-        width_ = PANE_NORMAL;
+        width_ = expanded_width_;
     UpdateToolSelection();
     Layout();
     WhenSectionChanged(index);
@@ -308,25 +319,28 @@ int UiDesignerSideColumn::GetToolRowHeight(int width) const
 
 void UiDesignerSideColumn::Cycle()
 {
+    UiDesignerPaneWidth next = PANE_NORMAL;
     switch(width_) {
-    case PANE_CLOSED: width_ = PANE_NORMAL; break;
-    case PANE_NORMAL: width_ = PANE_MEDIUM; break;
-    case PANE_MEDIUM: width_ = PANE_WIDE; break;
-    case PANE_WIDE: width_ = PANE_NORMAL; break;
+    case PANE_CLOSED: next = expanded_width_; break;
+    case PANE_NORMAL: next = PANE_MEDIUM; break;
+    case PANE_MEDIUM: next = PANE_WIDE; break;
+    case PANE_WIDE: next = PANE_NORMAL; break;
     }
-    Layout();
-    WhenWidthChanged();
+    SetPaneWidth(next);
 }
 
 void UiDesignerSideColumn::Close()
 {
-    width_ = PANE_CLOSED;
-    Layout();
-    WhenWidthChanged();
+    SetPaneWidth(PANE_CLOSED);
 }
 
 void UiDesignerSideColumn::Layout()
 {
+    const bool closed = width_ == PANE_CLOSED;
+    close_.Tip(closed ? "Expand panel" : "Collapse panel");
+    close_.SetIcon(right_
+        ? (closed ? ICON_DESIGN_RIGHT_PANEL_OPEN_48() : ICON_DESIGN_RIGHT_PANEL_CLOSE_48())
+        : (closed ? ICON_DESIGN_LEFT_PANEL_OPEN_48() : ICON_DESIGN_LEFT_PANEL_CLOSE_48()));
     const int w = GetSize().cx;
     const int h = GetSize().cy;
     if(width_ == PANE_CLOSED) {
@@ -344,7 +358,7 @@ void UiDesignerSideColumn::Layout()
 
     const int toolbar_h = width_ == PANE_CLOSED
         ? UiDesignerStyleMetrics::SideToolbarHeight() : GetToolRowHeight(w);
-    const int inset = width_ == PANE_CLOSED ? 0 : DPI(12);
+    const int inset = DPI(12);
     const int inner_w = max(0, w - 2 * inset);
     const int action_w = min(DPI(52), inner_w);
     const int panel_w = max(0, inner_w - action_w);
@@ -356,6 +370,10 @@ void UiDesignerSideColumn::Layout()
         tool_panel_.SetRect(inset, 0, panel_w, toolbar_h);
         action_layout_.SetRect(inset + panel_w, 0, action_w, toolbar_h);
     }
+    action_separator_.Show(!closed);
+    action_separator_.SetRect(right_ ? inset + action_w + DPI(4)
+                                     : inset + panel_w - DPI(4),
+                              (toolbar_h - DPI(20)) / 2, DPI(1), DPI(20));
 
     const Size panel_size = tool_panel_.GetSize();
     const int panel_content_inset = DPI(12);

@@ -21,6 +21,8 @@ replacing the live document with JSON.
 3. Read `references/controls/index.json`, then only the JSON schemas for controls
    you use. Property IDs, enum values, child attachment rules and supported theme
    fields must come from these schemas. Do not infer fields from C++ method names.
+4. For screenshots, HTML or comprehensive galleries, read
+   [reference translation and coverage](references/reference-workflow.md).
 
 ## Translate the reference
 

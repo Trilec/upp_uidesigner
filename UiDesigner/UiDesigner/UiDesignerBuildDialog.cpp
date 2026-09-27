@@ -1,6 +1,12 @@
 #include "UiDesignerBuildDialog.h"
 
 namespace Upp {
+void UiDesignerBuildDialog::Paint(Draw& draw)
+{
+    Color paper = UiTheme::ResolvePanel(UiPanelRole::Surface).palette.face[ST_NORMAL].color;
+    draw.DrawRect(GetSize(), IsNull(paper) ? SColorFace() : paper);
+}
+
 namespace {
 const char* build_keys[] = {"umk", "nests", "method", "folder", "package", "class", "executable"};
 }

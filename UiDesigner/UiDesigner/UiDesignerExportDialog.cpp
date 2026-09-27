@@ -2,6 +2,12 @@
 
 namespace Upp {
 
+void UiDesignerExportDialog::Paint(Draw& draw)
+{
+    Color paper = UiTheme::ResolvePanel(UiPanelRole::Surface).palette.face[ST_NORMAL].color;
+    draw.DrawRect(GetSize(), IsNull(paper) ? SColorFace() : paper);
+}
+
 static int ProfileIndex(UiDesignerExportProfile profile)
 {
     return (int)profile;

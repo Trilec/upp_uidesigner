@@ -1,4 +1,4 @@
 description "Real GUI lifecycle assistant integration tests";
 uses CtrlLib, UiDesigner/AssistantUi;
-file main.cpp;
+file main.cpp, gallery-proposal.json;
 mainconfig "" = "GUI";

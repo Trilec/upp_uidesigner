@@ -110,7 +110,7 @@ void AppChatTurn::Launch() {
         active = false; return;
     }
     if(AsJSON(messages).GetCount() > limits.request_bytes) {
-        error = Format("Assistant stopped: conversation exceeds the %d-byte request limit. Start a shorter request.", limits.request_bytes);
+        error = Format("Assistant stopped: accumulated conversation/tool data exceeds the %d-byte request limit. Retry with less repeated discovery or split the work into explicit stages.", limits.request_bytes);
         active = false; return;
     }
     ++round;
@@ -164,7 +164,8 @@ void AppChatTurn::Poll(const Function<Value(const String&, const ValueMap&)>& ex
         Value value;
         try { value = execute(AsString(c["function"]["name"]), (ValueMap)ParseJSON(AsString(c["function"]["arguments"]))); }
         catch(...) { error = "Host tool failed; no automatic retry"; active = false; return; }
-        ValueMap result = AppChatMessage("tool", AsJSON(value));
+        String result_json=AsJSON(value);
+        ValueMap result = AppChatMessage("tool", result_json);
         result.Set("tool_call_id", c["id"]); messages.Add(result); calls++;
         bool failed = value.Is<ValueMap>() && value["ok"] == false;
         String detail;
@@ -176,7 +177,7 @@ void AppChatTurn::Poll(const Function<Value(const String&, const ValueMap&)>& ex
         }
         WhenActivity(Format("Round %d call %d: %s %s", round, calls,
             AsString(c["function"]["name"]), failed ? "ERROR" : "OK") +
-            (failed ? ": " + detail : String()));
+            (failed ? ": " + detail : String()) + Format(" [%d result bytes]",result_json.GetCount()));
     }
     Launch();
 }

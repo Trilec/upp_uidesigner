@@ -70,7 +70,7 @@ static UiDesignerSizeProfile ResolveSizeProfile(const String& type,
         {"UiBezierCurveField", 220, 100, 120, 60},
         {"UiDropdown", 140, 25, 80, 25},
         {"UiMenu", 180, 120, 100, 60},
-        {"UiColorPicker", 480, 360, 320, 240},
+        {"UiColorPicker", 720, 520, 640, 460},
 
         {"UppLabel", 100, 25, 40, 20},
         {"UppButton", 80, 25, 50, 25},
@@ -1154,8 +1154,9 @@ static void RegisterNative(UiDesignerCatalog& catalog)
             if(const UiDesignerThemeAdapter* adapter = UiDesignerFindThemeAdapter(s.theme_adapter_id))
                 adapter->AddThemeOverrides(s);
         }
-        if(String(c.type) == "UiScrollPanel" ||
-           String(c.type) == "UiDirectContentHost")
+        if(String(c.type) == "UiScrollPanel")
+            s.child_adapter_id = "scroll_panel";
+        if(String(c.type) == "UiDirectContentHost")
             s.child_adapter_id = "single";
         if(String(c.type) == "UiGroupPanel" || String(c.type) == "UiTitleCard")
             AddTitle(s, c.display);

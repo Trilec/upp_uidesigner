@@ -13,6 +13,7 @@ public:
     explicit UiDesignerBuildDialog(UiDesignerSession& session);
     ~UiDesignerBuildDialog();
     void Layout() override;
+    void Paint(Draw& draw) override;
     bool Key(dword key, int count) override;
 private:
     void Build();

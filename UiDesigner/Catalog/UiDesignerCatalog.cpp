@@ -1002,10 +1002,10 @@ void AddUiDesignerCommonProperties(UiDesignerControlSpec& spec)
                      .Choice("Expand", "Expand");
         else if(String(field.id) == "cell_align_x")
             property.Choice("Left", "Left")
-                     .Choice("Center", "Center").Choice("Right", "Right");
+                     .Choice("Center", "Center").Choice("Right", "Right").Choice("Stretch", "Stretch");
         else
             property.Choice("Top", "Top")
-                     .Choice("Center", "Center").Choice("Bottom", "Bottom");
+                     .Choice("Center", "Center").Choice("Bottom", "Bottom").Choice("Stretch", "Stretch");
         property.impact = PropertyImpactLocalLayout |
                           PropertyImpactAncestorLayout | PropertyImpactCode;
         spec.properties.Add(property);

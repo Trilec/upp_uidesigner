@@ -1,0 +1,6473 @@
+{
+	"format": "upp-ui-designer-project",
+	"schema": 2,
+	"document": {
+		"format": "upp-ui-designer-next",
+		"schema": 4,
+		"ordering": "explicit-children",
+		"document_id": "056951146236A48499D3E2BCBACB197E",
+		"revision": 32,
+		"virtual_size": {
+			"cx": 1141,
+			"cy": 1002
+		},
+		"nodes": [
+			{
+				"id": 1,
+				"parent": 0,
+				"type": "Window",
+				"name": "Window",
+				"flags": 9,
+				"children": [
+					2
+				],
+				"properties": {
+
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 2,
+				"parent": 1,
+				"type": "UiGridLayout",
+				"name": "grid",
+				"flags": 3,
+				"children": [
+					3,
+					4,
+					6
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Expand",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 12,
+					"gap": 8,
+					"debug_layout": false,
+					"rows": 3,
+					"columns": 1,
+					"min_cell_width": 10,
+					"min_cell_height": 10
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 3,
+				"parent": 2,
+				"type": "UiLabel",
+				"name": "label",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Ui Control Gallery",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6,
+					"grid_row": 0,
+					"grid_column": 0
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 4,
+				"parent": 2,
+				"type": "UiScrollPanel",
+				"name": "scroll",
+				"flags": 1,
+				"children": [
+					5
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Expand",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 280,
+					"fixed_height": 160,
+					"min_width": 100,
+					"min_height": 70,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 4,
+					"grid_row": 1,
+					"grid_column": 0
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 5,
+				"parent": 4,
+				"type": "UiGridLayout",
+				"name": "grid_2",
+				"flags": 3,
+				"children": [
+					10,
+					13,
+					16,
+					19,
+					22,
+					25,
+					28,
+					31,
+					34,
+					37,
+					40,
+					43,
+					46,
+					49,
+					52,
+					55,
+					58,
+					61,
+					64,
+					67,
+					70,
+					73,
+					76,
+					79,
+					82,
+					85,
+					88,
+					91,
+					94,
+					97,
+					100,
+					106,
+					109,
+					122,
+					140,
+					144,
+					150,
+					158,
+					165,
+					172,
+					176,
+					180,
+					134
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Left",
+					"cell_align_y": "Top",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 4,
+					"gap": 10,
+					"debug_layout": false,
+					"rows": 11,
+					"columns": 4,
+					"min_cell_width": 10,
+					"min_cell_height": 10
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 6,
+				"parent": 2,
+				"type": "UiBoxLayout",
+				"name": "box",
+				"flags": 3,
+				"children": [
+					7,
+					8,
+					9
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 8,
+					"debug_layout": false,
+					"direction": "H",
+					"wrap": "None",
+					"grid_row": 2,
+					"grid_column": 0
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 7,
+				"parent": 6,
+				"type": "Spacer",
+				"name": "spacer",
+				"flags": 24,
+				"children": [
+
+				],
+				"properties": {
+					"weight": 1,
+					"layout_break": false,
+					"h_sizing": "Fill",
+					"v_sizing": "Auto",
+					"fixed_width": 0,
+					"fixed_height": 0,
+					"min_width": 0,
+					"min_height": 0,
+					"max_width": 0,
+					"max_height": 0,
+					"grid_row": 0,
+					"grid_column": 0,
+					"line_enabled": false,
+					"line_orientation": "Horizontal",
+					"line_align": "Center",
+					"line_thickness": 1,
+					"line_dash": "Solid",
+					"line_inset": 0,
+					"line_color_enabled": false,
+					"line_color": {
+						"$type": "Color",
+						"r": 128,
+						"g": 128,
+						"b": 128
+					}
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 8,
+				"parent": 6,
+				"type": "UiButton",
+				"name": "button",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 80,
+					"fixed_height": 25,
+					"min_width": 50,
+					"min_height": 25,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "OK",
+					"icon": "None",
+					"icon_side": "Left",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "MonoTint",
+					"scale_icon_to_content": false,
+					"align_h": "Center",
+					"align_v": "Center",
+					"content_inset_left": 4,
+					"content_inset_top": 4,
+					"content_inset_right": 4,
+					"content_inset_bottom": 4,
+					"click_focus": true,
+					"checkable": false,
+					"checked": false
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 9,
+				"parent": 6,
+				"type": "UiButton",
+				"name": "button_2",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 80,
+					"fixed_height": 25,
+					"min_width": 50,
+					"min_height": 25,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Cancel",
+					"icon": "None",
+					"icon_side": "Left",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "MonoTint",
+					"scale_icon_to_content": false,
+					"align_h": "Center",
+					"align_v": "Center",
+					"content_inset_left": 4,
+					"content_inset_top": 4,
+					"content_inset_right": 4,
+					"content_inset_bottom": 4,
+					"click_focus": true,
+					"checkable": false,
+					"checked": false
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 10,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_2",
+				"flags": 3,
+				"children": [
+					11,
+					12
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 0,
+					"grid_column": 0
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 11,
+				"parent": 10,
+				"type": "UiLabel",
+				"name": "label_2",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiLabel",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 12,
+				"parent": 10,
+				"type": "UiLabel",
+				"name": "label_3",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Plain text label example",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 13,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_3",
+				"flags": 3,
+				"children": [
+					14,
+					15
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 0,
+					"grid_column": 1
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 14,
+				"parent": 13,
+				"type": "UiLabel",
+				"name": "label_4",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiButton",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 15,
+				"parent": 13,
+				"type": "UiButton",
+				"name": "button_3",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 80,
+					"fixed_height": 25,
+					"min_width": 50,
+					"min_height": 25,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Button",
+					"icon": "None",
+					"icon_side": "Left",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "MonoTint",
+					"scale_icon_to_content": false,
+					"align_h": "Center",
+					"align_v": "Center",
+					"content_inset_left": 4,
+					"content_inset_top": 4,
+					"content_inset_right": 4,
+					"content_inset_bottom": 4,
+					"click_focus": true,
+					"checkable": false,
+					"checked": false
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 16,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_4",
+				"flags": 3,
+				"children": [
+					17,
+					18
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 0,
+					"grid_column": 2
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 17,
+				"parent": 16,
+				"type": "UiLabel",
+				"name": "label_5",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiToolButton",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 18,
+				"parent": 16,
+				"type": "UiToolButton",
+				"name": "tool_button",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 25,
+					"fixed_height": 25,
+					"min_width": 25,
+					"min_height": 25,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"icon": "ICON_DESIGN_TUNE_48",
+					"icon_side": "Left",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "MonoTint",
+					"scale_icon_to_content": false,
+					"align_h": "Center",
+					"align_v": "Center",
+					"content_inset_left": 4,
+					"content_inset_top": 4,
+					"content_inset_right": 4,
+					"content_inset_bottom": 4,
+					"click_focus": true,
+					"checkable": false,
+					"checked": false,
+					"text": "Tool",
+					"tooltip": "Tool button example"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 19,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_5",
+				"flags": 3,
+				"children": [
+					20,
+					21
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 0,
+					"grid_column": 3
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 20,
+				"parent": 19,
+				"type": "UiLabel",
+				"name": "label_6",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiSplitButton",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 21,
+				"parent": 19,
+				"type": "UiSplitButton",
+				"name": "split_button",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 70,
+					"min_height": 25,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Split",
+					"icon": "None",
+					"icon_side": "Left",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "MonoTint",
+					"scale_icon_to_content": false,
+					"align_h": "Center",
+					"align_v": "Center",
+					"content_inset_left": 4,
+					"content_inset_top": 4,
+					"content_inset_right": 4,
+					"content_inset_bottom": 4,
+					"click_focus": true,
+					"checkable": false,
+					"checked": false
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 22,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_6",
+				"flags": 3,
+				"children": [
+					23,
+					24
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 1,
+					"grid_column": 0
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 23,
+				"parent": 22,
+				"type": "UiLabel",
+				"name": "label_7",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiToggle",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 24,
+				"parent": 22,
+				"type": "UiToggle",
+				"name": "toggle",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 50,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 25,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"checked": true
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 25,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_7",
+				"flags": 3,
+				"children": [
+					26,
+					27
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 1,
+					"grid_column": 1
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 26,
+				"parent": 25,
+				"type": "UiLabel",
+				"name": "label_8",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiCheckBox",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 27,
+				"parent": 25,
+				"type": "UiCheckBox",
+				"name": "check",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 110,
+					"fixed_height": 25,
+					"min_width": 60,
+					"min_height": 25,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Enable option",
+					"checked": true
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 28,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_8",
+				"flags": 3,
+				"children": [
+					29,
+					30
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 1,
+					"grid_column": 2
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 29,
+				"parent": 28,
+				"type": "UiLabel",
+				"name": "label_9",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiRadioButton",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 30,
+				"parent": 28,
+				"type": "UiRadioButton",
+				"name": "radio",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 110,
+					"fixed_height": 25,
+					"min_width": 60,
+					"min_height": 25,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Select option",
+					"checked": true
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 31,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_9",
+				"flags": 3,
+				"children": [
+					32,
+					33
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 1,
+					"grid_column": 3
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 32,
+				"parent": 31,
+				"type": "UiLabel",
+				"name": "label_10",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiLineEdit",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 33,
+				"parent": 31,
+				"type": "UiLineEdit",
+				"name": "line_edit",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 160,
+					"fixed_height": 25,
+					"min_width": 70,
+					"min_height": 25,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 34,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_10",
+				"flags": 3,
+				"children": [
+					35,
+					36
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 2,
+					"grid_column": 0
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 35,
+				"parent": 34,
+				"type": "UiLabel",
+				"name": "label_11",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiMultiEdit",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 36,
+				"parent": 34,
+				"type": "UiMultiEdit",
+				"name": "multi_edit",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 190,
+					"fixed_height": 90,
+					"min_width": 100,
+					"min_height": 50,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 37,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_11",
+				"flags": 3,
+				"children": [
+					38,
+					39
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 2,
+					"grid_column": 1
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 38,
+				"parent": 37,
+				"type": "UiLabel",
+				"name": "label_12",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiIntEdit",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 39,
+				"parent": 37,
+				"type": "UiIntEdit",
+				"name": "int_edit",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 90,
+					"fixed_height": 25,
+					"min_width": 60,
+					"min_height": 25,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 40,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_12",
+				"flags": 3,
+				"children": [
+					41,
+					42
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 2,
+					"grid_column": 2
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 41,
+				"parent": 40,
+				"type": "UiLabel",
+				"name": "label_13",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiFloatEdit",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 42,
+				"parent": 40,
+				"type": "UiFloatEdit",
+				"name": "float_edit",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 60,
+					"min_height": 25,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 43,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_13",
+				"flags": 3,
+				"children": [
+					44,
+					45
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 2,
+					"grid_column": 3
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 44,
+				"parent": 43,
+				"type": "UiLabel",
+				"name": "label_14",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiPasswordEdit",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 45,
+				"parent": 43,
+				"type": "UiPasswordEdit",
+				"name": "password_edit",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 160,
+					"fixed_height": 25,
+					"min_width": 70,
+					"min_height": 25,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 46,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_14",
+				"flags": 3,
+				"children": [
+					47,
+					48
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 3,
+					"grid_column": 0
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 47,
+				"parent": 46,
+				"type": "UiLabel",
+				"name": "label_15",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiMaskEdit",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 48,
+				"parent": 46,
+				"type": "UiMaskEdit",
+				"name": "mask_edit",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 160,
+					"fixed_height": 25,
+					"min_width": 70,
+					"min_height": 25,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 49,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_15",
+				"flags": 3,
+				"children": [
+					50,
+					51
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 3,
+					"grid_column": 1
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 50,
+				"parent": 49,
+				"type": "UiLabel",
+				"name": "label_16",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiDropdown",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 51,
+				"parent": 49,
+				"type": "UiDropdown",
+				"name": "dropdown",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 140,
+					"fixed_height": 25,
+					"min_width": 80,
+					"min_height": 25,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 52,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_16",
+				"flags": 3,
+				"children": [
+					53,
+					54
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 3,
+					"grid_column": 2
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 53,
+				"parent": 52,
+				"type": "UiLabel",
+				"name": "label_17",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiDateTime",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 54,
+				"parent": 52,
+				"type": "UiDateTime",
+				"name": "date_time",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 240,
+					"fixed_height": 32,
+					"min_width": 150,
+					"min_height": 28,
+					"max_width": 0,
+					"max_height": 0,
+					"mode": "DateTime",
+					"format_style": "Iso",
+					"clock_format": "Hour24",
+					"show_seconds": true,
+					"button_role": "Subtle",
+					"first_day": 1,
+					"minimum_value": null,
+					"maximum_value": null,
+					"datetime_value": "2000-01-01T12:00:00",
+					"allow_null": true,
+					"allow_copy": true,
+					"allow_paste": true,
+					"presentation_frame": false,
+					"editable": true
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 55,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_17",
+				"flags": 3,
+				"children": [
+					56
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 3,
+					"grid_column": 3
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 56,
+				"parent": 55,
+				"type": "UiLabel",
+				"name": "label_18",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiColorPicker",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 58,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_18",
+				"flags": 3,
+				"children": [
+					59,
+					60
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 4,
+					"grid_column": 0
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 59,
+				"parent": 58,
+				"type": "UiLabel",
+				"name": "label_19",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiSlider",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 60,
+				"parent": 58,
+				"type": "UiSlider",
+				"name": "slider",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 160,
+					"fixed_height": 25,
+					"min_width": 80,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"value": 40,
+					"minimum": 0,
+					"maximum": 100
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 61,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_19",
+				"flags": 3,
+				"children": [
+					62,
+					63
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 4,
+					"grid_column": 1
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 62,
+				"parent": 61,
+				"type": "UiLabel",
+				"name": "label_20",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiSliderEdit",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 63,
+				"parent": 61,
+				"type": "UiSliderEdit",
+				"name": "slider_edit",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 190,
+					"fixed_height": 25,
+					"min_width": 100,
+					"min_height": 25,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"value": 35,
+					"minimum": 0,
+					"maximum": 100
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 64,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_20",
+				"flags": 3,
+				"children": [
+					65,
+					66
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 4,
+					"grid_column": 2
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 65,
+				"parent": 64,
+				"type": "UiLabel",
+				"name": "label_21",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiRangeSlider",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 66,
+				"parent": 64,
+				"type": "UiRangeSlider",
+				"name": "range_slider",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 220,
+					"fixed_height": 32,
+					"min_width": 100,
+					"min_height": 24,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"value": [
+						25,
+						75
+					]
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 67,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_21",
+				"flags": 3,
+				"children": [
+					68,
+					69
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 4,
+					"grid_column": 3
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 68,
+				"parent": 67,
+				"type": "UiLabel",
+				"name": "label_22",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiRangeSliderEdit",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 69,
+				"parent": 67,
+				"type": "UiRangeSliderEdit",
+				"name": "range_slider_edit",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 360,
+					"fixed_height": 32,
+					"min_width": 180,
+					"min_height": 28,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"range": [
+						0,
+						100
+					],
+					"step": 1,
+					"direction": "H",
+					"field_width": 78,
+					"gap": 6,
+					"inset": 0,
+					"precision": 3,
+					"value": [
+						25,
+						75
+					]
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 70,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_22",
+				"flags": 3,
+				"children": [
+					71,
+					72
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 5,
+					"grid_column": 0
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 71,
+				"parent": 70,
+				"type": "UiLabel",
+				"name": "label_23",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiProgressBar",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 72,
+				"parent": 70,
+				"type": "UiProgressBar",
+				"name": "progress",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 160,
+					"fixed_height": 20,
+					"min_width": 80,
+					"min_height": 16,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"value": 65,
+					"minimum": 0,
+					"maximum": 100
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 73,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_23",
+				"flags": 3,
+				"children": [
+					74,
+					75
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 5,
+					"grid_column": 1
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 74,
+				"parent": 73,
+				"type": "UiLabel",
+				"name": "label_24",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiScrollBar",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 75,
+				"parent": 73,
+				"type": "UiScrollBar",
+				"name": "scroll_bar",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 160,
+					"fixed_height": 18,
+					"min_width": 80,
+					"min_height": 16,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 76,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_24",
+				"flags": 3,
+				"children": [
+					77,
+					78
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 5,
+					"grid_column": 2
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 77,
+				"parent": 76,
+				"type": "UiLabel",
+				"name": "label_25",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiProgressRing",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 78,
+				"parent": 76,
+				"type": "UiProgressRing",
+				"name": "progress_ring",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 96,
+					"fixed_height": 96,
+					"min_width": 48,
+					"min_height": 48,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"total": 100,
+					"value": 70,
+					"show_percent": true,
+					"center_text": "70%",
+					"animate_on_show": true,
+					"intro_duration": 600,
+					"indeterminate_duration": 1100
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 79,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_25",
+				"flags": 3,
+				"children": [
+					80,
+					81
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 5,
+					"grid_column": 3
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 80,
+				"parent": 79,
+				"type": "UiLabel",
+				"name": "label_26",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiChartRing",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 81,
+				"parent": 79,
+				"type": "UiChartRing",
+				"name": "chart_ring",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 144,
+					"fixed_height": 144,
+					"min_width": 48,
+					"min_height": 48,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"segments": [
+						{
+							"value": 40,
+							"label": "First",
+							"color": null
+						},
+						{
+							"value": 35,
+							"label": "Second",
+							"color": null
+						},
+						{
+							"value": 25,
+							"label": "Third",
+							"color": null
+						}
+					],
+					"explicit_total": 0,
+					"center_text": "Total"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 82,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_26",
+				"flags": 3,
+				"children": [
+					83,
+					84
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 6,
+					"grid_column": 0
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 83,
+				"parent": 82,
+				"type": "UiLabel",
+				"name": "label_27",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiList",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 84,
+				"parent": 82,
+				"type": "UiList",
+				"name": "list",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fixed",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 220,
+					"fixed_height": 67,
+					"min_width": 100,
+					"min_height": 241,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard"
+				},
+				"data": {
+					"root": {
+						"items": [
+							{
+								"text": "First row"
+							},
+							{
+								"text": "Second row"
+							}
+						]
+					}
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 85,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_27",
+				"flags": 3,
+				"children": [
+					86,
+					87
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 6,
+					"grid_column": 1
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 86,
+				"parent": 85,
+				"type": "UiLabel",
+				"name": "label_28",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiTree",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 87,
+				"parent": 85,
+				"type": "UiTree",
+				"name": "tree",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 220,
+					"fixed_height": 140,
+					"min_width": 100,
+					"min_height": 70,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard"
+				},
+				"data": {
+					"root": {
+						"text": "Root",
+						"children": [
+							{
+								"text": "First",
+								"key": "first"
+							},
+							{
+								"text": "Second",
+								"key": "second"
+							}
+						]
+					}
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 88,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_28",
+				"flags": 3,
+				"children": [
+					89,
+					90
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 6,
+					"grid_column": 2
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 89,
+				"parent": 88,
+				"type": "UiLabel",
+				"name": "label_29",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiTable",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 90,
+				"parent": 88,
+				"type": "UiTable",
+				"name": "table",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 240,
+					"fixed_height": 140,
+					"min_width": 120,
+					"min_height": 70,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 91,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_29",
+				"flags": 3,
+				"children": [
+					92,
+					93
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 6,
+					"grid_column": 3
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 92,
+				"parent": 91,
+				"type": "UiLabel",
+				"name": "label_30",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiMenu",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 93,
+				"parent": 91,
+				"type": "UiMenu",
+				"name": "menu",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 180,
+					"fixed_height": 120,
+					"min_width": 100,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 94,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_30",
+				"flags": 3,
+				"children": [
+					95,
+					96
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 7,
+					"grid_column": 0
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 95,
+				"parent": 94,
+				"type": "UiLabel",
+				"name": "label_31",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiBreadcrumbs",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 96,
+				"parent": 94,
+				"type": "UiBreadcrumbs",
+				"name": "breadcrumbs",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 190,
+					"fixed_height": 25,
+					"min_width": 100,
+					"min_height": 25,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 97,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_31",
+				"flags": 3,
+				"children": [
+					98,
+					99
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 7,
+					"grid_column": 1
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 98,
+				"parent": 97,
+				"type": "UiLabel",
+				"name": "label_32",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiDoc",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 99,
+				"parent": 97,
+				"type": "UiDoc",
+				"name": "document",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 240,
+					"fixed_height": 140,
+					"min_width": 120,
+					"min_height": 70,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"value": "Document sample text"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 100,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_32",
+				"flags": 3,
+				"children": [
+					101,
+					102
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 7,
+					"grid_column": 2
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 101,
+				"parent": 100,
+				"type": "UiLabel",
+				"name": "label_33",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiBezierCurveField",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 102,
+				"parent": 100,
+				"type": "UiBezierCurveField",
+				"name": "curve",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fixed",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 220,
+					"fixed_height": 100,
+					"min_width": 120,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"curve": [
+						0.011,
+						0.491,
+						0.925,
+						1
+					],
+					"editable": true,
+					"show_formula": true,
+					"show_copy": true
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 106,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_34",
+				"flags": 3,
+				"children": [
+					107,
+					108
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 8,
+					"grid_column": 0
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 107,
+				"parent": 106,
+				"type": "UiLabel",
+				"name": "label_35",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiNodeGraph",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 108,
+				"parent": 106,
+				"type": "UiNodeGraph",
+				"name": "node_graph",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fixed",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 420,
+					"fixed_height": 220,
+					"min_width": 160,
+					"min_height": 100,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 109,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_35",
+				"flags": 3,
+				"children": [
+					110,
+					111
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 8,
+					"grid_column": 1
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 110,
+				"parent": 109,
+				"type": "UiLabel",
+				"name": "label_36",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiTab (+ UiTabPage)",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 111,
+				"parent": 109,
+				"type": "UiTab",
+				"name": "tab",
+				"flags": 1,
+				"children": [
+					114,
+					118
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fixed",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 300,
+					"fixed_height": 200,
+					"min_width": 140,
+					"min_height": 90,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 0,
+					"tab_font_face": "STDFONT",
+					"tab_font_size": 13,
+					"tab_font_bold": false,
+					"tab_font_italic": false,
+					"tab_extent": 34,
+					"item_spacing": 6,
+					"body_gap": 6,
+					"content_gap": 6,
+					"tab_padding_left": 12,
+					"tab_padding_top": 7,
+					"tab_padding_right": 12,
+					"tab_padding_bottom": 7,
+					"strip_inset_left": 0,
+					"strip_inset_top": 0,
+					"strip_inset_right": 0,
+					"strip_inset_bottom": 0,
+					"affordance_gap": 4,
+					"min_tab_main": 72,
+					"placement": "Top",
+					"visual": "Underline",
+					"tab_icon_size": 16,
+					"tab_icon_side": "Left",
+					"expand_tabs": false,
+					"active_tab_uses_body_face": true,
+					"close_buttons": false,
+					"drag_handles": false,
+					"drag_reorder": false,
+					"active_page": 114
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 114,
+				"parent": 111,
+				"type": "UiTabPage",
+				"name": "tab_page",
+				"flags": 24,
+				"children": [
+					115
+				],
+				"properties": {
+					"name": "tab_page",
+					"key": "gallery_general",
+					"title": "General",
+					"icon": "None",
+					"tooltip": "",
+					"enabled": true,
+					"closable": true,
+					"draggable": true
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 115,
+				"parent": 114,
+				"type": "UiBoxLayout",
+				"name": "box_36",
+				"flags": 3,
+				"children": [
+					116,
+					117
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 6,
+					"gap": 6,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 116,
+				"parent": 115,
+				"type": "UiLabel",
+				"name": "label_37",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "General page content",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 117,
+				"parent": 115,
+				"type": "UiLineEdit",
+				"name": "line_edit_2",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 160,
+					"fixed_height": 25,
+					"min_width": 70,
+					"min_height": 25,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 118,
+				"parent": 111,
+				"type": "UiTabPage",
+				"name": "tab_page_2",
+				"flags": 24,
+				"children": [
+					119
+				],
+				"properties": {
+					"name": "tab_page",
+					"key": "gallery_advanced",
+					"title": "Advanced",
+					"icon": "None",
+					"tooltip": "",
+					"enabled": true,
+					"closable": true,
+					"draggable": true
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 119,
+				"parent": 118,
+				"type": "UiBoxLayout",
+				"name": "box_37",
+				"flags": 3,
+				"children": [
+					120,
+					121
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 6,
+					"gap": 6,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 120,
+				"parent": 119,
+				"type": "UiLabel",
+				"name": "label_38",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Advanced page content",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 121,
+				"parent": 119,
+				"type": "UiCheckBox",
+				"name": "check_2",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 110,
+					"fixed_height": 25,
+					"min_width": 60,
+					"min_height": 25,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Advanced option",
+					"checked": false
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 122,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_38",
+				"flags": 3,
+				"children": [
+					123,
+					124
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 8,
+					"grid_column": 2
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 123,
+				"parent": 122,
+				"type": "UiLabel",
+				"name": "label_39",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiAccordion (+ Section)",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 124,
+				"parent": 122,
+				"type": "UiAccordion",
+				"name": "accordion",
+				"flags": 1,
+				"children": [
+					128,
+					131
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fixed",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 300,
+					"fixed_height": 240,
+					"min_width": 140,
+					"min_height": 100,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 0,
+					"single_open": false,
+					"enforce_one": false,
+					"show_chevron": true,
+					"drag_reorder": false,
+					"show_drag_handle": true,
+					"animation_enabled": true,
+					"anim_open_ms": 120,
+					"anim_close_ms": 0,
+					"header_height": 28,
+					"item_spacing": 8,
+					"header_body_gap": 4,
+					"body_min_height": 88,
+					"chevron_side": "Right",
+					"chevron_size": 0,
+					"chevron_gap": 8,
+					"chevron_open_icon": "Default",
+					"chevron_closed_icon": "Default",
+					"chevron_lock_icon": "Default",
+					"drag_side": "Right",
+					"drag_icon": "Default",
+					"drag_size": 14,
+					"drag_gap": 8,
+					"unified_section_frame": false,
+					"unified_section_radius": 8,
+					"unified_section_frame_width": 1
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 128,
+				"parent": 124,
+				"type": "UiAccordionSection",
+				"name": "accordion_section",
+				"flags": 24,
+				"children": [
+					129
+				],
+				"properties": {
+					"name": "accordion_section",
+					"key": "gallery_overview",
+					"title": "Overview",
+					"subtitle": "Summary",
+					"copy": "Summary of the section.",
+					"icon": "None",
+					"open": true,
+					"lock": "None",
+					"text_align_h": "Left",
+					"text_align_v": "Center",
+					"media_side": "Left",
+					"media_align_h": "Center",
+					"media_align_v": "Center",
+					"media_reserve": 10,
+					"media_min": 24,
+					"media_gap": 10,
+					"media_auto_fit": true,
+					"media_share_percent": 0,
+					"content_inset": 8,
+					"content_cell_gap": 8,
+					"show_title_line": true,
+					"title_line_length": "Large",
+					"title_line_thickness": 1,
+					"title_line_style": "Solid",
+					"show_card_line": false,
+					"card_line_side": "Bottom",
+					"card_line_length": "Large",
+					"card_line_thickness": 1,
+					"card_line_gap": 0,
+					"hover_enabled": false,
+					"selectable": true
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 129,
+				"parent": 128,
+				"type": "UiBoxLayout",
+				"name": "box_39",
+				"flags": 3,
+				"children": [
+					130
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 6,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 130,
+				"parent": 129,
+				"type": "UiLabel",
+				"name": "label_40",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Overview body content",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 131,
+				"parent": 124,
+				"type": "UiAccordionSection",
+				"name": "accordion_section_2",
+				"flags": 24,
+				"children": [
+					132
+				],
+				"properties": {
+					"name": "accordion_section",
+					"key": "gallery_details",
+					"title": "Details",
+					"subtitle": "Summary",
+					"copy": "More detail here.",
+					"icon": "None",
+					"open": true,
+					"lock": "None",
+					"text_align_h": "Left",
+					"text_align_v": "Center",
+					"media_side": "Left",
+					"media_align_h": "Center",
+					"media_align_v": "Center",
+					"media_reserve": 10,
+					"media_min": 24,
+					"media_gap": 10,
+					"media_auto_fit": true,
+					"media_share_percent": 0,
+					"content_inset": 8,
+					"content_cell_gap": 8,
+					"show_title_line": true,
+					"title_line_length": "Large",
+					"title_line_thickness": 1,
+					"title_line_style": "Solid",
+					"show_card_line": false,
+					"card_line_side": "Bottom",
+					"card_line_length": "Large",
+					"card_line_thickness": 1,
+					"card_line_gap": 0,
+					"hover_enabled": false,
+					"selectable": true
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 132,
+				"parent": 131,
+				"type": "UiBoxLayout",
+				"name": "box_40",
+				"flags": 3,
+				"children": [
+					133
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 6,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 133,
+				"parent": 132,
+				"type": "UiLabel",
+				"name": "label_41",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Details body content",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 134,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_41",
+				"flags": 3,
+				"children": [
+					135,
+					136
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 7,
+					"grid_column": 3
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 135,
+				"parent": 134,
+				"type": "UiLabel",
+				"name": "label_42",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiTitleCard",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 136,
+				"parent": 134,
+				"type": "UiTitleCard",
+				"name": "title_card",
+				"flags": 1,
+				"children": [
+					137
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 280,
+					"fixed_height": 140,
+					"min_width": 120,
+					"min_height": 70,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 0,
+					"title": "Title Card",
+					"subtitle": "Subtitle",
+					"copy": "Grouped heading with supporting copy.",
+					"text_align_h": "Left",
+					"text_align_v": "Center",
+					"media_side": "Left",
+					"media_align_h": "Center",
+					"media_align_v": "Center",
+					"media_reserve": 10,
+					"media_min": 24,
+					"media_gap": 10,
+					"media_auto_fit": true,
+					"media_share_percent": 0,
+					"content_inset": 8,
+					"content_cell_gap": 8,
+					"show_title_line": true,
+					"title_line_length": "Large",
+					"title_line_thickness": 1,
+					"title_line_style": "Solid",
+					"show_card_line": false,
+					"card_line_side": "Bottom",
+					"card_line_length": "Large",
+					"card_line_thickness": 1,
+					"card_line_gap": 0,
+					"hover_enabled": false,
+					"selectable": true,
+					"icon": "ICON_DESIGN_DESCRIPTION_48"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 137,
+				"parent": 136,
+				"type": "UiBoxLayout",
+				"name": "box_42",
+				"flags": 3,
+				"children": [
+					138,
+					139
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 6,
+					"debug_layout": false,
+					"direction": "H",
+					"wrap": "None"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 138,
+				"parent": 137,
+				"type": "UiButton",
+				"name": "button_4",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 80,
+					"fixed_height": 25,
+					"min_width": 50,
+					"min_height": 25,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Action",
+					"icon": "None",
+					"icon_side": "Left",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "MonoTint",
+					"scale_icon_to_content": false,
+					"align_h": "Center",
+					"align_v": "Center",
+					"content_inset_left": 4,
+					"content_inset_top": 4,
+					"content_inset_right": 4,
+					"content_inset_bottom": 4,
+					"click_focus": true,
+					"checkable": false,
+					"checked": false
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 139,
+				"parent": 137,
+				"type": "UiButton",
+				"name": "button_5",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 80,
+					"fixed_height": 25,
+					"min_width": 50,
+					"min_height": 25,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "More",
+					"icon": "None",
+					"icon_side": "Left",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "MonoTint",
+					"scale_icon_to_content": false,
+					"align_h": "Center",
+					"align_v": "Center",
+					"content_inset_left": 4,
+					"content_inset_top": 4,
+					"content_inset_right": 4,
+					"content_inset_bottom": 4,
+					"click_focus": true,
+					"checkable": false,
+					"checked": false
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 140,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_43",
+				"flags": 3,
+				"children": [
+					141,
+					142
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 9,
+					"grid_column": 0
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 141,
+				"parent": 140,
+				"type": "UiLabel",
+				"name": "label_43",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiPanel",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 142,
+				"parent": 140,
+				"type": "UiPanel",
+				"name": "panel",
+				"flags": 1,
+				"children": [
+					143
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fixed",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 280,
+					"fixed_height": 90,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Subtle",
+					"inset": 8
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 143,
+				"parent": 142,
+				"type": "UiLabel",
+				"name": "label_44",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Panel surface",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 144,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_44",
+				"flags": 3,
+				"children": [
+					145,
+					146
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 9,
+					"grid_column": 1
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 145,
+				"parent": 144,
+				"type": "UiLabel",
+				"name": "label_45",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiGroupPanel",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 146,
+				"parent": 144,
+				"type": "UiGroupPanel",
+				"name": "group",
+				"flags": 1,
+				"children": [
+					147
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fixed",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 280,
+					"fixed_height": 130,
+					"min_width": 100,
+					"min_height": 70,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 0,
+					"title": "Group",
+					"subtitle": "Supporting information",
+					"icon": "None"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 147,
+				"parent": 146,
+				"type": "UiBoxLayout",
+				"name": "box_45",
+				"flags": 3,
+				"children": [
+					148,
+					149
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 6,
+					"gap": 6,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 148,
+				"parent": 147,
+				"type": "UiLabel",
+				"name": "label_46",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Grouped field",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 149,
+				"parent": 147,
+				"type": "UiLineEdit",
+				"name": "line_edit_3",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 160,
+					"fixed_height": 25,
+					"min_width": 70,
+					"min_height": 25,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 150,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_46",
+				"flags": 3,
+				"children": [
+					151,
+					152
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 9,
+					"grid_column": 2
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 151,
+				"parent": 150,
+				"type": "UiLabel",
+				"name": "label_47",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiStack",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 152,
+				"parent": 150,
+				"type": "UiStack",
+				"name": "stack",
+				"flags": 1,
+				"children": [
+					153,
+					156
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fixed",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 280,
+					"fixed_height": 120,
+					"min_width": 100,
+					"min_height": 70,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 0
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 153,
+				"parent": 152,
+				"type": "UiBoxLayout",
+				"name": "box_47",
+				"flags": 3,
+				"children": [
+					154,
+					155
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fixed",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 110,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 6,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 154,
+				"parent": 153,
+				"type": "UiLabel",
+				"name": "label_48",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Stack layer A",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 155,
+				"parent": 153,
+				"type": "UiLabel",
+				"name": "label_49",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Second line of layer A",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 156,
+				"parent": 152,
+				"type": "UiBoxLayout",
+				"name": "box_48",
+				"flags": 3,
+				"children": [
+					157
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fixed",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 110,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 6,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 157,
+				"parent": 156,
+				"type": "UiLabel",
+				"name": "label_50",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Stack layer B",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 158,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_49",
+				"flags": 3,
+				"children": [
+					159,
+					160
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 9,
+					"grid_column": 3
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 159,
+				"parent": 158,
+				"type": "UiLabel",
+				"name": "label_51",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiSplitter",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 160,
+				"parent": 158,
+				"type": "UiSplitter",
+				"name": "splitter",
+				"flags": 3,
+				"children": [
+					161,
+					163
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fixed",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 360,
+					"fixed_height": 130,
+					"min_width": 120,
+					"min_height": 80,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 0
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 161,
+				"parent": 160,
+				"type": "UiBoxLayout",
+				"name": "box_50",
+				"flags": 3,
+				"children": [
+					162
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Expand",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 6,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 162,
+				"parent": 161,
+				"type": "UiLabel",
+				"name": "label_52",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Left pane",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 163,
+				"parent": 160,
+				"type": "UiBoxLayout",
+				"name": "box_51",
+				"flags": 3,
+				"children": [
+					164
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Expand",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 6,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 164,
+				"parent": 163,
+				"type": "UiLabel",
+				"name": "label_53",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Right pane",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 165,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_52",
+				"flags": 3,
+				"children": [
+					166,
+					167
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 10,
+					"grid_column": 0
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 166,
+				"parent": 165,
+				"type": "UiLabel",
+				"name": "label_54",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiQuadSplitter",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 167,
+				"parent": 165,
+				"type": "UiQuadSplitter",
+				"name": "quad_splitter",
+				"flags": 3,
+				"children": [
+					168,
+					169,
+					170,
+					171
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fixed",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 420,
+					"fixed_height": 160,
+					"min_width": 160,
+					"min_height": 100,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 0
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 168,
+				"parent": 167,
+				"type": "UiLabel",
+				"name": "label_55",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Quad 1",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 169,
+				"parent": 167,
+				"type": "UiLabel",
+				"name": "label_56",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Quad 2",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 170,
+				"parent": 167,
+				"type": "UiLabel",
+				"name": "label_57",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Quad 3",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 171,
+				"parent": 167,
+				"type": "UiLabel",
+				"name": "label_58",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Quad 4",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 172,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_53",
+				"flags": 3,
+				"children": [
+					173,
+					174
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 10,
+					"grid_column": 1
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 173,
+				"parent": 172,
+				"type": "UiLabel",
+				"name": "label_59",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiAbsoluteLayout",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 174,
+				"parent": 172,
+				"type": "UiAbsoluteLayout",
+				"name": "absolute",
+				"flags": 3,
+				"children": [
+					175
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fixed",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 120,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"x": 20,
+					"y": 20,
+					"width": 320,
+					"height": 180
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 175,
+				"parent": 174,
+				"type": "UiLabel",
+				"name": "label_60",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Absolute child",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 176,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_54",
+				"flags": 3,
+				"children": [
+					177,
+					178
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 10,
+					"grid_column": 2
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 177,
+				"parent": 176,
+				"type": "UiLabel",
+				"name": "label_61",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiDirectContentHost",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 178,
+				"parent": 176,
+				"type": "UiDirectContentHost",
+				"name": "host",
+				"flags": 1,
+				"children": [
+					179
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fixed",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 280,
+					"fixed_height": 90,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 0
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 179,
+				"parent": 178,
+				"type": "UiLabel",
+				"name": "label_62",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Hosted content",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 180,
+				"parent": 5,
+				"type": "UiBoxLayout",
+				"name": "box_55",
+				"flags": 3,
+				"children": [
+					181,
+					182
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 4,
+					"debug_layout": false,
+					"direction": "V",
+					"wrap": "None",
+					"grid_row": 10,
+					"grid_column": 3
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 181,
+				"parent": 180,
+				"type": "UiLabel",
+				"name": "label_63",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "UiBoxLayout (Flow)",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 182,
+				"parent": 180,
+				"type": "UiBoxLayout",
+				"name": "box_56",
+				"flags": 3,
+				"children": [
+					183,
+					184,
+					185
+				],
+				"properties": {
+					"width_mode": "Expand",
+					"height_mode": "Fit",
+					"cell_align_x": "Stretch",
+					"cell_align_y": "Stretch",
+					"fixed_width": 320,
+					"fixed_height": 180,
+					"min_width": 80,
+					"min_height": 60,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"inset": 8,
+					"gap": 6,
+					"debug_layout": false,
+					"direction": "H",
+					"wrap": "Flow"
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 183,
+				"parent": 182,
+				"type": "UiLabel",
+				"name": "label_64",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Flow item",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 184,
+				"parent": 182,
+				"type": "UiButton",
+				"name": "button_6",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 80,
+					"fixed_height": 25,
+					"min_width": 50,
+					"min_height": 25,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Wrap",
+					"icon": "None",
+					"icon_side": "Left",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "MonoTint",
+					"scale_icon_to_content": false,
+					"align_h": "Center",
+					"align_v": "Center",
+					"content_inset_left": 4,
+					"content_inset_top": 4,
+					"content_inset_right": 4,
+					"content_inset_bottom": 4,
+					"click_focus": true,
+					"checkable": false,
+					"checked": false
+				},
+				"actions": [
+
+				]
+			},
+			{
+				"id": 185,
+				"parent": 182,
+				"type": "UiLabel",
+				"name": "label_65",
+				"flags": 0,
+				"children": [
+
+				],
+				"properties": {
+					"width_mode": "Fit",
+					"height_mode": "Fit",
+					"cell_align_x": "Center",
+					"cell_align_y": "Center",
+					"fixed_width": 100,
+					"fixed_height": 25,
+					"min_width": 40,
+					"min_height": 20,
+					"max_width": 0,
+					"max_height": 0,
+					"visible": true,
+					"enabled": true,
+					"role": "Standard",
+					"text": "Next slot",
+					"icon": "None",
+					"icon_width": 18,
+					"icon_height": 18,
+					"icon_render_mode": "PreserveColor",
+					"icon_side": "Left",
+					"scale_icon_to_content": false,
+					"content_gap": 6
+				},
+				"actions": [
+
+				]
+			}
+		],
+		"resources": [
+
+		]
+	},
+	"theme": {
+		"preset": "Minimal",
+		"mode": "Light",
+		"accent": "#3A84FF",
+		"palettes": {
+			"light": [
+				"#F8FAFC",
+				"#FFFFFF",
+				"#E2E8F0",
+				"#0F172A",
+				"#3A84FF",
+				"#DC2626"
+			],
+			"dark": [
+				"#0F172A",
+				"#191919",
+				"#334155",
+				"#F1F5F9",
+				"#60A5FA",
+				"#F87171"
+			]
+		},
+		"roles": {
+			"controls": {
+				"standard": 1,
+				"subtle": 2,
+				"accent": 4,
+				"alert": 5
+			},
+			"panels": {
+				"surface": 1,
+				"subtle": 0,
+				"strong": 2
+			}
+		},
+		"styles": {
+
+		},
+		"generated": {
+
+		},
+		"studio_preview": {
+
+		},
+		"spacing": 8,
+		"radius": 8,
+		"pill_radius": 25,
+		"border_width": 1,
+		"shadows": true,
+		"shadow_distance": 6,
+		"shadow_offset_y": 2,
+		"shadow_alpha": 24
+	},
+	"theme_workspace": {
+		"schema": 1,
+		"active": 1,
+		"entries": [
+			{
+				"name": "Current theme",
+				"theme": {
+					"preset": "Minimal",
+					"mode": "Light",
+					"accent": "#3A84FF",
+					"palettes": {
+						"light": [
+							"#F8FAFC",
+							"#FFFFFF",
+							"#E2E8F0",
+							"#0F172A",
+							"#3A84FF",
+							"#DC2626"
+						],
+						"dark": [
+							"#0F172A",
+							"#191919",
+							"#334155",
+							"#F1F5F9",
+							"#60A5FA",
+							"#F87171"
+						]
+					},
+					"roles": {
+						"controls": {
+							"standard": 1,
+							"subtle": 2,
+							"accent": 4,
+							"alert": 5
+						},
+						"panels": {
+							"surface": 1,
+							"subtle": 0,
+							"strong": 2
+						}
+					},
+					"styles": {
+
+					},
+					"generated": {
+
+					},
+					"studio_preview": {
+
+					},
+					"spacing": 8,
+					"radius": 8,
+					"pill_radius": 25,
+					"border_width": 1,
+					"shadows": true,
+					"shadow_distance": 6,
+					"shadow_offset_y": 2,
+					"shadow_alpha": 24
+				}
+			},
+			{
+				"name": "Minimal",
+				"theme": {
+					"preset": "Minimal",
+					"mode": "Light",
+					"accent": "#3A84FF",
+					"palettes": {
+						"light": [
+							"#F8FAFC",
+							"#FFFFFF",
+							"#E2E8F0",
+							"#0F172A",
+							"#3A84FF",
+							"#DC2626"
+						],
+						"dark": [
+							"#0F172A",
+							"#191919",
+							"#334155",
+							"#F1F5F9",
+							"#60A5FA",
+							"#F87171"
+						]
+					},
+					"roles": {
+						"controls": {
+							"standard": 1,
+							"subtle": 2,
+							"accent": 4,
+							"alert": 5
+						},
+						"panels": {
+							"surface": 1,
+							"subtle": 0,
+							"strong": 2
+						}
+					},
+					"styles": {
+
+					},
+					"generated": {
+
+					},
+					"studio_preview": {
+
+					},
+					"spacing": 8,
+					"radius": 8,
+					"pill_radius": 25,
+					"border_width": 1,
+					"shadows": true,
+					"shadow_distance": 6,
+					"shadow_offset_y": 2,
+					"shadow_alpha": 24
+				}
+			}
+		]
+	}
+}

@@ -7,7 +7,16 @@ AppChatMessageCard::AppChatMessageCard() {
     activity_button.SetText("Activity");activity_button.WhenAction=[=]{activity_open=!activity_open;WhenResize();};
     RefreshTheme();
 }
-void AppChatMessageCard::SetMessage(const String& role,const String& value){heading.SetText(role);SetText(value);}
+void AppChatMessageCard::SetMessage(const String& role,const String& value){speaker=role;heading.SetText(role);SetText(value);}
+String AppChatMessageCard::ExportText() const {
+    String out=speaker+":\n"+text+"\n";
+    if(!status_text.IsEmpty())out<<"Status: "<<status_text<<'\n';
+    if(!activity.IsEmpty())out<<"Activity:\n"<<activity<<'\n';
+    return out;
+}
+String AppChatConversationView::ExportText() const {
+    String out;for(const auto& card:cards)out<<card.ExportText()<<'\n';return out;
+}
 void AppChatMessageCard::SetText(const String& value){if(text!=value){text=value;measured_width=-1;}}
 void AppChatMessageCard::SetActivity(const String& value){if(activity!=value){activity=value;activity_view.SetTextUtf8(value);}}
 UiButton& AppChatMessageCard::AddAction(const String& id,const String& label,Event<> callback,UiRole role) {

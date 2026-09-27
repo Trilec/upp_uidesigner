@@ -20,7 +20,7 @@ class UiDesignerAssistantDrawer : public UiPanel {
     UiLabel heading,context,reference;
     UiDropdown history;
     UiDesignerAssistantComposer composer;
-    UiButton send,profile_button,clear,undo,clear_reference;
+    UiButton send,profile_button,clear,undo,clear_reference,copy_log;
     AppChatProfile profile;
     ValueArray conversation;
     String refinement_id,submitted_refinement,history_signature,activity;

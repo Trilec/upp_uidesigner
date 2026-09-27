@@ -24,7 +24,8 @@ static bool HitLayoutSelectionRegion(const UiDesignerGeometryRecord& record,
                                      Point p)
 {
     if(!record.selectable || record.cue_kind != UiDesignerCueKind::LayoutBounds ||
-       record.rect.IsEmpty() || !record.rect.Contains(p))
+       record.rect.IsEmpty() || !record.rect.Contains(p) ||
+       (record.clipped && !record.clip.Contains(p)))
         return false;
 
     // Inset and gap space belongs to the transparent layout, even if a nested
@@ -58,6 +59,7 @@ UiDesignerNodeId UiDesignerGeometrySnapshot::Hit(Point p) const {
     const UiDesignerGeometryRecord* best = nullptr;
     for(const auto& record : records_)
         if(record.selectable && record.rect.Contains(p) &&
+           (!record.clipped || record.clip.Contains(p)) &&
            BetterSelectionRecord(record, best))
             best = &record;
     return best ? best->node : 0;
@@ -107,6 +109,7 @@ UiDesignerNodeId UiDesignerGeometrySnapshot::HitDropTarget(Point p) const {
     const UiDesignerGeometryRecord* best = nullptr;
     for(const auto& record : records_)
         if(record.drop_target && record.rect.Contains(p) &&
+           (!record.clipped || record.clip.Contains(p)) &&
            BetterSelectionRecord(record, best))
             best = &record;
     return best ? best->node : 0;

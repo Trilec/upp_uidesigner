@@ -62,9 +62,16 @@ def validate(document, schemas):
             errors.append(prefix + 'properties must be an object')
             continue
         for key, value in props.items():
+            if key == 'active_page' and node.get('type') == 'UiTab':
+                check(type(value) is int and (value == 0 and not children or
+                      value in children and by_id.get(value, {}).get('type') == 'UiTabPage'),
+                      prefix + 'active_page must reference a direct Tab page')
+                continue
             if key in ('grid_row', 'grid_column'):
                 parent = by_id.get(node.get('parent'), {})
-                check(parent.get('type') == 'UiGridLayout', prefix + 'grid placement requires Grid parent')
+                # Spacer persists dormant grid coordinates when hosted by Box.
+                check(parent.get('type') == 'UiGridLayout' or node.get('type') == 'Spacer',
+                      prefix + 'grid placement requires Grid parent')
                 check(type(value) is int and value >= 0, prefix + 'invalid grid placement')
                 continue
             field = fields.get(key)

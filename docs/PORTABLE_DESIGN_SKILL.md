@@ -37,3 +37,35 @@ current schemas rather than maintaining another hand-written field catalogue.
 Run all example files through both `scripts/validate_design.py` and the CLI's
 `validate`, then generate/inspect representative output. Skill metadata is checked
 with the standard skill-creator validator in UTF-8 mode on Windows.
+
+## Two reusable skills
+
+`uidesigner-design` creates loadable editable documents. `upp-ui-development`
+covers U++ programming, Ui composition, models, themes, PropertyEditor and builds.
+The latter includes maintained copies of six engineering guides; its header and
+demo links are resolved against the target Ui checkout. It does not bundle U++.
+
+Run `python PackageSkills.py` after refreshing schemas. It updates engineering
+reference snapshots with SHA-256 provenance and writes these directly under `skills/`,
+alongside the source skill folders:
+
+- `uidesigner-design.zip` and `upp-ui-development.zip`: one skill folder per ZIP.
+- `uidesigner-design-chat.md` and `upp-ui-development-chat.md`: flattened references
+  for chat sessions without folder access. The design reference includes exact
+  schemas and examples. It is a reference file, not text to inject in every turn.
+
+For a new coding session, install the folders using that host's skill mechanism
+and explicitly ask to use `uidesigner-design` or `upp-ui-development`. For a chat,
+attach the corresponding Markdown reference and screenshot/HTML, then ask:
+
+> Follow the attached UiDesigner skill. Recreate this reference as editable
+> .uidesign.json using native Ui controls. Read the relevant schemas, preserve
+> the requested layout, and report unsupported details and checks actually run.
+
+A ZIP attachment alone is not proof of skill installation; the host must be able
+to read its contents. ChatGPT skill availability and installation depend on the
+host/workspace. The plain Markdown option is supplied as an explicit reference
+workflow. No provider credentials are included in either bundle.
+
+The native Assistant remains a separate integration: installing these skills
+does not add direct OpenAI transport, saved profile selection or image upload.

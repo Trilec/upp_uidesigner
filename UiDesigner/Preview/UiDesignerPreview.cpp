@@ -1923,6 +1923,11 @@ static void AttachRuntimeChild(Ctrl& parent, Ctrl& child,
             group->SetContent(child);
         return;
     }
+    if(adapter == "scroll_panel") {
+        if(auto *scroll = dynamic_cast<UiScrollPanel *>(&parent))
+            scroll->Content().Add(child.SizePos());
+        return;
+    }
     if(adapter == "single") {
         parent.Add(child.SizePos());
         return;
@@ -2165,6 +2170,18 @@ void UiDesignerPreviewCanvas::BuildNode(
     instance.control = UiDesignerPreviewFactory::Create(*spec);
     if(!instance.control)
         return;
+    if(auto *scroll = dynamic_cast<UiScrollPanel *>(instance.control.Get()))
+        scroll->WhenScroll = [this] {
+            if(!laying_out_) {
+                // Content size changes can clamp scrolling during construction
+                // or layout. Publish geometry only after that mutation ends.
+                scroll_view_update_.Set(0, [this] {
+                    Layout();
+                    Refresh();
+                    WhenViewChanged();
+                });
+            }
+        };
     stats_.live_instance_creations++;
     UiDesignerPreviewFactory::Initialize(*instance.control, *spec);
     if(auto *tree = dynamic_cast<UiTree *>(instance.control.Get()))
@@ -2503,6 +2520,19 @@ UiDesignerApplyResult UiDesignerPreviewCanvas::ApplyProperty(
             RebuildDocument();
     }
     else if(instances_[q].control) {
+        if(IsManagedLayoutProperty(property)) {
+            UiDesignerNode effective(*node);
+            for(const auto& candidate : spec->properties)
+                if(IsManagedLayoutProperty(candidate.id))
+                    effective.SetProperty(candidate.id, Effective(*node, candidate.id, candidate.default_value));
+            effective.SetProperty(property, value);
+            UpdateManagedLayoutItem(instances_[q], effective);
+            stats_.ancestor_layouts++;
+            stats_.live_applies++;
+            Layout();
+            Refresh();
+            return UiDesignerApplyResult::AppliedAncestorLayout;
+        }
         if(property == "direction" || property == "wrap") {
             if(dynamic_cast<UiBoxLayout *>(instances_[q].control.Get())) {
                 // Direction and wrapping change how every child descriptor is
@@ -2543,11 +2573,6 @@ UiDesignerApplyResult UiDesignerPreviewCanvas::ApplyProperty(
 
         result = UiDesignerPreviewFactory::Apply(*instances_[q].control,
                                                   *spec, property, value);
-        if(result == UiDesignerApplyResult::Rejected && IsManagedLayoutProperty(property)) {
-            UpdateManagedLayoutItem(instances_[q], *node);
-            result = UiDesignerApplyResult::AppliedAncestorLayout;
-            stats_.ancestor_layouts++;
-        }
         switch(result) {
         case UiDesignerApplyResult::AppliedPaint: stats_.paint_updates++; break;
         case UiDesignerApplyResult::AppliedLocalLayout:
@@ -2708,7 +2733,7 @@ void UiDesignerPreviewCanvas::LayoutNode(
                          adapter == "box" || adapter == "grid" ||
                          adapter == "tab" || adapter == "stack" ||
                          adapter == "accordion" || adapter == "splitter" ||
-                         adapter == "quad" || adapter == "single" ||
+                         adapter == "quad" || adapter == "single" || adapter == "scroll_panel" ||
                          adapter == "title_card" ||
                          adapter == "group_panel" ||
                          adapter == "upp_tab" || adapter == "upp_splitter";
@@ -2795,10 +2820,10 @@ void UiDesignerPreviewCanvas::LayoutNode(
     const bool is_grid = dynamic_cast<UiGridLayout *>(instance.control.Get());
     const bool is_box = dynamic_cast<UiBoxLayout *>(instance.control.Get());
     const int64 control_layout_start = (measure && (is_grid || is_box)) ? usecs() : 0;
-    const Rect parent_assigned_rect = instance.control->GetRect();
+    const Ctrl::LogPos parent_assigned_pos = instance.control->GetPos();
     instance.control->Layout();
     if(instance.runtime_parent && (managed || section_host) && adapter != "absolute")
-        instance.control->SetRect(parent_assigned_rect);
+        instance.control->SetPos(parent_assigned_pos);
     if(control_layout_start) {
         const double elapsed = (double)usecs(control_layout_start) / 1000.0;
         if(is_grid) {
@@ -2816,6 +2841,11 @@ void UiDesignerPreviewCanvas::LayoutNode(
         const int p = rects_.Find(instance.runtime_parent);
         if(p >= 0)
             origin = rects_[p].TopLeft();
+        if(adapter == "scroll_panel") {
+            Ctrl* owner=FindRuntime(instance.runtime_parent);
+            for(Ctrl* host=instance.control->GetParent();host && host!=owner;host=host->GetParent())
+                origin+=host->GetRect().TopLeft();
+        }
     }
     rects_.GetAdd(node_id) = instance.control->GetRect().Offseted(origin);
 
@@ -2828,6 +2858,10 @@ void UiDesignerPreviewCanvas::Layout()
 {
     if(!document_)
         return;
+    if(laying_out_)
+        return;
+    struct LayoutGuard { bool& active; ~LayoutGuard() { active = false; } } guard{laying_out_};
+    laying_out_ = true;
     const bool measure = detailed_timing_enabled_ && !capture_paused_;
     const int64 layout_start = measure ? usecs() : 0;
     const int64 geometry_walk_start = measure ? usecs() : 0;
@@ -2884,6 +2918,11 @@ void UiDesignerPreviewCanvas::Layout()
             const UiDesignerNode* p = document_->Find(parent);
             if(!p)
                 break;
+            if(auto* scroll = dynamic_cast<UiScrollPanel*>(FindRuntime(parent))) {
+                Rect clip = scroll->GetViewportRect().Offseted(GetNodeRect(parent).TopLeft());
+                record.clip = record.clipped ? record.clip & clip : clip;
+                record.clipped = true;
+            }
             record.depth++;
             parent = p->parent;
         }
@@ -2955,6 +2994,8 @@ void UiDesignerPreviewCanvas::Layout()
         AddLayoutDropRegions(snapshot, *document_, catalog_, *node, record,
                              q >= 0 ? &instances_[q] : nullptr,
                              host_accordion, host_rect);
+        if(record.clipped)
+            snapshot.ClipRegions(node->id, record.clip);
         snapshot.Add(pick(record));
     }
     geometry_ = snapshot.Publish();
@@ -3093,6 +3134,88 @@ void UiDesignerPreviewCanvas::PaintSemantic(
             w.DrawRect(r.left + inset, r.CenterPoint().y,
                        max(0, r.Width() - inset * 2), thickness, line);
     }
+}
+
+UiDesignerPreviewCanvas::~UiDesignerPreviewCanvas()
+{
+    scroll_interaction_watch_.Kill();
+    scroll_view_update_.Kill();
+    for(auto& instance : instances_)
+        if(auto* scroll = dynamic_cast<UiScrollPanel*>(instance.control.Get()))
+            scroll->WhenScroll.Clear();
+    DestroyInstances();
+}
+
+UiScrollPanel* UiDesignerPreviewCanvas::FindScrollPanelAt(Point p)
+{
+    UiScrollPanel* best = nullptr;
+    int depth = -1;
+    for(auto& instance : instances_) {
+        auto* scroll = dynamic_cast<UiScrollPanel*>(instance.control.Get());
+        const auto* record = geometry_.Find(instance.node);
+        if(scroll && record && record->rect.Contains(p) && record->depth > depth) {
+            bool visible = true;
+            for(auto parent = record->parent; parent; ) {
+                auto* ancestor = dynamic_cast<UiScrollPanel*>(FindRuntime(parent));
+                if(ancestor && !ancestor->GetViewportRect().Offseted(GetNodeRect(parent).TopLeft()).Contains(p))
+                    visible = false;
+                const auto* node = document_->Find(parent);
+                parent = node ? node->parent : 0;
+            }
+            if(visible) { best = scroll; depth = record->depth; }
+        }
+    }
+    return best;
+}
+
+bool UiDesignerPreviewCanvas::ScrollAt(Point p, int zdelta, dword keyflags)
+{
+    UiScrollPanel* scroll = FindScrollPanelAt(p);
+    while(scroll) {
+        Point before = scroll->GetScrollPos();
+        scroll->MouseWheel(Point(0, 0), zdelta, keyflags);
+        if(scroll->GetScrollPos() != before) {
+            scroll_view_update_.Kill();
+            Layout();
+            Refresh();
+            WhenViewChanged();
+            return true;
+        }
+        Ctrl* parent = scroll->GetParent();
+        scroll = nullptr;
+        for(; parent && parent != this; parent = parent->GetParent())
+            if((scroll = dynamic_cast<UiScrollPanel*>(parent))) break;
+    }
+    return false;
+}
+
+bool UiDesignerPreviewCanvas::BeginScrollBarInteraction(Point p, dword keyflags)
+{
+    UiScrollPanel* scroll = FindScrollPanelAt(p);
+    if(!scroll) return false;
+    Point local = p + GetScreenRect().TopLeft() - scroll->GetScreenRect().TopLeft();
+    UiScrollBar* bar = scroll->GetScrollBarAt(local);
+    if(!bar) return false;
+    bar->LeftDown(local - bar->GetRect().TopLeft(), keyflags);
+    active_scrollbar_ = bar;
+    scroll_interaction_active_ = bar->HasCapture();
+    WhenViewChanged();
+    if(scroll_interaction_active_)
+        scroll_interaction_watch_.Set(16, [this] { PollScrollInteraction(); });
+    return true; // The real scrollbar owns capture and subsequent drag events.
+}
+
+void UiDesignerPreviewCanvas::PollScrollInteraction()
+{
+    if(active_scrollbar_ && active_scrollbar_->HasCapture()) {
+        scroll_interaction_watch_.Set(16, [this] { PollScrollInteraction(); });
+        return;
+    }
+    active_scrollbar_ = nullptr;
+    scroll_interaction_active_ = false;
+    Layout();
+    Refresh();
+    WhenViewChanged();
 }
 
 void UiDesignerPreviewCanvas::Paint(Draw& w)

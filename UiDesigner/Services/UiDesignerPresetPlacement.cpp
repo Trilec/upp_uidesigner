@@ -7,8 +7,8 @@ bool UiDesignerSession::BuildComposition(UiDesignerNodeId parent,
     const Vector<UiDesignerCompositionItem>& items, UiDesignerDocument& prepared,
     Vector<UiDesignerNodeId>& created, String& error) const
 {
-    if(items.IsEmpty() || items.GetCount() > 64 || !document_.Find(parent)) {
-        error = "Composition requires an existing parent and 1..64 items"; return false;
+    if(items.IsEmpty() || items.GetCount() > 256 || !document_.Find(parent)) {
+        error = "Composition requires an existing parent and 1..256 items"; return false;
     }
     if(!UiDesignerDeserialize(UiDesignerSerialize(document_, false), prepared, error)) return false;
     // Isolated construction uses the normal allocator and semantic drop rules.
@@ -41,6 +41,20 @@ bool UiDesignerSession::BuildComposition(UiDesignerNodeId parent,
             if(error.IsEmpty()) error = plan.reason; return false;
         }
         refs.Add(item.reference, id); created.Add(id);
+        // Interactive drops seed example pages/sections. Explicit composition
+        // children replace those examples on newly-created owners only.
+        if(item.type == "UiTab" || item.type == "UiAccordion") {
+            const String child_type = item.type == "UiTab" ? "UiTabPage" : "UiAccordionSection";
+            bool explicit_children = false;
+            for(const auto& child : items)
+                if(child.parent_reference == item.reference && child.type == child_type)
+                    explicit_children = true;
+            if(explicit_children) {
+                Vector<UiDesignerNodeId> seeded = clone(prepared.Find(id)->children);
+                for(auto child : seeded) prepared.RemoveNode(child);
+                if(item.type == "UiTab") prepared.SetProperty(id,"active_page",(UiDesignerNodeId)0,UiDesignerImpactStructure);
+            }
+        }
         if(item.has_list_items) {
             ValueMap data; data.Set("items", ValueArray());
             for(const String& text : item.list_items) {
@@ -62,6 +76,12 @@ bool UiDesignerSession::BuildComposition(UiDesignerNodeId parent,
                 error = "Invalid composition field " + key; return false;
             }
         }
+    }
+    for(auto id : created) {
+        const auto* node=prepared.Find(id);
+        if(node && node->type=="UiTab" && !node->children.IsEmpty() &&
+           (UiDesignerNodeId)node->GetProperty("active_page",(UiDesignerNodeId)0)==0)
+            prepared.SetProperty(id,"active_page",node->children[0],UiDesignerImpactStructure);
     }
     return catalog_.ValidateDocument(prepared, error);
 }

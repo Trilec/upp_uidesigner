@@ -36,14 +36,35 @@ static Value FieldInput(PropertyEditorKind kind, const Value& value) {
 static Value Result(bool ok, const Value& data) {
     ValueMap r; r.Set("ok", ok); r.Set(ok ? "result" : "error", data); return r;
 }
+// Keep the canonical catalogue complete. The assistant's discovery view omits
+// editor presentation metadata and loads styling only when it is requested.
+static Value AssistantControlSpec(const Value& response, bool include_theme) {
+    if(response["ok"] != true) return response;
+    ValueMap spec=response["result"];
+    if(!include_theme) {
+        spec.RemoveKey("theme_fields");
+        spec.Set("theme_fields_hint","Request include_theme=true only when authoring local style overrides; configuration properties do not accept theme fields.");
+    }
+    for(const char* section : {"properties", "theme_fields"}) {
+        if(!spec[section].Is<ValueArray>())continue;
+        ValueArray fields;
+        for(const Value& value : (ValueArray)spec[section]) {
+            ValueMap field=value;
+            for(const char* key : {"label", "group", "domain", "impact", "resettable"})field.RemoveKey(key);
+            fields.Add(field);
+        }
+        spec.Set(section,fields);
+    }
+    return Result(true,spec);
+}
 struct Operation { const char *name; const char *description; const char *properties; const char *required; };
 static const Operation operations[] = {
  {"inspect_context", "Captured submission scope and validation", "{}", "[]"},
  {"inspect_nodes", "Bounded explicit nodes with authored/effective style values", "{\"nodes\":{\"type\":\"array\",\"items\":{\"type\":\"integer\"},\"maxItems\":32}}", "[\"nodes\"]"},
  {"inspect_hierarchy", "Bounded hierarchy slice", "{\"offset\":{\"type\":\"integer\",\"minimum\":0}}", "[\"offset\"]"},
  {"search_controls", "Search registered controls", "{\"query\":{\"type\":\"string\"}}", "[\"query\"]"},
- {"describe_control", "Actual configuration, Theme, parenting and data schema", "{\"type\":{\"type\":\"string\"}}", "[\"type\"]"},
- {"describe_controls", "Read only relevant schemas in one bounded batch (up to four known types)", "{\"types\":{\"type\":\"array\",\"items\":{\"type\":\"string\"},\"maxItems\":4}}", "[\"types\"]"},
+ {"describe_control", "Configuration, parenting and data schema; optional include_theme for local styling", R"json({"type":{"type":"string"},"include_theme":{"type":"boolean"}})json", "[\"type\"]"},
+ {"describe_controls", "Compact configuration schemas for up to four types; optional include_theme for local styling", R"json({"types":{"type":"array","items":{"type":"string"},"maxItems":4},"include_theme":{"type":"boolean"}})json", "[\"types\"]"},
  {"list_presets", "Supported composition presets", "{}", "[]"},
  {"list_fonts", "Installed font families matching query", "{\"query\":{\"type\":\"string\"}}", "[\"query\"]"},
  {"retrieve_skill", "Retrieve one versioned skill by ID; empty ID returns index", "{\"id\":{\"type\":\"string\"}}", "[\"id\"]"},
@@ -54,7 +75,7 @@ static const Operation operations[] = {
  {"prepare_theme_design", "Propose a complete Light/Dark role baseline in Theme Studio; no durable mutation until human Keep", R"json({"summary":{"type":"string"},"light":{"type":"array","minItems":6,"maxItems":6,"items":{"type":"string"}},"dark":{"type":"array","minItems":6,"maxItems":6,"items":{"type":"string"}},"radius":{"type":"integer","minimum":0,"maximum":32},"border_width":{"type":"integer","minimum":0,"maximum":6},"replace_authored":{"type":"boolean"},"style":{"type":"object","additionalProperties":false,"properties":{"body_font":{"type":"string"},"heading_font":{"type":"string"},"body_size":{"type":"integer","minimum":6,"maximum":48},"heading_size":{"type":"integer","minimum":6,"maximum":48},"body_bold":{"type":"boolean"},"heading_bold":{"type":"boolean"},"shadow":{"type":"string","enum":["None","Hard"]},"shadow_offset":{"type":"integer","minimum":0,"maximum":12},"shadow_alpha":{"type":"integer","minimum":0,"maximum":255},"line_width":{"type":"integer","minimum":0,"maximum":6}}}})json", "[\"summary\",\"light\",\"dark\",\"radius\",\"border_width\",\"replace_authored\"]"},
  {"prepare_theme", "Prepare a separate Theme recipe group using registered fields", "{\"summary\":{\"type\":\"string\"},\"target\":{\"type\":\"string\"},\"fields\":{\"type\":\"object\"}}", "[\"summary\",\"target\",\"fields\"]"},
  {"prepare_font", "Replace mapped font families only; scope local or recipe", "{\"summary\":{\"type\":\"string\"},\"family\":{\"type\":\"string\"},\"scope\":{\"type\":\"string\",\"enum\":[\"local\",\"recipe\"]},\"nodes\":{\"type\":\"array\",\"items\":{\"type\":\"integer\"},\"maxItems\":32},\"target\":{\"type\":\"string\"}}", "[\"summary\",\"family\",\"scope\",\"nodes\",\"target\"]"},
- {"prepare_composition", "Prepare a registered subtree; symbolic parent references precede children; empty parent_ref uses explicit parent", "{\"summary\":{\"type\":\"string\"},\"parent\":{\"type\":\"integer\"},\"items\":{\"type\":\"array\",\"maxItems\":64,\"items\":{\"type\":\"object\",\"properties\":{\"ref\":{\"type\":\"string\"},\"parent_ref\":{\"type\":\"string\"},\"grid_row\":{\"type\":\"integer\",\"minimum\":0},\"grid_column\":{\"type\":\"integer\",\"minimum\":0},\"type\":{\"type\":\"string\"},\"list_items\":{\"type\":\"array\",\"maxItems\":128,\"items\":{\"type\":\"string\",\"maxLength\":4096}},\"properties\":{\"type\":\"object\"}},\"required\":[\"ref\",\"parent_ref\",\"type\",\"properties\"],\"additionalProperties\":false}}}", "[\"summary\",\"parent\",\"items\"]"},
+ {"prepare_composition", "Prepare a registered subtree; symbolic parent references precede children; empty parent_ref uses explicit parent", "{\"summary\":{\"type\":\"string\"},\"parent\":{\"type\":\"integer\"},\"items\":{\"type\":\"array\",\"maxItems\":256,\"items\":{\"type\":\"object\",\"properties\":{\"ref\":{\"type\":\"string\"},\"parent_ref\":{\"type\":\"string\"},\"grid_row\":{\"type\":\"integer\",\"minimum\":0},\"grid_column\":{\"type\":\"integer\",\"minimum\":0},\"type\":{\"type\":\"string\"},\"list_items\":{\"type\":\"array\",\"maxItems\":128,\"items\":{\"type\":\"string\",\"maxLength\":4096}},\"properties\":{\"type\":\"object\"}},\"required\":[\"ref\",\"parent_ref\",\"type\",\"properties\"],\"additionalProperties\":false}}}", "[\"summary\",\"parent\",\"items\"]"},
  {"proposal_status", "Inspect proposal status and receipt", "{\"id\":{\"type\":\"string\"}}", "[\"id\"]"}
 };
 static bool Shape(const Value& v, const Value& schema) {
@@ -125,7 +146,7 @@ String UiDesignerAssistantHost::SystemPrompt() const {
         "Separate Theme and Document apply groups. No shell, files, save or export tools exist. "
         "For dialog/layout requests retrieve layout-v2 first: it includes a schema-valid simple dialog example. "
         "Then describe_controls for only its relevant types and prepare one proposal. Presets are optional, not a required lookup; avoid broad/repeated searches or invented types. For icons or reference material retrieve design-v1; there is no image attachment or HTML rendering tool. "
-        "Common registered types are UiGridLayout, UiBoxLayout, UiPanel, UiLabel, UiButton, UiLineEdit, UiList and UiSlider. Use the spacer type in the layout-v2 example. There is no UiDialog or UiTextEdit: the captured Window root is the dialog. Batch relevant schemas in describe_controls (at most four types per call). "
+        "Common registered types are UiGridLayout, UiBoxLayout, UiPanel, UiLabel, UiButton, UiLineEdit, UiList and UiSlider. Use the spacer type in the layout-v2 example. There is no UiDialog or UiTextEdit: the captured Window root is the dialog. Batch relevant schemas in describe_controls (at most four types per call), reading each type once. Configuration schemas omit styling; request include_theme=true only for needed local overrides. For every-control requests enumerate the catalogue and check coverage, including required semantic children. One composition accepts up to 256 nodes within the argument byte budget. A single empty container is not a complete design; prepare the requested children too, and disclose any missing controls. "
         "Composition properties contain only authorable configuration fields in those schemas. The symbolic ref names each item; do not add a name property. Theme override fields such as font_bold are not composition properties. For each reported validation error, fix all listed fields together before retrying. "
         "For a new UiList, populate requested rows with list_items (array of strings beside properties); do not leave default First/Second sample rows. "
         "Stop discovery once a valid proposal exists. The execution-budget message gives the current call and round allowances. "
@@ -337,13 +358,16 @@ Value UiDesignerAssistantHost::ExecuteOperation(const String& name, const ValueM
     if(name.StartsWith("prepare_")) return Prepare(name, args);
     if(name == "inspect_context") return Result(true, captured);
     if(name == "search_controls") return automation.ListControls(args);
-    if(name == "describe_control") return automation.GetControlSpec(args);
+    if(name == "describe_control") {
+        ValueMap query;query.Set("type",args["type"]);
+        return AssistantControlSpec(automation.GetControlSpec(query),args["include_theme"]==true);
+    }
     if(name == "describe_controls") {
         ValueArray results; Index<String> seen;
         for(const Value& type : (ValueArray)args["types"]) {
             String id=AsString(type); if(seen.Find(id)>=0) continue; seen.Add(id);
             ValueMap query; query.Set("type",id);
-            Value result=automation.GetControlSpec(query);
+            Value result=AssistantControlSpec(automation.GetControlSpec(query),args["include_theme"]==true);
             if(result["ok"]==false) return result;
             results.Add(result["result"]);
         }

@@ -1012,7 +1012,15 @@ static void AttachRoot(UiDesignerChildAttachContext& c)
 
 static void AttachAdd(UiDesignerChildAttachContext& c)
 {
-    c.out << "\t" << c.parent << ".Add(" << c.member << ");\n";
+    // Plain panels do not manage child geometry. Anchor expanding axes just as
+    // the preview does, including the authored content inset.
+    const int inset = max(0, (int)c.parent_node.GetProperty("inset", 0));
+    c.out << "\t" << c.parent << ".Add(" << c.member;
+    if(c.child.GetProperty("width_mode", "Fit") == "Expand")
+        c.out << ".HSizePos(DPI(" << inset << "), DPI(" << inset << "))";
+    if(c.child.GetProperty("height_mode", "Fit") == "Expand")
+        c.out << ".VSizePos(DPI(" << inset << "), DPI(" << inset << "))";
+    c.out << ");\n";
 }
 
 static void AttachBox(UiDesignerChildAttachContext& c)
@@ -1089,6 +1097,11 @@ static void AttachGrid(UiDesignerChildAttachContext& c)
           << (sizing.max.cy > 0 ? "DPI(" + AsString(sizing.max.cy) + ")" : "INT_MAX") << ")); }\n";
 }
 
+static void AttachScrollPanel(UiDesignerChildAttachContext& c)
+{
+    c.out << "\t" << c.parent << ".Content().Add(" << c.member << ".SizePos());\n";
+}
+
 static void AttachAbsolute(UiDesignerChildAttachContext& c)
 {
     c.out << "\t" << c.parent << ".Add(" << c.member
@@ -1146,6 +1159,7 @@ static const UiDesignerChildAdapterEntry *FindChildAdapter(const String& id)
         {"root", AttachRoot},
         {"add", AttachAdd},
         {"single", AttachAdd},
+        {"scroll_panel", AttachScrollPanel},
         {"title_card", AttachTitleCard},
         {"group_panel", AttachGroupPanel},
         {"box", AttachBox},

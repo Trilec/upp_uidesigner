@@ -12,7 +12,8 @@ Vector<UiDesignerNodeId> UiDesignerPreviewSelectionStack(
     const UiDesignerNode *node = document.Find(id);
     while(node) {
         const UiDesignerGeometryRecord *record = geometry.Find(node->id);
-        if(record && record->selectable && record->rect.Contains(canvas_point))
+        if(record && record->selectable && record->rect.Contains(canvas_point) &&
+           (!record->clipped || record->clip.Contains(canvas_point)))
             result.Add(node->id);
         if(!node->parent)
             break;

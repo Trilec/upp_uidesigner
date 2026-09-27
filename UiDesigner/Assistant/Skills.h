@@ -35,7 +35,13 @@ wrap=Flow; V stacks and does not wrap. Snap is ordered wrapping aligned to repea
 slots, not a substitute for explicitly placed Grid regions. Inspect supported
 properties; runtime APIs not in the schema are not authorable assistant fields.
 Sizing: Fit measures content; Expand consumes available space; Fixed is for a real
-size requirement. Make the outer shell Expand and normally give the body/canvas
+size requirement. Inspect recommended_size before constraining complex editors.
+UiColorPicker needs at least 640x460 logical pixels for its full editor; use a
+larger cell or scrolling instead of shrinking it into a small button-sized tile.
+Size labels and their samples together in one V Box when building a gallery.
+Do not duplicate the sample tabs/sections: explicit semantic children replace
+the initial examples when composing a new Tab or Accordion.
+Make the outer shell Expand and normally give the body/canvas
 the remaining height; headings and action rows Fit. Do not make the whole shell
 Fit when the intention is a growing body. Set width and height independently.
 Infer the obvious expanding area and state it briefly. Ask which region should

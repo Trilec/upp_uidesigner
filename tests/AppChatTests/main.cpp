@@ -73,14 +73,14 @@ CONSOLE_APP_MAIN {
         trace.Start(exact,ValueArray(),ValueArray()); watch.Reset(); invoked=0;
         while(trace.active && watch.Seconds()<3) { trace.Poll([&](const String&,const ValueMap&)->Value {invoked++; return ValueMap();}); Sleep(1); }
         Check(invoked==16 && trace.error.IsEmpty(),"exactly sixteen calls are permitted");
-        trace.limits=AppChatLimits();
+        trace.limits=AppChatLimits();trace.limits.calls=24;
         auto boundary=std::make_shared<AppChatScriptedProvider>();
         for(int i=0;i<4;++i) boundary->replies.Add(Batch({"read","read","read","read","read","read"}));
         boundary->replies.Add(Batch({"read"}));
         trace.Start(boundary,ValueArray(),ValueArray()); watch.Reset(); invoked=0;
         while(trace.active && watch.Seconds()<3) { trace.Poll([&](const String&,const ValueMap&)->Value {++invoked;return ValueMap();});Sleep(1); }
-        Check(trace.limits.rounds==8 && invoked==24 && trace.error.Find("24 tool calls used; 1 more requested; limit 24")>=0,
-              "default recovery allowance permits twenty-four calls and rejects the next batch");
+        Check(invoked==24 && trace.error.Find("24 tool calls used; 1 more requested; limit 24")>=0,
+              "configured allowance permits twenty-four calls and rejects the next batch");
     }
     AppChatStream stream;
     String data = Chunk("{\"content\":\"Hello\",\"reasoning_content\":\"private\"}") + Chunk("{}", "\"stop\"") + "data: [DONE]\n\n";

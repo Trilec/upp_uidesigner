@@ -103,33 +103,33 @@ static UiDesignerNodeId BuildHolyGrail(UiDesignerPresetBuilder& b,
     UiDesignerNodeId root = b.Add("UiBoxLayout", "holy_grail", parent);
     b.Box(root, "V", 10, 12).Size(root, "Expand", "Expand");
     UiDesignerNodeId header = b.Add("UiTitleCard", "header", root);
-    b.Text(header, "Header").Size(header, "Expand", "Fixed", 0, 72)
+    b.Text(header, "Header").Size(header, "Expand", "Fit")
      .P(header, "subtitle", "Workspace summary and global actions")
      .P(header, "role", "Accent");
     UiDesignerNodeId body = b.Add("UiBoxLayout", "body", root);
     b.Box(body, "H", 10).Size(body, "Expand", "Expand");
     UiDesignerNodeId nav = b.Add("UiGroupPanel", "navigation", body);
-    b.Text(nav, "Navigation").Size(nav, "Fixed", "Expand", 180, 0)
+    b.Text(nav, "Navigation").Size(nav, "Expand", "Expand")
      .P(nav, "role", "Subtle");
     UiDesignerNodeId main = b.Add("UiPanel", "main_content", body);
     b.Size(main, "Expand", "Expand");
     UiDesignerNodeId main_col = b.Add("UiBoxLayout", "main_column", main);
     b.Box(main_col, "V", 8, 8).Size(main_col, "Expand", "Expand");
     UiDesignerNodeId hero = b.Add("UiTitleCard", "primary_article", main_col);
-    b.Text(hero, "Primary article").Size(hero, "Expand", "Fixed", 0, 88)
+    b.Text(hero, "Primary article").Size(hero, "Expand", "Fit")
      .P(hero, "subtitle", "Lead content and supporting actions");
     UiDesignerNodeId grid = b.Add("UiGridLayout", "content_grid", main_col);
-    b.Size(grid, "Expand", "Expand").P(grid, "columns", 2).P(grid, "gap", 8);
+    b.Size(grid, "Expand", "Fit").P(grid, "columns", 2).P(grid, "gap", 8);
     for(int i = 1; i <= 4; i++) {
         UiDesignerNodeId card = b.Add("UiTitleCard", Format("story_%d", i), grid);
-        b.Text(card, Format("Story %d", i)).Size(card, "Expand", "Fixed", 0, 72)
+        b.Text(card, Format("Story %d", i)).Size(card, "Expand", "Fit")
          .P(card, "grid_row", (i - 1) / 2).P(card, "grid_column", (i - 1) % 2);
     }
     UiDesignerNodeId rail = b.Add("UiGroupPanel", "widgets", body);
-    b.Text(rail, "Widgets").Size(rail, "Fixed", "Expand", 200, 0)
+    b.Text(rail, "Widgets").Size(rail, "Expand", "Expand")
      .P(rail, "role", "Subtle");
     UiDesignerNodeId footer = b.Add("UiTitleCard", "footer", root);
-    b.Text(footer, "Footer").Size(footer, "Expand", "Fixed", 0, 56)
+    b.Text(footer, "Footer").Size(footer, "Expand", "Fit")
      .P(footer, "role", "Subtle");
     return root;
 }

@@ -180,7 +180,7 @@ void UiDesignerInteractionOverlay::Paint(Draw& w)
         : Color(101, 116, 153);
     DrawFrame(w, root_rect, frame, decorations_visible_ ? DPI(4) : DPI(1));
 
-    if(decorations_visible_) {
+    if(decorations_visible_ && !owner_->preview_canvas_.IsScrollInteractionActive()) {
         const UiDesignerGeometrySnapshot& geometry = owner_->preview_canvas_.GetGeometrySnapshot();
         const UiDesignerSelection& selection = owner_->session_.State().selection;
         const int dash = DPI(5);
@@ -194,7 +194,9 @@ void UiDesignerInteractionOverlay::Paint(Draw& w)
                 continue;
             Rect r = record->rect.Offseted(canvas_origin);
             const Color cue = Blend(SColorText(), SColorPaper(), 170);
+            if(record->clipped) w.Clip(record->clip.Offseted(canvas_origin));
             DrawDashedRect(w, r, cue, DPI(1), dash, gap);
+            if(record->clipped) w.End();
         }
 
         for(const UiDesignerNode& node : document.GetNodes()) {
@@ -203,6 +205,7 @@ void UiDesignerInteractionOverlay::Paint(Draw& w)
             const UiDesignerGeometryRecord* geometry_record = geometry.Find(node.id);
             if(!geometry_record || !geometry_record->debug_layout)
                 continue;
+            if(geometry_record->clipped) w.Clip(geometry_record->clip.Offseted(canvas_origin));
             const Color outline = IsNull(geometry_record->debug_color)
                 ? UiDesignerStableLayoutColor(node.id, geometry_record->depth)
                 : geometry_record->debug_color;
@@ -234,6 +237,7 @@ void UiDesignerInteractionOverlay::Paint(Draw& w)
             w.DrawRect(body.left, body.bottom - 1, body.Width(), 1, outline);
             w.DrawRect(body.left, body.top, 1, body.Height(), outline);
             w.DrawRect(body.right - 1, body.top, 1, body.Height(), outline);
+            if(geometry_record->clipped) w.End();
         }
 
         // Selected layouts expose their existing snapshot regions without
@@ -243,6 +247,7 @@ void UiDesignerInteractionOverlay::Paint(Draw& w)
             geometry.Find(selected_id);
         const UiDesignerNode *selected_node = document.Find(selected_id);
         if(selected_record && selected_node && selected_record->drop_target) {
+            if(selected_record->clipped) w.Clip(selected_record->clip.Offseted(canvas_origin));
             const Color region = Color(245, 158, 11);
             for(const Rect& cell : selected_record->cell_rects)
                 DrawDashedRect(w, cell.Offseted(canvas_origin), region,
@@ -253,6 +258,7 @@ void UiDesignerInteractionOverlay::Paint(Draw& w)
                 DrawDashedRect(w, drop.visual_rect.Offseted(canvas_origin), region,
                                DPI(2), dash, gap);
             }
+            if(selected_record->clipped) w.End();
         }
 
         for(UiDesignerNodeId id : selection.nodes) {
@@ -267,7 +273,9 @@ void UiDesignerInteractionOverlay::Paint(Draw& w)
                 ? Color(245, 158, 11)
                 : Blend(Color(245, 158, 11), White(), 110);
             const int thickness = id == selection.primary ? DPI(3) : DPI(2);
+            if(geometry_record && geometry_record->clipped) w.Clip(geometry_record->clip.Offseted(canvas_origin));
             DrawDashedRect(w, r, color, thickness, dash, gap);
+            if(geometry_record && geometry_record->clipped) w.End();
         }
 
         DrawResizeHandles(w, root_rect, frame);
