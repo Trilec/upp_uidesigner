@@ -5,6 +5,8 @@
 
 namespace Upp {
 
+static const char* window_theme_defaults[] = {"Minimal", "Pill", "Linear", "Solid", "Outline", "Compact", "Layered"};
+
 static bool IsThemeOverrideChange(const UiDesignerPropertyChange& change)
 {
     return change.kind == UiDesignerPropertyChangeKind::ThemeOverride;
@@ -108,6 +110,7 @@ void UiDesignerSession::WireEvents()
     };
     theme_.WhenChanged = [=] {
         theme_.BuildPropertyModel(theme_model_);
+        if(state_.selection.primary == document_.GetRootId()) RebuildInspector();
         WhenInspectorChanged();
         WhenCodeChanged();
     };
@@ -746,6 +749,24 @@ void UiDesignerSession::RebuildInspector()
 
     const UiDesignerNode* primary = document_.Find(state_.selection.primary);
     if(primary && primary->id == document_.GetRootId()) {
+        inspector_model_.AddText("window_title", "Title", primary->GetProperty("window_title", ""), "Window")
+            .SetDefault("")
+            .SetHelp("Native window title. Empty uses the generated class name.");
+        auto& theme = inspector_model_.AddChoice("project_theme", "Theme", GetActiveProjectTheme(), "Window");
+        for(int i = 0; i < GetProjectThemeCount(); ++i) theme.AddChoice(i, GetProjectThemeName(i));
+        for(int i = 0; i < 7; ++i) theme.AddChoice(-i-1, "Default: " + String(window_theme_defaults[i]));
+        theme.SetHelp("Select a project theme or create a project copy of a default. Load custom theme files in Theme Studio.");
+        auto& appearance = inspector_model_.AddChoice("startup_appearance", "Startup appearance",
+            primary->GetProperty("startup_appearance", "Preview"), "Window");
+        appearance.AddChoice("Light", "Light").AddChoice("Dark", "Dark").AddChoice("Preview", "Follow editor preview");
+        appearance.SetHelp("Light/Dark fixes the exported startup appearance independently of the editor view.");
+        appearance.SetDefault("Preview");
+        inspector_model_.AddBoolean("window_resizable", "Resizable", primary->GetProperty("window_resizable", true), "Window").SetDefault(true)
+            .SetHelp("Off creates a fixed-size window using the Layout width and height.");
+        inspector_model_.AddBoolean("window_maximize_box", "Maximise button", primary->GetProperty("window_maximize_box", true), "Window").SetDefault(true)
+            .SetHelp("Only applies to resizable windows.");
+        inspector_model_.AddBoolean("window_start_maximized", "Start maximised", primary->GetProperty("window_start_maximized", false), "Window").SetDefault(false)
+            .SetHelp("Only applies to resizable windows; width and height remain the restored size.");
         const Size size = document_.GetVirtualSize();
         inspector_model_.AddNumericInt("document_width", "Width", size.cx,
                                        1, 8192, 1, "Layout")
@@ -790,6 +811,10 @@ bool UiDesignerSession::PreviewProperty(
     const String& property, const Value& value, String& error)
 {
     if(state_.selection.primary == document_.GetRootId() &&
+       (property.StartsWith("window_") || property == "startup_appearance" || property == "project_theme")) {
+        error.Clear(); return true; // Window settings commit atomically; no transient native window changes.
+    }
+    if(state_.selection.primary == document_.GetRootId() &&
        (property == "document_width" || property == "document_height")) {
         error.Clear();
         return true;
@@ -819,6 +844,25 @@ bool UiDesignerSession::PreviewProperty(
 bool UiDesignerSession::CommitProperty(
     const String& property, const Value& value, String& error)
 {
+    if(state_.selection.primary == document_.GetRootId()) {
+        if(property == "project_theme") {
+            if(!IsNumber(value)) { error = "Choose a project theme"; return false; }
+            int index = (int)value;
+            if(index < 0 && index >= -7)
+                return ActivateThemeSource("builtin:" + String(window_theme_defaults[-index-1]), error);
+            return SelectProjectTheme((int)value, error);
+        }
+        bool supported = property == "window_title" || property == "startup_appearance" ||
+            property == "window_resizable" || property == "window_maximize_box" || property == "window_start_maximized";
+        if(supported) {
+            bool valid = property == "window_title" ? value.Is<String>() :
+                property == "startup_appearance" ? (value == "Light" || value == "Dark" || value == "Preview") : value.Is<bool>();
+            if(!valid) { error = "Invalid Window setting: " + property; return false; }
+            error.Clear();
+            return commands_.SetProperty(document_.GetRootId(), property, value,
+                UiDesignerImpactCode, "Set Window " + property);
+        }
+    }
     if(state_.selection.primary == document_.GetRootId() &&
        (property == "document_width" || property == "document_height")) {
         Size size = document_.GetVirtualSize();
@@ -945,6 +989,12 @@ bool UiDesignerSession::CycleSizingMode(UiDesignerNodeId node_id,
 bool UiDesignerSession::ResetProperty(
     const String& property, String& error)
 {
+    if(state_.selection.primary == document_.GetRootId()) {
+        if(property == "window_title") return CommitProperty(property, String(), error);
+        if(property == "startup_appearance") return CommitProperty(property, "Preview", error);
+        if(property == "window_resizable" || property == "window_maximize_box") return CommitProperty(property, true, error);
+        if(property == "window_start_maximized") return CommitProperty(property, false, error);
+    }
     const UiDesignerPropertySpec* property_spec = nullptr;
     if(!SelectionSupports(property, &property_spec)) {
         error = "Selection does not support " + property;

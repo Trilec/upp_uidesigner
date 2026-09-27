@@ -37,6 +37,28 @@ User-owned files are created when absent and preserved on regeneration unless th
 
 The generated base constructs controls, attaches layout children, emits semantic Spacer/Separator APIs and wires declarative actions. The user subclass owns additional event wiring and named handler bodies.
 
+### Window settings
+
+Select Window in Hierarchy, click empty workspace outside the canvas, or grab a
+canvas resize edge to inspect Window settings. Width/height define the initial
+client size (the restored size when starting maximised). Window root properties
+are stored in canonical document JSON and edited through normal document Undo:
+
+- `window_title`: native title; empty uses the generated class name.
+- `startup_appearance`: `Light`, `Dark`, or `Preview` (default for compatibility).
+  Explicit Light/Dark selects the matching theme recipes before export; it does
+  not change the editor's appearance. Preview follows the current editor view.
+- `window_resizable`: defaults true. False creates a fixed-size window.
+- `window_maximize_box`: defaults true; only effective when resizable.
+- `window_start_maximized`: defaults false; only effective when resizable.
+
+The inspector's Theme choice selects the existing active project theme, including
+custom recipes, through the Theme workspace. It is not a second theme copy on the
+Window node. Save Project persists that selection; Theme Studio manages available
+themes. Export, Build and the Code pane share the same generation path.
+Fixed-size is not modal: modal execution and application behaviour remain the
+host application's responsibility.
+
 ## Preview
 
 Before writing, the export service validates identifiers and the canonical document and returns the exact file inventory, including files that will be preserved. The GUI dialog displays this inventory before terminal export.

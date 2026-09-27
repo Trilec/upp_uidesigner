@@ -6,6 +6,39 @@ reported validation separate. The graph project's own gates are not Designer gat
 
 ## Native Theme Studio tree — 2026-09-26
 
+### Window startup and export settings — 2026-09-27
+
+- Shared PropertyEditor follow-up: full themed indicator size is retained in
+  compact Boolean cells by removing standalone outer decoration/padding from the
+  hosted checkbox. No Designer-only sizing override. Boolean callbacks now emit
+  bool rather than integer state codes; numeric mode switches use UiToolButton.
+  Shared PropertyEditorTests passed 133 checks across all presets, Light/Dark.
+  Native Pill Light/Dark inspection and Resizable toggling passed after rebuild.
+  Required shared-Ui ancestor: `06027cc9a7672a1e07ff3ae6aa90942d9303fd7c`.
+  AssistantDesignerTests rebuilt against that repair: 200 checks, zero failures.
+- Follow-up visual audit: review each built-in preset full-screen in Theme Studio,
+  Light/Dark and all four roles, separating geometry/rendering defects from palette
+  choices. Pill Dark shell accent text and palette-list icons still need a contrast
+  review. This checkbox repair is not a claim that all theme defaults are polished.
+- Window Inspector now exposes title, project theme, startup appearance,
+  resizability, maximise button and maximised startup alongside canvas dimensions.
+- Explicit Light/Dark is independent of editor appearance and selects the matching
+  authored recipes during export. Follow editor preview preserves legacy behaviour.
+- Window properties use canonical document history/JSON. Theme selection reuses
+  the existing project-theme workspace. Fixed windows suppress maximise behaviour.
+- Empty workspace clicks and canvas resize handles select Window.
+- ExportedThemeContractTest: 53 checks, zero failures, including appearance/recipe
+  isolation, Undo, title escaping, sizing, canonical JSON roundtrip and default
+  theme reuse. Optional live-library fixture adds three checks (56 total).
+- Release Embedded validation passed (`build/Assistant-Release-20260927-132737`).
+  The later fixture/theme-choice test additions passed separately. Native checks
+  confirmed empty-workspace selection, the Window inspector, Dark startup in a
+  Light editor and switching to a Pill project copy while retaining Dark startup.
+- `build/ai-designs/LiveLibraryDark/project.uidesign.json` and
+  `build/LiveLibraryDark.exe` demonstrate explicit Dark startup and a window title.
+  Compilation passed; native launch approval timed out, so no visual PASS is claimed
+  for that executable. The original LiveLibrary files are unchanged.
+
 ### Quick guide and pending build/design validation — 2026-09-27
 
 - Help now opens a selectable, read-only rich-text guide with six topics: start

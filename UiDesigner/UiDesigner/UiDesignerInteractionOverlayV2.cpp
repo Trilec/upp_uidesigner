@@ -35,7 +35,9 @@ UiDesignerNodeId UiDesignerInteractionOverlayV2::ResolveClickSelection(
         owner_v2_->session_.Document(), CanvasPoint(p));
     if(stack.IsEmpty()) {
         cycle_valid_ = false;
-        return 0;
+        const auto root = owner_v2_->session_.Document().GetRootId();
+        owner_v2_->session_.Select(root, false);
+        return root;
     }
 
     UiDesignerNodeId selected = stack[0];

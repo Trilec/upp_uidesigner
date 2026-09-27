@@ -113,13 +113,25 @@ UiDesignerGeneratedProject UiDesignerExportService::BuildCppProject(
 {
     UiDesignerDocument runtime_document;
     runtime_document.ReplaceFrom(document, "Compile authored theme", false);
+    UiDesignerThemeSnapshot startup_theme = theme.Get();
+    const String appearance = AsString(document.GetProperty(document.GetRootId(), "startup_appearance", "Preview"));
+    if(appearance == "Light" || appearance == "Dark") {
+        startup_theme.mode = appearance;
+        startup_theme.SyncLegacyAccent();
+    }
+    else if(appearance != "Preview") {
+        error = "Invalid Window startup appearance";
+        UiDesignerGeneratedProject invalid;
+        invalid.diagnostics.Add(error);
+        return invalid;
+    }
     UiDesignerApplyRuntimeThemeRecipes(
-        runtime_document, theme.Get(), catalog_);
+        runtime_document, startup_theme, catalog_);
 
     UiDesignerCodeGenerationOptions generation = request.generation;
     generation.apply_compiled_theme = true;
     generation.compiled_theme_preset = theme.Get().preset;
-    generation.compiled_theme_mode = theme.Get().mode;
+    generation.compiled_theme_mode = startup_theme.mode;
 
     UiDesignerCodeGenerator generator(catalog_);
     UiDesignerGeneratedProject project =

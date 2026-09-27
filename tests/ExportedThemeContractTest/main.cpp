@@ -184,6 +184,65 @@ CONSOLE_APP_MAIN
           no_json_source.Find("Color(18, 52, 86)") >= 0,
           "compiled theme remains effective when optional theme.json is omitted");
 
+    session.Select(session.Document().GetRootId());
+    Check(session.InspectorModel().Find("startup_appearance") && session.InspectorModel().Find("project_theme"),
+          "Window inspector exposes startup appearance and project theme");
+    auto Authored = [&] { ValueMap v = UiDesignerDocumentToValue(session.Document()); v.RemoveKey("revision"); return AsJSON(v); };
+    const String authored_before = Authored();
+    Check(session.CommitProperty("startup_appearance", "Light", error), "Window appearance commits");
+    String light_source = session.GenerateCode("ThemeWindow");
+    Check(light_source.Find("UiThemeMode::Light") >= 0 && light_source.Find("Color(18, 52, 86)") < 0,
+          "startup Light chooses Light recipes despite Dark editor preview");
+    Check(theme.Get().mode == "Dark", "startup choice does not change editor appearance");
+    Check(session.Undo() && Authored() == authored_before,
+          "one Undo restores Window startup choice");
+    Check(!session.CommitProperty("startup_appearance", "Invalid", error), "invalid startup appearance rejected");
+    Check(session.CommitProperty("startup_appearance", "Dark", error), "explicit Dark startup commits");
+    Check(theme.Commit("mode", "Light", "Preview Light", error) &&
+          session.GenerateCode("ThemeWindow").Find("UiThemeMode::Dark") >= 0,
+          "fixed startup appearance survives editor Light switch");
+    Check(session.CommitProperty("window_title", "Library \"collection\"", error) &&
+          session.CommitProperty("window_resizable", false, error) &&
+          session.CommitProperty("window_start_maximized", true, error), "Window title and sizing commit");
+    String fixed_source = session.GenerateCode("ThemeWindow");
+    Check(fixed_source.Find("Title(\"Library \\\"collection\\\"\")") >= 0 &&
+          fixed_source.Find(".Sizeable(false).Zoomable(false)") >= 0 && fixed_source.Find("\tMaximize();") < 0,
+          "fixed dialog has escaped title, no maximise button and no maximised startup");
+    Check(session.CommitProperty("window_resizable", true, error) &&
+          session.GenerateCode("ThemeWindow").Find("\tMaximize();") >= 0,
+          "resizable window can start maximised");
+    Check(!session.CommitProperty("window_resizable", "yes", error), "invalid boolean rejected");
+    UiDesignerDocument restored_window;
+    Check(UiDesignerDeserialize(UiDesignerSerialize(session.Document(), false), restored_window, error) &&
+          restored_window.GetProperty(restored_window.GetRootId(), "startup_appearance") == "Dark" &&
+          restored_window.GetProperty(restored_window.GetRootId(), "window_title") == "Library \"collection\"",
+          "Window options roundtrip through canonical JSON");
+    Check(session.ResetProperty("window_title", error) &&
+          session.GenerateCode("ThemeWindow").Find("Title(\"ThemeWindow\")") >= 0,
+          "reset empty title uses generated class name");
+    const int original_theme = session.GetActiveProjectTheme();
+    Check(session.CommitProperty("project_theme", -2, error) && session.Theme().Get().preset == "Pill",
+          "Window theme selector creates a project copy of a default");
+    const int copied_count = session.GetProjectThemeCount();
+    Check(session.CommitProperty("project_theme", original_theme, error) &&
+          session.CommitProperty("project_theme", -2, error) && session.GetProjectThemeCount() == copied_count,
+          "default theme reuse does not create repeated copies");
+    Check(session.Document().GetProperty(session.Document().GetRootId(), "startup_appearance") == "Dark",
+          "switching project theme retains explicit startup appearance");
+    if(FindIndex(CommandLine(), String("library-fixture")) >= 0) {
+        UiDesignerSession library;
+        String base = AppendFileName(GetExeFolder(), "ai-designs");
+        Check(library.Load(AppendFileName(base, "LiveLibrary/project.uidesign.json"), error), "load live Library fixture");
+        library.Select(library.Document().GetRootId());
+        Check(library.CommitProperty("startup_appearance", "Dark", error) &&
+              library.CommitProperty("window_title", "Music Library - Dark startup", error), "configure Library startup");
+        UiDesignerExportRequest fixture;
+        fixture.destination = AppendFileName(base, "LiveLibraryDark");
+        fixture.generation.package_name = "LiveLibraryDark";
+        fixture.generation.class_name = "LiveLibraryDarkWindow";
+        auto exported = UiDesignerExportService(library.Catalog()).Execute(library.Document(), library.Theme(), fixture);
+        Check(exported.success, "export runnable dark Library fixture");
+    }
     DeleteFolderDeep(temp);
     Cout() << "EXPORTED_THEME_CONTRACT checks=" << checks
            << " failed=" << failed << '\n';

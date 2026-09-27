@@ -298,6 +298,7 @@ void UiDesignerInteractionOverlay::LeftDown(Point p, dword keyflags)
         return;
     const int resize_edge = HitDocumentResizeEdge(p);
     if(resize_edge) {
+        owner_->session_.Select(owner_->session_.Document().GetRootId(), false);
         resizing_ = true;
         pointer_gesture_ = UiDesignerPointerGesture::RootResize;
         resize_edge_ = resize_edge;

@@ -1493,6 +1493,13 @@ UiDesignerGeneratedProject UiDesignerCodeGenerator::Generate(
         result.diagnostics.Add(error);
         return result;
     }
+    for(const char* key : {"window_title", "window_resizable", "window_maximize_box", "window_start_maximized"}) {
+        Value v = document.GetProperty(document.GetRootId(), key);
+        if(!IsNull(v) && (String(key) == "window_title" ? !v.Is<String>() : !v.Is<bool>())) {
+            result.diagnostics.Add("Invalid Window setting: " + String(key));
+            return result;
+        }
+    }
     for(const UiDesignerNode& node : document.GetNodes()) {
         if(node.id == document.GetRootId())
             continue;
@@ -1572,10 +1579,17 @@ UiDesignerGeneratedProject UiDesignerCodeGenerator::Generate(
         gs << "\t// Compiled from UiDesigner ThemeDocument before controls resolve styles.\n"
            << "\tUiTheme::Set(" << GeneratedThemePresetExpr(options.compiled_theme_preset)
            << ", " << GeneratedThemeModeExpr(options.compiled_theme_mode) << ");\n";
-    gs << "\tTitle(" << CppString(options.class_name) << ").Sizeable().Zoomable();\n"
+    String title = AsString(document.GetProperty(document.GetRootId(), "window_title", ""));
+    if(title.IsEmpty()) title = options.class_name;
+    const bool resizable = document.GetProperty(document.GetRootId(), "window_resizable", true);
+    const bool maximize = document.GetProperty(document.GetRootId(), "window_maximize_box", true);
+    const bool maximized = document.GetProperty(document.GetRootId(), "window_start_maximized", false);
+    gs << "\tTitle(" << CppString(title) << ").Sizeable(" << (resizable ? "true" : "false")
+       << ").Zoomable(" << (resizable && maximize ? "true" : "false") << ");\n"
        << "\tSetRect(0, 0, DPI(" << document.GetVirtualSize().cx
-       << "), DPI(" << document.GetVirtualSize().cy << "));\n"
-       << "\tBuildControls();\n\tBuildLayout();\n\tBindGeneratedActions();\n}\n\n"
+       << "), DPI(" << document.GetVirtualSize().cy << "));\n";
+    if(resizable && maximized) gs << "\tMaximize();\n";
+    gs << "\tBuildControls();\n\tBuildLayout();\n\tBindGeneratedActions();\n}\n\n"
        << "void " << base << "::BuildControls()\n{\n";
     for(const UiDesignerNode& node : document.GetNodes()) {
         if(node.id == document.GetRootId())

@@ -25,7 +25,7 @@ const HelpTopic help_topics[] = {
         "Choose where extra space goes",
         "Fit measures the content. Expand takes available space. Fixed uses an explicit size. Typically the main content expands while headings and action rows fit. A Spacer can separate groups or push actions to the right. Avoid fixed coordinates when a layout expresses the structure.",
         "Select and refine",
-        "Use Hierarchy to select a container covered by its children. Inspector edits the selected control; Data edits supported list/tree content; Behavior configures supported actions. Use Undo/Redo to recover changes. Code shows the generated C++ for review.",
+        "Use Hierarchy to select a container covered by its children. Click empty workspace outside the canvas or a resize handle to select Window. Its Inspector sets the title, project theme, startup Light/Dark and resizing options. Startup appearance can differ from the editor view. Inspector edits controls; Data edits supported collections; Behavior configures actions. Use Undo/Redo to recover changes.",
         "Example: a resizing dialog",
         "Set the outer Grid to expand in both directions. Set the heading and bottom button row to Fit height; set the centre Panel to Expand height. In the horizontal button Box, make the Spacer expand and each button fit. Resize to check that the body gains space while the buttons remain together."
     }},
