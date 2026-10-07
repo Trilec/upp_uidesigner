@@ -1,3 +1,4 @@
+#include <Ui/UiFonts.h>
 #include "UiDesignerStyledThemeCommon.h"
 #include <Ui/UiButton.h>
 #include <Ui/UiToolButton.h>
@@ -61,7 +62,7 @@ static void AddButtonOverrides(UiDesignerControlSpec& spec)
     RenameOverride(spec, "shadow_y", "shadow_offset_y");
 
     Add(spec, "font_face", "Font face", "Typography",
-        PropertyEditorKind::Text, s.font.GetFaceName(), true)
+        PropertyEditorKind::Text, UiFonts::Selection(s.font), true)
         .Editor("property.font");
     AddNumeric(spec, "font_size", "Font size", "Typography",
                max(1, s.font.GetHeight()), 6, 128, true);
@@ -101,7 +102,7 @@ static bool ApplyButtonField(UiButton::Style& s, const String& id, const Value& 
     if(ApplyPaletteMetrics(s.palette, s.metrics, "", common, value))
         return true;
 
-    if(id == "font_face") s.font.FaceName(AsString(value));
+    if(id == "font_face") UiFonts::ApplySelection(s.font, AsString(value));
     else if(id == "font_size") s.font.Height(max(1, (int)value));
     else if(id == "font_bold") s.font.Bold((bool)value);
     else if(id == "font_italic") s.font.Italic((bool)value);
@@ -126,7 +127,7 @@ static Value ButtonFieldValue(const UiButton::Style& s, const String& id)
     const String common = ButtonCommonId(id);
     if(IsPaletteMetricsField("", common))
         return PaletteMetricsValue(s.palette, s.metrics, "", common);
-    if(id == "font_face") return s.font.GetFaceName();
+    if(id == "font_face") return UiFonts::Selection(s.font);
     if(id == "font_size") return s.font.GetHeight();
     if(id == "font_bold") return s.font.IsBold();
     if(id == "font_italic") return s.font.IsItalic();

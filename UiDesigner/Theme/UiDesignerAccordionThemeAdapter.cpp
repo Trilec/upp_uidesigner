@@ -1,3 +1,4 @@
+#include <Ui/UiFonts.h>
 #include "UiDesignerNormalizedThemeCommon.h"
 #include <Ui/UiAccordion.h>
 
@@ -184,13 +185,13 @@ static Value ValueOf(const UiAccordion::Style& s, const String& id)
     if(id == "header_title_color") return s.header_style.title_color;
     if(id == "header_subtitle_color") return s.header_style.subtitle_color;
     if(id == "header_copy_color") return s.header_style.copy_color;
-    if(id == "header_title_font_face") return s.header_style.title_font.GetFaceName();
+    if(id == "header_title_font_face") return UiFonts::Selection(s.header_style.title_font);
     if(id == "header_title_font_height") return s.header_style.title_font.GetHeight();
     if(id == "header_title_font_bold") return s.header_style.title_font.IsBold();
-    if(id == "header_subtitle_font_face") return s.header_style.subtitle_font.GetFaceName();
+    if(id == "header_subtitle_font_face") return UiFonts::Selection(s.header_style.subtitle_font);
     if(id == "header_subtitle_font_height") return s.header_style.subtitle_font.GetHeight();
     if(id == "header_subtitle_font_bold") return s.header_style.subtitle_font.IsBold();
-    if(id == "header_copy_font_face") return s.header_style.copy_font.GetFaceName();
+    if(id == "header_copy_font_face") return UiFonts::Selection(s.header_style.copy_font);
     if(id == "header_copy_font_height") return s.header_style.copy_font.GetHeight();
     if(id == "header_copy_font_bold") return s.header_style.copy_font.IsBold();
     if(id == "header_margin_left") return s.header_style.metrics.content_margin.left;
@@ -283,13 +284,13 @@ static void Apply(UiAccordion::Style& s, const String& id, const Value& v)
     else if(id == "header_title_color") s.header_style.title_color = (Color)v;
     else if(id == "header_subtitle_color") s.header_style.subtitle_color = (Color)v;
     else if(id == "header_copy_color") s.header_style.copy_color = (Color)v;
-    else if(id == "header_title_font_face") s.header_style.title_font.FaceName(AsString(v));
+    else if(id == "header_title_font_face") UiFonts::ApplySelection(s.header_style.title_font, AsString(v));
     else if(id == "header_title_font_height") s.header_style.title_font.Height(max(1, (int)v));
     else if(id == "header_title_font_bold") s.header_style.title_font.Bold((bool)v);
-    else if(id == "header_subtitle_font_face") s.header_style.subtitle_font.FaceName(AsString(v));
+    else if(id == "header_subtitle_font_face") UiFonts::ApplySelection(s.header_style.subtitle_font, AsString(v));
     else if(id == "header_subtitle_font_height") s.header_style.subtitle_font.Height(max(1, (int)v));
     else if(id == "header_subtitle_font_bold") s.header_style.subtitle_font.Bold((bool)v);
-    else if(id == "header_copy_font_face") s.header_style.copy_font.FaceName(AsString(v));
+    else if(id == "header_copy_font_face") UiFonts::ApplySelection(s.header_style.copy_font, AsString(v));
     else if(id == "header_copy_font_height") s.header_style.copy_font.Height(max(1, (int)v));
     else if(id == "header_copy_font_bold") s.header_style.copy_font.Bold((bool)v);
     else if(id == "header_margin_left") s.header_style.metrics.content_margin.left = max(0, (int)v);
@@ -358,13 +359,13 @@ static void AddOverrides(UiDesignerControlSpec& spec)
     Add(spec, "header_title_color", "Title", "Header/Ink", PropertyEditorKind::Color, s.header_style.title_color);
     Add(spec, "header_subtitle_color", "Subtitle", "Header/Ink", PropertyEditorKind::Color, s.header_style.subtitle_color);
     Add(spec, "header_copy_color", "Copy", "Header/Ink", PropertyEditorKind::Color, s.header_style.copy_color);
-    Add(spec, "header_title_font_face", "Title Font", "Header/Typography", PropertyEditorKind::Text, s.header_style.title_font.GetFaceName(), true).Editor("property.font");
+    Add(spec, "header_title_font_face", "Title Font", "Header/Typography", PropertyEditorKind::Text, UiFonts::Selection(s.header_style.title_font), true).Editor("property.font");
     AddInt(spec, "header_title_font_height", "Title Height", "Header/Typography", max(1, s.header_style.title_font.GetHeight()), 6, 96, true);
     Add(spec, "header_title_font_bold", "Title Bold", "Header/Typography", PropertyEditorKind::Boolean, s.header_style.title_font.IsBold(), true);
-    Add(spec, "header_subtitle_font_face", "Subtitle Font", "Header/Typography", PropertyEditorKind::Text, s.header_style.subtitle_font.GetFaceName(), true).Editor("property.font");
+    Add(spec, "header_subtitle_font_face", "Subtitle Font", "Header/Typography", PropertyEditorKind::Text, UiFonts::Selection(s.header_style.subtitle_font), true).Editor("property.font");
     AddInt(spec, "header_subtitle_font_height", "Subtitle Height", "Header/Typography", max(1, s.header_style.subtitle_font.GetHeight()), 6, 96, true);
     Add(spec, "header_subtitle_font_bold", "Subtitle Bold", "Header/Typography", PropertyEditorKind::Boolean, s.header_style.subtitle_font.IsBold(), true);
-    Add(spec, "header_copy_font_face", "Copy Font", "Header/Typography", PropertyEditorKind::Text, s.header_style.copy_font.GetFaceName(), true).Editor("property.font");
+    Add(spec, "header_copy_font_face", "Copy Font", "Header/Typography", PropertyEditorKind::Text, UiFonts::Selection(s.header_style.copy_font), true).Editor("property.font");
     AddInt(spec, "header_copy_font_height", "Copy Height", "Header/Typography", max(1, s.header_style.copy_font.GetHeight()), 6, 96, true);
     Add(spec, "header_copy_font_bold", "Copy Bold", "Header/Typography", PropertyEditorKind::Boolean, s.header_style.copy_font.IsBold(), true);
     AddInt(spec, "header_margin_left", "Left", "Header/Content Margin", s.header_style.metrics.content_margin.left, 0, 80, true);

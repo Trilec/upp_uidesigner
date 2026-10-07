@@ -132,6 +132,7 @@ UiDesignerGeneratedProject UiDesignerExportService::BuildCppProject(
     generation.apply_compiled_theme = true;
     generation.compiled_theme_preset = theme.Get().preset;
     generation.compiled_theme_mode = startup_theme.mode;
+    generation.project_typography = startup_theme.typography;
 
     UiDesignerCodeGenerator generator(catalog_);
     UiDesignerGeneratedProject project =

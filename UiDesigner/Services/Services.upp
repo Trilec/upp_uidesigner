@@ -2,6 +2,7 @@ description "UiDesigner session, edit, projection and automation services";
 
 uses
     Utilities/PropertyEditorCore,
+    UiDesigner/Fonts,
     UiDesigner/Core,
     UiDesigner/Commands,
     UiDesigner/Catalog,

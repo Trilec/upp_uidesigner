@@ -101,6 +101,8 @@ public:
                         int index, int grid_row, int grid_column,
                         UiDesignerNodeId *created, String& error);
     const Vector<String>& GetRecentPaths() const { return recent_paths_; }
+    bool ImportProjectFont(const String& path, const String& family_id,
+                           const String& license_text, String& asset_id, String& error);
     bool SaveThemeFile(const String& path, String& error);
     bool LoadThemeFile(const String& path, String& error);
     const String& GetThemePath() const { return theme_path_; }

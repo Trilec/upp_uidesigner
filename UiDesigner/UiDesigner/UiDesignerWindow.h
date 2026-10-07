@@ -55,6 +55,7 @@ private:
     void SaveDocument(bool save_as = false);
     void LoadDocument();
     void LoadTheme();
+    void ImportProjectFonts();
     void SaveThemeAs();
     void SaveTheme(bool save_as = false);
     void SyncThemeChoices();

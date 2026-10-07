@@ -1,3 +1,4 @@
+#include <Ui/UiFonts.h>
 #include "UiDesignerNormalizedThemeCommon.h"
 #include <Ui/UiChartRing.h>
 
@@ -35,7 +36,7 @@ Value ChartField(const UiChartRing::Style& s, const String& id)
     if(id == "segment_gap") return s.segment_gap;
     if(id == "min_text_height") return s.min_text_height;
     if(id == "font_height") return s.font.GetHeight();
-    if(id == "font_face") return s.font.GetFaceName();
+    if(id == "font_face") return UiFonts::Selection(s.font);
     if(id == "font_bold") return s.font.IsBold();
     if(id == "font_italic") return s.font.IsItalic();
     return Value();
@@ -57,7 +58,7 @@ void SetChartField(UiChartRing::Style& s, const String& id, const Value& value)
     if(index >= 0) { s.text_palette.ink[index] = (Color)value; return; }
     index = ChartSeriesIndex(id);
     if(index >= 0) { s.series[index] = (Color)value; return; }
-    if(id == "font_face") { s.font.FaceName(AsString(value)); return; }
+    if(id == "font_face") { UiFonts::ApplySelection(s.font, AsString(value)); return; }
     if(id == "font_bold") { s.font.Bold((bool)value); return; }
     if(id == "font_italic") { s.font.Italic((bool)value); return; }
     const int n = ChartMetric(id, value);
@@ -136,7 +137,7 @@ public:
         AddInt(spec, "segment_gap", "Segment gap", "Ring", s.segment_gap, 0, 256, true);
         AddInt(spec, "min_text_height", "Minimum text height", "Typography", s.min_text_height, 1, 128, true);
         AddInt(spec, "font_height", "Font height", "Typography", s.font.GetHeight(), 1, 128, true);
-        Add(spec, "font_face", "Font face", "Typography", PropertyEditorKind::Text, s.font.GetFaceName(), true);
+        Add(spec, "font_face", "Font face", "Typography", PropertyEditorKind::Text, UiFonts::Selection(s.font), true);
         Add(spec, "font_bold", "Bold", "Typography", PropertyEditorKind::Boolean, s.font.IsBold(), true);
         Add(spec, "font_italic", "Italic", "Typography", PropertyEditorKind::Boolean, s.font.IsItalic(), true);
     }

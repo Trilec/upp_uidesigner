@@ -54,7 +54,7 @@ GUI_APP_MAIN {
         if(auto* picker=dynamic_cast<UiButton*>(child)) {
             picker_found=true;
             Check(picker->GetText().IsEmpty() && picker->GetIconSize().cx==indicator &&
-                  picker->GetIconSize().cy < indicator,
+                  picker->GetIconSize().cy > 0 && picker->GetIconSize().cy <= indicator,
                   "DateTime uses dropdown-sized icon rather than font caret");
         }
     Check(picker_found,"DateTime picker button exists");

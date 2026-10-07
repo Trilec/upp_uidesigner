@@ -1,3 +1,4 @@
+#include <Ui/UiFonts.h>
 #include "UiDesignerAutomation.h"
 #include "UiDesignerRuntimeTheme.h"
 #include <cmath>
@@ -58,12 +59,9 @@ static bool ValidateDesignStyle(const ValueMap& style, String& error)
     for(int i = 0; i < style.GetCount(); ++i) {
         String key = AsString(style.GetKey(i));
         Value v = style.GetValue(i);
-        if(key == "body_font" || key == "heading_font") {
-            bool installed = false;
-            if(v.Is<String>()) for(int f = 0; f < Font::GetFaceCount(); ++f)
-                if(Font::GetFaceName(f) == (String)v) installed = true;
-            if(installed) continue;
-            error = "Choose an installed font using list_fonts: " + key; return false;
+        if(key == "body_font" || key == "heading_font" || key == "code_font") {
+            if(v.Is<String>() && UiFonts::Catalog().HasSelection(AsString(v))) continue;
+            error = "Choose a project or system font using list_fonts: " + key; return false;
         }
         if((key == "body_bold" || key == "heading_bold") && v.Is<bool>()) continue;
         if(key == "shadow" && v.Is<String>() && (v == "None" || v == "Hard")) continue;
@@ -186,6 +184,8 @@ bool UiDesignerAutomationService::BuildThemeDesign(const ValueMap& params,
         if(error.IsEmpty()) error = "Expected six hex colours for both light and dark";
         return false;
     }
+    for(const char *key : { "body_font", "heading_font", "code_font" })
+        if(style.Find(key) >= 0) result.typography.Set(key, style[key]);
     int radius = (int)params["radius"], border = (int)params["border_width"];
     if(radius < 0 || radius > 32 || border < 0 || border > 6) {
         error = "Radius must be 0..32 and border width 0..6"; return false;

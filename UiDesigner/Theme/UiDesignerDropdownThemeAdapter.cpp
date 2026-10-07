@@ -1,3 +1,4 @@
+#include <Ui/UiFonts.h>
 #include "UiDesignerNormalizedThemeCommon.h"
 #include <Ui/UiDropdown.h>
 
@@ -123,7 +124,7 @@ static Value ValueOf(const UiDropdown::Style& s, const String& id)
     if(id == "face_enabled") return s.metrics.face_enabled;
     if(id == "frame_enabled") return s.metrics.frame_enabled;
     if(id == "frame_width") return s.metrics.frame_width;
-    if(id == "font_face") return s.font.GetFaceName();
+    if(id == "font_face") return UiFonts::Selection(s.font);
     if(id == "font_height") return s.font.GetHeight();
     if(id == "font_bold") return s.font.IsBold();
     if(id == "font_italic") return s.font.IsItalic();
@@ -171,7 +172,7 @@ static Value ValueOf(const UiDropdown::Style& s, const String& id)
     if(id == "popup_item_frame_enabled") return s.popup_item_style.metrics.frame_enabled;
     if(id == "popup_item_frame_width") return s.popup_item_style.metrics.frame_width;
     if(id == "popup_item_radius") return s.popup_item_style.metrics.radius;
-    if(id == "popup_item_font_face") return s.popup_item_style.font.GetFaceName();
+    if(id == "popup_item_font_face") return UiFonts::Selection(s.popup_item_style.font);
     if(id == "popup_item_font_height") return s.popup_item_style.font.GetHeight();
     if(id == "popup_item_font_bold") return s.popup_item_style.font.IsBold();
     if(id == "popup_item_font_italic") return s.popup_item_style.font.IsItalic();
@@ -217,7 +218,7 @@ static void Apply(UiDropdown::Style& s, const String& id, const Value& v)
     else if(id == "face_enabled") s.metrics.face_enabled = (bool)v;
     else if(id == "frame_enabled") s.metrics.frame_enabled = (bool)v;
     else if(id == "frame_width") s.metrics.frame_width = max(0, (int)v);
-    else if(id == "font_face") s.font.FaceName(AsString(v));
+    else if(id == "font_face") UiFonts::ApplySelection(s.font, AsString(v));
     else if(id == "font_height") s.font.Height(max(1, (int)v));
     else if(id == "font_bold") s.font.Bold((bool)v);
     else if(id == "font_italic") s.font.Italic((bool)v);
@@ -265,7 +266,7 @@ static void Apply(UiDropdown::Style& s, const String& id, const Value& v)
     else if(id == "popup_item_frame_enabled") s.popup_item_style.metrics.frame_enabled = (bool)v;
     else if(id == "popup_item_frame_width") s.popup_item_style.metrics.frame_width = max(0, (int)v);
     else if(id == "popup_item_radius") s.popup_item_style.metrics.radius = max(0, (int)v);
-    else if(id == "popup_item_font_face") s.popup_item_style.font.FaceName(AsString(v));
+    else if(id == "popup_item_font_face") UiFonts::ApplySelection(s.popup_item_style.font, AsString(v));
     else if(id == "popup_item_font_height") s.popup_item_style.font.Height(max(1, (int)v));
     else if(id == "popup_item_font_bold") s.popup_item_style.font.Bold((bool)v);
     else if(id == "popup_item_font_italic") s.popup_item_style.font.Italic((bool)v);
@@ -301,7 +302,7 @@ static void AddOverrides(UiDesignerControlSpec& spec)
     for(int i = 0; i < 4; i++) Add(spec, "icon_" + String(kStates[i]), kLabels[i], "Icon", PropertyEditorKind::Color, s.palette.icon[i]);
     Add(spec, "ink_normal", "Normal", "Ink", PropertyEditorKind::Color, s.palette.ink[ST_NORMAL]);
     for(int i = 1; i < 4; i++) Add(spec, "ink_" + String(kStates[i]), kLabels[i], "Ink", PropertyEditorKind::Color, s.palette.ink[i]);
-    Add(spec, "font_face", "Font face", "Typography", PropertyEditorKind::Text, s.font.GetFaceName(), true).Editor("property.font");
+    Add(spec, "font_face", "Font face", "Typography", PropertyEditorKind::Text, UiFonts::Selection(s.font), true).Editor("property.font");
     AddInt(spec, "font_height", "Font height", "Typography", max(1, s.font.GetHeight()), 6, 96, true);
     Add(spec, "font_bold", "Bold", "Typography", PropertyEditorKind::Boolean, s.font.IsBold(), true);
     Add(spec, "font_italic", "Italic", "Typography", PropertyEditorKind::Boolean, s.font.IsItalic(), true);
@@ -356,7 +357,7 @@ static void AddOverrides(UiDesignerControlSpec& spec)
     AddInt(spec, "popup_item_radius", "Radius", "Popup/Items/Frame", s.popup_item_style.metrics.radius, 0, 96);
     for(int i = 0; i < 4; i++) Add(spec, "popup_item_frame." + String(kStates[i]), kLabels[i], "Popup/Items/Frame", PropertyEditorKind::Color, s.popup_item_style.palette.frame[i]);
     for(int i = 0; i < 4; i++) Add(spec, "popup_item_ink." + String(kStates[i]), kLabels[i], "Popup/Items/Ink", PropertyEditorKind::Color, s.popup_item_style.palette.ink[i]);
-    Add(spec, "popup_item_font_face", "Font face", "Popup/Items/Typography", PropertyEditorKind::Text, s.popup_item_style.font.GetFaceName(), true).Editor("property.font");
+    Add(spec, "popup_item_font_face", "Font face", "Popup/Items/Typography", PropertyEditorKind::Text, UiFonts::Selection(s.popup_item_style.font), true).Editor("property.font");
     AddInt(spec, "popup_item_font_height", "Font height", "Popup/Items/Typography", max(1, s.popup_item_style.font.GetHeight()), 6, 96, true);
     Add(spec, "popup_item_font_bold", "Bold", "Popup/Items/Typography", PropertyEditorKind::Boolean, s.popup_item_style.font.IsBold(), true);
     Add(spec, "popup_item_font_italic", "Italic", "Popup/Items/Typography", PropertyEditorKind::Boolean, s.popup_item_style.font.IsItalic(), true);

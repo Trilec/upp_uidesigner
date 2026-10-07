@@ -34,6 +34,7 @@ struct UiDesignerCodeGenerationOptions : Moveable<UiDesignerCodeGenerationOption
     bool apply_compiled_theme = false;
     String compiled_theme_preset = "Minimal";
     String compiled_theme_mode = "Light";
+    ValueMap project_typography;
 };
 
 struct UiDesignerGeneratedFile : Moveable<UiDesignerGeneratedFile> {

@@ -1,0 +1,13 @@
+description "Private project font resources, preview and packaged export acceptance";
+uses
+    CtrlLib,
+    Ui,
+    Utilities/PropertyEditor,
+    UiDesigner/Fonts,
+    UiDesigner/Services,
+    UiDesigner/Preview,
+    UiDesigner/Theme;
+file
+    main.cpp;
+mainconfig
+    "" = "GUI";

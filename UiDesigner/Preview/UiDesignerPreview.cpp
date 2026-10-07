@@ -1,3 +1,5 @@
+#include <Ui/UiFonts.h>
+#include <UiDesigner/Fonts/UiDesignerFonts.h>
 #include "UiDesignerPreview.h"
 #include <UiDesigner/Services/UiDesignerListDataAdapter.h>
 #include "UiDesignerVisuals.h"
@@ -1009,7 +1011,7 @@ static UiDesignerApplyResult ApplyRuntime(
         if(property == "tab_font_face" || property == "tab_font_size" ||
            property == "tab_font_bold" || property == "tab_font_italic") {
             Font font = tab->GetTabFont();
-            if(property == "tab_font_face") font.FaceName(AsString(value));
+            if(property == "tab_font_face") UiFonts::ApplySelection(font, AsString(value));
             else if(property == "tab_font_size") font.Height(max(1, (int)value));
             else if(property == "tab_font_bold") font.Bold((bool)value);
             else font.Italic((bool)value);
@@ -2225,6 +2227,7 @@ void UiDesignerPreviewCanvas::BuildNode(
 
 void UiDesignerPreviewCanvas::RebuildDocument()
 {
+    if(document_) UiDesignerActivateFonts(*document_, runtime_theme_);
     DestroyInstances();
     if(document_ && catalog_)
         BuildNode(document_->GetRootId(), *this, 0, 0);

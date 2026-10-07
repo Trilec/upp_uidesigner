@@ -1,3 +1,4 @@
+#include <Ui/UiFonts.h>
 #include "UiDesignerNormalizedThemeCommon.h"
 #include <Ui/UiBaseEdit.h>
 
@@ -88,7 +89,7 @@ static Value EditFieldValue(const UiBaseEdit::Style& s, const String& id)
     if(id == "face_enabled") return s.metrics.face_enabled;
     if(id == "frame_enabled") return s.metrics.frame_enabled;
     if(id == "frame_width") return s.metrics.frame_width;
-    if(id == "font_face") return s.font.GetFaceName();
+    if(id == "font_face") return UiFonts::Selection(s.font);
     if(id == "font_size") return s.font.GetHeight();
     if(id == "font_bold") return s.font.IsBold();
     if(id == "font_italic") return s.font.IsItalic();
@@ -149,7 +150,7 @@ static void ApplyEditField(UiBaseEdit::Style& s, const String& id, const Value& 
     else if(id == "face_enabled") s.metrics.face_enabled = (bool)v;
     else if(id == "frame_enabled") s.metrics.frame_enabled = (bool)v;
     else if(id == "frame_width") s.metrics.frame_width = max(0, (int)v);
-    else if(id == "font_face") s.font.FaceName(AsString(v));
+    else if(id == "font_face") UiFonts::ApplySelection(s.font, AsString(v));
     else if(id == "font_size") s.font.Height(max(1, (int)v));
     else if(id == "font_bold") s.font.Bold((bool)v);
     else if(id == "font_italic") s.font.Italic((bool)v);
@@ -206,7 +207,7 @@ static void AddEditOverrides(UiDesignerControlSpec& spec)
     AddInt(spec, "frame_width", "Width", "Frame", s.metrics.frame_width, 0, 24, true);
     for(int i = 0; i < 4; i++) Add(spec, "frame_" + String(kEditStates[i]), kEditStateLabels[i], "Frame", PropertyEditorKind::Color, s.palette.frame[i]);
     for(int i = 0; i < 4; i++) Add(spec, "text_" + String(kEditStates[i]), kEditStateLabels[i], "Ink", PropertyEditorKind::Color, s.palette.ink[i]);
-    Add(spec, "font_face", "Font face", "Typography", PropertyEditorKind::Text, s.font.GetFaceName(), true).Editor("property.font");
+    Add(spec, "font_face", "Font face", "Typography", PropertyEditorKind::Text, UiFonts::Selection(s.font), true).Editor("property.font");
     AddInt(spec, "font_size", "Font height", "Typography", max(1, s.font.GetHeight()), 6, 96, true);
     Add(spec, "font_bold", "Bold", "Typography", PropertyEditorKind::Boolean, s.font.IsBold(), true);
     Add(spec, "font_italic", "Italic", "Typography", PropertyEditorKind::Boolean, s.font.IsItalic(), true);

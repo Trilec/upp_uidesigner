@@ -1,3 +1,4 @@
+#include <Ui/UiFonts.h>
 #include "UiDesignerAssistant.h"
 #include "Skills.h"
 #include <UiDesigner/Services/UiDesignerRuntimeTheme.h>
@@ -66,7 +67,7 @@ static const Operation operations[] = {
  {"describe_control", "Configuration, parenting and data schema; optional include_theme for local styling", R"json({"type":{"type":"string"},"include_theme":{"type":"boolean"}})json", "[\"type\"]"},
  {"describe_controls", "Compact configuration schemas for up to four types; optional include_theme for local styling", R"json({"types":{"type":"array","items":{"type":"string"},"maxItems":4},"include_theme":{"type":"boolean"}})json", "[\"types\"]"},
  {"list_presets", "Supported composition presets", "{}", "[]"},
- {"list_fonts", "Installed font families matching query", "{\"query\":{\"type\":\"string\"}}", "[\"query\"]"},
+ {"list_fonts", "Project and optional system font selections matching query", "{\"query\":{\"type\":\"string\"}}", "[\"query\"]"},
  {"retrieve_skill", "Retrieve one versioned skill by ID; empty ID returns index", "{\"id\":{\"type\":\"string\"}}", "[\"id\"]"},
  {"inspect_theme_control", "Find a control's exact theme targets and relevant editable fields. Accepts catalogue type or display name; query e.g. title, text, frame", R"json({"type":{"type":"string"},"query":{"type":"string"}})json", "[\"type\",\"query\"]"},
  {"inspect_theme", "Current palette and proposal state; optional target inspects one exact recipe", "{\"target\":{\"type\":\"string\"}}", "[]"},
@@ -159,8 +160,8 @@ template<class T> static bool FieldValue(const T& spec, const Value& v, String& 
     String k = PropertyEditorKindName(spec.kind);
     if(spec.custom_editor == "property.numeric-int-working-range") k = "NumericInt";
     if(spec.custom_editor == "property.font" && v.Is<String>()) {
-        for(int i = 0; i < Font::GetFaceCount(); i++) if(Font::GetFaceName(i) == (String)v) return true;
-        error = "Requested font family is not installed"; return false;
+        if(UiFonts::Catalog().HasSelection(AsString(v))) return true;
+        error = "Requested font selection is not in the project/system catalogue"; return false;
     }
     if(k == "Text" || k == "Multiline" || k == "FilePath") {
         if(v.Is<String>() && ((String)v).GetCount() <= 8192) return true;
@@ -316,9 +317,9 @@ Value UiDesignerAssistantHost::Prepare(const String& name, const ValueMap& args)
             }
         }
     } else if(name == "prepare_font") {
-        String family = AsString(args["family"]); bool installed = false;
-        for(int i = 0; i < Font::GetFaceCount(); i++) if(Font::GetFaceName(i) == family) installed = true;
-        if(!installed) return Result(false, "Requested font family is not installed");
+        String family = AsString(args["family"]);
+        const bool available = UiFonts::Catalog().HasSelection(family);
+        if(!available) return Result(false, "Requested font selection is not in the project/system catalogue");
         bool recipe = args["scope"] == "recipe"; ValueMap fields; ValueArray edits;
         ValueArray nodes = args["nodes"];
         if(recipe) nodes.Add((int64)0);
@@ -378,8 +379,12 @@ Value UiDesignerAssistantHost::ExecuteOperation(const String& name, const ValueM
     }
     if(name == "list_fonts") {
         ValueArray a; String q = ToLower(AsString(args["query"]));
-        for(int i = 0; i < Font::GetFaceCount() && a.GetCount() < 128; i++)
-            if(ToLower(Font::GetFaceName(i)).Find(q) >= 0) a.Add(Font::GetFaceName(i));
+        const auto fonts = UiFonts::Catalog().Choices();
+        for(int i = 0; i < fonts.GetCount() && a.GetCount() < 128; ++i)
+            if(ToLower(fonts[i] + fonts.GetKey(i)).Find(q) >= 0) {
+                ValueMap font; font.Set("selection", fonts.GetKey(i)); font.Set("label", fonts[i]);
+                font.Set("source", fonts.GetKey(i).StartsWith("project:") ? "project" : "system"); a.Add(font);
+            }
         return Result(true, a);
     }
     if(name == "retrieve_skill") {

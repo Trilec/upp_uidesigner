@@ -1,3 +1,4 @@
+#include <Ui/UiFonts.h>
 #include "UiDesignerStyledThemeCommon.h"
 #include <Ui/UiPanel.h>
 #include <Ui/UiGroupPanel.h>
@@ -362,7 +363,7 @@ static void AddGroupPanelOverrides(UiDesignerControlSpec& spec)
         PropertyEditorKind::Color, s.subtitle_color);
 
     Add(spec, "title_font_face", "Title font face", "Header / Typography",
-        PropertyEditorKind::Text, s.title_font.GetFaceName(), true).Editor("property.font");
+        PropertyEditorKind::Text, UiFonts::Selection(s.title_font), true).Editor("property.font");
     AddNumeric(spec, "title_font_height", "Title font height", "Header / Typography",
                max(1, s.title_font.GetHeight()), 6, 128, true);
     Add(spec, "title_font_bold", "Title bold", "Header / Typography",
@@ -371,7 +372,7 @@ static void AddGroupPanelOverrides(UiDesignerControlSpec& spec)
         PropertyEditorKind::Boolean, s.title_font.IsItalic(), true);
 
     Add(spec, "subtitle_font_face", "Subtitle font face", "Header / Typography",
-        PropertyEditorKind::Text, s.subtitle_font.GetFaceName(), true).Editor("property.font");
+        PropertyEditorKind::Text, UiFonts::Selection(s.subtitle_font), true).Editor("property.font");
     AddNumeric(spec, "subtitle_font_height", "Subtitle font height", "Header / Typography",
                max(1, s.subtitle_font.GetHeight()), 6, 128, true);
     Add(spec, "subtitle_font_bold", "Subtitle bold", "Header / Typography",
@@ -434,11 +435,11 @@ static bool ApplyGroupField(UiGroupPanel::Style& s, const String& id, const Valu
     if(ApplyPanelCommon(s.palette, s.metrics, s.transparent, id, v)) return true;
     if(id == "title_color") s.title_color = (Color)v;
     else if(id == "subtitle_color") s.subtitle_color = (Color)v;
-    else if(id == "title_font_face") s.title_font.FaceName(AsString(v));
+    else if(id == "title_font_face") UiFonts::ApplySelection(s.title_font, AsString(v));
     else if(id == "title_font_height") s.title_font.Height(max(1, (int)v));
     else if(id == "title_font_bold") s.title_font.Bold((bool)v);
     else if(id == "title_font_italic") s.title_font.Italic((bool)v);
-    else if(id == "subtitle_font_face") s.subtitle_font.FaceName(AsString(v));
+    else if(id == "subtitle_font_face") UiFonts::ApplySelection(s.subtitle_font, AsString(v));
     else if(id == "subtitle_font_height") s.subtitle_font.Height(max(1, (int)v));
     else if(id == "subtitle_font_bold") s.subtitle_font.Bold((bool)v);
     else if(id == "subtitle_font_italic") s.subtitle_font.Italic((bool)v);
@@ -470,11 +471,11 @@ static Value GroupFieldValue(const UiGroupPanel::Style& s, const String& id)
     if(IsPanelCommonField(id)) return PanelCommonValue(s.palette, s.metrics, s.transparent, id);
     if(id == "title_color") return s.title_color;
     if(id == "subtitle_color") return s.subtitle_color;
-    if(id == "title_font_face") return s.title_font.GetFaceName();
+    if(id == "title_font_face") return UiFonts::Selection(s.title_font);
     if(id == "title_font_height") return s.title_font.GetHeight();
     if(id == "title_font_bold") return s.title_font.IsBold();
     if(id == "title_font_italic") return s.title_font.IsItalic();
-    if(id == "subtitle_font_face") return s.subtitle_font.GetFaceName();
+    if(id == "subtitle_font_face") return UiFonts::Selection(s.subtitle_font);
     if(id == "subtitle_font_height") return s.subtitle_font.GetHeight();
     if(id == "subtitle_font_bold") return s.subtitle_font.IsBold();
     if(id == "subtitle_font_italic") return s.subtitle_font.IsItalic();
@@ -659,7 +660,7 @@ static void AddTabOverrides(UiDesignerControlSpec& spec)
                       true, true, true, true, true, true);
 
     Add(spec, "tab_font_face", "Font face", "Tab / Typography",
-        PropertyEditorKind::Text, s.tab_font.GetFaceName(), true).Editor("property.font");
+        PropertyEditorKind::Text, UiFonts::Selection(s.tab_font), true).Editor("property.font");
     AddNumeric(spec, "tab_font_height", "Font height", "Tab / Typography",
                max(1, s.tab_font.GetHeight()), 6, 128, true);
     Add(spec, "tab_font_bold", "Bold", "Tab / Typography",
@@ -759,7 +760,7 @@ static bool ApplyTabField(UiTab::Style& s, const String& raw_id, const Value& v)
     const String id = TabCanonicalId(raw_id);
     if(ApplyPaletteMetrics(s.palette, s.metrics, "", id, v)) return true;
     if(ApplyPaletteMetrics(s.tab_palette, s.tab_metrics, "tab", id, v)) return true;
-    if(id == "tab_font_face") s.tab_font.FaceName(AsString(v));
+    if(id == "tab_font_face") UiFonts::ApplySelection(s.tab_font, AsString(v));
     else if(id == "tab_font_height") s.tab_font.Height(max(1, (int)v));
     else if(id == "tab_font_bold") s.tab_font.Bold((bool)v);
     else if(id == "tab_font_italic") s.tab_font.Italic((bool)v);
@@ -796,7 +797,7 @@ static Value TabFieldValue(const UiTab::Style& s, const String& raw_id)
     const String id = TabCanonicalId(raw_id);
     if(IsPaletteMetricsField("", id)) return PaletteMetricsValue(s.palette, s.metrics, "", id);
     if(IsPaletteMetricsField("tab", id)) return PaletteMetricsValue(s.tab_palette, s.tab_metrics, "tab", id);
-    if(id == "tab_font_face") return s.tab_font.GetFaceName();
+    if(id == "tab_font_face") return UiFonts::Selection(s.tab_font);
     if(id == "tab_font_height") return s.tab_font.GetHeight();
     if(id == "tab_font_bold") return s.tab_font.IsBold();
     if(id == "tab_font_italic") return s.tab_font.IsItalic();

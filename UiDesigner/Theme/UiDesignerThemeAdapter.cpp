@@ -1,3 +1,4 @@
+#include <Ui/UiFonts.h>
 #include "UiDesignerThemeAdapter.h"
 #include "UiDesignerStyledThemeCommon.h"
 #include <UiDesigner/Catalog/UiDesignerCatalog.h>
@@ -350,7 +351,7 @@ void UiDesignerApplyButtonStyleField(UiButton::Style& style,
 {
     switch(field) {
     case UiDesignerButtonStyleField::FontFace:
-        style.font.FaceName(AsString(value));
+        UiFonts::ApplySelection(style.font, AsString(value));
         break;
     case UiDesignerButtonStyleField::FontSize:
         style.font.Height(max(1, (int)value));
@@ -481,7 +482,7 @@ Value UiDesignerButtonStyleFieldValue(const UiButton::Style& style,
                                      UiDesignerButtonStyleField field)
 {
     switch(field) {
-    case UiDesignerButtonStyleField::FontFace: return style.font.GetFaceName();
+    case UiDesignerButtonStyleField::FontFace: return UiFonts::Selection(style.font);
     case UiDesignerButtonStyleField::FontSize: return style.font.GetHeight();
     case UiDesignerButtonStyleField::FontBold: return style.font.IsBold();
     case UiDesignerButtonStyleField::FontItalic: return style.font.IsItalic();
@@ -595,7 +596,7 @@ static void AddButtonThemeOverrides(UiDesignerControlSpec& spec, bool tool_butto
     };
 
     add(UiDesignerButtonStyleField::FontFace, "Font face", "Typography",
-        PropertyEditorKind::Text, base.font.GetFaceName(),
+        PropertyEditorKind::Text, UiFonts::Selection(base.font),
         PropertyImpactPaint | PropertyImpactCode);
     spec.theme_overrides.Top().Editor("property.font");
     add_int(UiDesignerButtonStyleField::FontSize, "Font size", "Typography",
@@ -1034,7 +1035,7 @@ public:
     {
         const UiTree::Style base = UiTheme::ResolveTree();
         UiDesignerStyledTheme::AddPaletteMetrics(spec, "", "Surface", base.palette, base.metrics);
-        UiDesignerNormalizedTheme::Add(spec, "font_face", "Font", "Text", PropertyEditorKind::Text, base.font.GetFaceName(), true).Editor("property.font");
+        UiDesignerNormalizedTheme::Add(spec, "font_face", "Font", "Text", PropertyEditorKind::Text, UiFonts::Selection(base.font), true).Editor("property.font");
         UiDesignerStyledTheme::AddNumeric(spec, "font_height", "Size", "Text", base.font.GetHeight(), 6, 96, true);
         UiDesignerNormalizedTheme::Add(spec, "font_bold", "Bold", "Text", PropertyEditorKind::Boolean, base.font.IsBold(), true);
         AddOverride(spec, "row_height", "Row height", "Layout", PropertyEditorKind::Integer,
@@ -1167,7 +1168,7 @@ public:
                                            : property.default_value;
             const Value effective = ResolveThemeValue(node, overlay, property.id, canonical);
             if(UiDesignerStyledTheme::ApplyPaletteMetrics(style.palette, style.metrics, "", property.id, effective)) continue;
-            if(property.id == "font_face") style.font.FaceName(AsString(effective));
+            if(property.id == "font_face") UiFonts::ApplySelection(style.font, AsString(effective));
             else if(property.id == "font_height") style.font.Height((int)effective);
             else if(property.id == "font_bold") style.font.Bold((bool)effective);
             else if(property.id == "row_height") style.row_height = (int)effective;
@@ -1202,7 +1203,7 @@ public:
             else if(property.id == "glyph_selected_color") style.glyph_selected_color = (Color)effective;
         }
         if(UiDesignerStyledTheme::IsPaletteMetricsField("", field_id)) return UiDesignerStyledTheme::PaletteMetricsValue(style.palette, style.metrics, "", field_id);
-        if(field_id == "font_face") return style.font.GetFaceName();
+        if(field_id == "font_face") return UiFonts::Selection(style.font);
         if(field_id == "font_height") return style.font.GetHeight();
         if(field_id == "font_bold") return style.font.IsBold();
         if(field_id == "row_height") return style.row_height;
@@ -1257,7 +1258,7 @@ public:
                                            : property.default_value;
             const Value effective = ResolveThemeValue(node, overlay, property.id, canonical);
             if(UiDesignerStyledTheme::ApplyPaletteMetrics(style.palette, style.metrics, "", property.id, effective)) continue;
-            if(property.id == "font_face") style.font.FaceName(AsString(effective));
+            if(property.id == "font_face") UiFonts::ApplySelection(style.font, AsString(effective));
             else if(property.id == "font_height") style.font.Height((int)effective);
             else if(property.id == "font_bold") style.font.Bold((bool)effective);
             else if(property.id == "row_height") style.row_height = (int)effective;
@@ -2229,7 +2230,7 @@ static UiBaseEdit::Style ResolveEditStyleBase(const UiDesignerNode& node)
 
 static Value EditFieldValue(const UiBaseEdit::Style& s, const String& id)
 {
-    if(id == "font_face") return s.font.GetFaceName();
+    if(id == "font_face") return UiFonts::Selection(s.font);
     if(id == "font_size") return s.font.GetHeight();
     if(id == "font_bold") return s.font.IsBold();
     if(id == "font_italic") return s.font.IsItalic();
@@ -2268,7 +2269,7 @@ static Value EditFieldValue(const UiBaseEdit::Style& s, const String& id)
 
 static void ApplyEditField(UiBaseEdit::Style& s, const String& id, const Value& v)
 {
-    if(id == "font_face") s.font.FaceName(AsString(v));
+    if(id == "font_face") UiFonts::ApplySelection(s.font, AsString(v));
     else if(id == "font_size") s.font.Height(max(1, (int)v));
     else if(id == "font_bold") s.font.Bold((bool)v);
     else if(id == "font_italic") s.font.Italic((bool)v);
@@ -2316,7 +2317,7 @@ static void AddEditThemeOverrides(UiDesignerControlSpec& spec)
         item.impact = impact; item.adapter_field_id = id;
         spec.theme_overrides.Add(pick(item));
     };
-    add("font_face", "Font face", "Typography", PropertyEditorKind::Text, base.font.GetFaceName(), PropertyImpactPaint | PropertyImpactCode | PropertyImpactLocalLayout);
+    add("font_face", "Font face", "Typography", PropertyEditorKind::Text, UiFonts::Selection(base.font), PropertyImpactPaint | PropertyImpactCode | PropertyImpactLocalLayout);
     spec.theme_overrides.Top().Editor("property.font");
     add("font_size", "Font size", "Typography", PropertyEditorKind::Integer, base.font.GetHeight(), PropertyImpactPaint | PropertyImpactCode | PropertyImpactLocalLayout);
     add("font_bold", "Font bold", "Typography", PropertyEditorKind::Boolean, base.font.IsBold());
@@ -2471,13 +2472,13 @@ void UiDesignerApplyTitleCardThemeField(UiTitleCard::Style& style,
     else if(field_id == "title_color") style.title_color = (Color)value;
     else if(field_id == "subtitle_color") style.subtitle_color = (Color)value;
     else if(field_id == "copy_color") style.copy_color = (Color)value;
-    else if(field_id == "title_font_face") style.title_font.FaceName(AsString(value));
+    else if(field_id == "title_font_face") UiFonts::ApplySelection(style.title_font, AsString(value));
     else if(field_id == "title_font_size") style.title_font.Height(max(1, (int)value));
     else if(field_id == "title_font_bold") style.title_font.Bold((bool)value);
-    else if(field_id == "subtitle_font_face") style.subtitle_font.FaceName(AsString(value));
+    else if(field_id == "subtitle_font_face") UiFonts::ApplySelection(style.subtitle_font, AsString(value));
     else if(field_id == "subtitle_font_size") style.subtitle_font.Height(max(1, (int)value));
     else if(field_id == "subtitle_font_bold") style.subtitle_font.Bold((bool)value);
-    else if(field_id == "copy_font_face") style.copy_font.FaceName(AsString(value));
+    else if(field_id == "copy_font_face") UiFonts::ApplySelection(style.copy_font, AsString(value));
     else if(field_id == "copy_font_size") style.copy_font.Height(max(1, (int)value));
     else if(field_id == "content_margin") style.metrics.content_margin = Rect(DPI(max(0, (int)value)), DPI(max(0, (int)value)), DPI(max(0, (int)value)), DPI(max(0, (int)value)));
     else if(field_id == "theme_title_subtitle_gap") style.title_subtitle_gap = DPI(max(0, (int)value));
@@ -2565,19 +2566,19 @@ static void AddTitleCardThemeOverrides(UiDesignerControlSpec& spec)
     AddOverride(spec, "copy_color", "Copy color", "Ink", PropertyEditorKind::Color,
                 base.copy_color, PropertyImpactPaint | PropertyImpactCode, "copy_color");
     AddOverride(spec, "title_font_face", "Title font face", "Typography", PropertyEditorKind::Text,
-                base.title_font.GetFaceName(), PropertyImpactPaint | PropertyImpactCode, "title_font_face");
+                UiFonts::Selection(base.title_font), PropertyImpactPaint | PropertyImpactCode, "title_font_face");
     AddOverride(spec, "title_font_size", "Title font size", "Typography", PropertyEditorKind::Integer,
                 base.title_font.GetHeight(), PropertyImpactPaint | PropertyImpactCode, "title_font_size");
     AddOverride(spec, "title_font_bold", "Title bold", "Typography", PropertyEditorKind::Boolean,
                 base.title_font.IsBold(), PropertyImpactPaint | PropertyImpactCode, "title_font_bold");
     AddOverride(spec, "subtitle_font_face", "Subtitle font face", "Typography", PropertyEditorKind::Text,
-                base.subtitle_font.GetFaceName(), PropertyImpactPaint | PropertyImpactCode, "subtitle_font_face");
+                UiFonts::Selection(base.subtitle_font), PropertyImpactPaint | PropertyImpactCode, "subtitle_font_face");
     AddOverride(spec, "subtitle_font_size", "Subtitle font size", "Typography", PropertyEditorKind::Integer,
                 base.subtitle_font.GetHeight(), PropertyImpactPaint | PropertyImpactCode, "subtitle_font_size");
     AddOverride(spec, "subtitle_font_bold", "Subtitle bold", "Typography", PropertyEditorKind::Boolean,
                 base.subtitle_font.IsBold(), PropertyImpactPaint | PropertyImpactCode, "subtitle_font_bold");
     AddOverride(spec, "copy_font_face", "Copy font face", "Typography", PropertyEditorKind::Text,
-                base.copy_font.GetFaceName(), PropertyImpactPaint | PropertyImpactCode, "copy_font_face");
+                UiFonts::Selection(base.copy_font), PropertyImpactPaint | PropertyImpactCode, "copy_font_face");
     AddOverride(spec, "copy_font_size", "Copy font size", "Typography", PropertyEditorKind::Integer,
                 base.copy_font.GetHeight(), PropertyImpactPaint | PropertyImpactCode, "copy_font_size");
     AddOverride(spec, "content_margin", "Content inset", "Layout", PropertyEditorKind::Integer,
@@ -2674,13 +2675,13 @@ public:
         if(field_id == "title_color") return style.title_color;
         if(field_id == "subtitle_color") return style.subtitle_color;
         if(field_id == "copy_color") return style.copy_color;
-        if(field_id == "title_font_face") return style.title_font.GetFaceName();
+        if(field_id == "title_font_face") return UiFonts::Selection(style.title_font);
         if(field_id == "title_font_size") return style.title_font.GetHeight();
         if(field_id == "title_font_bold") return style.title_font.IsBold();
-        if(field_id == "subtitle_font_face") return style.subtitle_font.GetFaceName();
+        if(field_id == "subtitle_font_face") return UiFonts::Selection(style.subtitle_font);
         if(field_id == "subtitle_font_size") return style.subtitle_font.GetHeight();
         if(field_id == "subtitle_font_bold") return style.subtitle_font.IsBold();
-        if(field_id == "copy_font_face") return style.copy_font.GetFaceName();
+        if(field_id == "copy_font_face") return UiFonts::Selection(style.copy_font);
         if(field_id == "copy_font_size") return style.copy_font.GetHeight();
         if(field_id == "content_margin") return style.metrics.content_margin.left;
         if(field_id == "theme_title_subtitle_gap") return style.title_subtitle_gap / DPI(1);

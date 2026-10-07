@@ -1,3 +1,4 @@
+#include <Ui/UiFonts.h>
 #include "UiDesignerThemeAdapter.h"
 #include <UiDesigner/Catalog/UiDesignerCatalog.h>
 #include <UiDesigner/Core/UiDesignerOverlay.h>
@@ -249,7 +250,7 @@ static void AddLabelThemeOverrides(UiDesignerControlSpec& spec)
                              ? SColorText() : base.palette.icon[i]);
 
     AddLabelOverride(spec, "font_face", "Font face", "Typography",
-                     PropertyEditorKind::Text, base.font.GetFaceName(), true)
+                     PropertyEditorKind::Text, UiFonts::Selection(base.font), true)
         .Editor("property.font");
     AddLabelInt(spec, "font_height", "Font height", "Typography",
                 max(1, base.font.GetHeight()), 6, 96, true);
@@ -387,7 +388,7 @@ static void ApplyLabelField(UiLabel::Style& style,
     else if(id == "frame_width") style.metrics.frame_width = max(0, (int)value);
     else if(id == "dashed") style.metrics.dashed = (bool)value;
     else if(id == "dash_pattern") style.metrics.dash_pattern = AsString(value);
-    else if(id == "font_face") style.font.FaceName(AsString(value));
+    else if(id == "font_face") UiFonts::ApplySelection(style.font, AsString(value));
     else if(id == "font_height") style.font.Height(max(1, (int)value));
     else if(id == "font_bold") style.font.Bold((bool)value);
     else if(id == "font_italic") style.font.Italic((bool)value);
@@ -451,7 +452,7 @@ static Value LabelFieldValue(const UiLabel::Style& style, const String& id)
     if(id == "frame_width") return style.metrics.frame_width;
     if(id == "dashed") return style.metrics.dashed;
     if(id == "dash_pattern") return style.metrics.dash_pattern;
-    if(id == "font_face") return style.font.GetFaceName();
+    if(id == "font_face") return UiFonts::Selection(style.font);
     if(id == "font_height") return style.font.GetHeight();
     if(id == "font_bold") return style.font.IsBold();
     if(id == "font_italic") return style.font.IsItalic();

@@ -1,3 +1,4 @@
+#include <UiDesigner/Fonts/UiDesignerFonts.h>
 #include "UiDesignerBuildDialog.h"
 #include "UiDesignerWindow.h"
 #include "UiDesignerVersion.h"
@@ -233,8 +234,9 @@ void UiDesignerWindow::UpdateDecorationsButton()
 void UiDesignerWindow::RefreshLoadMenu()
 {
     load_.ClearItems();
-    load_.Add("Open…", "open");
-    load_.Add("Load Theme…", "theme");
+    load_.Add("Openâ€¦", "open");
+    load_.Add("Load Themeâ€¦", "theme");
+    load_.Add("Import Project fonts...", "fonts");
     load_.AddSeparator();
     load_.Add("Blank form", "blank")
          .Add("Three-pane form", "three_pane")
@@ -271,10 +273,10 @@ void UiDesignerWindow::BuildHeader()
           .SetMediaReserve(0).SetMediaMin(DPI(15)).SetMediaAutoFit(false);
     save_.SetCustomStyle(UiTheme::ResolveButton(UiRole::Accent));
     save_.SetText("Save Project").SetSplitWidth(DPI(31));
-    save_.Add("Save Project", "save").Add("Save Project As…", "save_as")
+    save_.Add("Save Project", "save").Add("Save Project Asâ€¦", "save_as")
          .Add("Save Theme", "theme_save")
-         .Add("Save Theme As…", "theme")
-         .Add("Reset theme customisations…", "reset_theme");
+         .Add("Save Theme Asâ€¦", "theme")
+         .Add("Reset theme customisationsâ€¦", "reset_theme");
     save_.WhenAction = [=] { SaveDocument(false); };
     save_.WhenSelect = [=](int, const Value& value) {
         if((String)value == "theme_save") { SaveTheme(); return; }
@@ -292,6 +294,7 @@ void UiDesignerWindow::BuildHeader()
         const String action = value;
         if(action == "open") LoadDocument();
         else if(action == "theme") LoadTheme();
+        else if(action == "fonts") ImportProjectFonts();
         else if(action == "blank") session_.NewDocument("blank");
         else if(action == "dialog") session_.NewDocument("dialog");
         else if(action == "three_pane") session_.NewDocument("three_pane");
@@ -382,7 +385,7 @@ void UiDesignerWindow::BuildDesigner()
                    .AddSection("Inspector", ICON_DESIGN_TUNE_48(), inspector_)
                    .AddSection("Theme Overrides", ICON_DESIGN_FORMAT_PAINT_48(), overrides_shell_)
                    .AddSection("Data", ICON_EDITOR_FORMAT_LIST_BULLETED_48(), data_panel_,
-                               "Edit the selected control’s data")
+                               "Edit the selected controlâ€™s data")
                    .AddSection("Events & Actions", ICON_DESIGN_DYNAMIC_FORM_48(), behaviors_)
                    .AddSection("Code", ICON_DESIGN_CODE_BLOCKS_48(), code_)
                    .AddSection("Diagnostics", ICON_DESIGN_INFO_48(), diagnostics_panel_,
@@ -1289,6 +1292,7 @@ void UiDesignerWindow::ApplyThemeToShell()
     int started = msecs();
     const UiDesignerThemeSnapshot& theme = session_.Theme().GetEffective();
     SyncThemeChoices();
+    UiDesignerActivateFonts(session_.Document(), theme);
     UiDesignerApplyGlobalTheme(theme);
     brand_.SetCustomStyle(UiTheme::ResolveTitleCard(UiRole::Accent));
     save_.SetCustomStyle(UiTheme::ResolveButton(UiRole::Accent));
@@ -1476,7 +1480,7 @@ void UiDesignerWindow::SyncThemeChoices()
     String label = session_.GetProjectThemeName(session_.GetActiveProjectTheme());
     label << (session_.IsProjectThemeWorkspaceDirty() ? " *" : "");
     theme_select_.Add(label, "current");
-    if(theme.HasProposal()) theme_select_.Add("Proposal — unsaved", "proposal");
+    if(theme.HasProposal()) theme_select_.Add("Proposal â€” unsaved", "proposal");
     if(!theme_library_.IsEmpty()) {
         theme_select_.AddGroupHeader("My Themes");
         for(const auto& path : theme_library_) theme_select_.Add(GetFileTitle(path), "file:" + path);
@@ -1512,6 +1516,28 @@ void UiDesignerWindow::SaveTheme(bool save_as)
     if(!session_.SaveThemeFile(path, error)) Exclamation(error);
     else { RegisterThemePath(path); RefreshStatus("Theme saved. Project Save is a separate checkpoint."); }
     SyncThemeChoices();
+}
+
+void UiDesignerWindow::ImportProjectFonts()
+{
+    FileSel fonts;
+    fonts.Type("Static TrueType fonts", "*.ttf *.otf").Multi();
+    if(!fonts.ExecuteOpen("Import Project fonts")) return;
+    FileSel licence;
+    licence.Type("Font licence", "*.txt").AllFilesType();
+    if(!licence.ExecuteOpen("Choose the licence to copy with these fonts")) return;
+    String licence_text = LoadFile(~licence);
+    if(licence_text.IsVoid()) { RefreshStatus("Unable to read font licence"); return; }
+    int count = 0;
+    for(int i = 0; i < fonts.GetCount(); ++i) {
+        String id, error;
+        if(!session_.ImportProjectFont(fonts[i], String(), licence_text, id, error)) {
+            Exclamation(error); break;
+        }
+        ++count;
+    }
+    RefreshThemeInspector(); RefreshCode();
+    RefreshStatus(Format("Imported %d font faces. Choose Body / Heading / Code in Theme Studio.", count));
 }
 
 void UiDesignerWindow::LoadTheme()

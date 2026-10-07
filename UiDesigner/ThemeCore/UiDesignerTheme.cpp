@@ -434,6 +434,7 @@ ValueMap UiDesignerThemeSnapshot::ToValue() const
     out.Set("accent", ThemeColorText(accent));
     out.Set("palettes", palettes);
     out.Set("roles", roles.ToValue());
+    out.Set("typography", typography);
     out.Set("styles", EncodeThemeStyleValue(style_overrides));
     out.Set("generated", EncodeThemeStyleValue(generated_fields));
     out.Set("studio_preview", EncodeThemeStyleValue(studio_preview));
@@ -494,6 +495,18 @@ bool UiDesignerThemeSnapshot::FromValue(const Value& value, String& error)
         dark_palette.Set(roles.control_accent, parsed_accent);
     }
 
+    typography.Clear();
+    if(in.Find("typography") >= 0) {
+        if(!in["typography"].Is<ValueMap>()) { error = "Theme typography must be an object"; return false; }
+        typography = in["typography"];
+        for(int i = 0; i < typography.GetCount(); ++i) {
+            String key = AsString(typography.GetKey(i));
+            if((key != "body_font" && key != "heading_font" && key != "code_font" && key != "fallback_font") ||
+               !typography.GetValue(i).Is<String>() || AsString(typography.GetValue(i)).GetCount() > 1024) {
+                error = "Invalid typography selection"; return false;
+            }
+        }
+    }
     if(in.Find("styles") >= 0) {
         Value styles = DecodeThemeStyleValue(
             UiDesignerMapValue(in, "styles", ValueMap()));
@@ -604,12 +617,25 @@ static void AddPaletteRoleChoice(PropertyEditorModel& model, const String& id,
                    PropertyImpactFullPreview);
 }
 
+static void AddProjectTypography(PropertyEditorModel& model, const UiDesignerThemeSnapshot& t) {
+    for(const char *key : { "body_font", "heading_font", "code_font" }) {
+        auto& item = model.AddText(key, key == String("body_font") ? "Body family" : key == String("heading_font") ? "Heading family" : "Code family",
+                                  AsString(t.typography[key]), "Typography");
+        item.kind = PropertyEditorKind::Custom; item.inline_editor = true; item.row_span = 1;
+        item.custom_editor = "property.font";
+        item.SetDefault("").SetDomain(PropertyEditorDomain::Theme)
+            .SetImpact(PropertyImpactThemeGlobal | PropertyImpactLocalLayout | PropertyImpactPaint | PropertyImpactCode);
+    }
+}
+
 void UiDesignerThemeDocument::BuildPropertyModel(
     PropertyEditorModel& model) const
 {
     const UiDesignerThemeSnapshot& t = GetEffective();
     if(property_model_provider_) {
         property_model_provider_(model, t);
+        AddProjectTypography(model, t);
+        model.StructureChanged();
         return;
     }
 
@@ -707,6 +733,7 @@ void UiDesignerThemeDocument::BuildPropertyModel(
         .SetDomain(PropertyEditorDomain::Theme)
         .SetImpact(PropertyImpactThemeGlobal | PropertyImpactPaint);
 
+    AddProjectTypography(model, t);
     model.StructureChanged();
 }
 
@@ -717,6 +744,8 @@ Value UiDesignerThemeDocument::GetProperty(
         return source.GetStyleOverride(active_style_target_, property.Mid(7));
     if(property.StartsWith("preview."))
         return source.GetStudioPreviewValue(active_preview_target_, property.Mid(8));
+    if(property == "body_font" || property == "heading_font" || property == "code_font" || property == "fallback_font")
+        return source.typography[property];
     if(property == "preset") return source.preset;
     if(property == "mode") return source.mode;
     if(property == "accent") return source.accent;
@@ -748,6 +777,10 @@ bool UiDesignerThemeDocument::SetProperty(
     UiDesignerThemeSnapshot& target, const String& property,
     const Value& value, String& error) const
 {
+    if(property == "body_font" || property == "heading_font" || property == "code_font" || property == "fallback_font") {
+        if(!value.Is<String>() || AsString(value).GetCount() > 1024) { error = "Invalid font selection"; return false; }
+        target.typography.Set(property, value); error.Clear(); return true;
+    }
     if(property.StartsWith("studio.")) {
         if(active_style_target_.IsEmpty()) {
             error = "Select a Theme Studio sample first";

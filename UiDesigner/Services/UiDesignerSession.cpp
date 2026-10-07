@@ -1,3 +1,4 @@
+#include <UiDesigner/Fonts/UiDesignerFonts.h>
 #include "UiDesignerSession.h"
 #include "UiDesignerAutomation.h"
 #include "UiDesignerExport.h"
@@ -44,6 +45,18 @@ UiDesignerSession::UiDesignerSession()
     };
 }
 
+bool UiDesignerSession::ImportProjectFont(const String& path, const String& family_id,
+                                         const String& license_text, String& asset_id, String& error)
+{
+    UiDesignerDocument prepared;
+    prepared.ReplaceFrom(document_, "Prepare font import", false);
+    if(!UiDesignerImportFont(prepared, path, family_id, license_text, asset_id, error)) return false;
+    if(!commands_.ReplaceDocument(prepared, "Import project font")) {
+        error = commands_.GetLastError(); return false;
+    }
+    return true;
+}
+
 void UiDesignerSession::LoadRecentPaths()
 {
     recent_paths_.Clear();
@@ -76,6 +89,7 @@ void UiDesignerSession::AddRecentPath(const String& path)
 void UiDesignerSession::WireEvents()
 {
     document_.WhenChanged = [=](const UiDesignerChangeSet& changes) {
+        if(changes.resources_changed || changes.schema_changed) UiDesignerActivateFonts(document_, theme_.GetEffective());
         if(projection_)
             projection_->ApplyChangeSet(changes);
         if(changes.schema_changed || !changes.structure.IsEmpty() ||
@@ -105,10 +119,12 @@ void UiDesignerSession::WireEvents()
         theme_.BuildPropertyModel(theme_model_);
     };
     theme_.WhenPreview = [=] {
+        UiDesignerActivateFonts(document_, theme_.GetEffective());
         theme_.BuildPropertyModel(theme_model_);
         WhenInspectorChanged();
     };
     theme_.WhenChanged = [=] {
+        UiDesignerActivateFonts(document_, theme_.GetEffective());
         theme_.BuildPropertyModel(theme_model_);
         if(state_.selection.primary == document_.GetRootId()) RebuildInspector();
         WhenInspectorChanged();
@@ -148,6 +164,7 @@ void UiDesignerSession::AttachProjection(UiDesignerProjectionSink *projection)
     projection_ = projection;
     if(!projection_)
         return;
+    UiDesignerActivateFonts(document_, theme_.GetEffective());
     projection_->Bind(&document_, &catalog_, &overlay_, &state_.selection);
     projection_->RebuildDocument();
 }
@@ -328,6 +345,7 @@ void UiDesignerSession::NewDocument(const String& preset)
 
     commands_.ClearHistory();
     commands_.MarkSaved();
+    UiDesignerActivateFonts(document_, theme_.GetEffective());
     if(projection_)
         projection_->RebuildDocument();
     RebuildInspector();
@@ -402,6 +420,7 @@ bool UiDesignerSession::Load(const String& path, String& error)
     AddRecentPath(path);
     state_.selection.Clear();
     overlay_.Clear();
+    UiDesignerActivateFonts(document_, theme_.GetEffective());
     if(projection_)
         projection_->RebuildDocument();
     RebuildInspector();

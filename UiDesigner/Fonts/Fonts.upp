@@ -1,0 +1,8 @@
+description "Project font resource bridge using shared Ui font catalogue";
+uses
+    Ui,
+    UiDesigner/Core,
+    UiDesigner/ThemeCore;
+file
+    UiDesignerFonts.h,
+    UiDesignerFonts.cpp;

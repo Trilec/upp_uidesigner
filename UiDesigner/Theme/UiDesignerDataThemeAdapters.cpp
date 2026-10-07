@@ -1,3 +1,4 @@
+#include <Ui/UiFonts.h>
 #include "UiDesignerStyledThemeCommon.h"
 #include <Ui/UiTable.h>
 #include <Ui/UiBreadcrumbs.h>
@@ -94,10 +95,10 @@ class DataThemeAdapter final : public UiDesignerThemeAdapter {
         if(ApplyPaletteMetrics(s.palette, s.metrics, "", id, v)) return true;
         for(const auto& f : Traits::Numbers()) if(id == f.id) { s.*(f.member) = (int)v; return true; }
         for(const auto& f : Traits::Colors()) if(id == f.id) { s.*(f.member) = (Color)v; return true; }
-        if(id == "title_font_face") Traits::Heading(s).FaceName(AsString(v));
+        if(id == "title_font_face") UiFonts::ApplySelection(Traits::Heading(s), AsString(v));
         else if(id == "title_font_height") Traits::Heading(s).Height((int)v);
         else if(id == "title_font_bold") Traits::Heading(s).Bold((bool)v);
-        else if(id == "font_face") s.font.FaceName(AsString(v));
+        else if(id == "font_face") UiFonts::ApplySelection(s.font, AsString(v));
         else if(id == "font_height") s.font.Height((int)v);
         else if(id == "font_bold") s.font.Bold((bool)v);
         else return false;
@@ -120,8 +121,8 @@ public:
         for(const auto& f : Traits::Numbers()) AddNumeric(spec, f.id, f.id, "Layout", s.*(f.member), 6, 256, true);
         for(const auto& f : Traits::Colors())
             Add(spec, f.id, f.id, "Content colours", PropertyEditorKind::Color, s.*(f.member));
-        Add(spec, "font_face", "Font", "Text", PropertyEditorKind::Text, s.font.GetFaceName(), true).Editor("property.font");
-        Add(spec, "title_font_face", "Font", "Heading", PropertyEditorKind::Text, Traits::Heading(s).GetFaceName(), true).Editor("property.font");
+        Add(spec, "font_face", "Font", "Text", PropertyEditorKind::Text, UiFonts::Selection(s.font), true).Editor("property.font");
+        Add(spec, "title_font_face", "Font", "Heading", PropertyEditorKind::Text, UiFonts::Selection(Traits::Heading(s)), true).Editor("property.font");
         AddNumeric(spec, "title_font_height", "Size", "Heading", Traits::Heading(s).GetHeight(), 6, 96, true);
         Add(spec, "title_font_bold", "Bold", "Heading", PropertyEditorKind::Boolean, Traits::Heading(s).IsBold(), true);
         AddNumeric(spec, "font_height", "Size", "Text", s.font.GetHeight(), 6, 96, true);
@@ -144,10 +145,10 @@ public:
         if(IsPaletteMetricsField("", id)) return PaletteMetricsValue(s.palette, s.metrics, "", id);
         for(const auto& f : Traits::Numbers()) if(id == f.id) return s.*(f.member);
         for(const auto& f : Traits::Colors()) if(id == f.id) return s.*(f.member);
-        if(id == "title_font_face") return Traits::Heading(s).GetFaceName();
+        if(id == "title_font_face") return UiFonts::Selection(Traits::Heading(s));
         if(id == "title_font_height") return Traits::Heading(s).GetHeight();
         if(id == "title_font_bold") return Traits::Heading(s).IsBold();
-        if(id == "font_face") return s.font.GetFaceName();
+        if(id == "font_face") return UiFonts::Selection(s.font);
         if(id == "font_height") return s.font.GetHeight();
         if(id == "font_bold") return s.font.IsBold();
         return Value();

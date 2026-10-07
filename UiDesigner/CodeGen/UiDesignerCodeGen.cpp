@@ -1,4 +1,5 @@
 #include "UiDesignerCodeGen.h"
+#include <UiDesigner/Fonts/UiDesignerFonts.h>
 #include <UiDesigner/UiDesigner/UiDesignerButtonStyle.h>
 #include <UiDesigner/Theme/UiDesignerThemeAdapter.h>
 #include <UiDesigner/Core/UiDesignerSizing.h>
@@ -1474,6 +1475,8 @@ String UiDesignerCodeGenerator::GenerateSource(
     return Generate(document, options).generated_source;
 }
 
+#include "UiDesignerFontCodeGen.inc"
+
 String UiDesignerCodeGenerator::GeneratePackage(const String& class_name) const
 {
     return "description \"Generated UiDesigner application\";\n\n"
@@ -1657,6 +1660,8 @@ UiDesignerGeneratedProject UiDesignerCodeGenerator::Generate(
                     : options.namespace_name + "::" + options.class_name)
              << "().Run(); }\n";
 
+    gs = ResolveGeneratedFontSelections(gs);
+    bool font_package = PackageProjectFonts(document, options, result, gh, gs);
     result.generated_header = gh;
     result.generated_source = gs;
     result.user_header = uh;
@@ -1665,6 +1670,7 @@ UiDesignerGeneratedProject UiDesignerCodeGenerator::Generate(
     result.header = gh;
     result.source = gs;
     result.package = GeneratePackage(options.class_name);
+    if(font_package) result.package.Replace("\tmain.cpp;", "\t" + options.class_name + ".fonts.brc,\n\tmain.cpp;");
     result.json = UiDesignerSerialize(document, true);
 
     auto AddFile = [&](const String& path, const String& content, bool generated) {

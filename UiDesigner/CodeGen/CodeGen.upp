@@ -1,12 +1,14 @@
 description "UiDesigner deterministic C++ and JSON generation";
 
 uses
+    UiDesigner/Fonts,
     UiDesigner/Core,
     UiDesigner/Catalog;
 
 file
     UiDesignerCodeGen.h,
     UiDesignerCodeGen.cpp,
+    UiDesignerFontCodeGen.inc,
     UiDesignerModelDataCodeGen.cpp,
     UiDesignerDateTimeCodeGen.h,
     UiDesignerDateTimeCodeGen.cpp,
