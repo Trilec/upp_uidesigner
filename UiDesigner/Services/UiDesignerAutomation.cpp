@@ -195,6 +195,12 @@ Value UiDesignerAutomationService::GetControlSpec(const ValueMap& params) const
     ValueArray fields;
     for(const auto& f : spec->theme_overrides) {
         ValueMap m; m.Set("id", f.id); m.Set("adapter_field", f.adapter_field_id);
+        if(!f.visible_when_id.IsEmpty()) {
+            m.Set("visible_when_id", f.visible_when_id);
+            m.Set("visible_when_value", f.visible_when_value);
+            m.Set("help", f.help);
+        }
+
         m.Set("kind", PropertyEditorKindName(f.kind)); m.Set("default", f.default_value);
         m.Set("minimum", f.minimum); m.Set("maximum", f.maximum); m.Set("read_only", f.read_only);
         m.Set("designer_only", f.designer_only); m.Set("resettable", f.resettable);

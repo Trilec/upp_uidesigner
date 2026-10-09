@@ -1769,6 +1769,7 @@ public:
     void AddThemeOverrides(UiDesignerControlSpec& spec) const override
     {
         const UiMenu::Style base = UiTheme::ResolveMenu();
+        UiDesignerFrameAccentTheme::AddFields(spec, "", "", base.metrics);
         AddOverride(spec, "row_height", "Row height", "Layout", PropertyEditorKind::Integer,
                     base.row_height, PropertyImpactPaint | PropertyImpactCode, "row_height");
         AddOverride(spec, "bar_height", "Bar height", "Layout", PropertyEditorKind::Integer,
@@ -1841,6 +1842,7 @@ public:
 
     bool HasField(const String& field_id) const override
     {
+        if(UiDesignerFrameAccentTheme::HasField("", field_id)) return true;
         static const char *fields[] = {
             "row_height", "bar_height", "icon_size", "check_size", "arrow_size",
             "left_padding", "right_padding", "content_gap", "item_spacing",
@@ -1857,6 +1859,7 @@ public:
 
     bool FieldAffectsLayout(const String& field_id) const override
     {
+        if(UiDesignerFrameAccentTheme::HasField("", field_id)) return false;
         static const char *layout_fields[] = {
             "row_height", "bar_height", "icon_size", "check_size", "arrow_size",
             "left_padding", "right_padding", "content_gap", "item_spacing",
@@ -1881,6 +1884,7 @@ public:
             const Value canonical = q >= 0 ? node.theme_overrides.GetValue(q)
                                            : property.default_value;
             const Value effective = ResolveThemeValue(node, overlay, property.id, canonical);
+            if(UiDesignerFrameAccentTheme::Apply(style.metrics, "", property.adapter_field_id, effective)) continue;
             if(property.id == "row_height") style.row_height = (int)effective;
             else if(property.id == "bar_height") style.bar_height = (int)effective;
             else if(property.id == "icon_size") style.icon_size = (int)effective;
@@ -1916,6 +1920,7 @@ public:
             else if(property.id == "arrow_color") style.arrow_color = (Color)effective;
             else if(property.id == "shadow_color") style.shadow_color = (Color)effective;
         }
+        if(UiDesignerFrameAccentTheme::HasField("", field_id)) return UiDesignerFrameAccentTheme::Read(style.metrics, "", field_id);
         if(field_id == "row_height") return style.row_height;
         if(field_id == "bar_height") return style.bar_height;
         if(field_id == "icon_size") return style.icon_size;
@@ -1971,6 +1976,7 @@ public:
             const Value canonical = q >= 0 ? node.theme_overrides.GetValue(q)
                                            : property.default_value;
             const Value effective = ResolveThemeValue(node, overlay, property.id, canonical);
+            if(UiDesignerFrameAccentTheme::Apply(style.metrics, "", property.adapter_field_id, effective)) continue;
             if(property.id == "row_height") style.row_height = (int)effective;
             else if(property.id == "bar_height") style.bar_height = (int)effective;
             else if(property.id == "icon_size") style.icon_size = (int)effective;
@@ -2029,6 +2035,7 @@ public:
             if(q < 0)
                 continue;
             const Value value = node.theme_overrides.GetValue(q);
+            if(UiDesignerFrameAccentTheme::Emit(out, style_var + ".metrics", "", property.adapter_field_id, value)) continue;
             if(property.id == "row_height") out << "\t" << style_var << ".row_height = " << (int)value << ";\n";
             else if(property.id == "bar_height") out << "\t" << style_var << ".bar_height = " << (int)value << ";\n";
             else if(property.id == "icon_size") out << "\t" << style_var << ".icon_size = " << (int)value << ";\n";
@@ -2079,6 +2086,7 @@ public:
     void AddThemeOverrides(UiDesignerControlSpec& spec) const override
     {
         const UiColorPicker::Style& base = UiColorPicker::StyleDefault();
+        UiDesignerFrameAccentTheme::AddFields(spec, "", "", base.metrics);
         AddOverride(spec, "face", "Face colour", "Surface", PropertyEditorKind::Color,
                     UiDesignerFillColor(base.palette.face[ST_NORMAL]),
                     PropertyImpactPaint | PropertyImpactCode, "face");
@@ -2117,6 +2125,7 @@ public:
 
     bool HasField(const String& field_id) const override
     {
+        if(UiDesignerFrameAccentTheme::HasField("", field_id)) return true;
         static const char *fields[] = {"face", "frame", "radius", "navigation_height",
             "footer_height", "slot_size", "slot_gap", "page_gap", "right_panel_width",
             "section_gap", "readout_row_height", "channel_row_height", "button_height"};
@@ -2125,6 +2134,7 @@ public:
 
     bool FieldAffectsLayout(const String& field_id) const override
     {
+        if(UiDesignerFrameAccentTheme::HasField("", field_id)) return false;
         return field_id != "face" && field_id != "frame" && field_id != "radius";
     }
 
@@ -2134,7 +2144,8 @@ public:
     {
         const UiColorPicker::Style& base = UiColorPicker::StyleDefault();
         Value value;
-        if(field_id == "face") value = UiDesignerFillColor(base.palette.face[ST_NORMAL]);
+        if(UiDesignerFrameAccentTheme::HasField("", field_id)) value = UiDesignerFrameAccentTheme::Read(base.metrics, "", field_id);
+        else if(field_id == "face") value = UiDesignerFillColor(base.palette.face[ST_NORMAL]);
         else if(field_id == "frame") value = base.palette.frame[ST_NORMAL];
         else if(field_id == "radius") value = base.metrics.radius;
         else if(field_id == "navigation_height") value = base.navigation_height;
@@ -2168,6 +2179,7 @@ public:
             if(node.theme_overrides.Find(p.id) < 0 && !HasThemeValue(node, overlay, p.id)) continue;
             authored = true;
             Value v = ResolveFieldValue(node, spec, p.adapter_field_id, overlay);
+            if(UiDesignerFrameAccentTheme::Apply(style.metrics, "", p.adapter_field_id, v)) continue;
             if(p.adapter_field_id == "face") style.palette.face[ST_NORMAL] = UiFill::Solid((Color)v);
             else if(p.adapter_field_id == "frame") style.palette.frame[ST_NORMAL] = (Color)v;
             else if(p.adapter_field_id == "radius") style.metrics.radius = max(0, (int)v);
@@ -2199,6 +2211,7 @@ public:
             int q = node.theme_overrides.Find(p.id);
             if(q < 0) continue;
             Value v = node.theme_overrides.GetValue(q);
+            if(UiDesignerFrameAccentTheme::Emit(out, var + ".metrics", "", p.adapter_field_id, v)) continue;
             if(p.adapter_field_id == "face") out << "\t" << var << ".palette.face[ST_NORMAL] = UiFill::Solid(" << EmitValue(v) << ");\n";
             else if(p.adapter_field_id == "frame") out << "\t" << var << ".palette.frame[ST_NORMAL] = " << EmitValue(v) << ";\n";
             else if(p.adapter_field_id == "radius") out << "\t" << var << ".metrics.radius = " << (int)v << ";\n";
@@ -2455,6 +2468,7 @@ void UiDesignerApplyTitleCardThemeField(UiTitleCard::Style& style,
                                         const String& field_id,
                                         const Value& value)
 {
+    if(UiDesignerFrameAccentTheme::Apply(style.metrics, "", field_id, value)) return;
     if(field_id == "face_enabled") style.metrics.face_enabled = (bool)value;
     else if(field_id == "face_normal") style.palette.face[ST_NORMAL] = UiFill::Solid((Color)value);
     else if(field_id == "face_hot") style.palette.face[ST_HOT] = UiFill::Solid((Color)value);
@@ -2502,6 +2516,7 @@ void UiDesignerEmitTitleCardThemeField(String& out, const String& style_var,
                                        const String& field_id,
                                        const Value& value)
 {
+    if(UiDesignerFrameAccentTheme::Emit(out, style_var + ".metrics", "", field_id, value)) return;
     if(field_id == "face_enabled") out << "\t" << style_var << ".metrics.face_enabled = " << AsString((bool)value) << ";\n";
     else if(field_id == "face_normal") out << "\t" << style_var << ".palette.face[ST_NORMAL] = UiFill::Solid(" << EmitValue(value) << ");\n";
     else if(field_id == "frame_enabled") out << "\t" << style_var << ".metrics.frame_enabled = " << AsString((bool)value) << ";\n";
@@ -2542,6 +2557,7 @@ void UiDesignerEmitTitleCardThemeField(String& out, const String& style_var,
 static void AddTitleCardThemeOverrides(UiDesignerControlSpec& spec)
 {
     const UiTitleCard::Style base = ResolveTitleCardThemeBase(UiRole::Standard);
+    UiDesignerFrameAccentTheme::AddFields(spec, "", "", base.metrics);
     AddOverride(spec, "face_enabled", "Face enabled", "Surface", PropertyEditorKind::Boolean,
                 base.metrics.face_enabled, PropertyImpactPaint | PropertyImpactCode, "face_enabled");
     AddOverride(spec, "face_normal", "Face normal", "Surface", PropertyEditorKind::Color,
@@ -2633,6 +2649,7 @@ public:
     void AddThemeOverrides(UiDesignerControlSpec& spec) const override { AddTitleCardThemeOverrides(spec); }
     bool HasField(const String& field_id) const override
     {
+        if(UiDesignerFrameAccentTheme::HasField("", field_id)) return true;
         static const char *fields[] = {
             "face_enabled", "face_normal", "frame_enabled", "frame_normal", "frame_width", "radius",
             "text_normal", "text_disabled", "title_color", "subtitle_color", "copy_color",
@@ -2648,6 +2665,7 @@ public:
     }
     bool FieldAffectsLayout(const String& field_id) const override
     {
+        if(UiDesignerFrameAccentTheme::HasField("", field_id)) return false;
         return field_id != "face_normal" && field_id != "frame_normal" &&
                field_id != "text_normal" && field_id != "text_disabled" &&
                field_id != "title_color" && field_id != "subtitle_color" &&
@@ -2664,6 +2682,7 @@ public:
             const Value canonical = q >= 0 ? node.theme_overrides.GetValue(q) : p.default_value;
             UiDesignerApplyTitleCardThemeField(style, p.adapter_field_id, ResolveThemeValue(node, overlay, p.id, canonical));
         }
+        if(UiDesignerFrameAccentTheme::HasField("", field_id)) return UiDesignerFrameAccentTheme::Read(style.metrics, "", field_id);
         if(field_id == "face_enabled") return style.metrics.face_enabled;
         if(field_id == "face_normal") return UiDesignerFillColor(style.palette.face[ST_NORMAL]);
         if(field_id == "frame_enabled") return style.metrics.frame_enabled;
@@ -2732,6 +2751,7 @@ public:
             if(q < 0)
                 continue;
             const Value v = node.theme_overrides.GetValue(q);
+            if(UiDesignerFrameAccentTheme::Emit(out, member + "_style.metrics", "", p.adapter_field_id, v)) continue;
             if(p.adapter_field_id == "face_enabled") out << "\t" << member << "_style.metrics.face_enabled = " << AsString((bool)v) << ";\n";
             else if(p.adapter_field_id == "face_normal") out << "\t" << member << "_style.palette.face[ST_NORMAL] = UiFill::Solid(" << EmitValue(v) << ");\n";
             else if(p.adapter_field_id == "frame_enabled") out << "\t" << member << "_style.metrics.frame_enabled = " << AsString((bool)v) << ";\n";

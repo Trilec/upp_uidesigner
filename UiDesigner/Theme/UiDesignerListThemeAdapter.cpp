@@ -1,3 +1,4 @@
+#include "UiDesignerFrameAccentThemeCommon.h"
 #include <Ui/UiFonts.h>
 #include "UiDesignerNormalizedThemeCommon.h"
 #include <Ui/UiList.h>
@@ -16,6 +17,7 @@ static UiList::Style ListBase(UiRole role = UiRole::Standard)
 
 static bool IsListField(const String& id)
 {
+    if(UiDesignerFrameAccentTheme::HasField("", id)) return true;
     static const char *fields[] = {
         "radius", "high_contrast", "face_enabled", "frame_enabled", "frame_width",
         "icon.normal", "font_face", "font_height", "font_bold", "font_italic",
@@ -47,6 +49,7 @@ static bool IsListField(const String& id)
 
 static Value ListFieldValue(const UiList::Style& s, const String& id)
 {
+    if(UiDesignerFrameAccentTheme::HasField("", id)) return UiDesignerFrameAccentTheme::Read(s.metrics, "", id);
     int state = DotState(id, "face");
     if(state >= 0) return FillRecipe(s.palette.face[state]).ToValue();
     state = DotState(id, "frame");
@@ -135,6 +138,7 @@ static Value ListFieldValue(const UiList::Style& s, const String& id)
 
 static void ApplyListField(UiList::Style& s, const String& id, const Value& v)
 {
+    if(UiDesignerFrameAccentTheme::Apply(s.metrics, "", id, v)) return;
     int state = DotState(id, "face");
     if(state >= 0) { ApplyFill(s.palette.face[state], v); return; }
     state = DotState(id, "frame");
@@ -223,6 +227,7 @@ static void ApplyListField(UiList::Style& s, const String& id, const Value& v)
 static void AddListOverrides(UiDesignerControlSpec& spec)
 {
     const UiList::Style s = ListBase();
+    UiDesignerFrameAccentTheme::AddFields(spec, "", "", s.metrics);
     AddInt(spec, "radius", "Radius", "General", s.metrics.radius, 0, 96);
     Add(spec, "high_contrast", "High contrast", "General", PropertyEditorKind::Boolean, s.metrics.high_contrast);
     Add(spec, "face_enabled", "Enabled", "Face", PropertyEditorKind::Boolean, s.metrics.face_enabled);
@@ -342,6 +347,7 @@ static Value ResolveListFace(const UiDesignerNode& node, const UiDesignerControl
 
 static void EmitListField(String& out, const String& var, const String& id, const Value& v)
 {
+    if(UiDesignerFrameAccentTheme::Emit(out, var + ".metrics", "", id, v)) return;
     int state = DotState(id, "face");
     if(state >= 0) { out << "\t" << var << ".palette.face[" << StateCode(state) << "] = " << FillCode(v) << ";\n"; return; }
     state = DotState(id, "frame");

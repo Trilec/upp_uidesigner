@@ -59,6 +59,12 @@ static void AddCheckOverrides(UiDesignerControlSpec& spec)
                       true, false, true, true, true, true);
     AddPaletteMetrics(spec, "indicator", "Indicator", s.indicator_palette,
                       s.indicator_metrics, true, true, true, true, true, true);
+    // Designer exposes only Classic for this control. Its outer surface does
+    // not paint an accent; retain only the framed indicator's decoration.
+    for(int i = spec.theme_overrides.GetCount() - 1; i >= 0; --i)
+        if(UiDesignerFrameAccentTheme::HasField("", spec.theme_overrides[i].id))
+            spec.theme_overrides.Remove(i);
+
 
     Add(spec, "font_face", "Font face", "Typography", PropertyEditorKind::Text,
         UiFonts::Selection(s.font), true).Editor("property.font");
@@ -218,6 +224,12 @@ static void AddRadioOverrides(UiDesignerControlSpec& spec)
     AddPaletteMetrics(spec, "", "", s.palette, s.metrics, true, false, true, true, true, true);
     AddPaletteMetrics(spec, "indicator", "Indicator", s.indicator_palette,
                       s.indicator_metrics, true, true, true, true, true, true);
+    // Designer exposes only Classic for this control. Its outer surface does
+    // not paint an accent; retain only the framed indicator's decoration.
+    for(int i = spec.theme_overrides.GetCount() - 1; i >= 0; --i)
+        if(UiDesignerFrameAccentTheme::HasField("", spec.theme_overrides[i].id))
+            spec.theme_overrides.Remove(i);
+
     Add(spec, "font_face", "Font face", "Typography", PropertyEditorKind::Text,
         UiFonts::Selection(s.font), true).Editor("property.font");
     AddNumeric(spec, "font_height", "Font height", "Typography", max(1, s.font.GetHeight()), 6, 128, true);

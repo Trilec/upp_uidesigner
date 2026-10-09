@@ -1,3 +1,4 @@
+#include "UiDesignerFrameAccentThemeCommon.h"
 #include <Ui/UiFonts.h>
 #include "UiDesignerNormalizedThemeCommon.h"
 #include <Ui/UiDropdown.h>
@@ -69,6 +70,7 @@ static UiDropdown::Style Base(const UiDesignerNode& node)
 
 static bool IsField(const String& id)
 {
+    if(UiDesignerFrameAccentTheme::HasField("", id)) return true;
     static const char *fields[] = {
         "radius", "transparent", "align_h", "align_v", "face_enabled",
         "frame_enabled", "frame_width", "font_face", "font_height", "font_bold",
@@ -103,6 +105,7 @@ static bool IsField(const String& id)
 
 static Value ValueOf(const UiDropdown::Style& s, const String& id)
 {
+    if(UiDesignerFrameAccentTheme::HasField("", id)) return UiDesignerFrameAccentTheme::Read(s.metrics, "", id);
     if(State(id, "icon") >= 0) return s.palette.icon[State(id, "icon")];
     int state = State(id, "face");
     if(state >= 0) return FillRecipe(s.palette.face[state]).ToValue();
@@ -197,6 +200,7 @@ static Value ValueOf(const UiDropdown::Style& s, const String& id)
 
 static void Apply(UiDropdown::Style& s, const String& id, const Value& v)
 {
+    if(UiDesignerFrameAccentTheme::Apply(s.metrics, "", id, v)) return;
     if(State(id, "icon") >= 0) { s.palette.icon[State(id, "icon")] = (Color)v; return; }
     int state = State(id, "face");
     if(state >= 0) { ApplyFill(s.palette.face[state], v); return; }
@@ -291,6 +295,7 @@ static void Apply(UiDropdown::Style& s, const String& id, const Value& v)
 static void AddOverrides(UiDesignerControlSpec& spec)
 {
     const UiDropdown::Style s = UiTheme::ResolveDropdown(UiTheme::GetContext(), UiRole::Standard);
+    UiDesignerFrameAccentTheme::AddFields(spec, "", "", s.metrics);
     AddInt(spec, "radius", "Radius", "General", s.metrics.radius, 0, 96);
     Add(spec, "transparent", "Transparent", "General", PropertyEditorKind::Boolean, s.transparent);
     Add(spec, "face_enabled", "Enabled", "Face", PropertyEditorKind::Boolean, s.metrics.face_enabled);
@@ -407,6 +412,7 @@ static Value ResolveFace(const UiDesignerNode& node, const UiDesignerControlSpec
 
 static void Emit(String& out, const String& var, const String& id, const Value& v)
 {
+    if(UiDesignerFrameAccentTheme::Emit(out, var + ".metrics", "", id, v)) return;
     if(State(id, "icon") >= 0) { out << "\t" << var << ".palette.icon[" << StateCode(State(id, "icon")) << "] = " << EmitValue(v) << ";\n"; return; }
     int state = State(id, "face");
     if(state >= 0) { out << "\t" << var << ".palette.face[" << StateCode(state) << "] = " << FillCode(v) << ";\n"; return; }

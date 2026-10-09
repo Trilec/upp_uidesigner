@@ -72,6 +72,11 @@ public:
                 spec.theme_overrides.Remove(i);
         }
         DisambiguateTabThemeIds(spec);
+        for(auto& property : spec.theme_overrides)
+            if(property.adapter_field_id.StartsWith("tab_frame_accent_"))
+                property.VisibleWhen("visual", "Segmented")
+                    .Help("Tab-cap Frame Accent is painted only by Segmented. Other visuals retain the authored settings without drawing this decoration.");
+
     }
 
     bool HasField(const String& field_id) const override

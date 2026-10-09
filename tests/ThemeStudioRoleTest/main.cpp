@@ -1,6 +1,7 @@
 #include <CtrlLib/CtrlLib.h>
 #include <UiDesigner/Theme/UiDesignerThemeBuilderV2.h>
 #include <UiDesigner/Theme/UiDesignerThemeAdapter.h>
+#include <UiDesigner/Services/UiDesignerSession.h>
 
 using namespace Upp;
 
@@ -28,6 +29,121 @@ void Collect(Ctrl& root, Vector<T*>& result)
 bool SameFace(const UiFill& a, const UiFill& b)
 {
     return a.IsSolid() == b.IsSolid() && (!a.IsSolid() || a.color == b.color);
+}
+
+template <class T>
+void CheckFrameAccent(const UiDesignerCatalog& catalog, const char *type,
+                      String& generated, int index)
+{
+    const UiDesignerControlSpec *spec = catalog.Find(type);
+    const auto *adapter = spec ? UiDesignerGetThemeAdapter(*spec) : nullptr;
+    Check(adapter != nullptr, "Frame Accent has a registered adapter");
+    if(!adapter) return;
+    for(const char *field : {"frame_accent_top", "frame_accent_bottom",
+                            "frame_accent_left", "frame_accent_right",
+                            "frame_accent_thickness", "frame_accent_color", "frame_accent_alpha"}) {
+        const auto *property = spec->FindThemeOverride(field);
+        Check(property && adapter->HasField(property->adapter_field_id),
+              "Frame Accent metadata is owned by the runtime adapter");
+        Check(property && !adapter->FieldAffectsLayout(property->adapter_field_id),
+              "Frame Accent changes paint without changing layout");
+    }
+    UiDesignerDocument document;
+    document.NewDocument();
+    const auto id = document.AddNode(type, type, document.GetRootId(), UiDesignerNodeNone);
+    auto& node = *document.Find(id);
+    node.properties = spec->defaults;
+    node.SetThemeOverride("frame_accent_top", true);
+    node.SetThemeOverride("frame_accent_bottom", true);
+    node.SetThemeOverride("frame_accent_left", false);
+    node.SetThemeOverride("frame_accent_right", true);
+    node.SetThemeOverride("frame_accent_thickness", 4);
+    node.SetThemeOverride("frame_accent_color", Color(43, 101, 167));
+    node.SetThemeOverride("frame_accent_alpha", 170);
+    T control;
+    adapter->ApplyPreviewStyle(control, node, *spec, nullptr);
+    const auto actual = control.GetStyle().metrics.frame_accent;
+    const int edges = StyledFrameAccent::Top | StyledFrameAccent::Bottom | StyledFrameAccent::Right;
+    Check(actual.edges == edges && actual.thickness == 4 && actual.alpha == 170 &&
+          actual.color == Color(43, 101, 167), "Frame Accent reaches the preview");
+    UiDesignerTransientOverlay overlay;
+    overlay.Set(id, UiDesignerTransientValueKind::ThemeOverride, "frame_accent_top", false);
+    adapter->ApplyPreviewStyle(control, node, *spec, &overlay);
+    Check(control.GetStyle().metrics.frame_accent.edges == (edges & ~StyledFrameAccent::Top),
+          "Frame Accent transient preview preserves the other edges");
+    adapter->ApplyPreviewStyle(control, node, *spec, nullptr);
+    Check(control.GetStyle().metrics.frame_accent.edges == edges,
+          "Frame Accent cancel restores authored edges");
+    String error;
+    UiDesignerDocument loaded;
+    Check(UiDesignerDeserialize(UiDesignerSerialize(document, false), loaded, error),
+          "Frame Accent document loads from canonical JSON");
+    const auto *restored = loaded.Find(id);
+    Check(restored && (bool)restored->GetThemeOverride("frame_accent_top") &&
+          (Color)restored->GetThemeOverride("frame_accent_color") == Color(43, 101, 167),
+          "Frame Accent side and colour survive JSON roundtrip");
+    const String member = "accent_" + AsString(index);
+    generated << "{\n" << type << " " << member << ";\n";
+    adapter->EmitSetup(generated, member, node, *spec);
+    generated << "if(" << member << ".GetStyle().metrics.frame_accent.edges != " << edges
+              << " || " << member << ".GetStyle().metrics.frame_accent.thickness != 4"
+              << " || " << member << ".GetStyle().metrics.frame_accent.alpha != 170"
+              << " || " << member << ".GetStyle().metrics.frame_accent.color != Color(43, 101, 167)) ++failed;\n}\n";
+    node.ClearThemeOverrides();
+    adapter->ApplyPreviewStyle(control, node, *spec, nullptr);
+    Check(control.GetStyle().metrics.frame_accent.edges == StyledFrameAccent::None,
+          "Reset removes Frame Accent and resumes theme inheritance");
+}
+
+void CheckFrameAccents()
+{
+    UiDesignerCatalog catalog;
+    RegisterUiDesignerBuiltins(catalog);
+    String generated = "#include <Ui/Ui.h>\nusing namespace Upp;\nGUI_APP_MAIN { int failed = 0;\n";
+    CheckFrameAccent<UiPanel>(catalog, "UiPanel", generated, 0);
+    CheckFrameAccent<UiGroupPanel>(catalog, "UiGroupPanel", generated, 1);
+    CheckFrameAccent<UiScrollPanel>(catalog, "UiScrollPanel", generated, 2);
+    CheckFrameAccent<UiButton>(catalog, "UiButton", generated, 3);
+    CheckFrameAccent<UiLabel>(catalog, "UiLabel", generated, 4);
+    CheckFrameAccent<UiDropdown>(catalog, "UiDropdown", generated, 5);
+    CheckFrameAccent<UiList>(catalog, "UiList", generated, 6);
+    CheckFrameAccent<UiAccordion>(catalog, "UiAccordion", generated, 7);
+    CheckFrameAccent<UiLineEdit>(catalog, "UiLineEdit", generated, 8);
+    CheckFrameAccent<UiTitleCard>(catalog, "UiTitleCard", generated, 9);
+    CheckFrameAccent<UiMenu>(catalog, "UiMenu", generated, 10);
+    CheckFrameAccent<UiColorPicker>(catalog, "UiColorPicker", generated, 11);
+    generated << "Cout() << \"FRAME_ACCENT_GENERATED checks=12 failed=\" << failed << char(10); SetExitCode(failed ? 1 : 0); }\n";
+    Check(SaveFile(AppendFileName(GetExeFolder(), "frame-accent-generated.cpp"), generated),
+          "Generated Frame Accent fixture saves for a native compile check");
+}
+
+void CheckAccentShapeAvailability()
+{
+    UiDesignerSession session;
+    for(const char *type : {"UiCheckBox", "UiRadioButton"}) {
+        const auto *spec = session.Catalog().Find(type);
+        Check(spec && !spec->FindProperty("visual"), "Designer indicator control currently supports Classic only");
+        Check(spec && !spec->FindThemeOverride("frame_accent_top"), "Classic-only control does not advertise an ignored outer accent");
+        Check(spec && spec->FindThemeOverride("indicator_frame_accent_top"), "Classic indicator still exposes its working accent");
+    }
+    const auto *spec = session.Catalog().Find("UiTab");
+    const auto *property = spec ? spec->FindThemeOverride("tab_frame_accent_top") : nullptr;
+    Check(property && property->visible_when_id == "visual" &&
+          property->visible_when_value == "Segmented" && !property->help.IsEmpty(),
+          "Tab cap metadata identifies its supported visual");
+    if(!spec || !property) return;
+    const auto id = session.Document().AddNode("UiTab", "accent_shapes", session.Document().GetRootId(), UiDesignerNodeNone);
+    auto& node = *session.Document().Find(id);
+    node.properties = spec->defaults;
+    node.SetThemeOverride("tab_frame_accent_top", true);
+    session.Select(id);
+    const auto visible = [&] { const auto *row = session.ThemeOverrideModel().Find("tab_frame_accent_top"); return row && row->visible; };
+    Check(!visible(), "Classic Tab Inspector hides the unsupported cap accent");
+    Check(session.Commands().SetProperty(id, "visual", "Segmented", UiDesignerImpactPaint), "Actual normal-property command selects Segmented");
+    Check(visible(), "Segmented Tab Inspector reveals the supported cap accent");
+    Check(session.Commands().SetProperty(id, "visual", "Classic", UiDesignerImpactPaint) && !visible(), "Changing visual updates cap availability immediately");
+    Check((bool)node.GetThemeOverride("tab_frame_accent_top"), "Hiding unsupported cap decoration retains authored values");
+    Check(session.Commands().Undo() && visible(), "Undo restores Segmented cap availability and its saved accent");
 }
 
 void CheckRoleInheritance()
@@ -280,6 +396,8 @@ void Run()
 
 GUI_APP_MAIN
 {
+    CheckAccentShapeAvailability();
+    CheckFrameAccents();
     CheckRoleInheritance();
     Run();
     Cout() << "THEME_STUDIO_ROLE checks=" << checks << " failed=" << failed << '\n';

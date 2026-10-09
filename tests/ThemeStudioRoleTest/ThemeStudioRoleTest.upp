@@ -3,7 +3,8 @@ description "Theme Studio dropdown-to-sample live role and table regressions";
 uses
     CtrlLib,
     Ui,
-    UiDesigner/Theme;
+    UiDesigner/Theme,
+    UiDesigner/Services;
 
 file
     main.cpp;

@@ -180,6 +180,21 @@ CONSOLE_APP_MAIN
         }
     }
 
+    // Frame Accent is one independently editable decoration on every existing
+    // rectangular style surface. Composite track/thumb/fill fields use the
+    // same prefixed mapping and do not reserve additional layout space.
+    for(const char *type : selectable_types) {
+        const auto *spec = catalog.Find(type);
+        for(const char *field : {"frame_accent_top", "frame_accent_bottom",
+                                "frame_accent_left", "frame_accent_right",
+                                "frame_accent_thickness", "frame_accent_color", "frame_accent_alpha"}) {
+            const String id = String(type) == "UiCheckBox" || String(type) == "UiRadioButton"
+                ? "indicator_" + String(field) : String(field);
+            const auto *property = spec ? spec->FindThemeOverride(id) : nullptr;
+            Check(property != nullptr, String(type) + " exposes " + id);
+        }
+    }
+
     // Full fill recipes remain first-class where the current adapter owns a
     // recipe surface rather than a simple state colour.
     CheckProjection(RequireOverride(catalog, "UiLabel", "face.normal"),
@@ -209,7 +224,7 @@ CONSOLE_APP_MAIN
 
     CheckNoThemeOverride(catalog, "UiGroupPanel", "header_mode");
 
-    for(const char *id : {"style_visual", "icon_side", "style_tab_font_face"})
+    for(const char *id : {"style_visual", "icon_side"})
         CheckNoThemeOverride(catalog, "UiTab", id);
 
     for(const char *id : {"theme_media_auto_fit", "theme_title_line",
@@ -223,6 +238,7 @@ CONSOLE_APP_MAIN
 
     // Keep representative current Tab styling fields covered while its visual
     // family/placement/icon-side remain normal authored configuration.
+    RequireOverride(catalog, "UiTab", "style_tab_font_face");
     RequireOverride(catalog, "UiTab", "radius");
     RequireOverride(catalog, "UiTab", "tab_face_normal");
     RequireOverride(catalog, "UiTab", "indicator_thickness");

@@ -1,3 +1,4 @@
+#include "UiDesignerFrameAccentThemeCommon.h"
 #include "UiDesignerNormalizedThemeCommon.h"
 #include <Ui/UiDateTime.h>
 
@@ -20,6 +21,7 @@ UiDateTime::Style DateTimeBase(const UiDesignerNode& node)
 
 Value DateTimeField(const UiDateTime::Style& style, const String& id)
 {
+    if(UiDesignerFrameAccentTheme::HasField("", id)) return UiDesignerFrameAccentTheme::Read(style.editable.metrics, "", id);
     for(int part = 0; part < 2; ++part) {
         const String prefix = part ? "presentation_" : "editable_";
         const UiBaseEdit::Style& s = part ? style.presentation : style.editable;
@@ -38,6 +40,10 @@ Value DateTimeField(const UiDateTime::Style& style, const String& id)
 
 void SetDateTimeField(UiDateTime::Style& style, const String& id, const Value& value)
 {
+    if(UiDesignerFrameAccentTheme::Apply(style.editable.metrics, "", id, value)) {
+        UiDesignerFrameAccentTheme::Apply(style.presentation.metrics, "", id, value);
+        return;
+    }
     for(int part = 0; part < 2; ++part) {
         const String prefix = part ? "presentation_" : "editable_";
         UiBaseEdit::Style& s = part ? style.presentation : style.editable;
@@ -60,6 +66,11 @@ void SetDateTimeField(UiDateTime::Style& style, const String& id, const Value& v
 
 void EmitDateTimeField(String& out, const String& var, const String& id, const Value& value)
 {
+    if(UiDesignerFrameAccentTheme::HasField("", id)) {
+        UiDesignerFrameAccentTheme::Emit(out, var + ".editable.metrics", "", id, value);
+        UiDesignerFrameAccentTheme::Emit(out, var + ".presentation.metrics", "", id, value);
+        return;
+    }
     for(int part = 0; part < 2; ++part) {
         const String prefix = part ? "presentation_" : "editable_";
         const String field = part ? ".presentation" : ".editable";
@@ -90,6 +101,7 @@ public:
     void AddThemeOverrides(UiDesignerControlSpec& spec) const override
     {
         const auto style = DateTimeBase(UiDesignerNode());
+        UiDesignerFrameAccentTheme::AddFields(spec, "", "", style.editable.metrics);
         for(const char* prefix : {"editable_", "presentation_"})
             for(const char* channel : {"face", "text", "frame"})
                 for(const char* state : {"normal", "hot", "pressed", "disabled"}) {
@@ -105,6 +117,7 @@ public:
     }
     bool HasField(const String& id) const override
     {
+        if(UiDesignerFrameAccentTheme::HasField("", id)) return true;
         if(id == "font_height" || id == "radius" || id == "frame_width") return true;
         for(const char* prefix : {"editable_", "presentation_"})
             for(const char* channel : {"face", "text", "frame"})

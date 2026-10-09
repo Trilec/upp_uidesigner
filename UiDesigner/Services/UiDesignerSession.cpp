@@ -108,6 +108,8 @@ void UiDesignerSession::WireEvents()
                !spec->theme_overrides.IsEmpty())
                 RebuildThemeOverrideModel();
         }
+        else if(HasNormalPropertyChange(changes))
+            RefreshThemeOverrideVisibility();
         WhenCodeChanged();
     };
 
@@ -1086,9 +1088,13 @@ void UiDesignerSession::RefreshThemeOverrideVisibility()
         PropertyEditorItem *item = theme_override_model_.Find(property.id);
         const PropertyEditorItem *condition =
             theme_override_model_.Find(property.visible_when_id);
-        if(!item || !condition)
+        if(!item)
             continue;
-        const bool visible = condition->value == property.visible_when_value;
+        // A surface can depend on authored control configuration (for example,
+        // Segmented tabs), rather than on another appearance override.
+        const Value condition_value = condition ? condition->value
+            : node->GetProperty(property.visible_when_id);
+        const bool visible = condition_value == property.visible_when_value;
         if(item->visible != visible) {
             item->visible = visible;
             changed = true;

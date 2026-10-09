@@ -1,3 +1,4 @@
+#include "UiDesignerFrameAccentThemeCommon.h"
 #include <Ui/UiFonts.h>
 #include "UiDesignerThemeAdapter.h"
 #include <UiDesigner/Catalog/UiDesignerCatalog.h>
@@ -202,6 +203,7 @@ static Value MakeShadowCurveValue(const ShadowCurve& curve)
 static void AddLabelThemeOverrides(UiDesignerControlSpec& spec)
 {
     const UiLabel::Style base = UiTheme::ResolveLabel(UiRole::Standard);
+    UiDesignerFrameAccentTheme::AddFields(spec, "", "", base.metrics);
     static const char *states[] = { "normal", "hot", "pressed", "disabled" };
     static const char *labels[] = { "Normal", "Hot", "Pressed", "Disabled" };
 
@@ -333,6 +335,7 @@ static void AddLabelThemeOverrides(UiDesignerControlSpec& spec)
 
 static bool IsLabelField(const String& id)
 {
+    if(UiDesignerFrameAccentTheme::HasField("", id)) return true;
     static const char *fields[] = {
         "radius", "transparent", "high_contrast", "face_enabled",
         "frame_enabled", "frame_width", "dashed", "dash_pattern",
@@ -359,6 +362,7 @@ static void ApplyLabelField(UiLabel::Style& style,
                             const String& id,
                             const Value& value)
 {
+    if(UiDesignerFrameAccentTheme::Apply(style.metrics, "", id, value)) return;
     int state = StateIndex(id, "face");
     if(state >= 0) {
         ApplyLabelFaceRecipe(style.palette.face[state], value);
@@ -434,6 +438,7 @@ static void ApplyLabelField(UiLabel::Style& style,
 
 static Value LabelFieldValue(const UiLabel::Style& style, const String& id)
 {
+    if(UiDesignerFrameAccentTheme::HasField("", id)) return UiDesignerFrameAccentTheme::Read(style.metrics, "", id);
     int state = StateIndex(id, "face");
     if(state >= 0)
         return LabelFaceRecipe(style.palette.face[state]).ToValue();
@@ -526,6 +531,7 @@ static Value ResolveLabelFaceRecipe(const UiDesignerNode& node,
 static void EmitLabelField(String& out, const String& var,
                            const String& id, const Value& value)
 {
+    if(UiDesignerFrameAccentTheme::Emit(out, var + ".metrics", "", id, value)) return;
     int state = StateIndex(id, "face");
     if(state >= 0) {
         out << "\t" << var << ".palette.face[" << StateCode(state)

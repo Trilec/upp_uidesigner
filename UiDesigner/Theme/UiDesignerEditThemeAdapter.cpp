@@ -1,3 +1,4 @@
+#include "UiDesignerFrameAccentThemeCommon.h"
 #include <Ui/UiFonts.h>
 #include "UiDesignerNormalizedThemeCommon.h"
 #include <Ui/UiBaseEdit.h>
@@ -51,6 +52,7 @@ static bool IsEditKind(UiDesignerRuntimeKind kind)
 
 static bool IsEditField(const String& id)
 {
+    if(UiDesignerFrameAccentTheme::HasField("", id)) return true;
     static const char *fields[] = {
         "radius", "high_contrast", "text_align", "face_enabled", "frame_enabled",
         "frame_width", "font_face", "font_size", "font_bold", "font_italic",
@@ -75,6 +77,7 @@ static bool IsEditField(const String& id)
 
 static Value EditFieldValue(const UiBaseEdit::Style& s, const String& id)
 {
+    if(UiDesignerFrameAccentTheme::HasField("", id)) return UiDesignerFrameAccentTheme::Read(s.metrics, "", id);
     int state = EditState(id, "face");
     if(state >= 0) return FillRecipe(s.palette.face[state]).ToValue();
     state = EditState(id, "frame");
@@ -136,6 +139,7 @@ static Value EditFieldValue(const UiBaseEdit::Style& s, const String& id)
 
 static void ApplyEditField(UiBaseEdit::Style& s, const String& id, const Value& v)
 {
+    if(UiDesignerFrameAccentTheme::Apply(s.metrics, "", id, v)) return;
     int state = EditState(id, "face");
     if(state >= 0) { ApplyFill(s.palette.face[state], v); return; }
     state = EditState(id, "frame");
@@ -198,6 +202,7 @@ static void AddEditOverrides(UiDesignerControlSpec& spec)
 {
     UiDesignerNode dummy;
     const UiBaseEdit::Style s = UiTheme::ResolveEdit(UiTheme::GetContext(), UiRole::Standard);
+    UiDesignerFrameAccentTheme::AddFields(spec, "", "", s.metrics);
     AddInt(spec, "radius", "Radius", "General", s.metrics.radius, 0, 96);
     Add(spec, "high_contrast", "High contrast", "General", PropertyEditorKind::Boolean, s.metrics.high_contrast);
     Add(spec, "text_align", "Text Align", "General", PropertyEditorKind::Choice, EditAlignName(s.text_align), true).Choice("Left", "Left").Choice("Center", "Center").Choice("Right", "Right");
@@ -277,6 +282,7 @@ static Value ResolveEditFace(const UiDesignerNode& node, const UiDesignerControl
 
 static void EmitEditField(String& out, const String& var, const String& id, const Value& v)
 {
+    if(UiDesignerFrameAccentTheme::Emit(out, var + ".metrics", "", id, v)) return;
     int state = EditState(id, "face");
     if(state >= 0) { out << "\t" << var << ".palette.face[" << StateCode(state) << "] = " << FillCode(v) << ";\n"; return; }
     state = EditState(id, "frame");

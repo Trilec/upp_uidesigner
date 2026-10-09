@@ -2,6 +2,7 @@
 #define _UiDesigner_Theme_UiDesignerStyledThemeCommon_h_
 
 #include "UiDesignerNormalizedThemeCommon.h"
+#include "UiDesignerFrameAccentThemeCommon.h"
 
 namespace Upp {
 namespace UiDesignerStyledTheme {
@@ -119,6 +120,8 @@ inline void AddPaletteMetrics(UiDesignerControlSpec& spec,
             Group(group_root, "Face"), PropertyEditorKind::FillRecipe,
             FillRecipe(palette.face[i]).ToValue());
 
+    UiDesignerFrameAccentTheme::AddFields(spec, prefix, group_root, metrics);
+
     Add(spec, Id(prefix, "frame_enabled"), "Enabled",
         Group(group_root, "Frame"), PropertyEditorKind::Boolean,
         metrics.frame_enabled, true);
@@ -232,6 +235,7 @@ inline void AddPaletteMetrics(UiDesignerControlSpec& spec,
 
 inline bool IsPaletteMetricsField(const String& prefix, const String& id)
 {
+    if(UiDesignerFrameAccentTheme::HasField(prefix, id)) return true;
     if(StateSuffix(id, prefix, "face") >= 0 ||
        StateSuffix(id, prefix, "frame") >= 0 ||
        StateSuffix(id, prefix, "ink") >= 0 ||
@@ -269,6 +273,8 @@ inline Value PaletteMetricsValue(const StyledPalette& palette,
     state = StateSuffix(id, prefix, "icon");
     if(state >= 0) return palette.icon[state];
 
+    if(UiDesignerFrameAccentTheme::HasField(prefix, id))
+        return UiDesignerFrameAccentTheme::Read(metrics, prefix, id);
     if(id == Id(prefix, "radius")) return metrics.radius;
     if(id == Id(prefix, "high_contrast")) return metrics.high_contrast;
     if(id == Id(prefix, "face_enabled")) return metrics.face_enabled;
@@ -318,6 +324,7 @@ inline bool ApplyPaletteMetrics(StyledPalette& palette,
     state = StateSuffix(id, prefix, "icon");
     if(state >= 0) { palette.icon[state] = (Color)value; return true; }
 
+    if(UiDesignerFrameAccentTheme::Apply(metrics, prefix, id, value)) return true;
     if(id == Id(prefix, "radius")) metrics.radius = max(0, (int)value);
     else if(id == Id(prefix, "high_contrast")) metrics.high_contrast = (bool)value;
     else if(id == Id(prefix, "face_enabled")) metrics.face_enabled = (bool)value;
@@ -395,6 +402,7 @@ inline bool EmitPaletteMetrics(String& out,
         return true;
     }
 
+    if(UiDesignerFrameAccentTheme::Emit(out, metrics_expr, prefix, id, value)) return true;
     if(id == Id(prefix, "radius")) out << "\t" << metrics_expr << ".radius = " << max(0, (int)value) << ";\n";
     else if(id == Id(prefix, "high_contrast")) out << "\t" << metrics_expr << ".high_contrast = " << AsString((bool)value) << ";\n";
     else if(id == Id(prefix, "face_enabled")) out << "\t" << metrics_expr << ".face_enabled = " << AsString((bool)value) << ";\n";
